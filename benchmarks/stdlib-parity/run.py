@@ -151,6 +151,12 @@ def main():
         version = subprocess.run([compiler, *version_arg], capture_output=True)
         tools[label] = {"path": str(compiler), "sha256": sha256_file(compiler),
                         "version": (version.stdout + version.stderr).decode(errors="replace").strip()}
+        if label != "cpp":
+            tools[label]["runtime_sha256"] = {
+                name: sha256_file(compiler.parent / name)
+                for name in ("BoltAotRuntime.lib", "BoltRuntime.dll", "BoltAotRuntime.o", "libBoltRuntime.so", "libBoltRuntime.dylib")
+                if (compiler.parent / name).is_file()
+            }
     report = {"metric": "whole-process wall time including process startup, stdout and close",
               "date_utc": datetime.now(timezone.utc).isoformat(), "host": cpu_info(), "tools": tools,
               "runs": args.runs, "warmup": args.warmup, "run_cpu": args.cpu, "cases": {}}
@@ -167,6 +173,8 @@ def main():
                           for label in labels}
                 samples = {label: [] for label in labels}
                 artifact = expected_file(case)
+                record["expected_stdout"] = ("sha256:" + PRINT_SHA256 if case.startswith("print-lines")
+                                             else EXPECTED[case])
                 record["order"] = []
                 for index in range(-args.warmup, args.runs):
                     if index % len(labels) == 0:
@@ -188,6 +196,8 @@ def main():
                     record["ratio_ci95"] = paired_median_interval(samples["cpp"], samples["bolt"], 1701)
                 if args.before:
                     record["before_over_bolt"] = statistics.median(samples["before"]) / statistics.median(samples["bolt"])
+                    if args.runs >= 15:
+                        record["before_over_bolt_ci95"] = paired_median_interval(samples["bolt"], samples["before"], 1801)
                 print(f"{case:18s} Bolt {record['bolt']['median_ms']:9.3f} ms   "
                       f"C++ {record['cpp']['median_ms']:9.3f} ms   Bolt/C++ {ratio:.3f}", flush=True)
                 failures |= args.fail_on_slower and ratio > 1
