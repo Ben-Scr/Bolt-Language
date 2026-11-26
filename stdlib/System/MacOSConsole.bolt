@@ -1,0 +1,136 @@
+#if MacOS || FreeBSD
+import System
+namespace Bolt.Runtime;
+
+// macOS and FreeBSD Console implementation written in Bolt. The only terminal boundary is
+// the POSIX C ABI declared in MacOSApi.bolt (write/read/isatty and allocation).
+public static class MacOSConsole
+{
+private:
+    byte* Allocate(ulong bytes)
+    {
+        byte* buffer = (byte*)Bolt.Runtime.MacOS.Allocate(bytes);
+        if (buffer == null) throw OutOfMemoryException("Cannot allocate the console buffer.");
+        return buffer;
+    }
+
+    byte* Resize(byte* buffer, ulong bytes)
+    {
+        byte* replacement = (byte*)Bolt.Runtime.MacOS.Reallocate(buffer, bytes);
+        if (replacement == null) throw OutOfMemoryException("Cannot grow the console buffer.");
+        return replacement;
+    }
+
+    void WriteAll(byte* cursor, ulong remaining)
+    {
+        while (remaining != 0ul)
+        {
+            // Keep the request comfortably inside signed ssize_t ranges on all
+            // supported 64-bit macOS targets and handle partial writes.
+            ulong amount = remaining > 1073741824ul ? 1073741824ul : remaining;
+            long written = Bolt.Runtime.MacOS.Write(1, cursor, amount);
+            if (written < 0)
+            {
+                if (*Bolt.Runtime.MacOS.ErrnoLocation() == 4) continue; // EINTR
+                throw IOException("Cannot write to standard output.");
+            }
+            if (written == 0) throw IOException("Standard output made no progress.");
+            if ((ulong)written > amount) throw IOException("Standard output returned an invalid byte count.");
+            remaining -= (ulong)written;
+            cursor = &cursor[(ulong)written];
+        }
+    }
+
+    void WriteText(const string& value, bool newline)
+    {
+        ulong length = 0ul;
+#ifdef BoltStandaloneCore
+        byte* bytes = TypedMemory.TextData(value, length);
+#else
+        byte* bytes = NativeString.Bytes(value, length);
+#endif
+        if (newline && length < (ulong)sizeof(ConsoleBuffer))
+        {
+            ConsoleBuffer buffer;
+            byte* line = (byte*)&buffer;
+            for (ulong i = 0ul; i < length; i++) line[i] = bytes[i];
+            line[length] = 10;
+            WriteAll((byte*)&buffer, length + 1ul);
+            return;
+        }
+        WriteAll(bytes, length);
+        if (newline)
+        {
+            byte lf = (byte)10;
+            WriteAll(&lf, 1ul);
+        }
+    }
+
+public:
+    void Write(const string& value) { WriteText(value, false); }
+    void WriteLine(const string& value) { WriteText(value, true); }
+
+    string ReadLine()
+    {
+        ulong capacity = 256ul;
+        ulong length = 0ul;
+        bool endedWithLf = false;
+        byte* buffer = Allocate(capacity);
+        try
+        {
+            while (true)
+            {
+                byte unit = (byte)0;
+                long count = Bolt.Runtime.MacOS.Read(0, &unit, 1ul);
+                if (count < 0)
+                {
+                    if (*Bolt.Runtime.MacOS.ErrnoLocation() == 4) continue; // EINTR
+                    throw IOException("Cannot read from standard input.");
+                }
+                if (count == 0) break;
+                if (unit == (byte)10)
+                {
+                    endedWithLf = true;
+                    break;
+                }
+
+                if (length == capacity)
+                {
+                    if (capacity >= 4611686018427387904ul)
+                        throw IOException("The console input line is too large.");
+                    capacity *= 2ul;
+                    buffer = Resize(buffer, capacity);
+                }
+                buffer[length] = unit;
+                length++;
+            }
+
+            if (endedWithLf && length != 0ul && buffer[length - 1ul] == (byte)13) length--;
+            if (length == 0ul) return "";
+            return NativeString.FromUtf8(buffer, length);
+        }
+        finally
+        {
+            Bolt.Runtime.MacOS.Free(buffer);
+        }
+    }
+
+    void ClearDisplay()
+    {
+        // Redirected stdout is not a terminal and must not receive escape bytes.
+        if (Bolt.Runtime.MacOS.IsTerminal(1) == 0) return;
+        byte escape = (byte)27;
+        byte open = (byte)91;
+        byte two = (byte)50;
+        byte clear = (byte)74;
+        byte home = (byte)72;
+        WriteAll(&escape, 1ul);
+        WriteAll(&open, 1ul);
+        WriteAll(&two, 1ul);
+        WriteAll(&clear, 1ul);
+        WriteAll(&escape, 1ul);
+        WriteAll(&open, 1ul);
+        WriteAll(&home, 1ul);
+    }
+}
+#endif

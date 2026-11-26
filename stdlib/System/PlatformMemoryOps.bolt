@@ -1,0 +1,77 @@
+#ifdef BoltStandaloneCore
+import System
+namespace Bolt.Runtime;
+
+// Address inspection uses the pointer object representation, not a runtime call.
+// All supported Bolt targets have little-endian, 64-bit pointers.
+public static class MemoryOps
+{
+public:
+    ulong Address(const byte* pointer)
+    {
+        byte* local = (byte*)pointer;
+        byte* bits = (byte*)&local;
+        ulong result = 0ul;
+        for (int i = 0; i < 8; i++) result |= (ulong)bits[i] << (i * 8);
+        return result;
+    }
+    void ValidateAlignment(ulong alignment)
+    {
+        if (alignment == 0ul || (alignment & (alignment - 1ul)) != 0ul)
+            throw ArgumentException("Alignment must be a nonzero power of two.");
+    }
+private:
+    void Check(const byte* a, const byte* b, ulong count)
+    {
+        if (count == 0ul) return;
+        if (a == null || b == null) throw ArgumentNullException("A nonempty memory range needs a non-null pointer.");
+        if (Address(a) > ulong.MaxValue - (count - 1ul) || Address(b) > ulong.MaxValue - (count - 1ul))
+            throw OverflowException("Memory address range overflow.");
+    }
+public:
+    void Copy(byte* destination, const byte* source, ulong byteCount)
+    {
+        Check(destination, source, byteCount);
+        if (byteCount == 0ul) return;
+        ulong a = Address(destination), b = Address(source);
+        if ((a >= b ? a - b : b - a) < byteCount) throw ArgumentException("Memory.Copy ranges overlap; use Memory.Move.");
+        for (ulong i = 0ul; i < byteCount; i++) destination[i] = source[i];
+    }
+    void Move(byte* destination, const byte* source, ulong byteCount)
+    {
+        Check(destination, source, byteCount);
+        if (Address(destination) > Address(source))
+            for (ulong i = byteCount; i > 0ul; i--) destination[i - 1ul] = source[i - 1ul];
+        else for (ulong i = 0ul; i < byteCount; i++) destination[i] = source[i];
+    }
+    void Set(byte* destination, byte value, ulong byteCount)
+    {
+        Check(destination, destination, byteCount);
+        for (ulong i = 0ul; i < byteCount; i++) destination[i] = value;
+    }
+    int Compare(const byte* a, const byte* b, ulong byteCount)
+    {
+        Check(a, b, byteCount);
+        for (ulong i = 0ul; i < byteCount; i++) { if (a[i] < b[i]) return -1; if (a[i] > b[i]) return 1; }
+        return 0;
+    }
+    bool IsAligned(const byte* pointer, ulong alignment)
+    {
+        ValidateAlignment(alignment);
+        return (Address(pointer) & (alignment - 1ul)) == 0ul;
+    }
+}
+#else
+namespace Bolt.Runtime;
+[Native("bolt::system::MemoryOps")]
+public static class MemoryOps
+{
+public:
+    ulong Address(const byte* pointer);
+    void Copy(byte* destination, const byte* source, ulong byteCount);
+    void Move(byte* destination, const byte* source, ulong byteCount);
+    void Set(byte* destination, byte value, ulong byteCount);
+    int Compare(const byte* a, const byte* b, ulong byteCount);
+    bool IsAligned(const byte* pointer, ulong alignment);
+}
+#endif

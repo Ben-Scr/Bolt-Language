@@ -1,0 +1,29 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64"><Configuration>Debug</Configuration><Platform>x64</Platform></ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64"><Configuration>Release</Configuration><Platform>x64</Platform></ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals"><ProjectGuid>{$guid1$}</ProjectGuid><Keyword>MakeFileProj</Keyword></PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Label="Configuration"><ConfigurationType>Makefile</ConfigurationType></PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <PropertyGroup>
+    <BoltCompiler Condition="'$(BoltCompiler)' == ''">$(BOLT_COMPILER)</BoltCompiler>
+    <BoltCompiler Condition="'$(BoltCompiler)' == ''">bolt</BoltCompiler>
+    <OutDir>$(ProjectDir)bin\$(Configuration)\</OutDir>
+    <NMakeOutput>$(OutDir)$(ProjectName).exe</NMakeOutput>
+    <BoltFlags Condition="'$(Configuration)' == 'Debug'">--backend llvm --debug-info</BoltFlags>
+    <NMakeBuildCommandLine>"$(BoltCompiler)" compile "$(MSBuildProjectDirectory)" --profile $(Configuration) $(BoltFlags) --diagnostics msbuild -o "$(NMakeOutput)"</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>$(NMakeBuildCommandLine) --rebuild</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>"$(BoltCompiler)" clean "$(MSBuildProjectDirectory)"</NMakeCleanCommandLine>
+    <LocalDebuggerCommand>$(NMakeOutput)</LocalDebuggerCommand>
+    <LocalDebuggerWorkingDirectory>$(MSBuildProjectDirectory)</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="bolt.proj" />
+    <None Include="src\Main.bolt" />
+    <None Include="src\**\*.bolt" Exclude="src\Main.bolt" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>

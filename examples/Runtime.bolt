@@ -1,0 +1,15 @@
+import Console
+import Runtime
+
+static class Program {
+public:
+    void Main() {
+        Console.WriteLine("This outer program can be compiled to a native executable.");
+        string code = "int sum = 0; for(int i = 1; i <= 5; i++) { sum += i; } Console.WriteLine(sum);";
+        Runtime.Execute(code);
+        int result = Runtime.ExecuteProgram("static class Program { public: int Main() { return 42; } }");
+        Console.WriteLine("Runtime program returned: " + result);
+        // Runtime source is compiled and interpreted in an isolated language context.
+        // It cannot see the outer method's variables or native class instances.
+    }
+}

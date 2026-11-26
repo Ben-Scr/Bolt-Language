@@ -1,0 +1,1535 @@
+{
+  "host": "Windows-11-10.0.26200-SP0",
+  "cpu": "AMD Ryzen 9 7900X",
+  "bolt_backend": "LLVM 23.1.2 native Release",
+  "c_compilers": [
+    "MSVC 19.51.36260 /O2",
+    "Clang 23.1.2 -O3"
+  ],
+  "method": "Whole executable wall time, fresh process per sample, two warmups and twelve recorded runs per variant. Cases shuffled each round; shuffled initial variant order rotated by round for equal position counts. All stdout and exit codes verified. AVX2 C flags for searches.",
+  "seed": 442109,
+  "toolchains": {
+    "old": {
+      "bolt.exe": "1630344c29a8aebf4fd33158b172e2047f3c96b83488906adc80f25f997b998e",
+      "BoltCompiler.dll": "b1c5927ab33ff8e4b3f50d85b25b72e6fee50f2bf06e98cc7638d6e9c493930e",
+      "BoltRuntime.dll": "1d7c761b67bb1889771cdec8d126dcb305d45eab9a8f3c81d837cf4c72c75657"
+    },
+    "new": {
+      "bolt.exe": "9899a4c05e1fc0b467753736838dd6d0c01feb980c167cafa5d3ef3ec76f3877",
+      "BoltCompiler.dll": "a4e5dd032a0b259ba54cb7c67bc04b298fa6832a05b241180b13bccba2ce57d1",
+      "BoltRuntime.dll": "7bb491d5b07db7a5956de426ba281792e9f9a4c0d629bfb2a01a26f431ecd328"
+    }
+  },
+  "cases": {
+    "float-parse": {
+      "expected": "11358106450416173224",
+      "variants": {
+        "old": {
+          "fixture": "float-parse.bolt",
+          "source_sha256": "8ca2c6d074d71cb0c752854411145772a7144f4721cc1af34435a3351f6bcad4",
+          "executable_sha256": "8a7dd8d7655f4838e39ef79083838caf4099fa16f9b98311f46f3c83c083bce7",
+          "runtime_sha256": {
+            "BoltRuntime.dll": "1d7c761b67bb1889771cdec8d126dcb305d45eab9a8f3c81d837cf4c72c75657"
+          },
+          "command": [
+            "bolt.exe",
+            "compile",
+            "float-parse.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "n": 12,
+          "median_ms": 1072.8157,
+          "p95_ms": 1617.0593,
+          "min_ms": 986.7511,
+          "max_ms": 1617.0593,
+          "raw_ms": [
+            1128.5889,
+            1060.4597,
+            986.7511,
+            1617.0593,
+            1143.1822,
+            1252.6872,
+            1257.1238,
+            1049.3008,
+            1085.1717,
+            1016.8584,
+            1021.1481,
+            999.2869
+          ]
+        },
+        "new": {
+          "fixture": "float-parse.bolt",
+          "source_sha256": "8ca2c6d074d71cb0c752854411145772a7144f4721cc1af34435a3351f6bcad4",
+          "executable_sha256": "1b78b39e63a344ff84dc240562dec90aef14140e461bcdfe1211b921f7790a72",
+          "runtime_sha256": {
+            "BoltRuntime.dll": "7bb491d5b07db7a5956de426ba281792e9f9a4c0d629bfb2a01a26f431ecd328"
+          },
+          "command": [
+            "bolt.exe",
+            "compile",
+            "float-parse.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "n": 12,
+          "median_ms": 647.9695,
+          "p95_ms": 758.1803,
+          "min_ms": 591.3911,
+          "max_ms": 758.1803,
+          "raw_ms": [
+            647.5641,
+            643.01,
+            680.523,
+            716.7124,
+            648.3748,
+            753.1202,
+            758.1803,
+            596.3945,
+            627.0976,
+            630.1508,
+            708.1764,
+            591.3911
+          ]
+        },
+        "msvc": {
+          "fixture": "float-parse.c",
+          "source_sha256": "a964a7702f12b372a346e7cb4d25c6f4a6b17539c0df0610030900229425c4c0",
+          "executable_sha256": "377f4d11a2d79b4243892977da878d76952387bcbb18586e38d10ab9ca46cda6",
+          "runtime_sha256": {},
+          "command": [
+            "cl.EXE",
+            "/nologo",
+            "/O2",
+            "/DNDEBUG",
+            "/std:c11",
+            "float-parse.c",
+            "/Fe:program.exe"
+          ],
+          "n": 12,
+          "median_ms": 465.9103,
+          "p95_ms": 580.4845,
+          "min_ms": 439.9497,
+          "max_ms": 580.4845,
+          "raw_ms": [
+            473.8134,
+            459.7694,
+            439.9497,
+            580.4845,
+            477.6001,
+            529.8677,
+            502.9443,
+            457.1779,
+            457.9704,
+            444.1654,
+            472.0511,
+            448.0561
+          ]
+        },
+        "clang": {
+          "fixture": "float-parse.c",
+          "source_sha256": "a964a7702f12b372a346e7cb4d25c6f4a6b17539c0df0610030900229425c4c0",
+          "executable_sha256": "ba687bc1d0c455731bf8e763252dff35cc25b2c75306909e0780e3af8ce07854",
+          "runtime_sha256": {},
+          "command": [
+            "clang.exe",
+            "-std=c11",
+            "-O3",
+            "-DNDEBUG",
+            "float-parse.c",
+            "-o",
+            "program.exe"
+          ],
+          "n": 12,
+          "median_ms": 481.4558,
+          "p95_ms": 809.3093,
+          "min_ms": 442.6674,
+          "max_ms": 809.3093,
+          "raw_ms": [
+            482.5626,
+            442.6674,
+            759.3182,
+            809.3093,
+            531.5535,
+            546.7005,
+            556.6809,
+            444.5127,
+            477.2725,
+            453.39,
+            480.3491,
+            458.1485
+          ]
+        }
+      }
+    },
+    "list-search-long-avx2": {
+      "expected": "1073348608",
+      "variants": {
+        "old": {
+          "fixture": "list-search.bolt",
+          "source_sha256": "44571220d7a66ff970d586615e4abf0f14161f7efb05fbab2a6285cefda0b464",
+          "executable_sha256": "bd668905a22840618c0a05feddca9b3733acf5197ef2c8361354d4cd214f4912",
+          "runtime_sha256": {
+            "BoltRuntime.dll": "1d7c761b67bb1889771cdec8d126dcb305d45eab9a8f3c81d837cf4c72c75657"
+          },
+          "command": [
+            "bolt.exe",
+            "compile",
+            "list-search-long-simd-unroll4.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "n": 12,
+          "median_ms": 159.0301,
+          "p95_ms": 244.9978,
+          "min_ms": 145.5345,
+          "max_ms": 244.9978,
+          "raw_ms": [
+            235.3973,
+            162.6872,
+            152.074,
+            170.1081,
+            166.9865,
+            162.3031,
+            149.5928,
+            155.7571,
+            147.2336,
+            151.1793,
+            244.9978,
+            145.5345
+          ]
+        },
+        "new": {
+          "fixture": "list-search.bolt",
+          "source_sha256": "44571220d7a66ff970d586615e4abf0f14161f7efb05fbab2a6285cefda0b464",
+          "executable_sha256": "7022d9dafeab78c7ebcfd8e45fae585cfec57e66191bf1c56bf5b78041ff409f",
+          "runtime_sha256": {
+            "BoltRuntime.dll": "7bb491d5b07db7a5956de426ba281792e9f9a4c0d629bfb2a01a26f431ecd328"
+          },
+          "command": [
+            "bolt.exe",
+            "compile",
+            "list-search-long-avx2.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "n": 12,
+          "median_ms": 97.5931,
+          "p95_ms": 149.8979,
+          "min_ms": 79.4472,
+          "max_ms": 149.8979,
+          "raw_ms": [
+            116.3678,
+            102.9074,
+            100.4339,
+            96.3879,
+            90.3883,
+            105.5766,
+            98.7983,
+            83.5395,
+            80.3958,
+            85.4626,
+            149.8979,
+            79.4472
+          ]
+        },
+        "msvc": {
+          "fixture": "list-search-avx2.c",
+          "source_sha256": "ed394052c22ab25bc38e6b74b199d203ea49a7b0a854b24a590378edcef633ba",
+          "executable_sha256": "baa8a6ec5185c45cf0274a069b7353db8927a93fbe1fa41a69e8e980fcfed69f",
+          "runtime_sha256": {},
+          "command": [
+            "cl.EXE",
+            "/nologo",
+            "/O2",
+            "/DNDEBUG",
+            "/std:c11",
+            "/arch:AVX2",
+            "list-search-long-avx2.c",
+            "/Fe:program.exe"
+          ],
+          "n": 12,
+          "median_ms": 78.5044,
+          "p95_ms": 134.9312,
+          "min_ms": 69.7615,
+          "max_ms": 134.9312,
+          "raw_ms": [
+            134.9312,
+            87.0977,
+            70.9276,
+            91.8033,
+            81.4578,
+            71.6677,
+            73.6728,
+            75.5509,
+            84.2651,
+            74.3677,
+            84.9689,
+            69.7615
+          ]
+        },
+        "clang": {
+          "fixture": "list-search-avx2.c",
+          "source_sha256": "ed394052c22ab25bc38e6b74b199d203ea49a7b0a854b24a590378edcef633ba",
+          "executable_sha256": "565e9fb08ba56e0adb9af689dce8bc1be2fde97fd152cf3dd2b843633e70a1a4",
+          "runtime_sha256": {},
+          "command": [
+            "clang.exe",
+            "-std=c11",
+            "-O3",
+            "-DNDEBUG",
+            "-mavx2",
+            "list-search-long-avx2.c",
+            "-o",
+            "program.exe"
+          ],
+          "n": 12,
+          "median_ms": 84.8388,
+          "p95_ms": 114.2491,
+          "min_ms": 66.1229,
+          "max_ms": 114.2491,
+          "raw_ms": [
+            114.2491,
+            94.642,
+            82.2588,
+            76.7471,
+            104.6985,
+            93.5438,
+            66.1229,
+            88.4081,
+            69.9786,
+            86.2681,
+            83.4094,
+            79.4709
+          ]
+        }
+      }
+    },
+    "list-search-u64": {
+      "expected": "1073348608",
+      "variants": {
+        "old": {
+          "fixture": "list-search-u64.bolt",
+          "source_sha256": "d1f0310bbe93ac19a03c6622a75e2c174223e7ad9396fa84e236e8401e2b1900",
+          "executable_sha256": "142aac2dc3082d7a957558a150a82933172934c1caffd62f93e1d2957dec1e3c",
+          "runtime_sha256": {
+            "BoltRuntime.dll": "1d7c761b67bb1889771cdec8d126dcb305d45eab9a8f3c81d837cf4c72c75657"
+          },
+          "command": [
+            "bolt.exe",
+            "compile",
+            "list-search-u64.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "n": 12,
+          "median_ms": 1294.9279,
+          "p95_ms": 1813.8965,
+          "min_ms": 1251.7381,
+          "max_ms": 1813.8965,
+          "raw_ms": [
+            1268.5781,
+            1325.3894,
+            1301.4702,
+            1251.7381,
+            1519.7777,
+            1602.1292,
+            1813.8965,
+            1328.7503,
+            1284.8799,
+            1271.0428,
+            1288.3856,
+            1255.0189
+          ]
+        },
+        "new": {
+          "fixture": "list-search-u64.bolt",
+          "source_sha256": "d1f0310bbe93ac19a03c6622a75e2c174223e7ad9396fa84e236e8401e2b1900",
+          "executable_sha256": "03a981d715a0b368d66328ae439e65ab9fd5a61505024757afa421fa4423841f",
+          "runtime_sha256": {
+            "BoltRuntime.dll": "7bb491d5b07db7a5956de426ba281792e9f9a4c0d629bfb2a01a26f431ecd328"
+          },
+          "command": [
+            "bolt.exe",
+            "compile",
+            "list-search-u64.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "n": 12,
+          "median_ms": 186.9594,
+          "p95_ms": 215.6076,
+          "min_ms": 180.1193,
+          "max_ms": 215.6076,
+          "raw_ms": [
+            188.0301,
+            192.0543,
+            180.1193,
+            184.7786,
+            215.6076,
+            196.5018,
+            211.1516,
+            183.4159,
+            186.3188,
+            182.9947,
+            187.6,
+            183.7489
+          ]
+        },
+        "msvc": {
+          "fixture": "list-search-avx2.c",
+          "source_sha256": "d0dbf6c4f854fdebf1385373ea20c43af0bf73a62d124ec6a52d257414f2b4f6",
+          "executable_sha256": "2de5db247228c52bdc804cf6d02b7b1dac7eb2a44417a5660f86fd6f0c2505c4",
+          "runtime_sha256": {},
+          "command": [
+            "cl.EXE",
+            "/nologo",
+            "/O2",
+            "/DNDEBUG",
+            "/std:c11",
+            "/arch:AVX2",
+            "list-search-u64.c",
+            "/Fe:program.exe"
+          ],
+          "n": 12,
+          "median_ms": 172.9466,
+          "p95_ms": 207.3439,
+          "min_ms": 166.8755,
+          "max_ms": 207.3439,
+          "raw_ms": [
+            169.6607,
+            180.417,
+            167.5916,
+            166.8755,
+            174.9354,
+            207.3439,
+            179.2527,
+            171.0939,
+            170.176,
+            169.7363,
+            174.7993,
+            178.1855
+          ]
+        },
+        "clang": {
+          "fixture": "list-search-avx2.c",
+          "source_sha256": "d0dbf6c4f854fdebf1385373ea20c43af0bf73a62d124ec6a52d257414f2b4f6",
+          "executable_sha256": "ea8372843cfec0597dadc103df0e76bd99589f69bb0fa4a2ce68454595fc6774",
+          "runtime_sha256": {},
+          "command": [
+            "clang.exe",
+            "-std=c11",
+            "-O3",
+            "-DNDEBUG",
+            "-mavx2",
+            "list-search-u64.c",
+            "-o",
+            "program.exe"
+          ],
+          "n": 12,
+          "median_ms": 177.9574,
+          "p95_ms": 191.2001,
+          "min_ms": 168.6527,
+          "max_ms": 191.2001,
+          "raw_ms": [
+            171.0666,
+            186.4859,
+            168.988,
+            176.4245,
+            179.4904,
+            191.2001,
+            181.659,
+            187.3939,
+            173.5464,
+            175.3891,
+            190.0203,
+            168.6527
+          ]
+        }
+      }
+    },
+    "string-equality": {
+      "expected": "3996488",
+      "variants": {
+        "old": {
+          "fixture": "string-equality.bolt",
+          "source_sha256": "51b7c87a3792c5eebb276bdae7c24ac926b30d5c8721c19b1f9a2eef545cffbb",
+          "executable_sha256": "c9ddd5a1111bd159f0675d6155286cd1c900c35306ac4e0649c102c7f743847a",
+          "runtime_sha256": {
+            "BoltRuntime.dll": "1d7c761b67bb1889771cdec8d126dcb305d45eab9a8f3c81d837cf4c72c75657"
+          },
+          "command": [
+            "bolt.exe",
+            "compile",
+            "string-equality.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "n": 12,
+          "median_ms": 323.5279,
+          "p95_ms": 522.2349,
+          "min_ms": 311.2847,
+          "max_ms": 522.2349,
+          "raw_ms": [
+            318.4117,
+            327.4328,
+            320.6586,
+            311.2847,
+            366.7524,
+            334.5965,
+            324.4784,
+            316.8577,
+            353.4137,
+            322.5775,
+            522.2349,
+            313.6309
+          ]
+        },
+        "new": {
+          "fixture": "string-equality.bolt",
+          "source_sha256": "51b7c87a3792c5eebb276bdae7c24ac926b30d5c8721c19b1f9a2eef545cffbb",
+          "executable_sha256": "641adf66adb120ecc1382f5905be161421829384706a37a50cc0b55569d57625",
+          "runtime_sha256": {
+            "BoltRuntime.dll": "7bb491d5b07db7a5956de426ba281792e9f9a4c0d629bfb2a01a26f431ecd328"
+          },
+          "command": [
+            "bolt.exe",
+            "compile",
+            "string-equality.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "n": 12,
+          "median_ms": 324.775,
+          "p95_ms": 486.8614,
+          "min_ms": 308.1024,
+          "max_ms": 486.8614,
+          "raw_ms": [
+            315.6612,
+            335.8736,
+            311.2837,
+            313.4921,
+            357.832,
+            361.5067,
+            327.1405,
+            322.4095,
+            338.5556,
+            313.0639,
+            486.8614,
+            308.1024
+          ]
+        },
+        "msvc": {
+          "fixture": "string-equality.c",
+          "source_sha256": "af20a2636fd55835fc9a8d90f102e6c1595188e16f90768c1f17d1df607a016c",
+          "executable_sha256": "86937c2787b6e2fef1b6f17107487f2dd48ff1d32409bed14e7f7660c186ad0e",
+          "runtime_sha256": {},
+          "command": [
+            "cl.EXE",
+            "/nologo",
+            "/O2",
+            "/DNDEBUG",
+            "/std:c11",
+            "string-equality.c",
+            "/Fe:program.exe"
+          ],
+          "n": 12,
+          "median_ms": 221.5818,
+          "p95_ms": 421.7523,
+          "min_ms": 210.0277,
+          "max_ms": 421.7523,
+          "raw_ms": [
+            227.6239,
+            218.3753,
+            216.2937,
+            212.2662,
+            222.1179,
+            226.2088,
+            225.998,
+            221.0457,
+            421.7523,
+            210.4336,
+            281.0972,
+            210.0277
+          ]
+        },
+        "clang": {
+          "fixture": "string-equality.c",
+          "source_sha256": "af20a2636fd55835fc9a8d90f102e6c1595188e16f90768c1f17d1df607a016c",
+          "executable_sha256": "11f5512eecee1028981e13a5309dcc694d46d017b5a9eec6311bff38d4d7a801",
+          "runtime_sha256": {},
+          "command": [
+            "clang.exe",
+            "-std=c11",
+            "-O3",
+            "-DNDEBUG",
+            "string-equality.c",
+            "-o",
+            "program.exe"
+          ],
+          "n": 12,
+          "median_ms": 215.7298,
+          "p95_ms": 275.339,
+          "min_ms": 206.8677,
+          "max_ms": 275.339,
+          "raw_ms": [
+            214.7433,
+            206.8677,
+            216.7163,
+            211.2887,
+            230.6507,
+            220.9226,
+            225.2417,
+            212.1664,
+            226.4181,
+            212.5806,
+            275.339,
+            208.2546
+          ]
+        }
+      }
+    },
+    "memory-long": {
+      "expected": "509997311",
+      "variants": {
+        "old": {
+          "fixture": "memory.bolt",
+          "source_sha256": "c1ec12456e44adb6b45721217244889da692e6bee1ecd085b1a10cb477767bc7",
+          "executable_sha256": "ab7ab4288c77e2ffc7037fdb5c15da988b42ae4581b8fa50e49ed127caa6a2c3",
+          "runtime_sha256": {
+            "BoltRuntime.dll": "1d7c761b67bb1889771cdec8d126dcb305d45eab9a8f3c81d837cf4c72c75657"
+          },
+          "command": [
+            "bolt.exe",
+            "compile",
+            "memory-long.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "n": 12,
+          "median_ms": 602.1625,
+          "p95_ms": 769.4103,
+          "min_ms": 576.6282,
+          "max_ms": 769.4103,
+          "raw_ms": [
+            769.4103,
+            588.3042,
+            588.4767,
+            617.8315,
+            640.1061,
+            598.9387,
+            605.3863,
+            607.2963,
+            614.1123,
+            578.835,
+            589.084,
+            576.6282
+          ]
+        },
+        "new": {
+          "fixture": "memory.bolt",
+          "source_sha256": "c1ec12456e44adb6b45721217244889da692e6bee1ecd085b1a10cb477767bc7",
+          "executable_sha256": "fddef386186c7c14372e87bdedf9bb223c145ee9ff23da1b0041bdafcaa87847",
+          "runtime_sha256": {
+            "BoltRuntime.dll": "7bb491d5b07db7a5956de426ba281792e9f9a4c0d629bfb2a01a26f431ecd328"
+          },
+          "command": [
+            "bolt.exe",
+            "compile",
+            "memory-long.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "n": 12,
+          "median_ms": 603.2723,
+          "p95_ms": 859.7636,
+          "min_ms": 578.5066,
+          "max_ms": 859.7636,
+          "raw_ms": [
+            666.7462,
+            589.1218,
+            586.5662,
+            651.5463,
+            694.5283,
+            603.6178,
+            594.3171,
+            602.9268,
+            727.5114,
+            578.5066,
+            859.7636,
+            579.8481
+          ]
+        },
+        "msvc": {
+          "fixture": "memory.c",
+          "source_sha256": "adb1bf35332adf6bcb74a0dbf8175a190b4196ebb45c3147d92ea2efe3913728",
+          "executable_sha256": "7e66bd9cefd046dec16a8513b496a51f5fb2b46de84e7665d2f54f895911d343",
+          "runtime_sha256": {},
+          "command": [
+            "cl.EXE",
+            "/nologo",
+            "/O2",
+            "/DNDEBUG",
+            "/std:c11",
+            "memory-long.c",
+            "/Fe:program.exe"
+          ],
+          "n": 12,
+          "median_ms": 912.5283,
+          "p95_ms": 1021.4299,
+          "min_ms": 877.4974,
+          "max_ms": 1021.4299,
+          "raw_ms": [
+            1021.4299,
+            915.4559,
+            894.4845,
+            976.1126,
+            926.4819,
+            933.6997,
+            909.6007,
+            916.4269,
+            907.1246,
+            892.0543,
+            891.9337,
+            877.4974
+          ]
+        },
+        "clang": {
+          "fixture": "memory.c",
+          "source_sha256": "adb1bf35332adf6bcb74a0dbf8175a190b4196ebb45c3147d92ea2efe3913728",
+          "executable_sha256": "5945f5792c8d685f8d6b8ffb8b72ebc923a73559ede7779afbc81c65910d4970",
+          "runtime_sha256": {},
+          "command": [
+            "clang.exe",
+            "-std=c11",
+            "-O3",
+            "-DNDEBUG",
+            "memory-long.c",
+            "-o",
+            "program.exe"
+          ],
+          "n": 12,
+          "median_ms": 767.114,
+          "p95_ms": 939.06,
+          "min_ms": 746.6691,
+          "max_ms": 939.06,
+          "raw_ms": [
+            821.4352,
+            747.72,
+            755.1388,
+            786.9524,
+            939.06,
+            766.3192,
+            784.5108,
+            767.9088,
+            768.6919,
+            762.8468,
+            746.6691,
+            756.3129
+          ]
+        }
+      }
+    },
+    "arithmetic": {
+      "expected": "17925543158443646234",
+      "variants": {
+        "old": {
+          "fixture": "arithmetic.bolt",
+          "source_sha256": "4fad334107d7aa0a9925d333365d6436e505cbea4ebf3ff7910a66923a0852be",
+          "executable_sha256": "8fb27dab5dd5d80ee8bb576c820f791eb8f6aa7feccd69658385c5c918d9fcd0",
+          "runtime_sha256": {
+            "BoltRuntime.dll": "1d7c761b67bb1889771cdec8d126dcb305d45eab9a8f3c81d837cf4c72c75657"
+          },
+          "command": [
+            "bolt.exe",
+            "compile",
+            "arithmetic.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "n": 12,
+          "median_ms": 429.3444,
+          "p95_ms": 462.3627,
+          "min_ms": 422.9123,
+          "max_ms": 462.3627,
+          "raw_ms": [
+            462.3627,
+            426.1249,
+            424.7184,
+            422.9123,
+            446.2678,
+            433.2819,
+            459.3519,
+            428.8816,
+            430.7771,
+            429.8071,
+            424.9755,
+            426.3135
+          ]
+        },
+        "new": {
+          "fixture": "arithmetic.bolt",
+          "source_sha256": "4fad334107d7aa0a9925d333365d6436e505cbea4ebf3ff7910a66923a0852be",
+          "executable_sha256": "787e5c70069b8f570d7c712e043d901cc1a8822dac182a490493ae9d1a34473a",
+          "runtime_sha256": {
+            "BoltRuntime.dll": "7bb491d5b07db7a5956de426ba281792e9f9a4c0d629bfb2a01a26f431ecd328"
+          },
+          "command": [
+            "bolt.exe",
+            "compile",
+            "arithmetic.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "n": 12,
+          "median_ms": 431.4515,
+          "p95_ms": 464.5784,
+          "min_ms": 423.9311,
+          "max_ms": 464.5784,
+          "raw_ms": [
+            464.5784,
+            428.8816,
+            439.3224,
+            423.9311,
+            455.7513,
+            435.4034,
+            445.1131,
+            428.016,
+            434.0215,
+            425.2719,
+            426.7409,
+            425.6666
+          ]
+        },
+        "msvc": {
+          "fixture": "arithmetic.c",
+          "source_sha256": "8f8d09af5d61b196a81e30b231fef34b3acbf5eee5207d346e1f17cdadc1c699",
+          "executable_sha256": "a08fc2acef504fa05d66fd7b51625f8f570a9d09c96ad55270d44c47c8be6a4e",
+          "runtime_sha256": {},
+          "command": [
+            "cl.EXE",
+            "/nologo",
+            "/O2",
+            "/DNDEBUG",
+            "/std:c11",
+            "arithmetic.c",
+            "/Fe:program.exe"
+          ],
+          "n": 12,
+          "median_ms": 593.4319,
+          "p95_ms": 669.512,
+          "min_ms": 582.5123,
+          "max_ms": 669.512,
+          "raw_ms": [
+            669.512,
+            593.164,
+            586.5978,
+            588.7072,
+            623.9402,
+            598.8091,
+            623.3682,
+            593.9541,
+            593.6998,
+            587.8126,
+            584.7923,
+            582.5123
+          ]
+        },
+        "clang": {
+          "fixture": "arithmetic.c",
+          "source_sha256": "8f8d09af5d61b196a81e30b231fef34b3acbf5eee5207d346e1f17cdadc1c699",
+          "executable_sha256": "5cde5e81bb20635bb4a3d572fec6f084084f8190eeb9dac0b9d991c205c74a56",
+          "runtime_sha256": {},
+          "command": [
+            "clang.exe",
+            "-std=c11",
+            "-O3",
+            "-DNDEBUG",
+            "arithmetic.c",
+            "-o",
+            "program.exe"
+          ],
+          "n": 12,
+          "median_ms": 423.0584,
+          "p95_ms": 454.8008,
+          "min_ms": 420.0946,
+          "max_ms": 454.8008,
+          "raw_ms": [
+            449.0082,
+            420.7261,
+            420.1662,
+            420.9968,
+            438.863,
+            430.5088,
+            454.8008,
+            422.9365,
+            427.5095,
+            423.1803,
+            421.8069,
+            420.0946
+          ]
+        }
+      }
+    },
+    "pointers": {
+      "expected": "3495758670\n313794096",
+      "variants": {
+        "old": {
+          "fixture": "pointers.bolt",
+          "source_sha256": "13657a7a059c3c5f766b19c65bfea35b47bd790b1009fb94965d65213fb90b4f",
+          "executable_sha256": "68444c1e863f32217d0e9bc3b626f378064649323a507f32735b5473dc50394e",
+          "runtime_sha256": {
+            "BoltRuntime.dll": "1d7c761b67bb1889771cdec8d126dcb305d45eab9a8f3c81d837cf4c72c75657"
+          },
+          "command": [
+            "bolt.exe",
+            "compile",
+            "pointers.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "n": 12,
+          "median_ms": 104.6526,
+          "p95_ms": 122.9515,
+          "min_ms": 102.7027,
+          "max_ms": 122.9515,
+          "raw_ms": [
+            104.485,
+            104.7355,
+            106.6687,
+            104.5698,
+            114.9532,
+            106.4318,
+            122.9515,
+            106.3113,
+            104.3012,
+            102.7027,
+            103.3312,
+            103.3852
+          ]
+        },
+        "new": {
+          "fixture": "pointers.bolt",
+          "source_sha256": "13657a7a059c3c5f766b19c65bfea35b47bd790b1009fb94965d65213fb90b4f",
+          "executable_sha256": "b28fd6294c7d0df478e84b6175193ee9880de429c23d84ebe5e00ab0234222f8",
+          "runtime_sha256": {
+            "BoltRuntime.dll": "7bb491d5b07db7a5956de426ba281792e9f9a4c0d629bfb2a01a26f431ecd328"
+          },
+          "command": [
+            "bolt.exe",
+            "compile",
+            "pointers.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "n": 12,
+          "median_ms": 107.1984,
+          "p95_ms": 119.1411,
+          "min_ms": 102.6387,
+          "max_ms": 119.1411,
+          "raw_ms": [
+            103.751,
+            105.4011,
+            107.8666,
+            118.5433,
+            119.1411,
+            108.4331,
+            113.2763,
+            106.5302,
+            103.9343,
+            105.4838,
+            108.9272,
+            102.6387
+          ]
+        },
+        "msvc": {
+          "fixture": "pointers.c",
+          "source_sha256": "5b793a8383e7a7dc489a41afcaad9a0272b5c0571b91cfcf33fdbe613969b87f",
+          "executable_sha256": "a308038a5784d4a82153a2bf9433364434b59669c42c3cd7346d745abdb13b8f",
+          "runtime_sha256": {},
+          "command": [
+            "cl.EXE",
+            "/nologo",
+            "/O2",
+            "/DNDEBUG",
+            "/std:c11",
+            "pointers.c",
+            "/Fe:program.exe"
+          ],
+          "n": 12,
+          "median_ms": 257.6098,
+          "p95_ms": 276.6682,
+          "min_ms": 250.8409,
+          "max_ms": 276.6682,
+          "raw_ms": [
+            251.213,
+            253.8672,
+            276.6682,
+            260.5351,
+            265.9732,
+            260.173,
+            266.2616,
+            258.9084,
+            254.1787,
+            256.3112,
+            250.8409,
+            251.8637
+          ]
+        },
+        "clang": {
+          "fixture": "pointers.c",
+          "source_sha256": "5b793a8383e7a7dc489a41afcaad9a0272b5c0571b91cfcf33fdbe613969b87f",
+          "executable_sha256": "8547573b0f952931dd075be7b66b36eac96100eb5ef711719e1356251fee5ea3",
+          "runtime_sha256": {},
+          "command": [
+            "clang.exe",
+            "-std=c11",
+            "-O3",
+            "-DNDEBUG",
+            "pointers.c",
+            "-o",
+            "program.exe"
+          ],
+          "n": 12,
+          "median_ms": 100.7745,
+          "p95_ms": 105.9929,
+          "min_ms": 97.8559,
+          "max_ms": 105.9929,
+          "raw_ms": [
+            99.8134,
+            100.7187,
+            97.8559,
+            100.8303,
+            105.9929,
+            101.5825,
+            105.5568,
+            102.1139,
+            98.7751,
+            101.5324,
+            99.802,
+            98.4811
+          ]
+        }
+      }
+    },
+    "buffer-long": {
+      "expected": "4400059777024",
+      "variants": {
+        "old": {
+          "fixture": "buffer-long.bolt",
+          "source_sha256": "b123d5547d317faed85cc6692d517505740386cbfc4a431fc631fce116992356",
+          "executable_sha256": "47718de006e67d344c1ca93d6db32b71530cc7e44f5170a171374504f53b1e87",
+          "runtime_sha256": {
+            "BoltRuntime.dll": "1d7c761b67bb1889771cdec8d126dcb305d45eab9a8f3c81d837cf4c72c75657"
+          },
+          "command": [
+            "bolt.exe",
+            "compile",
+            "buffer-long.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "n": 12,
+          "median_ms": 181.394,
+          "p95_ms": 243.944,
+          "min_ms": 135.5568,
+          "max_ms": 243.944,
+          "raw_ms": [
+            205.0826,
+            158.653,
+            139.8241,
+            206.3609,
+            179.8312,
+            182.9569,
+            137.637,
+            201.1262,
+            156.9445,
+            185.9973,
+            243.944,
+            135.5568
+          ]
+        },
+        "new": {
+          "fixture": "buffer-long.bolt",
+          "source_sha256": "b123d5547d317faed85cc6692d517505740386cbfc4a431fc631fce116992356",
+          "executable_sha256": "58c162da06471ce7e71cfc5db24b27e13071c2127a48d188fbb480cc30076235",
+          "runtime_sha256": {
+            "BoltRuntime.dll": "7bb491d5b07db7a5956de426ba281792e9f9a4c0d629bfb2a01a26f431ecd328"
+          },
+          "command": [
+            "bolt.exe",
+            "compile",
+            "buffer-long.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "n": 12,
+          "median_ms": 189.1962,
+          "p95_ms": 253.7959,
+          "min_ms": 138.3171,
+          "max_ms": 253.7959,
+          "raw_ms": [
+            203.3393,
+            166.2126,
+            162.9583,
+            186.361,
+            224.4253,
+            211.2991,
+            164.7768,
+            204.1326,
+            138.3171,
+            192.0315,
+            253.7959,
+            153.8393
+          ]
+        },
+        "msvc": {
+          "fixture": "buffer-long.c",
+          "source_sha256": "2be81cf35a5a95805a797b627a7d60ee5d1b6f70a646cc6790d560ac2fd0d664",
+          "executable_sha256": "782066b1fc599e7c9b5bb452f2f920b7723d71079c510bdc7c491f3695d0d66b",
+          "runtime_sha256": {},
+          "command": [
+            "cl.EXE",
+            "/nologo",
+            "/O2",
+            "/DNDEBUG",
+            "/std:c11",
+            "buffer-long.c",
+            "/Fe:program.exe"
+          ],
+          "n": 12,
+          "median_ms": 344.073,
+          "p95_ms": 410.8118,
+          "min_ms": 246.4084,
+          "max_ms": 410.8118,
+          "raw_ms": [
+            331.6044,
+            368.2773,
+            262.0469,
+            333.3855,
+            372.4445,
+            359.0222,
+            274.5573,
+            361.0217,
+            270.7246,
+            354.7605,
+            410.8118,
+            246.4084
+          ]
+        },
+        "clang": {
+          "fixture": "buffer-long.c",
+          "source_sha256": "2be81cf35a5a95805a797b627a7d60ee5d1b6f70a646cc6790d560ac2fd0d664",
+          "executable_sha256": "27c8ed7d3d339c8b04ca260928f9d1faf89f8235d73bd9d459ca6e0cb0e51975",
+          "runtime_sha256": {},
+          "command": [
+            "clang.exe",
+            "-std=c11",
+            "-O3",
+            "-DNDEBUG",
+            "buffer-long.c",
+            "-o",
+            "program.exe"
+          ],
+          "n": 12,
+          "median_ms": 297.4445,
+          "p95_ms": 350.3963,
+          "min_ms": 219.7209,
+          "max_ms": 350.3963,
+          "raw_ms": [
+            302.6039,
+            251.2383,
+            241.074,
+            292.285,
+            331.3417,
+            330.99,
+            254.1919,
+            334.5109,
+            228.1484,
+            319.9593,
+            350.3963,
+            219.7209
+          ]
+        }
+      }
+    }
+  },
+  "debug_compile": {
+    "method": "Small single-file arithmetic fixture with loop bound 64. From source to linked native debug executable; fresh CLI process, new working directory, two warmups, twelve recorded builds per compiler. Run and check outputs outside timing. C builds also produce a PDB.",
+    "expected": "7523928834939243105",
+    "variants": {
+      "bolt": {
+        "command": [
+          "bolt.exe",
+          "compile",
+          "arithmetic.bolt",
+          "--debug",
+          "--backend",
+          "fast",
+          "--require-native",
+          "-o",
+          "program.exe"
+        ],
+        "n": 12,
+        "median_ms": 142.7635,
+        "p95_ms": 160.601,
+        "min_ms": 134.4387,
+        "max_ms": 160.601,
+        "raw_ms": [
+          158.8512,
+          160.601,
+          140.9741,
+          139.3664,
+          134.4387,
+          144.5529,
+          154.8997,
+          140.7037,
+          160.2574,
+          140.4097,
+          159.3409,
+          135.8117
+        ]
+      },
+      "msvc": {
+        "command": [
+          "cl.EXE",
+          "/nologo",
+          "/Od",
+          "/Z7",
+          "arithmetic.c",
+          "/Fe:program.exe",
+          "/link",
+          "/DEBUG:FULL",
+          "/INCREMENTAL:NO"
+        ],
+        "n": 12,
+        "median_ms": 160.7933,
+        "p95_ms": 197.5666,
+        "min_ms": 145.5725,
+        "max_ms": 197.5666,
+        "raw_ms": [
+          161.0285,
+          168.5249,
+          145.8552,
+          149.1561,
+          160.558,
+          197.5666,
+          149.0718,
+          152.1252,
+          163.7243,
+          168.8689,
+          164.7647,
+          145.5725
+        ]
+      },
+      "clang": {
+        "command": [
+          "clang.exe",
+          "-O0",
+          "-g",
+          "-gcodeview",
+          "arithmetic.c",
+          "-Xlinker",
+          "/DEBUG:FULL",
+          "-Xlinker",
+          "/INCREMENTAL:NO",
+          "-o",
+          "program.exe"
+        ],
+        "n": 12,
+        "median_ms": 175.506,
+        "p95_ms": 211.3957,
+        "min_ms": 169.2966,
+        "max_ms": 211.3957,
+        "raw_ms": [
+          174.2865,
+          177.1752,
+          171.7845,
+          176.7255,
+          177.3431,
+          173.0144,
+          184.409,
+          174.0392,
+          169.2966,
+          185.9477,
+          171.9969,
+          211.3957
+        ]
+      }
+    }
+  },
+  "specialized_c_controls": {
+    "method": "Separate session on same host. Two warmups, twelve measured trials, shuffled order and verified output. Fused buffer computes the checksum without materializing data; prefix case uses the known matching prefix of these specific inputs.",
+    "seed": 7878,
+    "cases": {
+      "buffer-long-fused-unroll8": {
+        "msvc": {
+          "fixture": "buffer-long-fused.c",
+          "source_sha256": "ab9d86dce2abd88afa9ef297641611dddf983ee26e6fd0c266d28ae7dc3612a1",
+          "executable_sha256": "34098aabf27c24a75496baffcd93eb76d1a9939af96b1d841d1c938c14abc0fb",
+          "command": [
+            "cl.EXE",
+            "/nologo",
+            "/O2",
+            "/DNDEBUG",
+            "/std:c11",
+            "buffer-long-fused-unroll8.c",
+            "/Fe:program.exe"
+          ],
+          "n": 12,
+          "median_ms": 45.3991,
+          "p95_ms": 58.608,
+          "min_ms": 44.1993,
+          "max_ms": 58.608,
+          "raw_ms": [
+            44.6598,
+            47.772,
+            46.0167,
+            44.9062,
+            44.9895,
+            44.2348,
+            45.4321,
+            44.1993,
+            58.608,
+            48.2554,
+            46.3351,
+            45.366
+          ]
+        },
+        "clang": {
+          "fixture": "buffer-long-fused.c",
+          "source_sha256": "ab9d86dce2abd88afa9ef297641611dddf983ee26e6fd0c266d28ae7dc3612a1",
+          "executable_sha256": "ad5b581e9d18b9ddec5dd6cdd169c89ca387fcbcf35c7131e2072c1430f7a2be",
+          "command": [
+            "clang.exe",
+            "-std=c11",
+            "-O3",
+            "-DNDEBUG",
+            "buffer-long-fused-unroll8.c",
+            "-o",
+            "program.exe"
+          ],
+          "n": 12,
+          "median_ms": 34.1636,
+          "p95_ms": 54.9359,
+          "min_ms": 31.0741,
+          "max_ms": 54.9359,
+          "raw_ms": [
+            31.0741,
+            34.6793,
+            35.3167,
+            35.4782,
+            34.0918,
+            31.4522,
+            32.1505,
+            34.2353,
+            33.7384,
+            54.9359,
+            38.6113,
+            32.1224
+          ]
+        }
+      },
+      "memory-long-prefix": {
+        "msvc": {
+          "fixture": "memory.c",
+          "source_sha256": "69d304e78f0ab2e3880e9167798acd61382890c9b544bef81434e5f714ac5c3b",
+          "executable_sha256": "f9f2e2bad3a801cefe67c113e5b13b1f839be737532a6187b212f226b4611dac",
+          "command": [
+            "cl.EXE",
+            "/nologo",
+            "/O2",
+            "/DNDEBUG",
+            "/std:c11",
+            "memory-long-prefix.c",
+            "/Fe:program.exe"
+          ],
+          "n": 12,
+          "median_ms": 554.8174,
+          "p95_ms": 669.6648,
+          "min_ms": 545.4044,
+          "max_ms": 669.6648,
+          "raw_ms": [
+            555.4396,
+            554.9599,
+            553.4437,
+            556.4211,
+            549.6468,
+            546.1671,
+            545.4044,
+            554.6749,
+            669.6648,
+            646.0184,
+            553.4598,
+            565.0105
+          ]
+        },
+        "clang": {
+          "fixture": "memory.c",
+          "source_sha256": "69d304e78f0ab2e3880e9167798acd61382890c9b544bef81434e5f714ac5c3b",
+          "executable_sha256": "647009434d074e5a262e03b25a498931d14c2087e853b31ef120d0b7a9bf1962",
+          "command": [
+            "clang.exe",
+            "-std=c11",
+            "-O3",
+            "-DNDEBUG",
+            "memory-long-prefix.c",
+            "-o",
+            "program.exe"
+          ],
+          "n": 12,
+          "median_ms": 418.5609,
+          "p95_ms": 468.9952,
+          "min_ms": 410.3516,
+          "max_ms": 468.9952,
+          "raw_ms": [
+            418.1383,
+            414.719,
+            411.5904,
+            412.0323,
+            434.9934,
+            410.3516,
+            412.2165,
+            422.1794,
+            456.2675,
+            468.9952,
+            426.9366,
+            418.9836
+          ]
+        }
+      },
+      "pointers-mask": {
+        "msvc": {
+          "fixture": "pointers-mask.c",
+          "source_sha256": "0298b9362c366e7bf65432539052a3af35a9becb3129274fcfa541880734e1bb",
+          "executable_sha256": "bad119206a6bb8b968b0441ec6ede1254d80cb0799c727242befa6ee24863eff",
+          "command": [
+            "cl.EXE",
+            "/nologo",
+            "/O2",
+            "/DNDEBUG",
+            "/std:c11",
+            "pointers-mask.c",
+            "/Fe:program.exe"
+          ],
+          "n": 12,
+          "median_ms": 167.5468,
+          "p95_ms": 173.0889,
+          "min_ms": 165.3125,
+          "max_ms": 173.0889,
+          "raw_ms": [
+            167.8514,
+            167.4129,
+            167.6807,
+            166.7862,
+            165.8976,
+            167.0456,
+            165.584,
+            168.0262,
+            173.0889,
+            169.8547,
+            171.4908,
+            165.3125
+          ]
+        },
+        "clang": {
+          "fixture": "pointers-mask.c",
+          "source_sha256": "0298b9362c366e7bf65432539052a3af35a9becb3129274fcfa541880734e1bb",
+          "executable_sha256": "69caa452c63487c9ba97b617c87b53106df984a871e758cfe88d648803c18950",
+          "command": [
+            "clang.exe",
+            "-std=c11",
+            "-O3",
+            "-DNDEBUG",
+            "pointers-mask.c",
+            "-o",
+            "program.exe"
+          ],
+          "n": 12,
+          "median_ms": 199.1705,
+          "p95_ms": 207.5745,
+          "min_ms": 196.182,
+          "max_ms": 207.5745,
+          "raw_ms": [
+            198.525,
+            199.2419,
+            203.0087,
+            199.0991,
+            198.4769,
+            197.8963,
+            197.8766,
+            199.6935,
+            207.5745,
+            207.3566,
+            199.9687,
+            196.182
+          ]
+        }
+      }
+    }
+  }
+}

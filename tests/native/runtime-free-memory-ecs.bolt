@@ -1,0 +1,146 @@
+import System
+import System.Memory
+import System.Threading
+import Ecs
+
+public class Tracked {
+public:
+    static int Order;
+    int Value;
+    Tracked(int value) { Value=value; }
+    ~Tracked() { Order=10*Order+Value; }
+}
+public class Derived : Tracked {
+public:
+    Derived(int value) : base(value) {}
+    ~Derived() { Order=10*Order+9; }
+}
+public class Broken : Tracked {
+public:
+    Broken() : base(3) { throw ArgumentException("construction failed"); }
+    ~Broken() { Order=10*Order+8; }
+}
+public struct Partial {
+public:
+    static int Started, Released;
+    int Id;
+    Partial() {
+        Id=++Started;
+        if(Id==2)throw ArgumentException("stop at the second element");
+    }
+    ~Partial() { Released=10*Released+Id; }
+}
+public class IntOwner : Owner<int> {
+public:
+    IntOwner() : base(4) {}
+}
+public class TextBuffer {
+public:
+    string Title;
+    System.Collections.Generic.List<string> Names;
+}
+public struct Position { public: int X; }
+public struct Velocity { public: int X=3; }
+public struct Disabled {}
+public class Observer {
+public:
+    int Calls;
+    void OnAdd(Registry& world,Entity entity,Position& position) {
+        Calls++;
+        position.X=11;
+        if(!world.IsValid(entity))throw Exception("invalid callback entity");
+    }
+}
+public class FailingObserver {
+public:
+    void OnAdd(Registry& world,Entity entity,Disabled& value) { throw ArgumentException("rollback"); }
+}
+public class OwnershipJob {
+public:
+    Shared<int> Result;
+    OwnershipJob(Shared<int> result) { Result=result; }
+    void Run() { int* p=new int(17);Result.Get()=*p;delete p; }
+}
+static class Program {
+    static void Check(bool value,string message) { if(!value)throw Exception(message); }
+    static void Ownership() {
+        Tracked* p=new Derived(2);
+        delete p;
+        Check(Tracked.Order==92,"dynamic destructor and base order");
+        try { delete p; throw Exception("double delete accepted"); } catch(InvalidOperationException& error) {}
+        try { Partial[] values=new Partial[4]; } catch(ArgumentException& error) {}
+        Check(Partial.Started==2 && Partial.Released==1,"only completed array elements are destroyed");
+        Arena arena=Arena.Growable(64,1024);
+        Tracked.Order=0;
+        Tracked* first=new(arena) Tracked(1);
+        try { delete first; throw Exception("arena delete accepted"); } catch(InvalidOperationException& error) {}
+        try { Broken* broken=new(arena) Broken(); } catch(ArgumentException& error) {}
+        Check(Tracked.Order==3,"partial construction");
+        Tracked* second=new(arena) Tracked(2);
+        arena.Reset();
+        Check(Tracked.Order==321 && arena.UsedBytes==0ul,"arena roots released exactly once in reverse order");
+        arena.Dispose();arena.Dispose();
+
+        Arena bounded=Arena.Fixed(256);
+        TextBuffer* buffer=new(bounded) TextBuffer();buffer->Title="kept";
+        ulong before=bounded.UsedBytes;
+        try {
+            for(int i=0;i<50;i++)buffer->Names.Add("a string in this arena");
+            throw Exception("nested array exceeded arena capacity");
+        } catch(OutOfMemoryException& error) {}
+        Check(bounded.UsedBytes>before && bounded.UsedBytes<=256ul,"bounded nested storage");
+        string snapshot=buffer->Title;bounded.Reset();
+        Check(snapshot=="kept","string escaped an arena by value");
+
+        IntOwner derived;IntOwner secondOwner=derived;secondOwner.Get()=6;
+        Check(derived.Get()==4,"deep copy through an Owner base");
+        Owner<string> owner("original");Owner<string> copy=owner;
+        copy.Get()="copy";
+        Check(owner.Get()=="original" && owner.Borrow()!=copy.Borrow(),"independent owners");
+        string* released=copy.Release();
+        Check(!copy.HasValue && *released=="copy","release transfers ownership");
+        delete released;
+        owner.Reset(owner.Get());Check(owner.Get()=="original","reset from self");owner.Reset();
+        try { owner.Get(); throw Exception("empty owner accepted"); } catch(InvalidOperationException& error) {}
+
+        Shared<int> value(5);Shared<int> alias=value;
+        Thread worker=Thread.Start(OwnershipJob(alias));
+        Check(worker.Join(5000) && value.Get()==17 && alias.Borrow()==value.Borrow(),"shared worker storage");
+    }
+    static void Entities() {
+        Registry world;world.Reserve(32);Registry alias=world;
+        Observer observer;
+        ulong token=world.OnAdd<Position>().ConnectRef<Observer>(observer);
+        Entity e=alias.Create<Position,Velocity>();
+        Check(observer.Calls==1 && world.Get<Position>(e).X==11,"callback and registry alias");
+        Position* address=world.TryGet<Position>(e);
+        for(int i=0;i<96;i++){Entity extra=world.Create();world.Add<Position>(extra);}
+        Check(world.TryGet<Position>(e)==address,"component borrow survived pool growth");
+        for(row : world.Query<Position>().With<Velocity>().Without<Disabled>())row.Get<Position>().X+=row.Get<Velocity>().X;
+        for(parts : world.Query<Velocity>().WithoutEntity())Check(parts.Get<Position>().X==14,"component-only query");
+        Check(world.Query<Position>().Count==97l,"query count");
+        try { for(row : world.Query<Velocity>())world.Destroy(row.Entity); }
+        catch(InvalidOperationException& error) {}
+        Check(world.IsValid(e),"mutation guarded during normal iteration");
+        Check(world.OnAdd<Position>().Disconnect(token),"signal disconnect");
+
+        FailingObserver failing;world.OnAdd<Disabled>().Connect(failing);
+        try { world.Add<Disabled>(e); } catch(ArgumentException& error) {}
+        Check(!world.Has<Disabled>(e),"failed callback rolled component back");
+        try { world.Create<Disabled>(); } catch(ArgumentException& error) {}
+        Check(world.EntityCount==97l,"failed create rolled entity back");
+        world.OnAdd<Disabled>().Clear();
+        world.Remove<Position,Velocity>(e);
+        Check(world.TryGet<Position>(e)==null && !world.Has<Velocity>(e),"variadic remove");
+        Row added=world.Add<Velocity,Position>(e);added.Get<Position>().X=23;
+        Row fetched=world.Get<Position,Velocity>(e);
+        Check(fetched.Get<Position>().X==23,"variadic add and get");
+        for(row : world.Query<>().Stable())world.Destroy(row.Entity);
+        Entity next=world.Create();
+        Registry foreign;
+        Check(!world.IsValid(e) && !foreign.IsValid(next) && alias.EntityCount==1l,"entity identity");
+        world.Reset();Check(alias.EntityCount==0l,"registry reset");
+    }
+public:
+    static void Main() { Ownership();Entities(); }
+}

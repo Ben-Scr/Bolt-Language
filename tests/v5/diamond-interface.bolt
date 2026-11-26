@@ -1,0 +1,9 @@
+
+interface IA{int Get();}
+interface IB:IA{}
+interface IC:IA{}
+interface IAll:IB,IC{}
+class Thing:IAll{public:int Get(){return 19;}}
+static class Program {public: void Main(){
+Thing t; IAll& all=t; IA& a=all; Print(all.Get()); Print(a.Get()); IAll boxed=t; IA parent=boxed; Print(parent.Get());
+}}

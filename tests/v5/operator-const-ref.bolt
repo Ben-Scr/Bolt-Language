@@ -1,0 +1,5 @@
+
+class N:IStringable{public:int Value;N(int v){Value=v;}string ToString(){return (string)Value;}static N operator +(const N& a,const N& b){return N(a.Value+b.Value);}}
+static class Program {public: void Main(){
+const N a=N(2);Print(a+N(3));N b=N(4);b+=a;Print(b);
+}}

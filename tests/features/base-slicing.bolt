@@ -1,0 +1,5 @@
+
+class Base{public:int X;void Speak(){Console.WriteLine("base");}} class Dog:Base{public:void Speak(){Console.WriteLine("dog");}} void Take(Base b){b.Speak();}
+static class Program { public: void Main() {
+Dog d; d.X=3; Base& r=d; Base b=r; b.Speak(); r.Speak(); Take(r);
+} }

@@ -1,0 +1,52 @@
+import System
+import System.Text
+
+static class Program {
+public:
+    bool RejectsBase64(const string& text) {
+        try { Base64Encoding.Decode(text); }
+        catch (FormatException e) { return true; }
+        return false;
+    }
+
+    int Main() {
+        byte[] empty = new byte[0];
+        if (HexEncoding.Encode(empty) != "" || Base64Encoding.Encode(empty) != "") return 1;
+        if (Base64Encoding.Decode(" \r\n\t").Length != 0 || UrlEncoding.Encode("") != "") return 2;
+
+        byte[] bytes = [(byte)0, (byte)171, (byte)255];
+        if (HexEncoding.Encode(bytes) != "00ABFF" || HexEncoding.Encode(bytes, false) != "00abff") return 3;
+        if (Base64Encoding.Encode(bytes) != "AKv/") return 4;
+        if (Base64Encoding.Encode("f".ToUtf8()) != "Zg==" || Base64Encoding.Encode("fo".ToUtf8()) != "Zm8=") return 5;
+        if (string.FromUtf8(Base64Encoding.Decode(" Z m8\r\n=\t")) != "fo") return 6;
+        byte[] decoded = Base64Encoding.Decode("AKv/");
+        if (decoded.Length != 3 || decoded[0] != 0 || decoded[1] != 171 || decoded[2] != 255) return 7;
+        if (!RejectsBase64("=AAA") || !RejectsBase64("AA=A") || !RejectsBase64("AA==AAAA") ||
+            !RejectsBase64("λAAA") || !RejectsBase64("abc")) return 8;
+        if (Base64UrlEncoding.Encode(bytes) != "AKv_" || Base64UrlEncoding.Encode("f".ToUtf8()) != "Zg") return 9;
+        if (UrlEncoding.Encode("aZ09-._~ /ä\0") != "aZ09-._~%20%2F%C3%A4%00") return 10;
+        string mixed = "ASCII\0éλ😀";
+        if (UTF8Encoding.GetString(UTF8Encoding.GetBytes(mixed)) != mixed) return 11;
+        if (UTF16LEEncoding.GetString(UTF16LEEncoding.GetBytes(mixed, true)) != mixed) return 12;
+        if (UTF16BEEncoding.GetString(UTF16BEEncoding.GetBytes(mixed)) != mixed) return 13;
+        if (UTF32BEEncoding.GetString(UTF32BEEncoding.GetBytes(mixed, true)) != mixed) return 14;
+        if (UTF32LEEncoding.GetString(UTF32LEEncoding.GetBytes(mixed)) != mixed) return 15;
+        if (UrlEncoding.Decode("é%CE%BB%00😀") != "éλ\0😀") return 16;
+        byte[] latin = new byte[256];
+        for (int i = 0; i < 256; i++) latin[i] = (byte)i;
+        byte[] restored = Latin1Encoding.GetBytes(Latin1Encoding.GetString(latin));
+        if (restored.Length != 256) return 17;
+        for (int i = 0; i < 256; i++) if (restored[i] != (byte)i) return 18;
+        if (ASCIIEncoding.GetString(ASCIIEncoding.GetBytes("a\0z")) != "a\0z") return 19;
+        try { ASCIIEncoding.GetBytes("é"); return 20; } catch (FormatException e) {}
+        try { ASCIIEncoding.GetString(latin); return 21; } catch (FormatException e) {}
+        try { Latin1Encoding.GetBytes("λ"); return 22; } catch (FormatException e) {}
+        try { UTF8Encoding.GetString([(byte)237, (byte)160, (byte)128]); return 23; } catch (FormatException e) {}
+        try { UrlEncoding.Decode("%E2%82"); return 24; } catch (FormatException e) {}
+        try { UTF16LEEncoding.GetString([(byte)0, (byte)216]); return 25; } catch (FormatException e) {}
+        try { UTF16BEEncoding.GetString([(byte)220, (byte)0]); return 26; } catch (FormatException e) {}
+        try { UTF32BEEncoding.GetString([(byte)0, (byte)17, (byte)0, (byte)0]); return 27; } catch (FormatException e) {}
+        if (UTF16BEEncoding.GetString(UTF16LEEncoding.GetBytes(mixed, true)) != mixed) return 28;
+        return 0;
+    }
+}

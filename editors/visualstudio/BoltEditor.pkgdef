@@ -1,0 +1,8 @@
+[$RootKey$\TextMate\Repositories]
+"Bolt"="$PackageFolder$\Grammars"
+[$RootKey$\TextMate\LanguageConfiguration\GrammarMapping]
+"source.bolt"="$PackageFolder$\Grammars\language-configuration.json"
+[$RootKey$\TextMate\LanguageConfiguration\ContentTypeMapping]
+"Bolt"="$PackageFolder$\Grammars\language-configuration.json"
+[$RootKey$\ShellFileAssociations\.bolt]
+"DefaultIconMoniker"="79a256bc-799b-47c4-8dfc-1fc26d70a907:1"

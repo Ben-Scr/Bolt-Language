@@ -1,0 +1,15 @@
+import System
+import System.Diagnostics
+public static class Program {
+public:
+    void ThrowHere() { throw ArgumentException("located"); }
+    void Main() {
+        try { ThrowHere(); }
+        catch (ArgumentException& error) {
+            Assert.Equal(5, error.SourceLine);
+            Assert.That(error.SourceFile.EndsWith("Main.bolt"));
+            Assert.That(error.StackTrace.Contains("ThrowHere"));
+            Print("source and frame checks passed");
+        }
+    }
+}

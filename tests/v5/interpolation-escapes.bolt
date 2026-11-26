@@ -1,0 +1,5 @@
+
+
+static class Program {public: void Main(){
+Print($"a\n\t\"{{ok}}\"\\b");Print($"é:{3}");Print($"x\0{1}");
+}}

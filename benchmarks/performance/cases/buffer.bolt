@@ -1,0 +1,14 @@
+import Bolt.Runtime
+static class Program
+{
+public:
+    void Main()
+    {
+        Buffer<int> values;
+        for (int i = 0; i < 524288; i++) values.Add((i ^ 117) & 65535);
+        int[] copy = values.ToArray();
+        ulong sum = 0ul;
+        for (int i = 0; i < copy.Length; i++) sum += (ulong)copy[i];
+        Print(sum);
+    }
+}

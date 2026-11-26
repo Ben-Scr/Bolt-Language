@@ -1,0 +1,93 @@
+import System
+namespace System.Security.Cryptography;
+
+// FIPS 180-4 SHA-256 implemented entirely in Bolt.
+public static class SHA256
+{
+private:
+    uint[] Constants()
+    {
+        return [
+            1116352408u,1899447441u,3049323471u,3921009573u,961987163u,1508970993u,2453635748u,2870763221u,
+            3624381080u,310598401u,607225278u,1426881987u,1925078388u,2162078206u,2614888103u,3248222580u,
+            3835390401u,4022224774u,264347078u,604807628u,770255983u,1249150122u,1555081692u,1996064986u,
+            2554220882u,2821834349u,2952996808u,3210313671u,3336571891u,3584528711u,113926993u,338241895u,
+            666307205u,773529912u,1294757372u,1396182291u,1695183700u,1986661051u,2177026350u,2456956037u,
+            2730485921u,2820302411u,3259730800u,3345764771u,3516065817u,3600352804u,4094571909u,275423344u,
+            430227734u,506948616u,659060556u,883997877u,958139571u,1322822218u,1537002063u,1747873779u,
+            1955562222u,2024104815u,2227730452u,2361852424u,2428436474u,2756734187u,3204031479u,3329325298u
+        ];
+    }
+
+public:
+    byte[] Hash(const byte[]& data)
+    {
+        uint[] k = Constants();
+        int paddedLength = ((data.Length + 9 + 63) / 64) * 64;
+        byte[] message = new byte[paddedLength];
+        for (int i = 0; i < data.Length; i++) message[i] = data[i];
+        message[data.Length] = (byte)128;
+        CryptoPrimitives.WriteUInt64BE((ulong)data.Length * 8ul, message, paddedLength - 8);
+
+        uint h0 = 1779033703u;
+        uint h1 = 3144134277u;
+        uint h2 = 1013904242u;
+        uint h3 = 2773480762u;
+        uint h4 = 1359893119u;
+        uint h5 = 2600822924u;
+        uint h6 = 528734635u;
+        uint h7 = 1541459225u;
+
+        uint[] w = new uint[64];
+        for (int block = 0; block < paddedLength; block += 64)
+        {
+            for (int i = 0; i < 16; i++) w[i] = CryptoPrimitives.ReadUInt32BE(message, block + i * 4);
+            for (int i = 16; i < 64; i++)
+            {
+                uint s0 = CryptoPrimitives.RotR32(w[i - 15], 7) ^ CryptoPrimitives.RotR32(w[i - 15], 18) ^ (w[i - 15] >> 3);
+                uint s1 = CryptoPrimitives.RotR32(w[i - 2], 17) ^ CryptoPrimitives.RotR32(w[i - 2], 19) ^ (w[i - 2] >> 10);
+                w[i] = CryptoPrimitives.Add32(w[i - 16], s0, w[i - 7], s1);
+            }
+
+            uint a = h0, b = h1, c = h2, d = h3;
+            uint e = h4, f = h5, g = h6, h = h7;
+
+            for (int i = 0; i < 64; i++)
+            {
+                uint s1 = CryptoPrimitives.RotR32(e, 6) ^ CryptoPrimitives.RotR32(e, 11) ^ CryptoPrimitives.RotR32(e, 25);
+                uint ch = (e & f) ^ ((~e) & g);
+                uint temp1 = CryptoPrimitives.Add32(h, s1, ch, k[i], w[i]);
+                uint s0 = CryptoPrimitives.RotR32(a, 2) ^ CryptoPrimitives.RotR32(a, 13) ^ CryptoPrimitives.RotR32(a, 22);
+                uint maj = (a & b) ^ (a & c) ^ (b & c);
+                uint temp2 = CryptoPrimitives.Add32(s0, maj);
+
+                h = g; g = f; f = e;
+                e = CryptoPrimitives.Add32(d, temp1);
+                d = c; c = b; b = a;
+                a = CryptoPrimitives.Add32(temp1, temp2);
+            }
+
+            h0 = CryptoPrimitives.Add32(h0, a);
+            h1 = CryptoPrimitives.Add32(h1, b);
+            h2 = CryptoPrimitives.Add32(h2, c);
+            h3 = CryptoPrimitives.Add32(h3, d);
+            h4 = CryptoPrimitives.Add32(h4, e);
+            h5 = CryptoPrimitives.Add32(h5, f);
+            h6 = CryptoPrimitives.Add32(h6, g);
+            h7 = CryptoPrimitives.Add32(h7, h);
+        }
+
+        byte[] result = new byte[32];
+        CryptoPrimitives.WriteUInt32BE(h0, result, 0);
+        CryptoPrimitives.WriteUInt32BE(h1, result, 4);
+        CryptoPrimitives.WriteUInt32BE(h2, result, 8);
+        CryptoPrimitives.WriteUInt32BE(h3, result, 12);
+        CryptoPrimitives.WriteUInt32BE(h4, result, 16);
+        CryptoPrimitives.WriteUInt32BE(h5, result, 20);
+        CryptoPrimitives.WriteUInt32BE(h6, result, 24);
+        CryptoPrimitives.WriteUInt32BE(h7, result, 28);
+        return result;
+    }
+
+    byte[] Hash(const string& text) { return Hash(text.ToUtf8()); }
+}

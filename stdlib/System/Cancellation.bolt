@@ -1,0 +1,44 @@
+import System
+import System.Diagnostics
+namespace System.Threading;
+
+class CancellationState {
+    public Atomic<int> Requested;
+    public Mutex Gate;
+    public ConditionVariable Changed;
+}
+public struct CancellationToken {
+    private CancellationState? state;
+    public CancellationToken() {}
+    public CancellationToken(CancellationState value) { state=value; }
+    public bool CanBeCanceled => state!=null;
+    public bool IsCancellationRequested => state!=null && state.Value.Requested.Load()!=0;
+    public void ThrowIfCancellationRequested() {
+        if(IsCancellationRequested)throw OperationCanceledException("The operation was canceled.");
+    }
+    public bool WaitCancellation(int milliseconds) {
+        if(milliseconds<0)throw ArgumentOutOfRangeException("Negative wait duration.");
+        if(state==null){Thread.Sleep(milliseconds);return false;}
+        var clock=Stopwatch.StartNew();
+        var sync=state.Value;
+        sync.Gate.Lock();
+        try {
+            while(sync.Requested.Load()==0) {
+                long remaining=(long)milliseconds-clock.ElapsedMilliseconds;
+                if(remaining<=0l)return false;
+                sync.Changed.Wait(sync.Gate,(int)remaining);
+            }
+            return true;
+        } finally {sync.Gate.Unlock();}
+    }
+}
+public sealed class CancellationTokenSource {
+    private CancellationState state;
+    public CancellationToken Token => CancellationToken(state);
+    public bool IsCancellationRequested => state.Requested.Load()!=0;
+    public void Cancel() {
+        state.Gate.Lock();
+        try {state.Requested.Store(1);state.Changed.NotifyAll();}
+        finally {state.Gate.Unlock();}
+    }
+}

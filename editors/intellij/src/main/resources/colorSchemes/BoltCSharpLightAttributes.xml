@@ -1,0 +1,136 @@
+<?xml version='1.0' encoding='utf-8'?>
+<list>
+  <option name="BOLT_KEYWORD">
+    <value>
+      <option name="FOREGROUND" value="0000FF" />
+    </value>
+  </option>
+  <option name="BOLT_CONTROL_FLOW">
+    <value>
+      <option name="FOREGROUND" value="AF00DB" />
+    </value>
+  </option>
+  <option name="BOLT_PRIMITIVE_TYPE">
+    <value>
+      <option name="FOREGROUND" value="0000FF" />
+    </value>
+  </option>
+  <option name="BOLT_TYPE_PARAMETER">
+    <value>
+      <option name="FOREGROUND" value="267F99" />
+    </value>
+  </option>
+  <option name="BOLT_CLASS">
+    <value>
+      <option name="FOREGROUND" value="267F99" />
+    </value>
+  </option>
+  <option name="BOLT_STRUCT">
+    <value>
+      <option name="FOREGROUND" value="2B9143" />
+    </value>
+  </option>
+  <option name="BOLT_INTERFACE">
+    <value>
+      <option name="FOREGROUND" value="2B9143" />
+    </value>
+  </option>
+  <option name="BOLT_ENUM">
+    <value>
+      <option name="FOREGROUND" value="2B9143" />
+    </value>
+  </option>
+  <option name="BOLT_METHOD">
+    <value>
+      <option name="FOREGROUND" value="795E26" />
+    </value>
+  </option>
+  <option name="BOLT_FIELD">
+    <value>
+      <option name="FOREGROUND" value="000000" />
+    </value>
+  </option>
+  <option name="BOLT_PROPERTY">
+    <value>
+      <option name="FOREGROUND" value="000000" />
+    </value>
+  </option>
+  <option name="BOLT_CONSTANT">
+    <value>
+      <option name="FOREGROUND" value="0070C1" />
+    </value>
+  </option>
+  <option name="BOLT_PARAMETER">
+    <value>
+      <option name="FOREGROUND" value="001080" />
+    </value>
+  </option>
+  <option name="BOLT_LOCAL_VARIABLE">
+    <value>
+      <option name="FOREGROUND" value="001080" />
+    </value>
+  </option>
+  <option name="BOLT_NAMESPACE">
+    <value>
+      <option name="FOREGROUND" value="000000" />
+    </value>
+  </option>
+  <option name="BOLT_IDENTIFIER">
+    <value>
+      <option name="FOREGROUND" value="000000" />
+    </value>
+  </option>
+  <option name="BOLT_STRING">
+    <value>
+      <option name="FOREGROUND" value="A31515" />
+    </value>
+  </option>
+  <option name="BOLT_CHARACTER">
+    <value>
+      <option name="FOREGROUND" value="A31515" />
+    </value>
+  </option>
+  <option name="BOLT_NUMBER">
+    <value>
+      <option name="FOREGROUND" value="098658" />
+    </value>
+  </option>
+  <option name="BOLT_LINE_COMMENT">
+    <value>
+      <option name="FOREGROUND" value="008000" />
+    </value>
+  </option>
+  <option name="BOLT_BLOCK_COMMENT">
+    <value>
+      <option name="FOREGROUND" value="008000" />
+    </value>
+  </option>
+  <option name="BOLT_OPERATOR">
+    <value>
+      <option name="FOREGROUND" value="000000" />
+    </value>
+  </option>
+  <option name="BOLT_BRACES">
+    <value>
+      <option name="FOREGROUND" value="000000" />
+    </value>
+  </option>
+  <option name="BOLT_PARENTHESES">
+    <value>
+      <option name="FOREGROUND" value="000000" />
+    </value>
+  </option>
+  <option name="BOLT_BRACKETS">
+    <value>
+      <option name="FOREGROUND" value="000000" />
+    </value>
+  </option>
+  <option name="BOLT_ATTRIBUTE">
+    <value>
+      <option name="FOREGROUND" value="267F99" />
+    </value>
+  </option>
+<option name="BOLT_CONCEPT"><value><option name="FOREGROUND" value="2B7759" /></value></option>
+  <option name="BOLT_INACTIVE_CODE"><value><option name="FOREGROUND" value="808080" /></value></option>
+<option name="BOLT_PREPROCESSOR"><value><option name="FOREGROUND" value="AF00DB" /></value></option>
+</list>

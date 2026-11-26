@@ -1,0 +1,5 @@
+
+
+static class Program {public: void Main(){
+Print(Reinterpret<ushort>((short)-1));Print(Reinterpret<short>((ushort)65535));Print(Reinterpret<ushort>((short)-1));Print(Reinterpret<short>((ushort)65535));Print(Reinterpret<uint>(-1));Print(Reinterpret<int>((uint)4294967295));Print(Reinterpret<ulong>((long)-1));Print(Reinterpret<long>(18446744073709551615ul));Print(Reinterpret<uint>(1.0f));Print(Reinterpret<float>((uint)1065353216));Print(Reinterpret<ulong>(1.0));Print(Reinterpret<double>(4607182418800017408ul));
+}}

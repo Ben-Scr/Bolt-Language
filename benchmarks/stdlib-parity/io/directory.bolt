@@ -1,0 +1,24 @@
+import System.IO
+
+static class Program {
+public:
+    int Main() {
+        if (Directory.Exists("entries")) return 3;
+        Directory.Create("entries");
+        for (int i = 0; i < 64; i++)
+            File.WriteAllText(Path.Combine("entries", "f" + i + ".dat"), "");
+        long sum = 0l;
+        for (int round = 0; round < 512; round++) {
+            string[] files = Directory.GetFiles("entries");
+            if (files.Length != 64 || Path.GetFileName(files[63]) != "f9.dat") return 1;
+            string selected = files[round & 63];
+            if (!File.Exists(selected) || Path.GetExtension(selected) != ".dat") return 2;
+            sum += Path.GetFileName(selected).Length;
+        }
+        for (int i = 0; i < 64; i++)
+            File.Delete(Path.Combine("entries", "f" + i + ".dat"));
+        Directory.Delete("entries", false);
+        Print(sum);
+        return 0;
+    }
+}

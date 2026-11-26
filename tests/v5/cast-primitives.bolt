@@ -1,0 +1,5 @@
+
+
+static class Program {public: void Main(){
+Print((int)0.5);Print((int)-2.9);Print((float)3);Print((string)0);Print((string)false);Print((byte)255);Print((short)-128);
+}}

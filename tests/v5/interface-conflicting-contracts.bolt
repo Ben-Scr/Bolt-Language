@@ -1,0 +1,5 @@
+
+interface A{int Get();} interface B{string Get();} interface C:A,B{}
+static class Program {public: void Main(){
+
+}}

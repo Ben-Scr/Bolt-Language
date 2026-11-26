@@ -1,0 +1,277 @@
+[
+  {
+    "name": "abstract-dispatch",
+    "file": "tests/native/abstract-dispatch.bolt",
+    "interpreter_unavailable": "abstract classes",
+    "stdout": "abstract dispatch OK\n"
+  },
+  {
+    "name": "source-ecs",
+    "file": "tests/native/source-ecs.bolt",
+    "interpreter_unavailable": "raw pointer indexing or reinterpretation",
+    "stdout": "source ECS OK\n"
+  },
+  {
+    "name": "list-add-range",
+    "file": "tests/native/list-add-range.bolt",
+    "stdout": "list add range OK\n"
+  },
+  {
+    "name": "buffer-sibling-swap",
+    "file": "tests/native/buffer-sibling-swap.bolt",
+    "stdout": "sibling swap OK\n"
+  },
+  {
+    "name": "buffer-sibling-lifetime",
+    "file": "tests/native/buffer-sibling-lifetime.bolt",
+    "interpreter_unavailable": "destructors and RAII",
+    "stdout": "sibling lifetime OK\n"
+  },
+  {
+    "name": "buffer-append-buffer",
+    "file": "tests/native/buffer-append-buffer.bolt",
+    "stdout": "append buffer OK\n"
+  },
+  {
+    "name": "queue-work-loop",
+    "file": "tests/native/queue-work-loop.bolt",
+    "stdout": "queue work loop OK\n"
+  },
+  {
+    "name": "queue-managed",
+    "file": "tests/native/queue-managed.bolt",
+    "stdout": "managed queue OK\n"
+  },
+  {
+    "name": "queue-singleton",
+    "file": "tests/native/queue-singleton.bolt",
+    "stdout": "singleton queue OK\n"
+  },
+  {
+    "name": "queue-singleton-lifetime",
+    "file": "tests/native/queue-singleton-lifetime.bolt",
+    "interpreter_unavailable": "destructors and RAII",
+    "stdout": "singleton lifetime OK\n"
+  },
+  {
+    "name": "queue-representation",
+    "file": "tests/QueueRepresentation.bolt",
+    "stdout": "true\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\ntrue\n"
+  },
+  {
+    "name": "arena-array-range",
+    "file": "tests/native/arena-array-range.bolt",
+    "stdout": "true\ntrue\ntrue\n"
+  },
+  {
+    "name": "array-range-replacement",
+    "file": "tests/native/array-range-replacement.bolt",
+    "stdout": "true\n"
+  },
+  {
+    "name": "utf8-replacement",
+    "file": "tests/native/utf8-replacement.bolt",
+    "stdout": "true\n"
+  },
+  {
+    "name": "hash-table-sparse-clear",
+    "file": "tests/native/hash-table-sparse-clear.bolt",
+    "stdout": "sparse clear OK\n"
+  },
+  {
+    "name": "hash-table-buckets",
+    "file": "tests/native/hash-table-buckets.bolt",
+    "stdout": "true\n"
+  },
+  {
+    "name": "failure-literal",
+    "file": "tests/native/failure-literal.bolt",
+    "stdout": "true\n"
+  },
+  {
+    "name": "reverse-buffer-append",
+    "file": "tests/native/reverse-buffer-append.bolt",
+    "stdout": "true\n"
+  },
+  {
+    "name": "struct-default-initialization",
+    "file": "tests/native/struct-default-initialization.bolt",
+    "stdout": "true\n"
+  },
+  {
+    "name": "struct-buffer-ownership",
+    "file": "tests/native/struct-buffer-ownership.bolt",
+    "interpreter_unavailable": "raw pointer indexing or reinterpretation",
+    "stdout": "true\n"
+  },
+  {
+    "name": "buffer-truncate-values",
+    "file": "tests/native/buffer-truncate-values.bolt",
+    "interpreter_unavailable": "destructors and RAII",
+    "stdout": "true\n"
+  },
+  {
+    "name": "string-equality-widths",
+    "file": "tests/native/string-equality-widths.bolt",
+    "stdout": "true\n"
+  },
+  {
+    "name": "integer-search",
+    "file": "tests/native/integer-search.bolt",
+    "stdout": "true\n"
+  },
+  {
+    "name": "string-value-calls",
+    "file": "tests/native/string-value-calls.bolt",
+    "interpreter_unavailable": "raw pointer indexing or reinterpretation",
+    "stdout": "true\n"
+  },
+  {
+    "name": "string-index-ownership",
+    "file": "tests/native/string-index-ownership.bolt",
+    "interpreter_unavailable": "raw pointer indexing or reinterpretation",
+    "stdout": "true\n"
+  },
+  {
+    "name": "collection-reorganization",
+    "file": "tests/native/collection-reorganization.bolt",
+    "stdout": "true\n"
+  },
+  {
+    "name": "counted-ulong-reduction",
+    "file": "tests/native/counted-ulong-reduction.bolt",
+    "stdout": ""
+  },
+  {
+    "name": "conditional-pointer-swap",
+    "file": "tests/native/conditional-pointer-swap.bolt",
+    "stdout": ""
+  },
+  {
+    "name": "indexed-snapshot",
+    "file": "tests/native/indexed-snapshot.bolt",
+    "stdout": ""
+  },
+  {
+    "name": "private-array-ranges",
+    "file": "tests/native/private-array-ranges.bolt",
+    "stdout": ""
+  },
+  {
+    "name": "consumed-buffer-snapshot",
+    "file": "tests/native/consumed-buffer-snapshot.bolt",
+    "stdout": ""
+  },
+  {
+    "name": "plain-struct-snapshot",
+    "file": "tests/native/plain-struct-snapshot.bolt",
+    "stdout": ""
+  },
+  {
+    "name": "finite-loop-proof",
+    "file": "tests/native/finite-loop-proof.bolt",
+    "stdout": "4598527063266164736\noverflow\n"
+  },
+  {
+    "name": "filled-memory-transfer",
+    "file": "tests/native/filled-memory-transfer.bolt",
+    "interpreter_unavailable": "native type Bolt.Runtime.MemoryOps",
+    "stdout": "filled memory transfers OK\n"
+  },
+  {
+    "name": "copied-memory-compare",
+    "file": "tests/native/copied-memory-compare.bolt",
+    "interpreter_unavailable": "raw pointer indexing or reinterpretation",
+    "stdout": ""
+  },
+  {
+    "name": "fresh-array-local",
+    "file": "tests/native/fresh-array-local.bolt",
+    "stdout": ""
+  },
+  {
+    "name": "v4-casts-print",
+    "file": "tests/native/v4-casts-print.bolt",
+    "stdout": "0\n-3\n9\n\n"
+  },
+  {
+    "name": "v4-bit-representation",
+    "file": "tests/native/v4-bit-representation.bolt",
+    "stdout": "1065353216\n1\n4607182418800017408\n-1\n"
+  },
+  {
+    "name": "v4-bit-nan",
+    "file": "tests/native/v4-bit-nan.bolt",
+    "stdout": "2143289345\ntrue\nfalse\n"
+  },
+  {
+    "name": "v4-bit-width",
+    "file": "tests/native/v4-bit-width.bolt",
+    "stdout": "",
+    "error": "equally sized",
+    "phase": "compile"
+  },
+  {
+    "name": "v4-bit-owning-type",
+    "file": "tests/native/v4-bit-owning-type.bolt",
+    "stdout": "",
+    "error": "equally sized",
+    "phase": "compile"
+  },
+  {
+    "name": "v4-bit-enum",
+    "file": "tests/native/v4-bit-enum.bolt",
+    "stdout": "-1\n65535\n"
+  },
+  {
+    "name": "v4-jit-statements",
+    "file": "tests/native/v4-jit-statements.bolt",
+    "stdout": "42\n0\n"
+  },
+  {
+    "name": "v4-jit-program",
+    "file": "tests/native/v4-jit-program.bolt",
+    "stdout": "33\n"
+  },
+  {
+    "name": "v4-cast-grouping",
+    "file": "tests/native/v4-cast-grouping.bolt",
+    "stdout": "6\n2\n8\n"
+  },
+  {
+    "name": "v4-runtime-site",
+    "file": "tests/native/v4-runtime-site.bolt",
+    "stdout": "",
+    "error": "division by zero"
+  },
+  {
+    "name": "buffer-scalar-append",
+    "file": "tests/native/buffer-scalar-append.bolt",
+    "stdout": ""
+  },
+  {
+    "name": "private-record-refill",
+    "file": "tests/native/private-record-refill.bolt",
+    "stdout": ""
+  },
+  {
+    "name": "buffer-counted-append",
+    "file": "tests/native/buffer-counted-append.bolt",
+    "stdout": ""
+  },
+  {
+    "name": "checked-array-reduction",
+    "file": "tests/native/checked-array-reduction.bolt",
+    "stdout": ""
+  },
+  {
+    "name": "array-loop-versioning",
+    "file": "tests/native/array-loop-versioning.bolt",
+    "stdout": ""
+  },
+  {
+    "name": "stream-read-remaining",
+    "file": "tests/native/stream-read-remaining.bolt",
+    "stdout": ""
+  }
+]

@@ -1,0 +1,55 @@
+import Console
+class Item {
+public:
+    int X;
+    const int Fixed = 3;
+    int Get() { return X; }
+    void Add(int n) { this.X += n; }
+}
+class Box { public: Item V; }
+class Counters {
+public:
+    static int Count = 1 + 2;
+    static const int Limit = 5;
+    static Item Default;
+    static void Add() { Count++; }
+}
+static class Program {
+public:
+    void Mutate(Item copy) { copy.X = 99; }
+    Item Make(int n) { Item result; result.X = n; return result; }
+    int Fib(int n) { if(n <= 1) return n; return Fib(n-1) + Fib(n-2); }
+    int Arguments(int a, int b) { return a * 10 + b; }
+    int Shadow(int n) { int n = n + 1; return n; }
+    void Main() {
+        Item a; a.X=5; Item b=a; b.Add(1); Mutate(a);
+        Box original; original.V=a; Box copy=original; copy.V.X=33;
+        original=copy; copy.V.X=44;
+        Console.WriteLine(a.X + "," + b.X + "," + original.V.X + "," + original.V.Fixed);
+        Box rhs; rhs.V.X=3; original.V.X=(original=rhs,7);
+        Console.WriteLine(original.V.X);
+        Console.WriteLine(Make(7).Get());
+        Console.WriteLine(Make(8).X);
+        Counters.Add(); Counters.Default.X=9;
+        Console.WriteLine(Counters.Count + "," + Counters.Limit + "," + Counters.Default.X);
+        Console.WriteLine(Fib(10));
+        int x=1; x+=(x=3); Console.WriteLine(x);
+        int i=0; Console.WriteLine(i++ + i++);
+        Console.WriteLine(Arguments(i++, i++));
+        Console.WriteLine(Shadow(7));
+        int shadow=7; { int shadow=shadow+1; Console.WriteLine(shadow); } Console.WriteLine(shadow);
+        int n=0;
+        for(int k=0;k<6;k++) { if(k==2)continue; if(k==5)break; n+=k; }
+        while(n<10)n++;
+        Console.WriteLine(n);
+        int update=0; for(int k=0;k<3;k++,update+=2){} Console.WriteLine(update);
+        bool left=false && (++i > 0); bool right=true || (++i > 0);
+        Console.WriteLine(!left && right); Console.WriteLine(i);
+        Console.WriteLine(-7%3); Console.WriteLine(-9223372036854775808%-1l);
+        Console.WriteLine(int(-2.9)); Console.WriteLine(string(true));
+        string s="flag="; s+=true; Console.WriteLine(s);
+        const Item immutable=Make(15); Item mutable=immutable; mutable.X=20;
+        Console.WriteLine(immutable.X + "," + mutable.X);
+        Console.Write("a\0b"); Console.WriteLine();
+    }
+}

@@ -1,0 +1,22 @@
+import Bolt.Runtime
+
+public static class Program {
+public:
+    int Main() {
+        Buffer<int> data;
+        data.Reserve(1);
+        data.Add(5);
+        data.Add(data[0]);
+
+        int[] one = [31];
+        int changes = 0;
+        for (int i = 0; i < 4096; i++) {
+            int before = data.Capacity;
+            data.AppendRange(one, 0, 1);
+            if (before != data.Capacity) changes++;
+        }
+        if (data.Length != 4098 || data[0] != 5 || data[4097] != 31) return 1;
+        Print(changes);
+        return 0;
+    }
+}

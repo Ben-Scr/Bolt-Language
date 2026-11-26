@@ -1,0 +1,87 @@
+import System
+
+enum Mode { Idle, Run, Jump }
+class Signal {
+public:
+    event Action<int> Changed;
+    void Raise(int n) { Changed(n); }
+}
+
+class Gauge {
+    int value;
+public:
+    Gauge(int initial) { value=initial; }
+    Func<int> MakeReader() { return () => { value++; return value; }; }
+}
+
+static class Program {
+    static int calls;
+    static int Select(int n) { calls++; return n; }
+    static Func<int,int> Counter(int seed) { return n => { seed += n; return seed; }; }
+    static Action<int> Forward(Action<int> target) { return value => target(value); }
+    static int Apply(Func<int,int> fn, int x) { return fn(x); }
+    static int Describe(Mode mode) {
+        switch (mode) {
+            case Mode.Run:
+            case Mode.Jump: return 10;
+            default: return 2;
+        }
+    }
+public:
+    int Main() {
+        int total = 0;
+        Action<int> add = n => total += n;
+        Action<int> twice = (int n) => { add(n); add(n); };
+        twice(3);
+        total++;
+        add(4);
+        if (total != 11) return 1;
+        Func<int,int> a = Counter(5);
+        Func<int,int> b = Counter(5);
+        Func<int,int> copy = a;
+        if (a(1) != 6 || copy(3) != 9 || b(2) != 7) return 2;
+        if (Apply(x => x + total, 1) != 12) return 3;
+        Func<int,Func<int,int>> bind = x => y => x + y + total;
+        Func<int,int> nested = bind(3);
+        if (nested(2) != 16) return 4;
+        Signal s;
+        s.Changed += add;
+        s.Raise(2);
+        s.Changed -= add;
+        s.Raise(10);
+        if (total != 13) return 5;
+        int sum = 0;
+        for (int i = 0; i < 5; i++) {
+            switch (Select(i)) {
+                default: sum += 10; break;
+                case 0: continue;
+                case 1:
+                case 2: sum += 2; break;
+                case 3:
+                    for (int j=0;j<3;j++) { if (j==1) break; sum++; }
+                    switch ("ok") { case "ok": sum++; break; }
+            }
+            sum += 100;
+        }
+        if (sum != 416 || calls != 5 || Describe(Mode.Idle) != 2 || Describe(Mode.Jump) != 10) return 6;
+        var square = (int x) => x*x;
+        const int baseValue = 3;
+        const int label = baseValue + 1;
+        switch (square(2)) { case label: break; default: return 7; }
+        Gauge gauge=Gauge(5);
+        Func<int> reader=gauge.MakeReader();
+        Func<int> readerCopy=reader;
+        if(reader()!=6 || readerCopy()!=7) return 8;
+        Action<int> first=Forward(add);
+        Action<int> second=Forward(n => total += 2*n);
+        s.Changed += first;
+        s.Changed += second;
+        s.Changed -= first;
+        s.Raise(5);
+        if(total!=23) return 9;
+        Func<int,string> format = n => string(n);
+        if(format(42)!="42") return 10;
+        Print("closures and switch OK");
+        return 0;
+    }
+}

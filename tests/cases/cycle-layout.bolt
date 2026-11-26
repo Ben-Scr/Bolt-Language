@@ -1,0 +1,1 @@
+class A {public:B Value;} class B {public:A Value;} static class Program { public: void Main() {  } }

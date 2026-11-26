@@ -1,0 +1,132 @@
+#if MacOS || FreeBSD
+import System
+namespace Bolt.Runtime;
+
+// DateTime's macOS platform boundary is source-authored Bolt. Darwin exposes
+// the POSIX clock/calendar functions through libSystem, so compiled DateTime
+// calls those C ABI symbols directly rather than a C++ runtime helper.
+public static class MacOSDateTime
+{
+private:
+    byte* Allocate(ulong bytes)
+    {
+        byte* memory = (byte*)Bolt.Runtime.MacOS.Allocate(bytes);
+        if (memory == null) throw OutOfMemoryException("Cannot allocate the macOS DateTime platform buffer.");
+        return memory;
+    }
+
+    ulong ReadU64(byte* memory, ulong offset)
+    {
+        ulong value = 0ul;
+        for (int index = 0; index < 8; index++)
+            value |= ((ulong)memory[offset + (ulong)index]) << (index * 8);
+        return value;
+    }
+
+    uint ReadU32(byte* memory, ulong offset)
+    {
+        uint value = 0u;
+        for (int index = 0; index < 4; index++)
+            value |= ((uint)memory[offset + (ulong)index]) << (index * 8);
+        return value;
+    }
+
+    int ReadI32(byte* memory, ulong offset) { return Reinterpret<int>(ReadU32(memory, offset)); }
+    long ReadI64(byte* memory, ulong offset) { return Reinterpret<long>(ReadU64(memory, offset)); }
+
+    void WriteI32(byte* memory, ulong offset, int value)
+    {
+        uint bits = Reinterpret<uint>(value);
+        for (int index = 0; index < 4; index++)
+            memory[offset + (ulong)index] = (byte)((bits >> (index * 8)) & 255u);
+    }
+
+    long FloorSeconds(long ticks)
+    {
+        long seconds = ticks / 10000000l;
+        return ticks % 10000000l < 0l ? seconds - 1l : seconds;
+    }
+
+    void LocalTime(long seconds, byte* calendar)
+    {
+        Bolt.Runtime.MacOS.TimeValue stamp = (Bolt.Runtime.MacOS.TimeValue)seconds;
+        if (Bolt.Runtime.MacOS.LocalTime(&stamp, (Bolt.Runtime.MacOS.CalendarTime*)calendar) == null)
+            Bolt.Runtime.Failure.Range("Local DateTime is outside the POSIX timezone range.");
+    }
+
+public:
+    long UtcNowTicks() { return ClockTicks(0); }
+    long MonotonicTicks()
+    {
+#ifdef FreeBSD
+        return ClockTicks(4);
+#else
+        return ClockTicks(6);
+#endif
+    }
+private:
+    long ClockTicks(int clockId)
+    {
+        // Darwin's 64-bit timespec is tv_sec + tv_nsec, each eight bytes.
+        byte* value = Allocate(16ul);
+        try
+        {
+            if (Bolt.Runtime.MacOS.ClockGetTime(clockId, (Bolt.Runtime.MacOS.TimeSpec*)value) != 0)
+                Bolt.Runtime.Failure.InvalidOperation("POSIX clock_gettime failed.");
+            long seconds = ReadI64(value, 0ul);
+            long nanoseconds = ReadI64(value, 8ul);
+            if (nanoseconds < 0l || nanoseconds >= 1000000000l)
+                Bolt.Runtime.Failure.InvalidOperation("POSIX clock_gettime returned an invalid nanosecond value.");
+            return seconds * 10000000l + nanoseconds / 100l;
+        }
+        finally
+        {
+            Bolt.Runtime.MacOS.Free(value);
+        }
+    }
+
+public:
+    long OffsetSeconds(long utcTicks)
+    {
+        // On supported 64-bit Darwin targets tm_gmtoff is at byte offset 40.
+        byte* calendar = Allocate(64ul);
+        try
+        {
+            LocalTime(FloorSeconds(utcTicks), calendar);
+            return ReadI64(calendar, 40ul);
+        }
+        finally
+        {
+            Bolt.Runtime.MacOS.Free(calendar);
+        }
+    }
+
+    long LocalMidnightTicks(long utcTicks)
+    {
+        byte* calendar = Allocate(64ul);
+        byte* checked = Allocate(64ul);
+        try
+        {
+            LocalTime(FloorSeconds(utcTicks), calendar);
+            WriteI32(calendar, 0ul, 0);
+            WriteI32(calendar, 4ul, 0);
+            WriteI32(calendar, 8ul, 0);
+            WriteI32(calendar, 32ul, -1);
+
+            long result = Bolt.Runtime.MacOS.MakeTime((Bolt.Runtime.MacOS.CalendarTime*)calendar);
+            LocalTime(result, checked);
+            if (ReadI32(checked, 20ul) != ReadI32(calendar, 20ul) ||
+                ReadI32(checked, 16ul) != ReadI32(calendar, 16ul) ||
+                ReadI32(checked, 12ul) != ReadI32(calendar, 12ul))
+                Bolt.Runtime.Failure.Range("Local midnight is outside the POSIX timezone range.");
+
+            return result * 10000000l;
+        }
+        finally
+        {
+            Bolt.Runtime.MacOS.Free(checked);
+            Bolt.Runtime.MacOS.Free(calendar);
+        }
+    }
+}
+#endif

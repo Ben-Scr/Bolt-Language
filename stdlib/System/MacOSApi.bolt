@@ -1,0 +1,41 @@
+#if MacOS || FreeBSD
+namespace Bolt.Runtime.MacOS;
+
+// Direct POSIX process I/O used on Darwin and 64-bit FreeBSD. Darwin exports these through
+// libSystem; generated Bolt code links/calls the C ABI directly.
+[Header("unistd.h"), Native("write")]
+extern "C" long Write(int fileDescriptor, byte* buffer, ulong count);
+[Header("unistd.h"), Native("read")]
+extern "C" long Read(int fileDescriptor, byte* buffer, ulong count);
+[Header("unistd.h"), Native("isatty")]
+extern "C" int IsTerminal(int fileDescriptor);
+[Header("errno.h"), Native("__error")]
+extern "C" int* ErrnoLocation();
+
+[Header("stdlib.h"), Native("arc4random_buf")]
+extern "C" void Arc4RandomBuffer(void* buffer, ulong bytes);
+
+[Header("stdlib.h"), Native("malloc")]
+extern "C" void* Allocate(ulong bytes);
+[Header("stdlib.h"), Native("realloc")]
+extern "C" void* Reallocate(void* memory, ulong bytes);
+[Header("stdlib.h"), Native("free")]
+extern "C" void Free(void* memory);
+
+// Opaque Darwin/POSIX calendar structures. Compiled Bolt passes them directly
+// to libSystem and inspects only their documented 64-bit ABI byte layout.
+[Native("time_t")]
+public enum TimeValue : long { Zero = 0 }
+[Native("timespec")]
+public struct TimeSpec {}
+[Native("tm")]
+public struct CalendarTime {}
+
+[Header("time.h"), Native("clock_gettime")]
+extern "C" int ClockGetTime(int clockId, TimeSpec* value);
+[Header("time.h"), Native("localtime_r")]
+extern "C" CalendarTime* LocalTime(TimeValue* value, CalendarTime* result);
+[Header("time.h"), Native("mktime")]
+extern "C" long MakeTime(CalendarTime* value);
+
+#endif

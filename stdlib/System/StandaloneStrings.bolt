@@ -1,0 +1,316 @@
+#ifdef BoltStandaloneCore
+import System
+namespace Bolt.Runtime;
+
+// UTF-8 string operations use borrowed bytes and ordinary Bolt containers.
+// Offsets exposed to users count Unicode scalars, never UTF-8 bytes.
+public static class StandaloneStrings
+{
+public:
+    void MissingFormatter(byte* type) {
+        byte* name=StandaloneCore.Ptr(type,32ul);
+        string fullName=NativeString.FromUtf8(name,StandaloneCore.CLength(name));
+        throw Exception("type '"+fullName+"' does not implement IStringable");
+    }
+    string FloatText(double value, int precision) { return FloatFormatting.Format(value,precision); }
+    string[] Arguments(int count,byte** argv) {
+#ifdef Windows
+        ushort** wide=Bolt.Runtime.StandaloneWindows.Arguments(Bolt.Runtime.StandaloneWindows.CommandLine(),&count);
+        if(wide==null)throw SystemException("Cannot read process arguments.");
+        try {
+            string[] result=new string[count-1];
+            for(int i=1;i<count;i++)result[i-1]=SystemCalls.FromWide(wide[i],-1);
+            return result;
+        } finally {Bolt.Runtime.StandaloneWindows.FreeArguments(wide);}
+#else
+        string[] result=new string[count<=1 ? 0 : count-1];
+        for(int i=1;i<count;i++){
+            byte* data=argv[i];ulong n=StandaloneCore.CLength(data),at=0ul;
+            while(at<n)Decode(data,n,at);
+            result[i-1]=NativeString.FromUtf8(data,n);
+        }
+        return result;
+#endif
+    }
+    string DescribeException(byte* object) {
+        byte* type=StandaloneCore.Ptr(object,0ul),name=StandaloneCore.Ptr(type,32ul);
+        string fullName=NativeString.FromUtf8(name,StandaloneCore.CLength(name));
+        int start=LastIndexOf(fullName,'.')+1;
+        ulong n=0ul;
+        byte* data=StandaloneCore.br_string_data(&object[8ul],&n);
+        string result=Substring(fullName,start)+": "+NativeString.FromUtf8(data,n);
+        if(StandaloneCore.Ptr(object,16ul)!=null){
+            ulong at=0ul;byte* site=StandaloneCore.Ptr(object,16ul);
+            ulong line=StandaloneCore.SiteNumber(site,&at),column=StandaloneCore.SiteNumber(site,&at);
+            StandaloneCore.SiteNumber(site,&at);ulong length=StandaloneCore.SiteNumber(site,&at);
+            result+="\n"+NativeString.FromUtf8(&site[at],length)+":"+(string)line+":"+(string)column;
+        }
+        data=StandaloneCore.br_string_data(&object[24ul],&n);
+        if(n>0ul)result+="\n"+NativeString.FromUtf8(data,n);
+        return result;
+    }
+    uint Decode(byte* data, ulong length, ulong& at) {
+        if (at >= length) throw IndexOutOfRangeException("String index out of range.");
+        uint value = StandaloneCore.ReadScalar(data,length,at);
+        if (value == uint.MaxValue) throw FormatException("Invalid UTF-8 sequence.");
+        return value;
+    }
+    ulong AdvanceScalars(byte* data, ulong length, int index) {
+        ulong at = 0ul, left = (ulong)index;
+        while (left != 0ul) {
+            if (at == length) return ulong.MaxValue;
+            if (data[at] < 128) {
+                ulong limit = length - at < left ? length : at + left;
+                ulong next = StandaloneCore.AsciiEnd(data, at, limit);
+                left -= next - at;
+                at = next;
+            } else {
+                Decode(data, length, at);
+                left--;
+            }
+        }
+        return at;
+    }
+    ulong Offset(byte* data, ulong length, int index) {
+        if (index < 0) throw ArgumentOutOfRangeException("String index must be nonnegative.");
+        ulong at = AdvanceScalars(data, length, index);
+        if (at == ulong.MaxValue) throw ArgumentOutOfRangeException("String index out of range.");
+        return at;
+    }
+    int ByteLength(const string& text) { ulong length = 0ul; NativeString.Bytes(text, length); return (int)length; }
+    int Length(const string& text) {
+        ulong length = 0ul;
+        byte* data = NativeString.Bytes(text, length);
+        ulong count = StandaloneCore.ScalarCount(data, length);
+        if (count == ulong.MaxValue) throw FormatException("Invalid UTF-8 sequence.");
+        return (int)count;
+    }
+    char At(const string& text, int index) {
+        ulong length=0ul,at=0ul;byte* data=NativeString.Bytes(text,length);
+        if(index<0)throw IndexOutOfRangeException("string index out of range");
+        at = AdvanceScalars(data, length, index);
+        if(at==ulong.MaxValue)throw IndexOutOfRangeException("string index out of range");
+        if(at==length)throw IndexOutOfRangeException("character index out of range");
+        return (char)Decode(data,length,at);
+    }
+    bool Match(byte* data, ulong length, ulong at, byte* pattern, ulong size) { if (size > length - at) return false; for (ulong i = 0ul; i < size; i++) if (data[at + i] != pattern[i]) return false; return true; }
+    // Eight ASCII bytes with no copy of the first pattern byte can be skipped
+    // together. Other bytes still pass through the checked scalar decoder.
+    bool FindNext(byte* data, ulong length, byte* token, ulong size, ulong& at, int& index) {
+        if (size == 0ul) return true;
+        ulong ones = 72340172838076673ul, highBits = 9259542123273814144ul;
+        ulong repeated = (ulong)token[0] * ones;
+        while (at < length) {
+            while (length - at >= 8ul) {
+                ulong word = StandaloneCore.Word(data, at), diff = word ^ repeated;
+                if (((word | (Bits.Add64(diff, ~ones + 1ul) & ~diff)) & highBits) != 0ul) break;
+                at += 8ul;
+                index += 8;
+            }
+            if (at == length) break;
+            if (data[at] == token[0] && Match(data, length, at, token, size)) return true;
+            if (data[at] < 128) at++;
+            else Decode(data, length, at);
+            index++;
+        }
+        return false;
+    }
+    int IndexOf(const string& text, const string& pattern, int start) {
+        ulong length = 0ul, size = 0ul; byte* data = NativeString.Bytes(text, length), token = NativeString.Bytes(pattern, size); ulong at = Offset(data, length, start); int index = start;
+        return FindNext(data, length, token, size, at, index) ? index : -1;
+    }
+    int IndexOf(const string& text, const string& pattern) { return IndexOf(text, pattern, 0); }
+    int IndexOf(const string& text, char pattern, int start) { return IndexOf(text, (string)pattern, start); }
+    int IndexOf(const string& text, char pattern) { return IndexOf(text, (string)pattern, 0); }
+    int LastIndexOf(const string& text, const string& pattern) {
+        ulong length = 0ul, size = 0ul, at = 0ul; byte* data = NativeString.Bytes(text, length), token = NativeString.Bytes(pattern, size); int index = 0, result = -1;
+        if (size == 0ul) return Length(text);
+        while (FindNext(data, length, token, size, at, index)) {
+            result = index;
+            Decode(data, length, at);
+            index++;
+        }
+        return result;
+    }
+    int LastIndexOf(const string& text, char pattern) { return LastIndexOf(text, (string)pattern); }
+    bool Contains(const string& text, const string& pattern) { return IndexOf(text, pattern) >= 0; }
+    bool Contains(const string& text, char pattern) { return IndexOf(text, pattern) >= 0; }
+    bool StartsWith(const string& text, const string& pattern) { ulong length = 0ul, size = 0ul; byte* data = NativeString.Bytes(text, length), token = NativeString.Bytes(pattern, size); return Match(data, length, 0ul, token, size); }
+    bool EndsWith(const string& text, const string& pattern) { ulong length = 0ul, size = 0ul; byte* data = NativeString.Bytes(text, length), token = NativeString.Bytes(pattern, size); return size <= length && Match(data, length, length - size, token, size); }
+    int Compare(const string& a, const string& b) { ulong n = 0ul, m = 0ul; byte* x = NativeString.Bytes(a,n), y = NativeString.Bytes(b,m); for (ulong i=0ul;i<n && i<m;i++) { if (x[i]<y[i]) return -1; if (x[i]>y[i]) return 1; } return n<m ? -1 : (n>m ? 1 : 0); }
+    bool Equals(const string& a, const string& b) { return Compare(a, b) == 0; }
+    bool IsNullOrEmpty(const string& text) { return ByteLength(text) == 0; }
+    bool White(uint c) { return (c >= 9u && c <= 13u) || c == 32u || c == 133u || c == 160u || c == 5760u || (c >= 8192u && c <= 8202u) || c == 8232u || c == 8233u || c == 8239u || c == 8287u || c == 12288u; }
+    bool IsNullOrWhiteSpace(const string& text) { ulong length = 0ul, at = 0ul; byte* data = NativeString.Bytes(text, length); while (at < length) if (!White(Decode(data, length, at))) return false; return true; }
+    string Substring(const string& text, int start, int count) {
+        if (count < -1) throw ArgumentOutOfRangeException("Count must be -1 or nonnegative.");
+        ulong length = 0ul; byte* data = NativeString.Bytes(text, length); ulong from = Offset(data, length, start); byte* begin = from == length ? null : &data[from];
+        ulong size = count == -1 ? length - from : Offset(begin, length - from, count);
+        return NativeString.FromUtf8(begin, size);
+    }
+    string Substring(const string& text, int start) { return Substring(text, start, -1); }
+    string Remove(const string& text, int start, int count) { if (count < -1) throw ArgumentOutOfRangeException("Count must be -1 or nonnegative."); string left = Substring(text, 0, start); string right = count == -1 ? "" : Substring(text, start + count); return left + right; }
+    string Remove(const string& text, int start) { return Remove(text, start, -1); }
+    string Insert(const string& text, int start, const string& value) { return Substring(text, 0, start) + value + Substring(text, start); }
+    string Replace(const string& text, const string& oldValue, const string& newValue) {
+        ulong length = 0ul, size = 0ul;
+        byte* data = NativeString.Bytes(text, length), token = NativeString.Bytes(oldValue, size);
+        if (size == 0ul) throw ArgumentException("Replace needs a nonempty old value.");
+        ulong at = 0ul, matches = 0ul;
+        int index = 0;
+        while (FindNext(data, length, token, size, at, index)) {
+            matches++;
+            at += size;
+        }
+        if (matches == 0ul) return text;
+        ulong replacementSize = 0ul;
+        byte* replacement = NativeString.Bytes(newValue, replacementSize);
+        ulong kept = length - matches * size;
+        if (replacementSize > (ulong.MaxValue - kept) / matches)
+            throw OutOfMemoryException("Replacement text exceeds the maximum string size.");
+        ulong needed = kept + matches * replacementSize;
+        if (needed == 0ul) return "";
+        byte* output = StandaloneCore.Allocate(needed);
+        if (output == null) throw OutOfMemoryException("Cannot allocate replacement text.");
+        try {
+            ulong start = 0ul, written = 0ul;
+            at = 0ul;
+            index = 0;
+            while (FindNext(data, length, token, size, at, index)) {
+                StandaloneCore.Bytes(&output[written], &data[start], at - start);
+                written += at - start;
+                StandaloneCore.Bytes(&output[written], replacement, replacementSize);
+                written += replacementSize;
+                at += size;
+                start = at;
+            }
+            StandaloneCore.Bytes(&output[written], &data[start], length - start);
+            return NativeString.FromUtf8(output, needed);
+        } finally {
+            StandaloneCore.Free(output);
+        }
+    }
+    string Replace(const string& text, char oldValue, char newValue) { return Replace(text, (string)oldValue, (string)newValue); }
+    string TrimSides(const string& text, bool left, bool right) {
+        ulong length = 0ul, at = 0ul, begin = 0ul, end = 0ul; byte* data = NativeString.Bytes(text, length); bool leading = true;
+        while (at < length) { ulong before = at; uint value = Decode(data, length, at); if (White(value)) { if (leading && left) begin = at; } else { leading = false; end = at; } }
+        if (!right) end = length; if (end < begin) end = begin;
+        return NativeString.FromUtf8(begin == length ? null : &data[begin], end - begin);
+    }
+    string Trim(const string& text) { return TrimSides(text, true, true); }
+    string TrimStart(const string& text) { return TrimSides(text, true, false); }
+    string TrimEnd(const string& text) { return TrimSides(text, false, true); }
+
+    string[] Split(const string& text, const string& separator, bool removeEmpty)
+    {
+        ulong size=0ul, length=0ul;
+        byte* data=NativeString.Bytes(text,length), token=NativeString.Bytes(separator,size);
+        if(size==0ul) throw ArgumentException("Split needs a non-empty separator.");
+        int count=0;
+        string[] result;
+        for(int pass=0;pass<2;pass++) {
+            ulong begin=0ul, at=0ul;
+            if(pass==1) result=new string[count];
+            count=0;
+            while(true) {
+                if(at==length || Match(data,length,at,token,size)) {
+                    if(!removeEmpty || begin!=at) {
+                        if(pass==1) result[count]=NativeString.FromUtf8(begin==at ? null : &data[begin],at-begin);
+                        count++;
+                    }
+                    if(at==length) break;
+                    at+=size;
+                    begin=at;
+                } else Decode(data,length,at);
+            }
+        }
+        return result;
+    }
+    string[] Split(const string& text, const string& separator) { return Split(text,separator,false); }
+    string[] Split(const string& text, char separator, bool removeEmpty) { return Split(text,(string)separator,removeEmpty); }
+    string[] Split(const string& text, char separator) { return Split(text,(string)separator,false); }
+    string Join(const string& separator, const string[]& values) {
+        if(values.Length==0)return "";
+        ulong sep=0ul;byte* token=NativeString.Bytes(separator,sep);
+        ulong size=(ulong)(values.Length-1)*sep;
+        for(int i=0;i<values.Length;i++){
+            ulong n=0ul;NativeString.Bytes(values[i],n);size+=n;
+        }
+        if(size==0ul)return "";
+        byte[] result=new byte[(int)size];
+        byte* output=&result[0];ulong at=0ul;
+        for(int i=0;i<values.Length;i++){
+            if(i>0 && sep>0ul){StandaloneCore.Bytes(&output[at],token,sep);at+=sep;}
+            ulong n=0ul;byte* data=NativeString.Bytes(values[i],n);
+            if(n>0ul){StandaloneCore.Bytes(&output[at],data,n);at+=n;}
+        }
+        return NativeString.FromUtf8(output,size);
+    }
+    string FromUtf8(const byte[]& bytes) {
+        if(bytes.Length==0)return "";
+        byte* data=(byte*)TypedMemory.ArrayData(bytes, 0);
+        ulong length=(ulong)bytes.Length;
+        if(StandaloneCore.ScalarCount(data,length)==ulong.MaxValue)
+            throw FormatException("Invalid UTF-8 sequence.");
+        return NativeString.FromUtf8(data,length);
+    }
+    byte[] ToUtf8(const string& value) {
+        ulong n=0ul; byte* data=NativeString.Bytes(value,n);
+        byte[] bytes=new byte[(int)n];
+        if(n!=0ul)StandaloneCore.Bytes(&bytes[0],data,n);
+        return bytes;
+    }
+
+    string Pad(const string& text,int width,char padding,bool left) {
+        if(width<0)throw ArgumentOutOfRangeException("Width must be nonnegative.");
+        int count=Length(text);
+        if(width<=count)return text;
+        string unit=(string)padding;
+        ulong n=0ul,m=0ul;
+        byte* data=NativeString.Bytes(text,n),token=NativeString.Bytes(unit,m);
+        ulong extra=(ulong)(width-count)*m;
+        byte[] result=new byte[(int)(extra+n)];
+        ulong first=left ? extra : 0ul, pad=left ? 0ul : n;
+        for(ulong i=0ul;i<n;i++)result[(int)(first+i)]=data[i];
+        for(ulong i=0ul;i<extra;i+=m)
+            for(ulong j=0ul;j<m;j++)result[(int)(pad+i+j)]=token[j];
+        return NativeString.FromUtf8(&result[0],extra+n);
+    }
+    string PadLeft(const string& text,int width,char padding){return Pad(text,width,padding,true);}
+    string PadLeft(const string& text,int width){return Pad(text,width,' ',true);}
+    string PadRight(const string& text,int width,char padding){return Pad(text,width,padding,false);}
+    string PadRight(const string& text,int width){return Pad(text,width,' ',false);}
+    char[] ToCharArray(const string& text) { char[] result = new char[Length(text)]; ulong length = 0ul, at = 0ul; byte* data = NativeString.Bytes(text, length); for (int i = 0; i < result.Length; i++) result[i] = (char)Decode(data, length, at); return result; }
+    // Table records are immutable compiler data: scalar, count, three outputs.
+    byte* CaseRecord(uint scalar,byte* table,int count) {
+        int low=0,high=count;
+        while(low<high){
+            int middle=low+(high-low)/2;
+            byte* record=&table[(ulong)middle*20ul];uint key=*((uint*)record);
+            if(key==scalar)return record;
+            if(key<scalar)low=middle+1;else high=middle;
+        }
+        return null;
+    }
+    string Case(const string& text,byte* table,int count) {
+        ulong length=0ul,n=0ul;byte* data=NativeString.Bytes(text,length);
+        byte[] bytes;
+        for(int pass=0;pass<2;pass++){
+            byte* output=null;
+            if(pass==1){bytes=new byte[(int)n];output=&bytes[0];}
+            n=0ul;ulong cursor=0ul;bool changed=false;
+            while(cursor<length){
+                uint scalar=Decode(data,length,cursor);byte* record=CaseRecord(scalar,table,count);
+                uint size=record==null ? 1u : *((uint*)&record[4ul]);
+                if(record!=null)changed=true;
+                for(uint i=0u;i<size;i++){
+                    uint mapped=record==null ? scalar : *((uint*)&record[8ul+(ulong)i*4ul]);
+                    n+=StandaloneCore.EncodeScalar(mapped,output==null ? null : &output[n]);
+                }
+            }
+            if(!changed)return text;
+        }
+        return NativeString.FromUtf8(&bytes[0],n);
+    }
+}
+#endif

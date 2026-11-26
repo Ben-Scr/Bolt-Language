@@ -1,0 +1,6 @@
+
+class Box<T>:IStringable{public:T Value;Box(T v){Value=v;}string ToString(){return (string)Value;}static Box<T> operator +(Box<T> a,Box<T> b){return Box<T>(a.Value+b.Value);}}
+T Add<T>(T a,T b):Addable{return a+b;}
+static class Program {public: void Main(){
+Box<int> a=Box<int>(2);Box<int> b=Box<int>(3);Print(Add(a,b));
+}}

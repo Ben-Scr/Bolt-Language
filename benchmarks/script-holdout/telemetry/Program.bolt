@@ -1,0 +1,40 @@
+import System.IO
+
+public static class Program {
+public:
+    void Main() {
+        byte[] data = File.ReadAllBytes("input.bin");
+        int length = data.Length;
+        int[] stats = new int[64 * 3];
+        int pos = 0;
+        while (pos < length) {
+            int service = 0;
+            while (data[pos] != 44) {
+                service = service * 10 + data[pos] - 48;
+                pos++;
+            }
+            pos++;
+            int status = 0;
+            while (data[pos] != 44) {
+                status = status * 10 + data[pos] - 48;
+                pos++;
+            }
+            pos++;
+            int latency = 0;
+            while (data[pos] != 10) {
+                latency = latency * 10 + data[pos] - 48;
+                pos++;
+            }
+            pos++;
+            int slot = service * 3;
+            stats[slot]++;
+            if (status >= 500) stats[slot + 1]++;
+            if (latency >= 250) stats[slot + 2]++;
+        }
+        byte[] report = new byte[64 * 3 * 4];
+        for (int i = 0; i < 64 * 3; i++) {
+            for (int j = 0; j < 4; j++) report[i * 4 + j] = (byte)((stats[i] >> (j * 8)) & 255);
+        }
+        File.WriteAllBytes("result.bin", report);
+    }
+}

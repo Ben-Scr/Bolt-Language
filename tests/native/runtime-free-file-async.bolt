@@ -1,0 +1,39 @@
+import System
+import System.IO
+import System.Threading.Tasks
+
+static class Program {
+public:
+    async Task<int> Main(string[] args) {
+        if(args.Length!=0)return 7;
+        Task<void> write = File.WriteAllTextAsync("text","first\n");
+        if (!write.Wait(10000) || !write.IsCompletedSuccessfully) return 1;
+        await File.AppendAllTextAsync("text","second");
+        Task<string[]> lines = File.ReadAllLinesAsync("text");
+        string[] result = lines.GetResult();
+        if (result.Length != 2 || result[0] != "first" || result[1] != "second") return 2;
+        if (await File.ReadAllTextAsync("text") != "first\nsecond") return 3;
+        byte[] data = {1,2,3,255};
+        Task<void> save = File.WriteAllBytesAsync("bytes",data);
+        data[0]=0;
+        save.Wait();
+        Task<byte[]> bytes=File.ReadAllBytesAsync("bytes"), alias=bytes;
+        byte[] read=bytes.Result;
+        read[0]=0;
+        if (alias.Result[0]!=1 || read[3]!=255) return 4;
+        Task<string> missing=File.ReadAllTextAsync("absent");
+        for(int i=0;i<2;i++){
+            bool caught=false;
+            try { missing.Wait(); } catch(FileNotFoundException& e){ caught=true; }
+            if(!caught || !missing.IsFaulted || missing.IsCanceled)return 5;
+        }
+#ifdef Linux
+        Task<byte[]> blocked=File.ReadAllBytesAsync("waiting-pipe");
+        bool expired=!blocked.Wait(2);
+        File.WriteAllBytes("waiting-pipe",data);
+        if(!expired || (await blocked)[3]!=255)return 6;
+#endif
+        File.WriteAllTextAsync("joined-on-exit","done");
+        return 0;
+    }
+}

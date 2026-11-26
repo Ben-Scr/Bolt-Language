@@ -1,0 +1,17 @@
+import System.Text
+
+static class Program {
+public:
+    void Main() {
+        byte[] source = new byte[512];
+        for (int i = 0; i < source.Length; i++) source[i] = (byte)(i & 255);
+        long sum = 0l;
+        for (int i = 0; i < 8192; i++) {
+            source[i & 511] = (byte)((i >> 2) & 255);
+            string text = Latin1Encoding.GetString(source);
+            byte[] copy = Latin1Encoding.GetBytes(text);
+            sum += text.ByteLength + (int)copy[(i * 29) & 511];
+        }
+        Print(sum);
+    }
+}

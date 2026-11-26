@@ -1,0 +1,28 @@
+import System
+
+static class Program {
+private:
+    bool Matches<T>(T value, string expected) : IStringable<T> {
+        return value.ToString() == expected && Converter.ToString(value) == expected;
+    }
+    bool BoxedMatches(IStringable value, string expected) {
+        return value.ToString() == expected && Converter.ToString(value) == expected;
+    }
+public:
+    int Main() {
+        if (!Matches(false, "false") || !Matches(true, "true")) return 1;
+        if (!Matches('\0', "\0") || !Matches('\n', "\n") || !Matches('A', "A")) return 2;
+        if (!Matches('é', "é") || !Matches('水', "水") || !Matches('😀', "😀")) return 3;
+        if (!Matches((char)769, string.FromUtf8([(byte)204, (byte)129]))) return 4;
+
+        char last = (char)1114111;
+        string text = Converter.ToString(last);
+        byte[] bytes = text.ToUtf8();
+        if (last.ToString() != text || text.Length != 1 || bytes.Length != 4) return 5;
+        if (bytes[0] != 244 || bytes[1] != 143 || bytes[2] != 191 || bytes[3] != 191) return 6;
+        if (!BoxedMatches(false, "false") || !BoxedMatches('😀', "😀")) return 7;
+        IStringable? boxed = '水';
+        if (boxed == null || !BoxedMatches(boxed, "水")) return 8;
+        return 0;
+    }
+}

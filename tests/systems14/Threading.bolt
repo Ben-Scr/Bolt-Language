@@ -1,0 +1,30 @@
+import System
+import System.Threading
+public class IncrementJob {public: Atomic<int> Counter;IncrementJob(Atomic<int> c){Counter=c;}void Run(){for(int i=0;i<1000;i++)Counter.Add(1);}}
+public class FailJob {public:void Run(){throw ArgumentException("worker-original");}}
+public class CatchJob {public:Atomic<int> Counter;CatchJob(Atomic<int> c){Counter=c;}void Run(){try{int z=0;Print(1/z);}catch(DivideByZeroException& e){Counter.Add(1);}}}
+public class WakeJob {public: Mutex Gate;ConditionVariable CV;Atomic<int> Ready;WakeJob(Mutex gate,ConditionVariable cv,Atomic<int> ready){Gate=gate;CV=cv;Ready=ready;}void Run(){LockGuard lock=LockGuard(Gate);Ready.Store(1);CV.NotifyAll();}}
+public class SignalJob {public:Semaphore Signal;SignalJob(Semaphore s){Signal=s;}void Run(){Signal.Release();}}
+static class Program {public:
+ static int checks=0;
+ void Check(bool v){if(!v)throw InvalidOperationException("Threading check failed: "+checks);checks++;}
+ void Main(){
+  Atomic<int> count;Thread a=Thread.Start(IncrementJob(count)),b=Thread.Start(IncrementJob(count)),c=Thread.Start(IncrementJob(count));
+  Check(a.Id!=0ul&&a.Id!=Thread.CurrentId);Check(a.Join(10000)&&b.Join(10000)&&c.Join(10000));Check(count.Load()==3000);
+  int expected=12;Check(!count.CompareExchange(expected,7)&&expected==3000);Check(count.CompareExchange(expected,9));Check(count.Exchange(3)==9&&count.Load()==3);
+  Thread caught=Thread.Start(CatchJob(count));Check(caught.Join(10000)&&count.Load()==4);
+  Thread failed=Thread.Start(FailJob());bool error=false;try{failed.Join(10000);}catch(InvalidOperationException& e){error=true;Check(e.Message.Contains("worker-original"));}Check(error&&failed.IsFaulted);
+  Mutex gate;ConditionVariable cv;Atomic<int> ready;
+  gate.Lock();Thread waking=Thread.Start(WakeJob(gate,cv,ready));while(ready.Load()==0){Check(cv.Wait(gate,5000));}Check(gate.IsOwnedByCurrentThread);gate.Unlock();Check(waking.Join(5000));
+  {LockGuard guard=LockGuard(gate);Check(guard.IsHeld&&gate.IsOwnedByCurrentThread);}Check(gate.TryLock());gate.Unlock();
+  bool wrong=false;try{gate.Unlock();}catch(InvalidOperationException& e){wrong=true;}Check(wrong);
+  gate.Lock();wrong=false;try{gate.TryLock();}catch(InvalidOperationException& e){wrong=true;}Check(wrong);
+  // A condition wait may wake spuriously; every return must reacquire the mutex.
+  cv.Wait(gate,1);Check(gate.IsOwnedByCurrentThread);gate.Unlock();
+  Semaphore semaphore(0,2);Check(!semaphore.Wait(0));Thread signal=Thread.Start(SignalJob(semaphore));Check(semaphore.Wait(5000));Check(signal.Join(5000));Check(semaphore.CurrentCount==0);
+  semaphore.Release(2);wrong=false;try{semaphore.Release();}catch(InvalidOperationException& e){wrong=true;}Check(wrong);Check(semaphore.Wait(0)&&semaphore.Wait(0));
+  // Last-owner cleanup joins even when callers do not explicitly join.
+  {Thread implicitJoin=Thread.Start(IncrementJob(count));}Check(count.Load()==1004);
+  Print("THREADING14:"+checks);
+ }
+}

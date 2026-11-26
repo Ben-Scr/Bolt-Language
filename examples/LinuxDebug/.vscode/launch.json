@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Bolt unter Linux (GDB)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/bin/Debug/BoltDebug",
+      "cwd": "${workspaceFolder}",
+      "args": [],
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb",
+      "preLaunchTask": "Bolt mit Quellzeilen bauen"
+    }
+  ]
+}

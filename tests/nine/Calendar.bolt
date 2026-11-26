@@ -1,0 +1,28 @@
+import System
+import System.Diagnostics
+public static class Program {
+    public static void Assert(bool condition) { if (!condition) { Print("FAILED"); Terminate(5); } }
+    public static void Main() {
+        TimeSpan s = TimeSpan(1,2,3,4,5);
+        Assert(s.Days == 1 && s.Hours == 2 && s.Minutes == 3 && s.Seconds == 4 && s.Milliseconds == 5);
+        Assert(s.ToString() == "1.02:03:04.0050000");
+        Assert(TimeSpan.FromSeconds(-1.25).ToString() == "-00:00:01.2500000");
+        Assert(TimeSpan(long.MinValue).ToString() == "-10675199.02:48:05.4775808");
+        Assert(TimeSpan.FromTicks(-5l).Negate().Ticks == 5l);
+        Assert(DateTime(1,1,1).ToString() == "0001-01-01T00:00:00.0000000Z");
+        Assert(DateTime(9999,12,31).DayOfYear == 365);
+        Assert(DateTime(2000,2,29).AddDays(1).ToString() == "2000-03-01T00:00:00.0000000Z");
+        Assert(DateTime.Parse("2000-02-29T13:14:15.0160000+01:00").ToString() == "2000-02-29T12:14:15.0160000Z");
+        Assert(DateTime.FromUnixTimeMilliseconds(-1).ToUnixTimeSeconds() == -1l);
+        for (int year = 1; year <= 9999; year += 83) {
+            for (int month = 1; month <= 12; month++) {
+                DateTime first = DateTime(year,month,1);
+                Assert(first.Year == year && first.Month == month && first.Day == 1);
+                Assert(DateTime.Parse(first.ToString()).Ticks == first.Ticks);
+            }
+        }
+        Stopwatch watch; watch.Start(); watch.Pause(); Assert(watch.Elapsed.Ticks >= 0l);
+        DateTime now = DateTime.UtcNow; Assert(now.ToLocalTime().ToUniversalTime() == now);
+        Print("calendar OK");
+    }
+}

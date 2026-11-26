@@ -1,0 +1,166 @@
+{
+  "name": "Bolt C# Light",
+  "include": "./base/light_plus.json",
+  "semanticHighlighting": true,
+  "semanticTokenColors": {
+    "keyword:bolt": "#0000FF",
+    "boltControlFlow:bolt": "#AF00DB",
+    "boltPrimitive:bolt": "#0000FF",
+    "typeParameter:bolt": "#267F99",
+    "type:bolt": "#267F99",
+    "class:bolt": "#267F99",
+    "struct:bolt": "#2B9143",
+    "interface:bolt": "#2B9143",
+    "enum:bolt": "#2B9143",
+    "method:bolt": "#795E26",
+    "function:bolt": "#795E26",
+    "field:bolt": "#000000",
+    "event:bolt": "#000000",
+    "property:bolt": "#000000",
+    "enumMember:bolt": "#0070C1",
+    "parameter:bolt": "#001080",
+    "variable:bolt": "#001080",
+    "namespace:bolt": "#000000",
+    "identifier:bolt": "#000000",
+    "string:bolt": "#A31515",
+    "character:bolt": "#A31515",
+    "number:bolt": "#098658",
+    "comment:bolt": "#008000",
+    "operator:bolt": "#000000",
+    "decorator:bolt": "#267F99",
+    "concept:bolt": "#2B7759",
+    "boltInactiveCode:bolt": "#808080",
+    "inactiveCode:bolt": "#808080",
+    "macro:bolt": "#AF00DB"
+  },
+  "tokenColors": [
+    {
+      "scope": [
+        "keyword.other.bolt"
+      ],
+      "settings": {
+        "foreground": "#0000FF",
+        "fontStyle": ""
+      }
+    },
+    {
+      "scope": [
+        "keyword.control.bolt"
+      ],
+      "settings": {
+        "foreground": "#AF00DB",
+        "fontStyle": ""
+      }
+    },
+    {
+      "scope": [
+        "support.type.primitive.bolt"
+      ],
+      "settings": {
+        "foreground": "#0000FF",
+        "fontStyle": ""
+      }
+    },
+    {
+      "scope": [
+        "variable.other.bolt",
+        "punctuation.separator.bolt"
+      ],
+      "settings": {
+        "foreground": "#000000",
+        "fontStyle": ""
+      }
+    },
+    {
+      "scope": [
+        "string.quoted.double.bolt",
+        "string.quoted.double.interpolated.bolt"
+      ],
+      "settings": {
+        "foreground": "#A31515",
+        "fontStyle": ""
+      }
+    },
+    {
+      "scope": [
+        "string.quoted.single.bolt"
+      ],
+      "settings": {
+        "foreground": "#A31515",
+        "fontStyle": ""
+      }
+    },
+    {
+      "scope": [
+        "constant.numeric.bolt"
+      ],
+      "settings": {
+        "foreground": "#098658",
+        "fontStyle": ""
+      }
+    },
+    {
+      "scope": [
+        "comment.line.double-slash.bolt"
+      ],
+      "settings": {
+        "foreground": "#008000",
+        "fontStyle": ""
+      }
+    },
+    {
+      "scope": [
+        "comment.block.bolt"
+      ],
+      "settings": {
+        "foreground": "#008000",
+        "fontStyle": ""
+      }
+    },
+    {
+      "scope": [
+        "keyword.operator.bolt"
+      ],
+      "settings": {
+        "foreground": "#000000",
+        "fontStyle": ""
+      }
+    },
+    {
+      "scope": [
+        "punctuation.section.braces.bolt"
+      ],
+      "settings": {
+        "foreground": "#000000",
+        "fontStyle": ""
+      }
+    },
+    {
+      "scope": [
+        "punctuation.section.parentheses.bolt"
+      ],
+      "settings": {
+        "foreground": "#000000",
+        "fontStyle": ""
+      }
+    },
+    {
+      "scope": [
+        "punctuation.section.brackets.bolt"
+      ],
+      "settings": {
+        "foreground": "#000000",
+        "fontStyle": ""
+      }
+    },
+    {
+      "scope": [
+        "meta.preprocessor.bolt"
+      ],
+      "settings": {
+        "foreground": "#AF00DB",
+        "fontStyle": ""
+      }
+    }
+  ]
+}

@@ -1,0 +1,178 @@
+import Bolt.Runtime
+import Type
+namespace System.Collections.Generic;
+
+// Incoming elements are always stored in arrival order. Numeric batches can
+// also be read forwards: consuming a number has no resource to release.
+[StringableElements]
+[SerializeSequence("Length", "ItemAt", "Enqueue")]
+public sealed class Queue<T> : IStringable
+{
+private:
+    Bolt.Runtime.Buffer<T> incoming, outgoing;
+    int consumed = 0;
+    ulong revision = 0ul;
+    static bool Numeric => Type.IsInteger<T>() || Type.IsFloatingPoint<T>();
+    void Changed() { revision = revision == ulong.MaxValue ? 0ul : revision + 1ul; }
+
+    void RefillOutgoing()
+    {
+        if (incoming.Length == 0) Bolt.Runtime.Failure.InvalidOperation("queue is empty.");
+        if (Numeric)
+        {
+            outgoing.Clear();
+            outgoing.Swap(incoming);
+            consumed = 0;
+            return;
+        }
+        // Managed elements use the existing two-stack path and release their
+        // storage as soon as they are dequeued.
+        outgoing.Swap(incoming);
+        int end = outgoing.Length - 1;
+        for (int i = 0; i < end; i++, end--)
+        {
+            T temp = outgoing[i];
+            outgoing[i] = outgoing[end];
+            outgoing[end] = temp;
+        }
+    }
+public:
+    Queue(int capacity = 0) { incoming.Reserve(capacity); }
+    int Length => (outgoing.Length - consumed) + incoming.Length;
+    int Count => Length;
+    int Capacity => incoming.Capacity + outgoing.Capacity;
+    void Reserve(int capacity) { if (capacity < 0) Bolt.Runtime.Failure.Range("Queue capacity must be nonnegative."); if (capacity > incoming.Capacity) { incoming.Reserve(capacity); Changed(); } }
+    void Enqueue(T value) { incoming.Add(value); Changed(); }
+    T Dequeue()
+    {
+        if (consumed == outgoing.Length)
+        {
+            if (consumed <= 1 && incoming.Length == 1 && incoming.Capacity == outgoing.Capacity)
+            {
+                T only = incoming[0];
+                incoming.Truncate(0);
+                Changed();
+                return only;
+            }
+            RefillOutgoing();
+        }
+        if (Numeric)
+        {
+            T item = outgoing[consumed];
+            consumed++;
+            Changed();
+            return item;
+        }
+        int last = outgoing.Length - 1;
+        T value = outgoing[last];
+        outgoing.Truncate(last);
+        Changed();
+        return value;
+    }
+    [ReadOnly] T Peek()
+    {
+        if (consumed < outgoing.Length) return outgoing[Numeric ? consumed : outgoing.Length - 1];
+        if (incoming.Length == 0) Bolt.Runtime.Failure.InvalidOperation("Cannot peek into an empty queue.");
+        return incoming[0];
+    }
+    bool TryDequeue(T& value) { if (Length == 0) return false; value = Dequeue(); return true; }
+    void Clear()
+    {
+        if (Length == 0) return;
+        incoming.Clear(); outgoing.Clear(); consumed = 0; Changed();
+    }
+    [ReadOnly] T ItemAt(int index)
+    {
+        if (index < 0 || index >= Length) Bolt.Runtime.Failure.Index("Queue index is out of range.");
+        int available = outgoing.Length - consumed;
+        if (index < available) return outgoing[Numeric ? consumed + index : outgoing.Length - 1 - index];
+        return incoming[index - available];
+    }
+    [ReadOnly] bool Contains(const T& value)
+    {
+        for (int i = 0; i < incoming.Length; i++) if (Bolt.Runtime.Values.Equal<T>(incoming[i], value)) return true;
+        for (int i = consumed; i < outgoing.Length; i++) if (Bolt.Runtime.Values.Equal<T>(outgoing[i], value)) return true;
+        return false;
+    }
+    [ReadOnly] T[] ToArray()
+    {
+        if (outgoing.Length == consumed) return incoming.ToArray();
+        Bolt.Runtime.Buffer<T> result; result.Reserve(Length);
+        if (Numeric)
+        {
+            result.AppendBuffer(consumed, outgoing.Length - consumed, outgoing);
+        }
+        else
+        {
+            for (int i = outgoing.Length - 1; i >= 0; i--) result.Add(outgoing[i]);
+        }
+        result.AppendBuffer(0, incoming.Length, incoming);
+        return result.ToArray();
+    }
+    QueueEnumerator<T> GetEnumerator()
+    {
+        return QueueEnumerator<T>(&incoming, &outgoing, &revision, Numeric ? consumed : -1);
+    }
+    static bool operator ==(const Queue<T>& a, const Queue<T>& b)
+    {
+        if (a.Length != b.Length) return false;
+        for (int i = 0; i < a.Length; i++) if (!Bolt.Runtime.Values.Equal<T>(a.ItemAt(i), b.ItemAt(i))) return false;
+        return true;
+    }
+    [ReadOnly] ulong GetHashCode()
+    {
+        ulong hash = 0ul;
+        if (Numeric)
+        {
+            for (int i = consumed; i < outgoing.Length; i++)
+                hash = Bolt.Runtime.Bits.Add64(Bolt.Runtime.Bits.Multiply64(hash, 16777619ul), Bolt.Runtime.Values.Hash<T>(outgoing[i]));
+        }
+        else
+        {
+            for (int i = outgoing.Length - 1; i >= 0; i--)
+                hash = Bolt.Runtime.Bits.Add64(Bolt.Runtime.Bits.Multiply64(hash, 16777619ul), Bolt.Runtime.Values.Hash<T>(outgoing[i]));
+        }
+        for (int i = 0; i < incoming.Length; i++) hash = Bolt.Runtime.Bits.Add64(Bolt.Runtime.Bits.Multiply64(hash, 16777619ul), Bolt.Runtime.Values.Hash<T>(incoming[i]));
+        return hash;
+    }
+    [SnapshotReceiver]
+    string ToString() : IStringable<T>
+    {
+        T[] values = ToArray(); string[] pieces = new string[values.Length];
+        for (int i = 0; i < values.Length; i++) pieces[i] = Bolt.Runtime.Values.Format<T>(values[i]);
+        return "[" + string.Join(", ", pieces) + "]";
+    }
+}
+public struct QueueEnumerator<T>
+{
+private:
+    Bolt.Runtime.Buffer<T>* incoming;
+    Bolt.Runtime.Buffer<T>* outgoing;
+    ulong* revision;
+    ulong expected;
+    int index = -1;
+    // -1 selects a reversed stack. A nonnegative index is the first live number.
+    int first;
+    void Check() { if (*revision != expected) Bolt.Runtime.Failure.InvalidOperation("Collection was modified during iteration."); }
+    int OutgoingCount => first < 0 ? outgoing->Length : outgoing->Length - first;
+public:
+    QueueEnumerator(Bolt.Runtime.Buffer<T>* a, Bolt.Runtime.Buffer<T>* b, ulong* r, int firstIndex = -1)
+    { incoming = a; outgoing = b; revision = r; expected = *r; first = firstIndex; }
+    bool MoveNext()
+    {
+        Check();
+        int length = OutgoingCount + incoming->Length;
+        if (index < length) index++;
+        return index < length;
+    }
+    T Current
+    {
+        get {
+            Check();
+            int available = OutgoingCount;
+            if (index < 0 || index >= available + incoming->Length) Bolt.Runtime.Failure.Index("Iterator is not positioned on an element.");
+            if (index < available) return (*outgoing)[first < 0 ? available - 1 - index : first + index];
+            return (*incoming)[index - available];
+        }
+    }
+}

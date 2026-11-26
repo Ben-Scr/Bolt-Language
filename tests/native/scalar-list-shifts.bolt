@@ -1,0 +1,31 @@
+import System
+import System.Collections.Generic
+
+public static class Program {
+public:
+    int Main() {
+        List<long> values;
+        values.Reserve(70002);
+        for (int i = 0; i < 70000; i++) values.Add((long)i);
+
+        // The suffix exceeds the inline vector kernels' largest size.
+        values.RemoveAt(3);
+        if (values.Count != 69999) return 1;
+        for (int i = 0; i < values.Count; i++)
+            if (values[i] != (long)(i < 3 ? i : i + 1)) return 2;
+
+        values.Insert(3, 91l);
+        if (values.Count != 70000) return 3;
+        for (int i = 0; i < values.Count; i++)
+            if (values[i] != (i == 3 ? 91l : (long)i)) return 4;
+
+        List<long> copy = values;
+        var cursor = copy.GetEnumerator();
+        values.RemoveAt(0);
+        copy.RemoveAt(69999);
+        if (values[2] != 91l || copy[3] != 91l || copy[0] != 0l || values[69998] != 69999l) return 5;
+        try { cursor.MoveNext(); return 6; } catch (InvalidOperationException e) {}
+        try { copy.RemoveAt(-1); return 7; } catch (IndexOutOfRangeException e) {}
+        return 0;
+    }
+}

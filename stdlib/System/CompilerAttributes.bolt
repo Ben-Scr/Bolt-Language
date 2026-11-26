@@ -1,0 +1,17 @@
+namespace System;
+
+// Definitions of compiler-recognized metadata contracts. The compiler binds the
+// bracketed short names directly to these declarations; no instances are created.
+public class ReflectAttribute : Attribute {}
+public class ReadOnlyAttribute : Attribute {}
+public class JsonNameAttribute : Attribute {}
+public class JsonIgnoreAttribute : Attribute {}
+public class HeaderAttribute : Attribute {}
+public class NativeAttribute : Attribute {}
+public class NativePropertyAttribute : Attribute {}
+public class NativePackAttribute : Attribute {}
+public class SerializeValueAttribute : Attribute {}
+public class SerializeSequenceAttribute : Attribute {}
+public class SerializeMapAttribute : Attribute {}
+public class StringableElementsAttribute : Attribute {}
+public class SnapshotReceiverAttribute : Attribute {}

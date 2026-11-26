@@ -1,0 +1,63 @@
+import System
+namespace Bolt.Runtime.Threading;
+
+#ifdef Windows
+[Header("windows.h"), Native("ExitProcess")] extern "C" void Terminate(uint status);
+[Header("windows.h"), Native("GetCurrentThreadId")] extern "C" uint Self();
+[Header("windows.h"), Native("CreateThread")] extern "C" void* Create(void* security, ulong stack, void* entry, void* argument, uint flags, void* id);
+[Header("windows.h"), Native("WaitForSingleObject")] extern "C" uint Join(void* handle, uint milliseconds);
+[Header("windows.h"), Native("CloseHandle")] extern "C" int Close(void* handle);
+[Header("windows.h"), Native("InitializeSRWLock")] extern "C" void MutexInit(void* mutex);
+[Header("windows.h"), Native("AcquireSRWLockExclusive")] extern "C" void MutexLock(void* mutex);
+[Header("windows.h"), Native("TryAcquireSRWLockExclusive")] extern "C" byte MutexTry(void* mutex);
+[Header("windows.h"), Native("ReleaseSRWLockExclusive")] extern "C" void MutexUnlock(void* mutex);
+[Header("windows.h"), Native("InitializeConditionVariable")] extern "C" void ConditionInit(void* condition);
+[Header("windows.h"), Native("SleepConditionVariableSRW")] extern "C" int ConditionWait(void* condition, void* mutex, uint milliseconds, uint flags);
+[Header("windows.h"), Native("WakeConditionVariable")] extern "C" void NotifyOne(void* condition);
+[Header("windows.h"), Native("WakeAllConditionVariable")] extern "C" void NotifyAll(void* condition);
+[Header("windows.h"), Native("GetLastError")] extern "C" uint LastError();
+#else
+[Header("pthread.h"), Native("pthread_self")] extern "C" ulong Self();
+[Header("stdlib.h"), Native("abort")] extern "C" void Abort();
+[Header("pthread.h"), Native("pthread_create")] extern "C" int Create(void* thread, void* attributes, void* entry, void* argument);
+[Header("pthread.h"), Native("pthread_join")] extern "C" int Join(ulong thread, void* result);
+[Header("pthread.h"), Native("pthread_mutex_init")] extern "C" int MutexInit(void* mutex, void* attributes);
+[Header("pthread.h"), Native("pthread_mutex_destroy")] extern "C" int MutexDestroy(void* mutex);
+[Header("pthread.h"), Native("pthread_mutex_lock")] extern "C" int MutexLock(void* mutex);
+[Header("pthread.h"), Native("pthread_mutex_trylock")] extern "C" int MutexTry(void* mutex);
+[Header("pthread.h"), Native("pthread_mutex_unlock")] extern "C" int MutexUnlock(void* mutex);
+#if !(MacOS || IOS)
+[Header("pthread.h"), Native("pthread_condattr_init")] extern "C" int ConditionAttributesInit(void* attributes);
+[Header("pthread.h"), Native("pthread_condattr_setclock")] extern "C" int ConditionAttributesClock(void* attributes, int clock);
+[Header("pthread.h"), Native("pthread_condattr_destroy")] extern "C" int ConditionAttributesDestroy(void* attributes);
+#else
+[Header("pthread.h"), Native("pthread_cond_timedwait_relative_np")] extern "C" int ConditionRelativeWait(void* condition, void* mutex, void* interval);
+#endif
+[Header("pthread.h"), Native("pthread_cond_init")] extern "C" int ConditionInit(void* condition, void* attributes);
+[Header("pthread.h"), Native("pthread_cond_destroy")] extern "C" int ConditionDestroy(void* condition);
+[Header("pthread.h"), Native("pthread_cond_wait")] extern "C" int ConditionWait(void* condition, void* mutex);
+[Header("pthread.h"), Native("pthread_cond_timedwait")] extern "C" int ConditionTimedWait(void* condition, void* mutex, void* deadline);
+[Header("pthread.h"), Native("pthread_cond_signal")] extern "C" int NotifyOne(void* condition);
+[Header("pthread.h"), Native("pthread_cond_broadcast")] extern "C" int NotifyAll(void* condition);
+[Header("time.h"), Native("clock_gettime")] extern "C" int Clock(int clock, void* sample);
+#if Android && (ARM32 || X86)
+struct TimeSample { public: int Seconds; int Nanoseconds; }
+#else
+struct TimeSample { public: long Seconds; long Nanoseconds; }
+#endif
+#ifdef Android
+[Header("errno.h"), Native("__errno")] extern "C" int* Errno();
+#elif IOS
+[Header("errno.h"), Native("__error")] extern "C" int* Errno();
+#elif Web
+[Header("errno.h"), Native("__errno_location")] extern "C" int* Errno();
+#endif
+[Header("time.h"), Native("nanosleep")] extern "C" int Sleep(void* duration, void* remaining);
+#endif
+#ifdef Windows
+[Header("windows.h"), Native("SwitchToThread")] extern "C" int RegistryYield();
+#else
+[Header("sched.h"), Native("sched_yield")] extern "C" int RegistryYield();
+[Header("stdlib.h"), Native("calloc")] extern "C" byte* Calloc(ulong count,ulong bytes);
+[Header("stdlib.h"), Native("free")] extern "C" void Free(byte* data);
+#endif

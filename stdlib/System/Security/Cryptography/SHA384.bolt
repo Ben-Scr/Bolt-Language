@@ -1,0 +1,10 @@
+namespace System.Security.Cryptography;
+
+// FIPS 180-4 SHA-384 implemented by the SHA-512 compression function with
+// the SHA-384 initialization vector and 384-bit output.
+public static class SHA384
+{
+public:
+    byte[] Hash(const byte[]& data) { return SHA512.Hash384(data); }
+    byte[] Hash(const string& text) { return SHA512.Hash384(text); }
+}

@@ -1,0 +1,54 @@
+import System
+
+static class Program {
+public:
+    int UnknownValue(int x) { return x - 2; }
+
+    void Replace(int[]& x) { x = new int[4]; x[3] = 31; }
+
+    int Main() {
+        int[] map = new int[8];
+        for (int i = 0; i < 8; i++) map[i] = (i + 1) & 7;
+        int cursor = 3;
+        for (int i = 0; i < 20; i++) cursor = map[cursor];
+        if (cursor != 7) return 1;
+
+        uint[] u = new uint[2];
+        u[1] = 2147483647u;
+        uint value = 0u;
+        value = u[1];
+        if (value != 2147483647u) return 2;
+
+        int[] unknown = new int[2];
+        unknown[1] = UnknownValue(1);
+        cursor = unknown[1];
+        if (cursor != -1) return 3;
+        bool failed = false;
+        try { cursor = unknown[cursor]; }
+        catch (Exception e) { failed = true; }
+        if (!failed || cursor != -1) return 4;
+
+        int[] aliased = new int[2];
+        aliased[1] = 4;
+        int* ptr = &aliased[1];
+        *ptr = -8;
+        cursor = aliased[1];
+        if (cursor != -8) return 5;
+        int[] resized = new int[2];
+        Replace(resized);
+        cursor = resized[3];
+        if (cursor != 31) return 6;
+
+        int[] changed = new int[1];
+        --changed[0];
+        cursor = changed[0];
+        if (cursor != -1) return 7;
+
+        int[] noItems = new int[0];
+        failed = false;
+        try { cursor = noItems[0]; }
+        catch (Exception e) { failed = true; }
+        if (!failed) return 8;
+        return 0;
+    }
+}

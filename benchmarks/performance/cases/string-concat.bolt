@@ -1,0 +1,18 @@
+import Bolt.Runtime
+
+static class Program {
+public:
+    void Main() {
+        string[] parts = ["assets", "main", "textures", "ui", "icon", "editor", "buttons", "line"];
+        uint hash = 17u;
+        for (int i = 0; i < 500000; i++) {
+            string path = parts[(int)(hash & 7u)] + "/" + parts[(i >> 2) & 7];
+            path += parts[(i + 3) & 7];
+            ulong length = 0ul;
+            byte* bytes = NativeString.Bytes(path, length);
+            uint sample = bytes[(ulong)hash % length];
+            hash = (hash << 5) ^ (hash >> 2) ^ sample ^ (uint)length;
+        }
+        Print(hash);
+    }
+}

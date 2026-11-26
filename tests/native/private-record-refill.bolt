@@ -1,0 +1,91 @@
+import System
+import Bolt.Runtime
+
+struct Entry {
+public:
+    int X;
+    int Y;
+}
+
+static class Program {
+public:
+    int Fold(int bias, int total) {
+        Buffer<Entry> items;
+        items.Reserve(8);
+        try {
+            items.Clear();
+            for (int i = 0; i < 8; i++) {
+                Entry item;
+                item.X = (i ^ total) & 7;
+                item.Y = (i + bias) & 3;
+                items.Add(item);
+            }
+            for (int i = 0; i < items.Length; i++) total += items[i].X + items[i].Y;
+        } catch { return total; }
+        return total;
+    }
+
+    bool FirstFailure(int high, int low) {
+        Buffer<Entry> items;
+        items.Reserve(8);
+        int total = int.MaxValue;
+        try {
+            items.Clear();
+            for (int i = 0; i < 8; i++) {
+                Entry item;
+                item.X = (i + high) & 7;
+                item.Y = (low - i) & 7;
+                items.Add(item);
+            }
+            for (int i = 0; i < items.Length; i++) total += items[i].X + items[i].Y;
+        } catch (Exception error) {
+            return total == int.MaxValue && error.Message == "integer overflow in -";
+        }
+        return false;
+    }
+
+    int Partial(int total) {
+        Buffer<Entry> items;
+        items.Reserve(5);
+        items.Clear();
+        for (int i = 0; i < 5; i++) {
+            Entry item;
+            item.X = (i ^ total) & 7;
+            item.Y = (i + 1) & 3;
+            items.Add(item);
+        }
+        for (int i = 0; i < items.Length; i++) total += items[i].X + items[i].Y;
+        return total;
+    }
+
+    int Read(Buffer<Entry>& items) { return items[6].Y; }
+
+    int Observed(int bias) {
+        Buffer<Entry> items;
+        items.Reserve(8);
+        Buffer<Entry>& alias = items;
+        int total = 0;
+        items.Clear();
+        for (int i = 0; i < 8; i++) {
+            Entry item;
+            item.X = (i ^ bias) & 7;
+            item.Y = (bias - i) & 3;
+            items.Add(item);
+        }
+        for (int i = 0; i < items.Length; i++) total += items[i].X + items[i].Y;
+        return total + Read(alias);
+    }
+
+    int Main() {
+        if (Fold(1, -3) != 37) return 1;
+        // The fill saw the original total, even on the overflowing reduction.
+        if (Fold(1, int.MaxValue - 10) != int.MaxValue - 4) return 2;
+        // A producer error takes precedence over any reduction error.
+        if (Fold(int.MaxValue - 2, int.MaxValue - 10) != int.MaxValue - 10) return 3;
+        if (!FirstFailure(int.MaxValue - 5, int.MinValue + 2)) return 4;
+        if (Observed(1) != 43) return 5;
+        if (Partial(3) != 23) return 6;
+        return 0;
+    }
+}
+

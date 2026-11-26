@@ -1,0 +1,28 @@
+import Ecs
+import System
+
+public class Component {
+public:
+    string Name;
+    Component(string name) { Name=name; }
+}
+static class Program {
+public:
+    void Main() {
+        Registry world;
+        Registry alias=world;
+        Entity entity=alias.Create();
+        Component original=Component("source");
+        world.Add<Component>(entity,original);
+        original.Name="changed";
+        for(row : alias.Query<Component>()) {
+            if(row.Get<Component>().Name!="source") throw Exception("component copy");
+            row.Get<Component>().Name="updated";
+        }
+        if(world.EntityCount!=1 || world.Get<Component>(entity).Name!="updated")
+            throw Exception("registry alias or query");
+        world.Destroy(entity);
+        if(alias.IsValid(entity)) throw Exception("destroy");
+        Print("source ECS OK");
+    }
+}

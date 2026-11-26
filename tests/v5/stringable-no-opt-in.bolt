@@ -1,0 +1,5 @@
+
+class Plain{public:string ToString(){return "manual";}}
+static class Program {public: void Main(){
+Plain p;Print(p.ToString());
+}}

@@ -1,0 +1,6 @@
+public class Vec2 {
+public:
+    float X;
+    float Y;
+    float LengthSquared() { return X * X + Y * Y; }
+}

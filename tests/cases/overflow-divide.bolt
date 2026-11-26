@@ -1,0 +1,1 @@
+static class Program { public: void Main() { long n=-9223372036854775808;Console.WriteLine(n/-1l); } }

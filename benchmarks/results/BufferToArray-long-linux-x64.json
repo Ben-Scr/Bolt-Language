@@ -1,0 +1,25 @@
+{
+  "fixture": "benchmarks/performance/cases/buffer-long.bolt",
+  "unit": "elapsed ms per process",
+  "pairs": 3,
+  "warmups": 1,
+  "cpu_affinity": 7,
+  "expected_checksum": 4400059777024,
+  "raw_ms": {
+    "old": [
+      5444.424451,
+      5234.523966,
+      5132.728873
+    ],
+    "new": [
+      4833.224528,
+      4597.978784,
+      4230.49959
+    ]
+  },
+  "median_ms": {
+    "old": 5234.523966,
+    "new": 4597.978784
+  },
+  "executable_sha256": "5b3f2e1adfd9692347f746f4d88e66b9a2797782b477e4b9a069fefc7da8bc06"
+}

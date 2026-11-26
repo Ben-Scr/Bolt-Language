@@ -1,0 +1,111 @@
+import System
+import System.Collections.Generic
+
+// Arbitrary-length integer base conversion used as a standard-library utility.
+// Ganzzahlen beliebiger Laenge; negative Zahlen behalten ihr Minuszeichen.
+// Beispiel: TryConvert("FF", 16, 2, result, error) ergibt "11111111".
+public static class NumberConverter
+{
+public:
+    bool IsSupportedBase(int numberBase)
+    {
+        return numberBase == 2 || numberBase == 8 || numberBase == 10 || numberBase == 16;
+    }
+
+    bool TryConvert(const string& text, int sourceBase, int targetBase,
+                    string& result, string& error)
+    {
+        result = "";
+        error = "";
+        if (!IsSupportedBase(sourceBase) || !IsSupportedBase(targetBase))
+        {
+            error = "Erlaubte Basen: 2, 8, 10 und 16.";
+            return false;
+        }
+
+        byte[] digits = text.Trim().ToUtf8();
+        int start = 0;
+        bool negative = false;
+        if (digits.Length > 0 && (digits[0] == 45 || digits[0] == 43))
+        {
+            negative = digits[0] == 45;
+            start++;
+        }
+
+        // Praefixe sind optional und gelten nur fuer die gewaehlte Eingabebasis.
+        if (digits.Length - start >= 2 && digits[start] == 48)
+        {
+            int prefix = digits[start + 1];
+            if ((sourceBase == 2 && (prefix == 98 || prefix == 66)) ||
+                (sourceBase == 8 && (prefix == 111 || prefix == 79)) ||
+                (sourceBase == 16 && (prefix == 120 || prefix == 88)))
+                start += 2;
+        }
+
+        if (start == digits.Length)
+        {
+            error = "Bitte eine ganze Zahl mit mindestens einer Ziffer eingeben.";
+            return false;
+        }
+
+        for (int i = start; i < digits.Length; i++)
+        {
+            int digit = DigitValue(digits[i]);
+            if (digit < 0 || digit >= sourceBase)
+            {
+                error = "Ungueltige Ziffer fuer Basis " + sourceBase +
+                        ". Erlaubt: " + AllowedDigits(sourceBase) + ".";
+                return false;
+            }
+            digits[i] = (byte)digit;
+        }
+
+        while (start < digits.Length && digits[start] == 0) start++;
+        if (start == digits.Length)
+        {
+            result = "0";
+            return true;
+        }
+
+        // Schriftliche Division: Die gesamte Zahl muss nie in int/long passen.
+        // Bei diesen Basen ist jeder Zwischenschritt hoechstens 255.
+        List<byte> reversed;
+        while (start < digits.Length)
+        {
+            int remainder = 0;
+            for (int i = start; i < digits.Length; i++)
+            {
+                int current = remainder * sourceBase + digits[i];
+                digits[i] = (byte)(current / targetBase);
+                remainder = current % targetBase;
+            }
+            reversed.Add((byte)(remainder < 10 ? 48 + remainder : 65 + remainder - 10));
+            while (start < digits.Length && digits[start] == 0) start++;
+        }
+
+        int offset = negative ? 1 : 0;
+        byte[] output = new byte[reversed.Length + offset];
+        if (negative) output[0] = (byte)45;
+        for (int i = 0; i < reversed.Length; i++)
+            output[offset + i] = reversed[reversed.Length - 1 - i];
+        result = string.FromUtf8(output);
+        return true;
+    }
+
+private:
+    int DigitValue(byte digit)
+    {
+        if (digit >= 48 && digit <= 57) return digit - 48;
+        if (digit >= 65 && digit <= 70) return digit - 65 + 10;
+        if (digit >= 97 && digit <= 102) return digit - 97 + 10;
+        return -1;
+    }
+
+    string AllowedDigits(int numberBase)
+    {
+        if (numberBase == 2) return "0-1";
+        if (numberBase == 8) return "0-7";
+        if (numberBase == 10) return "0-9";
+        return "0-9, A-F oder a-f";
+    }
+}

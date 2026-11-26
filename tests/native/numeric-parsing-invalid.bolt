@@ -1,0 +1,4 @@
+static class Program {
+public:
+    void Main() { Print(int.Parse("42abc")); }
+}

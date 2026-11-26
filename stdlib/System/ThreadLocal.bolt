@@ -1,0 +1,71 @@
+import System
+import Bolt.Runtime
+namespace System.Threading;
+
+class ThreadLocalValues<T> {
+public:
+    Mutex Gate;
+    ThreadHandle Key;
+    Buffer<ICaptureCell<T>> Values;
+    ThreadLocalValues() { Key = LocalStorage.CreateKey(); }
+
+    T* Find() {
+        if (Key.Pointer == null) throw ObjectDisposedException("ThreadLocal");
+        return (T*)LocalStorage.Get(Key.Pointer->NativeId);
+    }
+    T* Store(const T& value) {
+        ICaptureCell<T> cell = ClosureStorage.Create<T>(value);
+        T* address = &cell.Get();
+        Values.Add(cell);
+        if (!LocalStorage.Set(Key.Pointer->NativeId, address)) {
+            Values.Truncate(Values.Length - 1);
+            throw InvalidOperationException("Could not set the thread-local value.");
+        }
+        return address;
+    }
+}
+
+// Copies share one OS key. Its thread-specific slots point into stable boxes.
+// The holder owns all boxes, including the values of threads that have exited.
+public sealed class ThreadLocal<T> {
+private:
+    ICaptureCell<ThreadLocalValues<T>> owner;
+    ThreadLocalValues<T>* state;
+public:
+    ThreadLocal() : owner(ClosureStorage.Create<ThreadLocalValues<T>>(ThreadLocalValues<T>())) {
+        state = &owner.Get();
+    }
+    T Value {
+        get {
+            state->Gate.Lock();
+            try {
+                T* address = state->Find();
+                if (address == null) { T initial; address = state->Store(initial); }
+                return *address;
+            } finally { state->Gate.Unlock(); }
+        }
+        set {
+            state->Gate.Lock();
+            try {
+                T* address = state->Find();
+                if (address == null) state->Store(value);
+                else *address = value;
+            } finally { state->Gate.Unlock(); }
+        }
+    }
+    bool IsValueCreated {
+        get {
+            state->Gate.Lock();
+            try { return state->Find() != null; } finally { state->Gate.Unlock(); }
+        }
+    }
+    void Dispose() {
+        Buffer<ICaptureCell<T>> retired;
+        state->Gate.Lock();
+        try {
+            ThreadHandle empty;
+            state->Key = empty;
+            state->Values.Swap(retired);
+        } finally { state->Gate.Unlock(); }
+    }
+}

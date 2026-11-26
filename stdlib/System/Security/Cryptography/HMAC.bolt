@@ -1,0 +1,35 @@
+import System
+namespace System.Security.Cryptography;
+
+// RFC 2104 HMAC using the pure-Bolt SHA-2 implementations.
+public static class HMAC
+{
+private:
+    byte[] Compute(const byte[]& key, const byte[]& data, bool sha512)
+    {
+        int blockSize = sha512 ? 128 : 64;
+        byte[] normalized;
+        if (key.Length > blockSize) normalized = sha512 ? System.Security.Cryptography.SHA512.Hash(key) : System.Security.Cryptography.SHA256.Hash(key);
+        else normalized = CryptoPrimitives.Copy(key);
+
+        byte[] innerPad = new byte[blockSize];
+        byte[] outerPad = new byte[blockSize];
+        for (int i = 0; i < blockSize; i++)
+        {
+            byte value = i < normalized.Length ? normalized[i] : (byte)0;
+            innerPad[i] = (byte)(value ^ (byte)54);
+            outerPad[i] = (byte)(value ^ (byte)92);
+        }
+
+        byte[] innerInput = CryptoPrimitives.Concat(innerPad, data);
+        byte[] innerHash = sha512 ? System.Security.Cryptography.SHA512.Hash(innerInput) : System.Security.Cryptography.SHA256.Hash(innerInput);
+        byte[] outerInput = CryptoPrimitives.Concat(outerPad, innerHash);
+        return sha512 ? System.Security.Cryptography.SHA512.Hash(outerInput) : System.Security.Cryptography.SHA256.Hash(outerInput);
+    }
+
+public:
+    byte[] SHA256(const byte[]& key, const byte[]& data) { return Compute(key, data, false); }
+    byte[] SHA512(const byte[]& key, const byte[]& data) { return Compute(key, data, true); }
+    byte[] SHA256(const byte[]& key, const string& text) { return SHA256(key, text.ToUtf8()); }
+    byte[] SHA512(const byte[]& key, const string& text) { return SHA512(key, text.ToUtf8()); }
+}

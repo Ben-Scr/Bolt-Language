@@ -1,0 +1,100 @@
+import System
+import System.IO
+
+class Label : IStringable {
+public:
+    int N=7;
+    string ToString(){N++;return "label"+N;}
+}
+sealed class DetailedLabel : Label {
+public:
+    int Extra=3;
+    override string ToString(){Extra++;return "detail"+Extra;}
+}
+enum Code : ushort { Valid=513 }
+static class Program {
+    static void WriteLabel(StreamWriter& writer,Label& label){writer.Write<Label>(label);}
+    static int Binary(Stream& stream) {
+        BinaryWriter w = BinaryWriter(stream,true);
+        w.Write<short>(-12); w.Write<int>(-123456); w.Write<long>(-5555555555l);
+        w.Write<byte>((byte)222); w.Write<ushort>((ushort)65534); w.Write<uint>(3456789000u);
+        w.Write<ulong>(9223372036854775900ul); w.Write<bool>(true); w.Write<char>('Ω');
+        w.Write<float>(1.5f); w.Write<double>(-2.25); w.Write<string>("ä\0z");
+        byte[] tail={3,4}; w.Write<byte[]>(tail); w.Flush(); w.Dispose(); w.Close();
+        stream.Seek(0);
+        BinaryReader r = BinaryReader(stream,true);
+        if(r.ReadInt16()!=-12 || r.ReadInt()!=-123456 || r.ReadInt64()!=-5555555555l) return 20;
+        if(r.ReadUInt8()!=222 || r.ReadUInt16()!=65534 || r.ReadUInt32()!=3456789000u) return 21;
+        if(r.ReadUInt64()!=9223372036854775900ul || !r.ReadBool() || r.ReadChar()!='Ω') return 22;
+        if(r.ReadFloat()!=1.5f || r.ReadDouble()!=-2.25 || r.ReadString()!="ä\0z") return 23;
+        if(r.Read<byte>()!=3 || r.ReadBytes(1)[0]!=4) return 24;
+        bool eof=false; try { r.ReadInt(); } catch(EndOfStreamException& e){ eof=true; }
+        r.Close(); r.Dispose();
+        return eof?0:25;
+    }
+public:
+    static int Main() {
+        MemoryStream m=MemoryStream(4); MemoryStream alias=m;
+        if(!m.CanRead || !m.CanSeek || !m.CanWrite || m.Length!=0) return 1;
+        m.Seek(8); m.WriteByte((byte)200);
+        if(alias.Position!=9 || alias.Length!=9 || alias.ToArray()[7]!=0) return 2;
+        m.SetLength(2); m.SetLength(9); if(m.ToArray()[8]!=0 || alias.Position!=2) return 3;
+        m.SetLength(0); int status=Binary(m); if(status!=0)return status;
+        byte[] input={2,3,4}; MemoryStream src=MemoryStream(input);
+        MemoryStream dest; src.CopyTo(dest,2); dest.Seek(-2,SeekOrigin.End);
+        byte[] out=new byte[4]; if(dest.Read(out,1,2)!=2 || out[1]!=3 || out[2]!=4 || dest.ReadByte()!=-1)return 4;
+        dest.Seek(0); if(dest.ReadAllBytes().Length!=3)return 5;
+        bool invalid=false; try { m.CopyTo(alias); } catch(ArgumentException& e){invalid=true;}
+        if(!invalid)return 6; alias.Dispose(); if(m.CanRead || m.ToArray().Length==0)return 7;
+        FileStream f=File.Create("data"); status=Binary(f); if(status!=0)return status;
+        f.SetLength(6); f.Seek(2,SeekOrigin.Begin); f.WriteByte(91); f.Seek(2);
+        if(f.Length!=6 || f.Position!=2 || f.ReadByte()!=91)return 31;
+        FileStream g=f; g.Close();
+        if(f.CanWrite || File.GetLength("data")!=6)return 8;
+        f=File.OpenWrite("data"); f.Write(input,1,2); f.Flush(); f.Dispose();
+        f=File.OpenRead("data"); if(f.ReadByte()!=3 || f.ReadByte()!=4 || f.CanWrite)return 9; f.Close();
+        f=File.Open("data",FileMode.Truncate,FileAccess.Write); f.Close();
+        StreamWriter writer=StreamWriter("data"); StreamWriter copy=writer;
+        writer.Write<string>("one\r"); copy.WriteLine<string>("two"); writer.WriteLine(); writer.Flush();
+        writer.Close(); copy.Dispose();
+        StreamWriter append=StreamWriter("data",true); append.Write<string>("rest"); append.Dispose();
+        StreamReader reader=StreamReader("data"); if(reader.EndOfStream || reader.ReadLine()!="one" || reader.ReadLine()!="two")return 10;
+        if(reader.ReadToEnd()!="\nrest" || !reader.EndOfStream)return 11;
+        reader.Dispose(); reader.Close();
+        MemoryStream text; StreamWriter w=StreamWriter(text,true); w.WriteLine<int>(42); w.Close();
+        text.Seek(0); StreamReader sr=StreamReader(text,true);
+        if(sr.ReadLine()!="42")return 12; sr.Close(); if(!text.CanRead)return 13;
+        FileStream app=File.Open("data",FileMode.Append,FileAccess.ReadWrite);
+        app.SetLength(3); app.Seek(0); app.WriteByte(65);
+        if(app.Position!=4 || app.Length!=4)return 14;
+        app.Close();
+        text.SetLength(0); w=StreamWriter(text,true);
+        w.WriteLine<double>(0.00001); w.Write<float>(1.25f); w.Dispose();
+        if(string.FromUtf8(text.ToArray())!="1e-05\n1.25")return 15;
+        byte[] invalidBytes={2}; MemoryStream bad=MemoryStream(invalidBytes); BinaryReader br=BinaryReader(bad);
+        invalid=false; try{br.ReadBool();}catch(FormatException& e){invalid=true;}
+        if(!invalid)return 16;
+        Label label; int? none=null; void* pointer=null;
+        text.SetLength(0); w=StreamWriter(text,true);
+        w.Write<Label>(label); w.Write<int?>(none); w.Write<void*>(pointer); w.Close();
+        if(label.N!=7 || string.FromUtf8(text.ToArray())!="label8null0x0")return 17;
+        text.SetLength(0); w=StreamWriter(text,true); DetailedLabel detail;
+        WriteLabel(w,detail); w.Close();
+        if(detail.Extra!=3 || string.FromUtf8(text.ToArray())!="detail4")return 18;
+        FileStream unopened; if(unopened.CanSeek || unopened.CanRead || unopened.CanWrite)return 19;
+        invalid=false;
+        try{FileStream duplicate=File.Open("data",FileMode.CreateNew,FileAccess.Write);}catch(IOException& e){invalid=true;}
+        if(!invalid)return 26;
+        FileStream created=File.Open("new-file",FileMode.OpenOrCreate,FileAccess.ReadWrite); created.Dispose();
+        text.SetLength(0); BinaryWriter encoded=BinaryWriter(text,true);
+        encoded.Write<Code>(Code.Valid); encoded.Write<uint>(1114112u); encoded.Write<uint>(67108865u); encoded.Close();
+        text.Seek(0); BinaryReader decoded=BinaryReader(text,true);
+        if(decoded.Read<Code>()!=Code.Valid)return 27;
+        invalid=false; try{decoded.ReadChar();}catch(FormatException& e){invalid=true;}
+        if(!invalid)return 28;
+        invalid=false; try{decoded.ReadString();}catch(IOException& e){invalid=true;}
+        if(!invalid)return 29;
+        if(decoded.ReadBytes(0).Length!=0)return 30;
+        return 0;
+    }
+}

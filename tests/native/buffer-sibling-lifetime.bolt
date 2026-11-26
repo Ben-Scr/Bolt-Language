@@ -1,0 +1,39 @@
+import Bolt.Runtime
+
+public class Token {
+public:
+    static bool Recording=false;
+    static int Drops=0;
+    static int Sum=0;
+    int Value;
+    string Label;
+    Token(int value,string label) { Value=value; Label=label; }
+    ~Token() { if (Recording) { Drops++; Sum+=Value; } }
+}
+public class TokenBuffers {
+public:
+    Buffer<Token> A, B;
+    void Exchange() { A.Swap(B); }
+}
+static class Program {
+public:
+    int Main() {
+        TokenBuffers pair;
+        pair.A.Add(Token(3,"links")); pair.B.Add(Token(7,"rechts")); pair.B.Add(Token(11,"dort"));
+        Token.Drops=0; Token.Sum=0; Token.Recording=true;
+        pair.Exchange();
+        Token.Recording=false;
+        if(Token.Drops!=0 || Token.Sum!=0 || pair.A.Length!=2 || pair.B.Length!=1 ||
+           pair.A[0].Label!="rechts" || pair.A[1].Value!=11 || pair.B[0].Label!="links") return 1;
+        Token[] snapshot=pair.A.ToArray();
+        Token.Recording=true; pair.A.Clear(); pair.B.Clear(); Token.Recording=false;
+        if(Token.Drops!=3 || Token.Sum!=21 || snapshot[0].Value!=7 || snapshot[1].Label!="dort") return 2;
+        Arena region=Arena.Fixed(262144);
+        TokenBuffers* owner=new(region) TokenBuffers();
+        owner->A.Add(Token(19,"erst")); owner->B.Add(Token(29,"zweite")); owner->Exchange();
+        Token[] outside=owner->A.ToArray();
+        region.Reset();
+        if(outside.Length!=1 || outside[0].Value!=29 || outside[0].Label!="zweite") return 3;
+        Print("sibling lifetime OK"); return 0;
+    }
+}

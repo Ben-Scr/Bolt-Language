@@ -1,0 +1,40 @@
+class Player {public:int Score=9;}
+class Bus<T...> {
+public:
+    event Action<T...> Changed;
+    void Raise(T... values) { Changed(values...); }
+}
+R Forward<R, O, T...>(O& receiver,T... values) { return receiver.Accept(values...); }
+void Dispatch<T...>(Action<T...> callback,T... values) { callback(values...); }
+class Receiver {
+public:
+    int Count=0;
+    int Accept(int number,string text,Player player) { return number+text.Length+player.Score; }
+    void Mixed(int number,string text,Player player) { Count+=number+text.Length+player.Score; }
+    void Empty() { Count++; }
+    void Mutate(int& number,string& text) { number+=4;text+="!"; }
+    void Many(int p0,int p1,int p2,int p3,int p4,int p5,int p6,int p7,int p8,int p9,int p10,int p11,int p12,int p13,int p14,int p15,int p16) { Count+=p0+p16; }
+}
+static class Program {
+public:
+    void Main() {
+        Receiver receiver;Player player;
+        Action<int,string,Player> mixed=receiver.Mixed;
+        Dispatch<int,string,Player>(mixed,3,"yes",player);
+        Print(receiver.Count);
+        Print(Forward<int,Receiver,int,string,Player>(receiver,2,"ok",player));
+        Action empty=receiver.Empty;Dispatch<>(empty);Print(receiver.Count);
+        int number=5;string text="ref";
+        Bus<int&,string&> refs;refs.Changed+=receiver.Mutate;
+        refs.Raise(number,text);Print(number);Print(text);
+        refs.Changed-=receiver.Mutate;refs.Raise(number,text);Print(number);
+        Bus<int,int,int,int,int,int,int,int,int,int,int,int,int,int,int,int,int> many;
+        many.Changed+=receiver.Many;many.Raise(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17);Print(receiver.Count);
+        many.Changed-=receiver.Many;many.Raise(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17);Print(receiver.Count);
+        Action<int,int,int,int,int,int,int,int,int,int,int,int,int,int,int,int,int> large=receiver.Many;large(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17);Print(receiver.Count);
+        Action<int,int,int,int,int,int,int,int,int,int,int,int,int,int,int,int,int> same=receiver.Many;
+        Print(large.InvocationId()==same.InvocationId());
+        Print(large.InvocationKey()==same.InvocationKey());
+        Print(large.InvocationTarget()==same.InvocationTarget());
+    }
+}

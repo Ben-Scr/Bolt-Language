@@ -1,0 +1,2 @@
+int& Bad(){int[] a={1};return a[0];}
+static class Program{public:void Main(){}}

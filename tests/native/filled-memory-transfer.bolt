@@ -1,0 +1,81 @@
+import System
+import System.Memory
+
+static class Program {
+public:
+    void Slide(byte* fill, ulong filled, byte* from, byte* to, ulong length, byte* edit) {
+        Memory.Set(fill, (byte)37, filled);
+        *edit = (byte)201;
+        Memory.Move(to, from, length);
+    }
+
+    int ThroughCopy(byte* a, ulong filled, byte* source, byte* copy, ulong copied,
+                    byte* edit, byte* from, byte* to, ulong moved) {
+        Memory.Set(a, (byte)37, filled);
+        Memory.Copy(copy, source, copied);
+        *edit = (byte)201;
+        int sign = Memory.Compare(a, copy, copied);
+        Memory.Move(to, from, moved);
+        return sign;
+    }
+
+    byte Initial(int i) { return (byte)(3*i + 11); }
+    int Main() {
+        byte[] data = new byte[64];
+        byte[] expected = new byte[64];
+        byte[] snapshot = new byte[12];
+        // Exercise overlapping moves in either direction, disjoint and identical
+        // ranges, an unrelated Copy source, and writes inside and outside each range.
+        for (int kind = 0; kind < 3; kind++) {
+            for (int shift = -9; shift <= 9; shift++) {
+                for (int edit = 0; edit < 15; edit++) {
+                    for (int i = 0; i < 64; i++) { data[i] = Initial(i); expected[i] = Initial(i); }
+                    int fill = kind == 0 ? 28 : 2;
+                    int copied = 8;
+                    int filled = 6 + (edit % 5);
+                    int length = 1 + (edit % 10);
+                    int changed = 25 + edit;
+                    int moveSource = edit == 0 ? 29 : 28;
+                    int dest = moveSource + shift;
+                    for (int i = 0; i < filled; i++) expected[fill+i] = (byte)37;
+                    if (kind == 0) {
+                        Slide(&data[fill], (ulong)filled, &data[moveSource], &data[dest], (ulong)length, &data[changed]);
+                        expected[changed] = (byte)201;
+                    } else {
+                        int source = kind == 1 ? fill : 12;
+                        for (int i = 0; i < copied; i++) expected[28+i] = expected[source+i];
+                        expected[changed] = (byte)201;
+                        int sign = 0;
+                        for (int i = 0; i < copied; i++) {
+                            if (expected[fill+i] < expected[28+i]) { sign = -1; break; }
+                            if (expected[fill+i] > expected[28+i]) { sign = 1; break; }
+                        }
+                        int got = ThroughCopy(&data[fill], (ulong)filled, &data[source], &data[28], (ulong)copied,
+                                              &data[changed], &data[moveSource], &data[dest], (ulong)length);
+                        if (got != sign) return 1;
+                    }
+                    for (int i = 0; i < length; i++) snapshot[i] = expected[moveSource+i];
+                    for (int i = 0; i < length; i++) expected[dest+i] = snapshot[i];
+                    for (int i = 0; i < 64; i++) if (expected[i] != data[i]) return 2;
+                }
+            }
+        }
+        bool caught = false;
+        try {
+            Memory.Set(&data[1], (byte)51, 5ul);
+            Memory.Copy(&data[2], &data[1], 5ul);
+        } catch (ArgumentException& e) { caught = true; }
+        if (!caught || data[1] != (byte)51 || data[5] != (byte)51) return 3;
+        caught = false;
+        try {
+            Memory.Set(&data[0], (byte)77, 1ul);
+            Memory.Move(null, &data[0], 1ul);
+        } catch (ArgumentNullException& e) { caught = true; }
+        if (!caught || data[0] != (byte)77) return 4;
+        Memory.Set(null, (byte)19, 0ul);
+        Memory.Copy(null, null, 0ul);
+        Memory.Move(null, null, 0ul);
+        Print("filled memory transfers OK");
+        return 0;
+    }
+}

@@ -1,0 +1,5 @@
+static class Program { public: void Main() {
+    Arena arena = Arena.Fixed(4096);
+    int* pointer = new(arena) int(3);
+    delete pointer;
+} }

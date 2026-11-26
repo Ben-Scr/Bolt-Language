@@ -1,0 +1,30 @@
+struct SlotState {
+public:
+    uint Owner;
+    uint Flags;
+}
+struct Slot {
+public:
+    SlotState State;
+    ulong Value;
+}
+static class Program {
+public:
+    void Main() {
+        ulong checksum = 0ul;
+        for (int frame = 0; frame < 256; frame++) {
+            Slot[] slots = new Slot[65536 + (frame & 63)];
+            uint cursor = (uint)(frame + 1);
+            for (int j = 0; j < 4096; j++) {
+                int k = (int)((cursor ^ (uint)(j * 77)) & 65535u);
+                cursor = ((cursor << 3) ^ (cursor >> 13) ^ slots[k].State.Owner ^
+                          slots[k].State.Flags ^ (uint)slots[k].Value ^ (uint)j ^ 160171u) & 16777215u;
+                slots[k].State.Owner = (uint)(j + frame + 1);
+                slots[k].State.Flags = cursor & 255u;
+                slots[k].Value = (ulong)j;
+            }
+            checksum += (ulong)cursor + slots[frame].Value;
+        }
+        Print(checksum);
+    }
+}

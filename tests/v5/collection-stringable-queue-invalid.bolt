@@ -1,0 +1,4 @@
+import System.Collections.Generic
+class Plain { public: string ToString() { return "manual"; } }
+void Echo<T>(T value):IStringable { Print(value.ToString()); }
+static class Program { public: void Main() { Queue<Plain> values; Echo(values); } }

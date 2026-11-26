@@ -1,0 +1,107 @@
+import System
+namespace System.Security.Cryptography;
+
+// FIPS 180-4 SHA-512 implemented entirely in Bolt.
+public static class SHA512
+{
+private:
+    ulong[] Constants()
+    {
+        return [
+            4794697086780616226ul,8158064640168781261ul,13096744586834688815ul,16840607885511220156ul,
+            4131703408338449720ul,6480981068601479193ul,10538285296894168987ul,12329834152419229976ul,
+            15566598209576043074ul,1334009975649890238ul,2608012711638119052ul,6128411473006802146ul,
+            8268148722764581231ul,9286055187155687089ul,11230858885718282805ul,13951009754708518548ul,
+            16472876342353939154ul,17275323862435702243ul,1135362057144423861ul,2597628984639134821ul,
+            3308224258029322869ul,5365058923640841347ul,6679025012923562964ul,8573033837759648693ul,
+            10970295158949994411ul,12119686244451234320ul,12683024718118986047ul,13788192230050041572ul,
+            14330467153632333762ul,15395433587784984357ul,489312712824947311ul,1452737877330783856ul,
+            2861767655752347644ul,3322285676063803686ul,5560940570517711597ul,5996557281743188959ul,
+            7280758554555802590ul,8532644243296465576ul,9350256976987008742ul,10552545826968843579ul,
+            11727347734174303076ul,12113106623233404929ul,14000437183269869457ul,14369950271660146224ul,
+            15101387698204529176ul,15463397548674623760ul,17586052441742319658ul,1182934255886127544ul,
+            1847814050463011016ul,2177327727835720531ul,2830643537854262169ul,3796741975233480872ul,
+            4115178125766777443ul,5681478168544905931ul,6601373596472566643ul,7507060721942968483ul,
+            8399075790359081724ul,8693463985226723168ul,9568029438360202098ul,10144078919501101548ul,
+            10430055236837252648ul,11840083180663258601ul,13761210420658862357ul,14299343276471374635ul,
+            14566680578165727644ul,15097957966210449927ul,16922976911328602910ul,17689382322260857208ul,
+            500013540394364858ul,748580250866718886ul,1242879168328830382ul,1977374033974150939ul,
+            2944078676154940804ul,3659926193048069267ul,4368137639120453308ul,4836135668995329356ul,
+            5532061633213252278ul,6448918945643986474ul,6902733635092675308ul,7801388544844847127ul
+        ];
+    }
+
+    byte[] HashCore(const byte[]& data, bool sha384)
+    {
+        ulong[] k = Constants();
+        int paddedLength = ((data.Length + 17 + 127) / 128) * 128;
+        byte[] message = new byte[paddedLength];
+        for (int i = 0; i < data.Length; i++) message[i] = data[i];
+        message[data.Length] = (byte)128;
+        CryptoPrimitives.WriteUInt64BE((ulong)data.Length * 8ul, message, paddedLength - 8);
+
+        ulong h0, h1, h2, h3, h4, h5, h6, h7;
+        if (sha384)
+        {
+            h0 = 14680500436340154072ul; h1 = 7105036623409894663ul;
+            h2 = 10473403895298186519ul; h3 = 1526699215303891257ul;
+            h4 = 7436329637833083697ul; h5 = 10282925794625328401ul;
+            h6 = 15784041429090275239ul; h7 = 5167115440072839076ul;
+        }
+        else
+        {
+            h0 = 7640891576956012808ul; h1 = 13503953896175478587ul;
+            h2 = 4354685564936845355ul; h3 = 11912009170470909681ul;
+            h4 = 5840696475078001361ul; h5 = 11170449401992604703ul;
+            h6 = 2270897969802886507ul; h7 = 6620516959819538809ul;
+        }
+
+        ulong[] w = new ulong[80];
+        for (int block = 0; block < paddedLength; block += 128)
+        {
+            for (int i = 0; i < 16; i++) w[i] = CryptoPrimitives.ReadUInt64BE(message, block + i * 8);
+            for (int i = 16; i < 80; i++)
+            {
+                ulong s0 = CryptoPrimitives.RotR64(w[i - 15], 1) ^ CryptoPrimitives.RotR64(w[i - 15], 8) ^ (w[i - 15] >> 7);
+                ulong s1 = CryptoPrimitives.RotR64(w[i - 2], 19) ^ CryptoPrimitives.RotR64(w[i - 2], 61) ^ (w[i - 2] >> 6);
+                w[i] = CryptoPrimitives.Add64(w[i - 16], s0, w[i - 7], s1);
+            }
+
+            ulong a = h0, b = h1, c = h2, d = h3;
+            ulong e = h4, f = h5, g = h6, h = h7;
+            for (int i = 0; i < 80; i++)
+            {
+                ulong s1 = CryptoPrimitives.RotR64(e, 14) ^ CryptoPrimitives.RotR64(e, 18) ^ CryptoPrimitives.RotR64(e, 41);
+                ulong ch = (e & f) ^ ((~e) & g);
+                ulong temp1 = CryptoPrimitives.Add64(h, s1, ch, k[i], w[i]);
+                ulong s0 = CryptoPrimitives.RotR64(a, 28) ^ CryptoPrimitives.RotR64(a, 34) ^ CryptoPrimitives.RotR64(a, 39);
+                ulong maj = (a & b) ^ (a & c) ^ (b & c);
+                ulong temp2 = CryptoPrimitives.Add64(s0, maj);
+
+                h = g; g = f; f = e;
+                e = CryptoPrimitives.Add64(d, temp1);
+                d = c; c = b; b = a;
+                a = CryptoPrimitives.Add64(temp1, temp2);
+            }
+
+            h0 = CryptoPrimitives.Add64(h0, a); h1 = CryptoPrimitives.Add64(h1, b);
+            h2 = CryptoPrimitives.Add64(h2, c); h3 = CryptoPrimitives.Add64(h3, d);
+            h4 = CryptoPrimitives.Add64(h4, e); h5 = CryptoPrimitives.Add64(h5, f);
+            h6 = CryptoPrimitives.Add64(h6, g); h7 = CryptoPrimitives.Add64(h7, h);
+        }
+
+        int outputLength = sha384 ? 48 : 64;
+        byte[] full = new byte[64];
+        CryptoPrimitives.WriteUInt64BE(h0, full, 0); CryptoPrimitives.WriteUInt64BE(h1, full, 8);
+        CryptoPrimitives.WriteUInt64BE(h2, full, 16); CryptoPrimitives.WriteUInt64BE(h3, full, 24);
+        CryptoPrimitives.WriteUInt64BE(h4, full, 32); CryptoPrimitives.WriteUInt64BE(h5, full, 40);
+        CryptoPrimitives.WriteUInt64BE(h6, full, 48); CryptoPrimitives.WriteUInt64BE(h7, full, 56);
+        return CryptoPrimitives.Slice(full, 0, outputLength);
+    }
+
+public:
+    byte[] Hash(const byte[]& data) { return HashCore(data, false); }
+    byte[] Hash(const string& text) { return Hash(text.ToUtf8()); }
+    byte[] Hash384(const byte[]& data) { return HashCore(data, true); }
+    byte[] Hash384(const string& text) { return Hash384(text.ToUtf8()); }
+}

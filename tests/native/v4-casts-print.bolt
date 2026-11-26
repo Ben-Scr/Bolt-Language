@@ -1,0 +1,1 @@
+static class Program {public:string Value(){return (string)0;} T Convert<T>(int n){return (T)n;} void Main(){Print(Value());Print((int)-3.9);Print(Convert<double>(9));Print();}}

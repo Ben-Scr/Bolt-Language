@@ -1,0 +1,78 @@
+{
+  "x86_64": {
+    "libllvm19": {
+      "path": "osx-64/libllvm19-19.1.7-h56e7563_2.conda",
+      "sha256": "375a634873b7441d5101e6e2a9d3a42fec51be392306a03a2fa12ae8edecec1a"
+    },
+    "lld": {
+      "path": "osx-64/lld-19.1.7-hc570667_1.conda",
+      "sha256": "de84239a4146fab2ccac89425f597498f2bcbc798a40cbfb626f1d593b5d3fca"
+    },
+    "libcxx": {
+      "path": "osx-64/libcxx-19.1.7-hf95d169_2.conda",
+      "sha256": "13658bbacdd29559d6c80249fa4896bc5f9344783922912d5a409d0c5e2c3e25"
+    },
+    "libzlib": {
+      "path": "osx-64/libzlib-1.3.1-hd23fc13_2.conda",
+      "sha256": "8412f96504fc5993a63edf1e211d042a1fd5b1d51dedec755d2058948fcced09"
+    },
+    "zstd": {
+      "path": "osx-64/zstd-1.5.7-hbc1a06c_7.conda",
+      "sha256": "5277886d9704a624dc9b79ac985861e1e431bdb39a57c082507ab577a138ec6c"
+    },
+    "libxml2-16": {
+      "path": "osx-64/libxml2-16-2.14.5-h52472cf_1.conda",
+      "sha256": "7075cd977746aa2209c9be2437aebdb276580ea44eef156fe24a45be2ee5a98c"
+    },
+    "libiconv": {
+      "path": "osx-64/libiconv-1.18-h4ae439b_3.conda",
+      "sha256": "2389e03a58ed0f5e8f2469eb4d4ba80d0af378b38854ae5eee65e5b641244082"
+    },
+    "liblzma": {
+      "path": "osx-64/liblzma-5.8.1-hd471939_2.conda",
+      "sha256": "7e22fd1bdb8bf4c2be93de2d4e718db5c548aa082af47a7430eb23192de6bb36"
+    }
+  },
+  "arm64": {
+    "libllvm19": {
+      "path": "osx-arm64/libllvm19-19.1.7-h8e0c9ce_2.conda",
+      "sha256": "46f8ff3d86438c0af1bebe0c18261ce5de9878d58b4fe399a3a125670e4f0af5"
+    },
+    "lld": {
+      "path": "osx-arm64/lld-19.1.7-ha4b1419_1.conda",
+      "sha256": "fc220b6e7c5b2d157244d42a99987ba5368489d874d55721dd45332ec98691f0"
+    },
+    "libcxx": {
+      "path": "osx-arm64/libcxx-19.1.7-ha82da77_2.conda",
+      "sha256": "07e4efaea695d807135f4d2d217bfec586bf1be0c81b69be8088d5e2cf8a606f"
+    },
+    "libzlib": {
+      "path": "osx-arm64/libzlib-1.3.1-h8359307_2.conda",
+      "sha256": "ce34669eadaba351cd54910743e6a2261b67009624dbc7daeeafdef93616711b"
+    },
+    "zstd": {
+      "path": "osx-arm64/zstd-1.5.7-hf451053_7.conda",
+      "sha256": "da867f5092eb0cb746d353694f0098031fd9817a4ce7d5743121209ae0f406ca"
+    },
+    "libxml2-16": {
+      "path": "osx-arm64/libxml2-16-2.14.5-h1e38a0d_1.conda",
+      "sha256": "7ea22f23774a5ca4e3afb9a06189242e7e75a3659f27ac3bda66e10852649a1b"
+    },
+    "libiconv": {
+      "path": "osx-arm64/libiconv-1.18-he4c29f2_3.conda",
+      "sha256": "689a14968267f2f97c07112fca5636e7d756036b9aee969911267c20bd3eea1f"
+    },
+    "liblzma": {
+      "path": "osx-arm64/liblzma-5.8.1-h39f12f2_2.conda",
+      "sha256": "0cb92a9e026e7bd4842f410a5c5c665c89b2eb97794ffddba519a626b8ce7285"
+    }
+  },
+  "libiconv-source": {
+    "url": "https://ftp.gnu.org/gnu/libiconv/libiconv-1.18.tar.gz",
+    "sha256": "3b08f5f4f9b4eb82f151a7040bfd6fe6c6fb922efe4b1659c66ea933276965e8"
+  },
+  "zig-darwin": {
+    "libSystem.tbd": "cdb2217019505764ef1c0ede11f4702e5cbc8900aae7759bd08aed08ba5e6b33",
+    "SDKSettings.json": "4a0d00fdae28d61106c6bf2dba9e7305877f77eca208356f6fcb7ba27e3d8688"
+  }
+}

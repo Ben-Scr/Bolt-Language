@@ -1,0 +1,34 @@
+public interface IText {
+    string ToString();
+    explicit string() { return ToString(); }
+}
+public class Value : IText {
+public:
+    int data;
+    Value(int x) { data=x; }
+    implicit int() { return data; }
+    string ToString() { return "v=" + data; }
+}
+public struct Scaled {
+public:
+    float v;
+    Scaled(float x) { v=x; }
+    float() { return v; }
+}
+static class Program {
+public:
+    int Read(int x) { return x; }
+    int Return(Value x) { return x; }
+    void Main() {
+        Value v=Value(7);
+        int a=v;
+        Print(a);
+        Print(Read(v));
+        Print(Return(v));
+        Print((string)v);
+        IText& text=v;
+        Print((string)text);
+        Scaled scaled=Scaled(1.5f);
+        Print((float)scaled);
+    }
+}

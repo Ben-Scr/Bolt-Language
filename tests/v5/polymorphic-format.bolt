@@ -1,0 +1,5 @@
+class Parent:IStringable{public:string ToString(){return "parent";}}
+class Child:Parent{public:override string ToString(){return "child";}}
+static class Program { public: void Main() {
+Child c; Parent& p=c; Console.WriteLine(p); Print((string)p); Print($"hello:{p}"); Print("concat:"+p); string s="append:"; s+=p; Print(s); Parent copy=p; Print(copy); Print(p);
+}}

@@ -1,0 +1,5 @@
+
+T Add<T>(T a,T b):Number,Addable{return a+b;}
+static class Program { public: void Main() {
+Add<string>("a","b");
+} }

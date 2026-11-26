@@ -1,0 +1,5 @@
+
+
+static class Program {public: void Main(){
+IStringable[] p=new IStringable[2];
+}}

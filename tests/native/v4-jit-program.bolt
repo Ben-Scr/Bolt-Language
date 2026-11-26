@@ -1,0 +1,1 @@
+static class Program { public: void Main(){Print(Runtime.ExecuteProgramJit("static class Program {public:int Main(){return 33;}}"));} }

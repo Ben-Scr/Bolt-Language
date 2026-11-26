@@ -1,0 +1,79 @@
+import System
+namespace System.Security.Cryptography;
+
+// RFC 8439 ChaCha20 implemented entirely in Bolt.
+public static class ChaCha20
+{
+private:
+    void QuarterRound(uint[]& state, int a, int b, int c, int d)
+    {
+        state[a] = CryptoPrimitives.Add32(state[a], state[b]); state[d] = state[d] ^ state[a]; state[d] = CryptoPrimitives.RotL32(state[d], 16);
+        state[c] = CryptoPrimitives.Add32(state[c], state[d]); state[b] = state[b] ^ state[c]; state[b] = CryptoPrimitives.RotL32(state[b], 12);
+        state[a] = CryptoPrimitives.Add32(state[a], state[b]); state[d] = state[d] ^ state[a]; state[d] = CryptoPrimitives.RotL32(state[d], 8);
+        state[c] = CryptoPrimitives.Add32(state[c], state[d]); state[b] = state[b] ^ state[c]; state[b] = CryptoPrimitives.RotL32(state[b], 7);
+    }
+
+public:
+    byte[] Block(const byte[]& key, const byte[]& nonce, uint counter)
+    {
+        if (key.Length != 32) throw ArgumentException("ChaCha20 key must contain exactly 32 bytes.");
+        if (nonce.Length != 12) throw ArgumentException("ChaCha20 nonce must contain exactly 12 bytes.");
+
+        uint[] state = new uint[16];
+        state[0] = 1634760805u;
+        state[1] = 857760878u;
+        state[2] = 2036477234u;
+        state[3] = 1797285236u;
+        for (int i = 0; i < 8; i++) state[4 + i] = CryptoPrimitives.ReadUInt32LE(key, i * 4);
+        state[12] = counter;
+        state[13] = CryptoPrimitives.ReadUInt32LE(nonce, 0);
+        state[14] = CryptoPrimitives.ReadUInt32LE(nonce, 4);
+        state[15] = CryptoPrimitives.ReadUInt32LE(nonce, 8);
+
+        uint[] working = new uint[16];
+        for (int i = 0; i < 16; i++) working[i] = state[i];
+        for (int round = 0; round < 10; round++)
+        {
+            QuarterRound(working, 0, 4, 8, 12);
+            QuarterRound(working, 1, 5, 9, 13);
+            QuarterRound(working, 2, 6, 10, 14);
+            QuarterRound(working, 3, 7, 11, 15);
+            QuarterRound(working, 0, 5, 10, 15);
+            QuarterRound(working, 1, 6, 11, 12);
+            QuarterRound(working, 2, 7, 8, 13);
+            QuarterRound(working, 3, 4, 9, 14);
+        }
+
+        byte[] output = new byte[64];
+        for (int i = 0; i < 16; i++)
+            CryptoPrimitives.WriteUInt32LE(CryptoPrimitives.Add32(working[i], state[i]), output, i * 4);
+        return output;
+    }
+
+    byte[] Transform(const byte[]& input, const byte[]& key, const byte[]& nonce, uint initialCounter = 1u)
+    {
+        byte[] output = new byte[input.Length];
+        uint counter = initialCounter;
+        int offset = 0;
+        while (offset < input.Length)
+        {
+            byte[] stream = Block(key, nonce, counter);
+            int count = input.Length - offset;
+            if (count > 64) count = 64;
+            for (int i = 0; i < count; i++) output[offset + i] = (byte)(input[offset + i] ^ stream[i]);
+            offset += count;
+            if (offset < input.Length)
+            {
+                if (counter == uint.MaxValue) throw InvalidOperationException("ChaCha20 counter exhausted.");
+                counter = CryptoPrimitives.Add32(counter, 1u);
+            }
+        }
+        return output;
+    }
+
+    byte[] Encrypt(const byte[]& plaintext, const byte[]& key, const byte[]& nonce, uint initialCounter = 1u)
+    { return Transform(plaintext, key, nonce, initialCounter); }
+
+    byte[] Decrypt(const byte[]& ciphertext, const byte[]& key, const byte[]& nonce, uint initialCounter = 1u)
+    { return Transform(ciphertext, key, nonce, initialCounter); }
+}

@@ -1,0 +1,26 @@
+import System.Text
+
+static class Program {
+    uint HashBytes(uint hash, const byte[]& bytes) {
+        for (int i = 0; i < bytes.Length; i++)
+            hash = (uint)(((ulong)(hash ^ (uint)bytes[i]) * 16777619ul) & 4294967295ul);
+        return hash;
+    }
+
+public:
+    void Main() {
+        uint hash = 2166136261u;
+        for (int pass = 0; pass < 18; pass++) {
+            int length = 2046 + pass % 3;
+            byte[] data = new byte[length];
+            for (int i = 0; i < length; i++)
+                data[i] = (byte)((i * 131 + (i >> 3) + pass * 17) & 255);
+            string hex = HexEncoding.Encode(data, (pass & 1) == 0);
+            string base64 = Base64Encoding.Encode(data);
+            hash = HashBytes(hash, hex.ToUtf8());
+            hash = HashBytes(hash, base64.ToUtf8());
+            hash = HashBytes(hash, Base64Encoding.Decode(base64));
+        }
+        Print(hash);
+    }
+}

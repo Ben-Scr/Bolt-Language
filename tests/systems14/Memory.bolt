@@ -1,0 +1,41 @@
+import System
+import System.Memory
+import System.Diagnostics
+public class Payload { public: int Value=12; }
+static class Program { public:
+ static int checks=0;
+ void Check(bool value){Assert.That(value);checks++;}
+ void Main(){
+  Allocator allocator(16384l);
+  {MemoryBlock empty=allocator.Allocate(0ul);Check(empty.Length==0ul);Check(empty.IsAlive);empty.Close();Check(!empty.IsAlive);}
+  Check(allocator.LiveBytes==0ul);
+  MemoryBlock a=allocator.Allocate(64ul,256ul),b=allocator.Allocate(64ul);
+  Check(Memory.IsAligned(a.Data,256ul));Check(a.Length==64ul);Check(allocator.LiveAllocations==2ul);
+  Memory.Set(a.Data,(byte)17,64ul);Memory.Copy(b.Data,a.Data,64ul);Check(Memory.Compare(a.Data,b.Data,64ul)==0);
+  b.Write(2ul,(byte)18);Check(Memory.Compare(a.Data,b.Data,64ul)<0);
+  for(int i=0;i<8;i++)a.Write((ulong)i,(byte)i);
+  byte[] bytes=[(byte)0,(byte)1,(byte)2,(byte)3,(byte)4,(byte)5,(byte)6,(byte)7];byte* data=&bytes[0];Memory.Move(&bytes[2],data,6ul);Check(bytes[2]==(byte)0 && bytes[7]==(byte)5);a.Write(7ul,(byte)5);
+  Memory.Copy(null,null,0ul);Memory.Move(null,null,0ul);Memory.Set(null,(byte)0,0ul);Check(Memory.Compare(null,null,0ul)==0);
+  bool caught=false;try{Memory.Copy(data,&bytes[1],6ul);}catch(ArgumentException& e){caught=true;}Check(caught);
+  caught=false;try{Memory.Copy(null,data,1ul);}catch(ArgumentNullException& e){caught=true;}Check(caught);
+  caught=false;try{Memory.AlignUp(10ul,3ul);}catch(ArgumentException& e){caught=true;}Check(caught);
+  Check(Memory.AlignUp(17ul,16ul)==32ul);Check(Memory.ByteCount(12l,4ul)==48ul);
+  caught=false;try{Memory.ByteCount(-1l,4ul);}catch(ArgumentOutOfRangeException& e){caught=true;}Check(caught);
+  caught=false;try{Memory.AlignUp(18446744073709551615ul,8ul);}catch(OverflowException& e){caught=true;}Check(caught);
+  caught=false;try{Memory.ByteCount(9223372036854775807l,4ul);}catch(OverflowException& e){caught=true;}Check(caught);
+  Allocator other; caught=false;try{other.Free(a);}catch(ArgumentException& e){caught=true;}Check(caught&&a.IsAlive);
+  MemoryBlock alias=a;a=allocator.Reallocate(a,128ul,256ul);Check(!alias.IsAlive&&a.IsAlive&&a.Read(7ul)==(byte)5);
+  allocator.FailAfter(0l);caught=false;try{MemoryBlock unused=allocator.Reallocate(a,256ul);}catch(OutOfMemoryException& e){caught=true;}Check(caught&&a.IsAlive&&a.Length==128ul);
+  allocator.FailAfter(-1l);allocator.Free(a);allocator.Free(a);allocator.Free(b);Check(allocator.LiveBytes==0ul&&allocator.LiveAllocations==0ul);
+  {MemoryBlock block=allocator.Allocate(77ul);Check(allocator.LiveBytes==77ul);}Check(allocator.LiveBytes==0ul);
+  ByteArena arena(32ul,4096ul);ArenaSlice first=arena.Allocate(20ul,16ul);first.Write(0ul,(byte)91);
+  for(int i=0;i<12;i++){ArenaSlice item=arena.Allocate(40ul,32ul);Check(Memory.IsAligned(item.Data,32ul));}
+  Check(first.Read(0ul)==(byte)91);arena.Reset();Check(!first.IsAlive);caught=false;try{first.Read(0ul);}catch(ObjectDisposedException& e){caught=true;}Check(caught);
+  ArenaSlice after=arena.Allocate(8ul);arena.Close();Check(!after.IsAlive);arena.Close();
+  ArenaSlice stale;{ByteArena temporary;stale=temporary.Allocate(1ul);}Check(!stale.IsAlive);
+  SafePointer<Payload> p=SafePointers.NewSafe<Payload>();Check(p.HasValue&&p.Get().Value==12);
+  SafePointer<Payload> copy=p;copy.Get().Value=44;Check(p.Get().Value==12&&copy.Get().Value==44);p.Reset();Check(!p.HasValue&&copy.HasValue);
+  caught=false;try{p.Get();}catch(InvalidOperationException& e){caught=true;}Check(caught);
+  Print("MEMORY14:"+checks);
+ }
+}

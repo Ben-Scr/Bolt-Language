@@ -1,0 +1,25 @@
+import System.Reflection
+[Reflect] class Sample {
+public:
+    int stored=4;
+    int& Borrow(){return stored;}
+    int Zero(){return 4;}
+    int Mixed(int number,string text,long extra){return number+text.Length+(int)extra;}
+    int Change(int& number,string& text){number+=2;text+="!";return number;}
+    int Many(int p0,int p1,int p2,int p3,int p4,int p5,int p6,int p7,int p8,int p9,int p10,int p11,int p12,int p13,int p14,int p15,int p16){return p0+p16;}
+}
+R Forward<R,O,T...>(O& value,string method,T... args){return Reflection.Invoke<R,O,T...>(value,method,args...);}
+static class Program {
+public:
+    void Main(){
+        Sample sample;
+        int& field=Reflection.Invoke<int&,Sample>(sample,"Borrow");field=8;
+        if(sample.stored!=8)throw Exception("reflected reference return lost its target");
+        Print(Forward<int,Sample>(sample,"Zero"));
+        Print(Forward<int,Sample,int,string,long>(sample,"Mixed",3,"ok",7l));
+        int number=5;string text="ref";
+        Print(Forward<int,Sample,int&,string&>(sample,"Change",number,text));
+        Print(number);Print(text);
+        Print(Forward<int,Sample,int,int,int,int,int,int,int,int,int,int,int,int,int,int,int,int,int>(sample,"Many",1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17));
+    }
+}

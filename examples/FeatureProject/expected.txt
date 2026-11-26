@@ -1,0 +1,18 @@
+10, 5
+8
+1
+10
+10
+1
+25
+Compile
+1
+Bolt logger
+Bolt logger
+4
+true
+int
+string
+double
+2
+42

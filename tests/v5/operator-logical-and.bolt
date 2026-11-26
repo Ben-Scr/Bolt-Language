@@ -1,0 +1,5 @@
+
+class N{public:static bool operator &&(N a,N b){return true;}}
+static class Program {public: void Main(){
+
+}}

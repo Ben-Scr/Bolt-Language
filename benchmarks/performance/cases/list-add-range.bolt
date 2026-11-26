@@ -1,0 +1,25 @@
+import System.Collections.Generic
+
+static class Program
+{
+public:
+    void Main()
+    {
+        const int width = 131072;
+        const int batches = 32768;
+        List<int> source(width);
+        List<int> destination(width);
+        for (int i = 0; i < width; i++) source.Add(i);
+
+        ulong checksum = 0ul;
+        for (int batch = 0; batch < batches; batch++)
+        {
+            int index = (batch * 31) % width;
+            source[index] = batch;
+            destination.AddRange(source);
+            checksum += (ulong)destination[index] + (ulong)destination.Count;
+            destination.Clear();
+        }
+        Print(checksum);
+    }
+}

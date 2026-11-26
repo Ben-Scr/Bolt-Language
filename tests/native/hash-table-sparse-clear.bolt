@@ -1,0 +1,45 @@
+import Bolt.Runtime
+import System
+import System.Collections.Generic
+
+static class Program
+{
+public:
+    bool Check(int capacity, int bucketCount)
+    {
+        HashSet<int> values(capacity);
+        // Find a collision chain using the current backend's own integer hash.
+        int[] keys = new int[12];
+        ulong bucket = Bolt.Runtime.Values.Hash<int>(0) % (ulong)bucketCount;
+        int found = 0;
+        for (int i = 0; i < 100000 && found < keys.Length; i++)
+        {
+            if (Bolt.Runtime.Values.Hash<int>(i) % (ulong)bucketCount == bucket)
+            {
+                keys[found++] = i;
+                values.Add(i);
+            }
+        }
+        if (found != keys.Length || !values.Remove(keys[4])) return false;
+        HashSetEnumerator<int> iter = values.GetEnumerator();
+        if (!iter.MoveNext()) return false;
+        values.Clear();
+        if (values.Count != 0 || values.Capacity != capacity) return false;
+        bool invalidated = false;
+        try { iter.MoveNext(); }
+        catch (InvalidOperationException& error) { invalidated = true; }
+        if (!invalidated) return false;
+        HashSetEnumerator<int> empty = values.GetEnumerator();
+        values.Clear();
+        if (empty.MoveNext()) return false;
+        for (int i = 0; i < keys.Length; i++) if (!values.Add(keys[i])) return false;
+        for (int i = 0; i < keys.Length; i++) if (!values.Contains(keys[i])) return false;
+        return values.Count == keys.Length;
+    }
+    int Main()
+    {
+        if (!Check(384, 512) || !Check(391, 522)) return 1;
+        Print("sparse clear OK");
+        return 0;
+    }
+}

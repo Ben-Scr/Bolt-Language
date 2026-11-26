@@ -1,0 +1,16 @@
+static class Program {
+public:
+    void Main() {
+        string text = "";
+        for (int i = 0; i < 128; i++) text += "level=Grün/😀;";
+        ulong sum = 0ul;
+        int count = text.Length;
+        for (int round = 0; round < 384; round++) {
+            for (int i = 0; i < count; i++) {
+                int at = (i * 29 + round) % count;
+                sum += (ulong)(uint)text[at];
+            }
+        }
+        Print(sum);
+    }
+}

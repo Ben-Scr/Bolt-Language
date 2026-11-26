@@ -1,0 +1,58 @@
+public struct Health : IStringable
+{
+private:
+    int value;
+public:
+    Health(int initial) { value = initial; }
+    implicit int() { return value; }
+    string ToString() { return "HP=" + value; }
+    // Explicit string conversion is inherited from IStringable's default body.
+}
+
+public class Player
+{
+private:
+    int health = 100;
+public:
+    public event Action<int> OnHealthChanged;
+    int Health => health;
+
+    void Damage(int amount)
+    {
+        health -= amount;
+        OnHealthChanged.Invoke(health);
+    }
+}
+
+public class Listener
+{
+public:
+    int Last;
+    void Handle(int value)
+    {
+        Last = value;
+        Print("Changed: " + value);
+    }
+}
+
+public static class Program
+{
+public:
+    void Main()
+    {
+        Player player;
+        Listener listener;
+        // A bound instance method borrows the listener; keep it alive.
+        player.OnHealthChanged += listener.Handle;
+        player.Damage(25);
+        player.OnHealthChanged -= listener.Handle;
+        player.Damage(5);
+
+        Health value = Health(player.Health);
+        int numeric = value;               // implicit conversion
+        string text = (string)value;       // explicit interface-default conversion
+        Print(text);
+        Print(numeric);
+        Print(listener.Last);              // 75: the unsubscribed call did not run
+    }
+}

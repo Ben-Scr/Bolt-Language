@@ -1,0 +1,23 @@
+import Bolt.Runtime
+
+static class Program {
+public:
+    int Main() {
+        int sum = 0;
+        for (int round = 0; round < 12; round++) {
+            Buffer<int> source;
+            source.Add(round);
+            int[] fresh = source.ToArray();
+            int[] separate = fresh;
+            source[0] = 700;
+            fresh[0] = 99;
+            if (separate[0] != round || source[0] != 700) return 1;
+            int[] literal = [round, 2];
+            int[] zeros = new int[4];
+            if (zeros[0] != 0 || zeros[3] != 0) return 2;
+            sum += separate[0] + literal[1];
+            zeros[3] = 9;
+        }
+        return sum == 90 ? 0 : 3;
+    }
+}

@@ -1,0 +1,148 @@
+#if !(Windows || Web)
+import System
+namespace Bolt.Runtime;
+
+static class ProcessLauncher {
+    static void Action(int result) { if(result!=0)throw IOException("posix_spawn file action failed: "+(string)result); }
+    static int MakePipe(PipeHandle& parent,bool read,int target,void* actions) {
+        parent.Initialize(read);
+        int[] ends=new int[2];
+#if Linux || Android
+        if(Bolt.Runtime.ProcessApi.Pipe(&ends[0],524288)!=0)throw IOException("pipe2 failed.");
+        int duplicate=1030, nonblock=2048;
+#else
+        if(Bolt.Runtime.ProcessApi.Pipe(&ends[0])!=0)throw IOException("pipe failed.");
+#if MacOS || IOS
+        int duplicate=67;
+#else
+        int duplicate=17;
+#endif
+        int nonblock=4;
+#endif
+        try {
+            for(int i=0;i<2;i++){
+                if(ends[i]<3){
+                    int moved=Bolt.Runtime.ProcessApi.FileControl(ends[i],duplicate,3);
+                    if(moved<0)throw IOException("Cannot move a pipe descriptor.");
+                    Bolt.Runtime.ProcessApi.Close(ends[i]);ends[i]=moved;
+                }
+#if !(Linux || Android)
+                if(Bolt.Runtime.ProcessApi.FileControl(ends[i],2,1)<0)throw IOException("Cannot set FD_CLOEXEC.");
+#endif
+            }
+            int p=read?0:1,k=1-p;
+            int flags=Bolt.Runtime.ProcessApi.FileControl(ends[p],3,0);
+            if(flags<0 || Bolt.Runtime.ProcessApi.FileControl(ends[p],4,flags|nonblock)<0)
+                throw IOException("Cannot make parent pipe nonblocking.");
+            Action(Bolt.Runtime.ProcessApi.Redirect(actions,ends[k],target));
+            parent.Attach(ends[p]);ends[p]=-1;
+            int child=ends[k];ends[k]=-1;return child;
+        } finally {
+            for(int i=0;i<2;i++)if(ends[i]>=0)Bolt.Runtime.ProcessApi.Close(ends[i]);
+        }
+    }
+    // The packed byte array owns all C strings through posix_spawn. Build
+    // pointers only after the final allocation so array growth cannot move them.
+    static byte[] Pack(const string[]& values) {
+        int total=1;
+        for(int i=0;i<values.Length;i++)total+=values[i].ByteLength+1;
+        byte[] bytes=new byte[total];
+        int offset=0;
+        for(int i=0;i<values.Length;i++){
+            ulong n=0ul;byte* text=NativeString.Bytes(values[i],n);
+            SystemCalls.Bytes(&bytes[offset],text,n);
+            offset+=(int)n+1;
+        }
+        return bytes;
+    }
+    static void Point(byte[]& bytes,byte*[]& pointers,const string[]& values) {
+        int offset=0;
+        for(int i=0;i<values.Length;i++){
+            pointers[i]=&bytes[offset];
+            offset+=values[i].ByteLength+1;
+        }
+    }
+public:
+    static void Start(SystemState* state,PipeHandle& input,PipeHandle& output,PipeHandle& error,
+                      string program,const string[]& args,string directory,bool redirect,const string[]& environment) {
+        string[] argv=new string[args.Length+1];argv[0]=program;
+        for(int i=0;i<args.Length;i++)argv[i+1]=args[i];
+        byte*[] av=new byte*[argv.Length+1], ev=new byte*[environment.Length+1];
+        byte[] arguments=Pack(argv), env=Pack(environment);
+        Point(arguments,av,argv);Point(env,ev,environment);
+        // Storage is aligned and accommodates both pointer-based BSD actions
+        // and the larger inline glibc/musl file-actions structures.
+        ulong[] actions=new ulong[32];
+        int[] kids=[-1,-1,-1];
+        void* attr=null;
+#if MacOS || IOS
+        ulong attributes=0ul;
+        bool initialized=false;
+#endif
+        Action(Bolt.Runtime.ProcessApi.InitActions(&actions[0]));
+        try {
+            if(directory!=""){
+                byte[] directoryProbe=(directory+"/.\0").ToUtf8();
+                if(Bolt.Runtime.StandalonePosix.Access(&directoryProbe[0],0)!=0)
+                    throw DirectoryNotFoundException("Child working directory does not exist: "+directory);
+#ifdef IOS
+                throw InvalidOperationException("A child working directory is unavailable on iOS.");
+#else
+                byte[] cwd=(directory+"\0").ToUtf8();
+                int result=Bolt.Runtime.ProcessApi.ChildDirectory(&actions[0],&cwd[0]);
+#ifdef Android
+                if(result<0)throw InvalidOperationException("A child working directory requires Android API 34 or later.");
+#endif
+                Action(result);
+#endif
+            }
+            if(redirect){
+                kids[0]=MakePipe(input,false,0,&actions[0]);
+                kids[1]=MakePipe(output,true,1,&actions[0]);
+                kids[2]=MakePipe(error,true,2,&actions[0]);
+            }
+#if FreeBSD || (Linux && BoltSpawnCloseFrom)
+            Action(Bolt.Runtime.ProcessApi.CloseFrom(&actions[0],3));
+#endif
+#if MacOS || IOS
+            Action(Bolt.Runtime.ProcessApi.InitSpawnAttributes(&attributes));
+            initialized=true;attr=&attributes;
+            Action(Bolt.Runtime.ProcessApi.SpawnFlags(attr,16384)); // POSIX_SPAWN_CLOEXEC_DEFAULT
+            if(!redirect)for(int fd=0;fd<3;fd++){
+                if(Bolt.Runtime.ProcessApi.FileControl(fd,1,0)>=0)
+                    Action(Bolt.Runtime.ProcessApi.InheritDescriptor(&actions[0],fd));
+            }
+#endif
+            string path="/usr/bin:/bin";
+            for(int i=0;i<environment.Length;i++)
+                if(environment[i].StartsWith("PATH=")){path=environment[i].Substring(5);break;}
+            bool search=!program.Contains('/'), denied=false;
+            int at=0;
+            while(true){
+                int next=path.IndexOf(':',at);
+                string candidate=program;
+                if(search){
+                    string basePath=next<0?path.Substring(at):path.Substring(at,next-at);
+                    candidate=(basePath==""?".":basePath)+"/"+program;
+                }
+                byte[] name=(candidate+"\0").ToUtf8();
+                int pid=0;
+                int result=Bolt.Runtime.ProcessApi.Start(&pid,&name[0],&actions[0],attr,&av[0],&ev[0]);
+                if(result==0){state->Id=pid;state->Open=true;return;}
+                if(result==13)denied=true;
+                else if(result!=2 && result!=20)throw IOException("posix_spawn failed: "+(string)result);
+                if(!search || next<0)break;
+                at=next+1;
+            }
+            if(denied)throw IOException("Cannot execute "+program);
+            throw FileNotFoundException("Executable or working directory not found: "+program);
+        } finally {
+#if MacOS || IOS
+            if(initialized)Bolt.Runtime.ProcessApi.DropSpawnAttributes(&attributes);
+#endif
+            Bolt.Runtime.ProcessApi.DropActions(&actions[0]);
+            for(int i=0;i<3;i++)if(kids[i]>=0)Bolt.Runtime.ProcessApi.Close(kids[i]);
+        }
+    }
+}
+#endif

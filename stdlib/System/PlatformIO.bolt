@@ -1,0 +1,307 @@
+import System.IO
+import System
+namespace Bolt.Runtime.IO;
+#ifdef BoltStandaloneCore
+// The caller owns one open handle from Open through Close, including on errors.
+struct FileHandle
+{
+private:
+#ifdef Windows
+    void* handle;
+#else
+    int descriptor;
+#if Linux || FreeBSD
+    void* file;
+#endif
+    int LastError()
+    {
+#ifdef Linux
+        return *Bolt.Runtime.Linux.ErrnoLocation();
+#else
+        return *Bolt.Runtime.MacOS.ErrnoLocation();
+#endif
+    }
+#endif
+    void Fail(const string& path, const string& operation, int code)
+    {
+        string message = operation + " '" + path + "': OS error " + (string)code;
+#ifdef Windows
+        if (code == 2 || code == 3) throw FileNotFoundException(message);
+        if (code == 5 || code == 32) throw UnauthorizedAccessException(message);
+#else
+        if (code == 2) throw FileNotFoundException(message);
+        if (code == 13 || code == 1) throw UnauthorizedAccessException(message);
+#endif
+        throw IOException(message);
+    }
+    long LengthHint(const string& path)
+    {
+#ifdef Windows
+        long size = 0l;
+        if (Bolt.Runtime.StandaloneWindows.FileSize(handle, (Bolt.Runtime.Windows.LargeInteger*)&size) != 0) return size;
+#else
+        // Seek on the open descriptor. Pipes and some virtual files have no size.
+        long size = Bolt.Runtime.StandalonePosix.Seek(descriptor, 0l, 2);
+        if (size >= 0l) {
+            if (Bolt.Runtime.StandalonePosix.Seek(descriptor, 0l, 0) < 0l) Fail(path, "Seek", LastError());
+            return size;
+        }
+#endif
+        return 0l;
+    }
+    int Read(const string& path, byte* data, int count)
+    {
+#ifdef Windows
+        uint received = 0u;
+        if (Bolt.Runtime.Windows.ReadFile(handle, data, (uint)count, &received, null) == 0) {
+            int code = (int)Bolt.Runtime.Windows.GetLastError();
+            if (code == 38 || code == 109) return 0; // EOF or the writer closed its pipe.
+            Fail(path, "Read", code);
+        }
+        return (int)received;
+#else
+        long received = -1l;
+        while (received < 0l) {
+#ifdef Linux
+            received = Bolt.Runtime.Linux.Read(descriptor, data, (ulong)count);
+#else
+            received = Bolt.Runtime.MacOS.Read(descriptor, data, (ulong)count);
+#endif
+            if (received < 0l) {
+                int code = LastError();
+                if (code != 4) Fail(path, "Read", code); // Retry EINTR.
+            }
+        }
+        return (int)received;
+#endif
+    }
+public:
+    void Open(const string& path, FileMode mode)
+    {
+        bool reading = mode == FileMode.Open;
+        bool append = mode == FileMode.Append;
+#ifdef Windows
+        byte[] wide = WindowsPath.Wide(path);
+        // FILE_APPEND_DATA alone lets the kernel place every write at EOF.
+        uint access = reading ? 2147483648u : (append ? 4u : 1073741824u);
+        uint disposition = reading ? 3u : (append ? 4u : 2u); // OPEN_EXISTING / OPEN_ALWAYS / CREATE_ALWAYS
+        handle = Bolt.Runtime.StandaloneWindows.OpenFile((ushort*)&wide[0], access, 3u, null, disposition, 128u, null);
+        if (*((long*)&handle) == -1l) {
+            int code = (int)Bolt.Runtime.Windows.GetLastError();
+            Fail(path, "Open", code);
+        }
+#else
+        if (path == "") throw ArgumentException("The path must not be empty.");
+        if (path.Contains('\0')) throw ArgumentException("The path contains a NUL character.");
+        byte[] name = (path + "\0").ToUtf8();
+#ifdef MacOS
+        // openx_np has a fixed C ABI, including on Darwin arm64. Set the
+        // creation mode explicitly and request O_CLOEXEC in the same open.
+        void* security = null;
+        if (!reading) {
+            security = Bolt.Runtime.StandalonePosix.NewFileSecurity();
+            if (security == null) Fail(path, "Open", LastError());
+        }
+        try {
+            ushort permissions = (ushort)438; // 0666, subject to umask
+            if (!reading && Bolt.Runtime.StandalonePosix.SetFileSecurity(security, 4, &permissions) != 0)
+                Fail(path, "Open", LastError());
+            int flags = 16777216; // O_CLOEXEC
+            if (!reading) flags |= 1 | 512 | (append ? 8 : 1024); // O_WRONLY | O_CREAT | (O_APPEND or O_TRUNC)
+            while (true) {
+                descriptor = Bolt.Runtime.StandalonePosix.OpenFile(&name[0], flags, security);
+                if (descriptor >= 0) break;
+                int code = LastError();
+                if (code != 4) Fail(path, "Open", code);
+            }
+        } finally {
+            if (security != null) Bolt.Runtime.StandalonePosix.FreeFileSecurity(security);
+        }
+#else
+        // 'w' truncates and 'a' requests O_APPEND. Both create subject to umask.
+        // 'e' requests close-on-exec at open time. All data I/O uses the fd.
+        byte[] flags = (reading ? "rbe\0" : (append ? "abe\0" : "wbe\0")).ToUtf8();
+        while (true) {
+            file = Bolt.Runtime.StandalonePosix.OpenFile(&name[0], &flags[0]);
+            if (file != null) break;
+            int code = LastError();
+            if (code != 4) Fail(path, "Open", code);
+        }
+        descriptor = Bolt.Runtime.StandalonePosix.Descriptor(file);
+#endif
+#endif
+    }
+#if Windows || (Linux && (X64 || ARM64 || RISCV64))
+    long Length(const string& path)
+    {
+#ifdef Windows
+        long size = 0l;
+        if (Bolt.Runtime.StandaloneWindows.FileSize(handle, (Bolt.Runtime.Windows.LargeInteger*)&size) == 0)
+            Fail(path, "Read length", (int)Bolt.Runtime.Windows.GetLastError());
+        return size;
+#else
+        ulong[] status = new ulong[32];
+        if (Bolt.Runtime.LinuxFile.Status(descriptor, &status[0]) != 0) Fail(path, "Read length", LastError());
+        // st_size is a signed 64-bit off_t at offset 48 on all three Linux ABIs.
+        return ((long*)&status[0])[6];
+#endif
+    }
+#endif
+    byte[] ReadToEnd(const string& path)
+    {
+        long size = LengthHint(path);
+        if (size > int.MaxValue) throw IOException("File exceeds the Bolt byte-array length limit.");
+        byte[] bytes = new byte[(int)size];
+        int used = 0;
+        while (used < bytes.Length) {
+            int count = Read(path, &bytes[used], bytes.Length - used);
+            if (count == 0) break;
+            used += count;
+        }
+        // A file can shrink or grow after sizing, and a stream may report zero.
+        byte next = (byte)0;
+        if (used == bytes.Length) {
+            if (Read(path, &next, 1) == 0) return bytes;
+            if (used == int.MaxValue) throw IOException("File exceeds the Bolt byte-array length limit.");
+        }
+        Bolt.Runtime.Buffer<byte> result;
+        result.AppendRange(bytes, 0, used);
+        if (used < bytes.Length) return result.ToArray();
+        result.Add(next);
+        byte[] chunk = new byte[8192];
+        while (true) {
+            int extra = Read(path, &chunk[0], chunk.Length);
+            if (extra == 0) break;
+            if (result.Length > int.MaxValue - extra) throw IOException("File exceeds the Bolt byte-array length limit.");
+            result.AppendRange(chunk, 0, extra);
+        }
+        return result.ToArray();
+    }
+private:
+    void WriteBuffer(const string& path, const byte* data, int count)
+    {
+        int offset = 0;
+        while (offset < count) {
+            int remaining = count - offset;
+#ifdef Windows
+            uint written = 0u;
+            if (Bolt.Runtime.StandaloneWindows.WriteBytes(handle, data[offset], (uint)remaining, &written, null) == 0) {
+                int code = (int)Bolt.Runtime.Windows.GetLastError();
+                Fail(path, "Write", code);
+            }
+#else
+            long written = Bolt.Runtime.StandalonePosix.WriteBytes(descriptor, data[offset], (ulong)remaining);
+            if (written < 0l) {
+                int code = LastError();
+                if (code == 4) continue; // EINTR
+                Fail(path, "Write", code);
+            }
+#endif
+            if (written == 0) throw IOException("Write made no progress for '" + path + "'.");
+            offset += (int)written;
+        }
+    }
+public:
+    void WriteAll(const string& path, const byte[]& bytes)
+    {
+        if (bytes.Length > 0) WriteBuffer(path, Bolt.Runtime.TypedMemory.ArrayData(bytes, 0), bytes.Length);
+    }
+    void WriteText(const string& path, const string& text)
+    {
+        ulong length = 0ul;
+        const byte* data = Bolt.Runtime.TypedMemory.TextData(text, length);
+        WriteBuffer(path, data, (int)length);
+    }
+    void Close(const string& path)
+    {
+#ifdef Windows
+        if (Bolt.Runtime.StandaloneWindows.Close(handle) == 0) {
+            int code = (int)Bolt.Runtime.Windows.GetLastError();
+            Fail(path, "Close", code);
+        }
+#elif MacOS
+        if (Bolt.Runtime.StandalonePosix.Close(descriptor) != 0) Fail(path, "Close", LastError());
+#else
+        if (Bolt.Runtime.StandalonePosix.Close(file) != 0) Fail(path, "Close", LastError());
+#endif
+    }
+}
+#else
+struct FileHandle
+{
+private:
+    FileStream stream;
+public:
+    void Open(const string& path, FileMode mode)
+    {
+        stream = FileStream(path, mode, mode == FileMode.Open ? FileAccess.Read : FileAccess.Write);
+    }
+    byte[] ReadToEnd(const string& path)
+    {
+        if (stream.Length > int.MaxValue) Bolt.Runtime.Failure.IO("File exceeds the Bolt byte-array length limit.");
+        return stream.ReadAllBytes();
+    }
+    void WriteAll(const string& path, const byte[]& bytes) { stream.Write(bytes); }
+    void WriteText(const string& path, const string& text)
+    {
+        WriterLease writer = WriterLease(stream, true);
+        writer.WriteText(text);
+    }
+    void Close(const string& path) { stream.Close(); }
+}
+#endif
+#if (Windows || (Linux && (X64 || ARM64 || RISCV64))) && BoltStandaloneCore
+public struct DirectoryEntry
+{
+public:
+    string Path;
+    bool IsDirectory;
+    bool IsFile;
+    bool IsLink;
+}
+#else
+[Native("bolt::platform::FileOps")]
+public static class FileOps
+{
+public:
+    bool Exists(string path);
+    void Delete(string path);
+    void Copy(string source, string destination, bool overwrite);
+    void Move(string source, string destination, bool overwrite);
+}
+
+[Native("bolt::platform::DirectoryEntry")]
+public class DirectoryEntry
+{
+public:
+    [NativeProperty("Path")] const string Path;
+    [NativeProperty("IsDirectory")] const bool IsDirectory;
+    [NativeProperty("IsFile")] const bool IsFile;
+    [NativeProperty("IsLink")] const bool IsLink;
+}
+[Native("bolt::platform::DirectoryOps")]
+public static class DirectoryOps
+{
+public:
+    bool IsDirectory(string path);
+    bool IsLink(string path);
+    void CreateOne(string path);
+    void RemoveOne(string path);
+    void Move(string source, string destination);
+    string Current();
+    void Current(string path);
+    DirectoryEntry[] Entries(string path);
+}
+#endif
+#if !(BoltStandaloneCore && (Windows || MacOS || FreeBSD || (Linux && (X64 || ARM64 || RISCV64))))
+[Native("bolt::platform::WriterLease")]
+public class WriterLease
+{
+public:
+    WriterLease();
+    WriterLease(Stream& stream, bool leaveOpen);
+    void WriteText(const string& text);
+    void Flush();
+    void Close();
+}
+#endif

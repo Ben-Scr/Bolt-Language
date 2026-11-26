@@ -1,0 +1,7 @@
+
+
+static class Program {public: void Main(){
+Print($"begin{1 /* } \" */ + 2}end"); Print($"line{
+3+4
+}end");
+}}

@@ -1,0 +1,5 @@
+
+class A{} class B{} class C:A,B{}
+static class Program {public: void Main(){
+
+}}

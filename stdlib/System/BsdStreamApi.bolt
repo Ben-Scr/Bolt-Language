@@ -1,0 +1,13 @@
+#if BoltStandaloneCore && (MacOS || FreeBSD)
+namespace Bolt.Runtime.BsdStreamApi;
+[Header("fcntl.h"), Native("open")]
+extern "C" int Open(byte* path, int flags, uint permissions);
+[Header("unistd.h"), Native("ftruncate")]
+extern "C" int Truncate(int fd, long length);
+#if MacOS && X64
+[Header("sys/stat.h"), Native("fstat64")]
+#else
+[Header("sys/stat.h"), Native("fstat")]
+#endif
+extern "C" int Status(int fd, void* status);
+#endif

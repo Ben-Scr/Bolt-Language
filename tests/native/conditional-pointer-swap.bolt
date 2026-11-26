@@ -1,0 +1,19 @@
+static class Program {
+public:
+    int Main() {
+        int x=13, y=22;
+        int* a=&x;
+        int* b=&y;
+        for (int i=0; i<3; i++) {
+            if (i!=1) { int* tmp=a; a=b; b=tmp; }
+            if (i<2 && (*a!=22 || *b!=13)) return 1;
+        }
+        if (a!=&x || b!=&y) return 2;
+        int** observed=&a;
+        for (int j=0; j<2; j++) {
+            if (j==0) { int* tmp=b; b=a; a=tmp; }
+            if (**observed!=22) return 3;
+        }
+        return 0;
+    }
+}

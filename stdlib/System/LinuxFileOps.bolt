@@ -1,0 +1,204 @@
+#if Linux && (X64 || ARM64 || RISCV64) && BoltStandaloneCore
+import System
+import System.IO
+import System.Collections.Generic
+namespace Bolt.Runtime.IO;
+
+static class LinuxPath
+{
+public:
+    byte[] Name(const string& path)
+    {
+        if (path == "") throw ArgumentException("The path must not be empty.");
+        if (path.Contains('\0')) throw ArgumentException("The path contains a NUL character.");
+        return (path + "\0").ToUtf8();
+    }
+    int Error() { return *Bolt.Runtime.Linux.ErrnoLocation(); }
+    void Fail(const string& path, int code)
+    {
+        string message = "'" + path + "': OS error " + (string)code;
+        if (code == 2) throw FileNotFoundException(message);
+        if (code == 13 || code == 1) throw UnauthorizedAccessException(message);
+        throw IOException(message);
+    }
+    // Linux LP64 struct stat begins with st_dev and st_ino. x86-64 puts
+    // st_nlink before st_mode; arm64 and riscv64 put it after st_mode.
+    uint Mode(ulong* status)
+    {
+#ifdef X64
+        return ((uint*)status)[6];
+#else
+        return ((uint*)status)[4];
+#endif
+    }
+    uint Kind(byte* name, bool follow, bool required, bool allowDangling = false)
+    {
+        ulong[] status = new ulong[32];
+        if (Bolt.Runtime.LinuxFile.StatusAt(-100, name, &status[0], follow ? 0 : 256) == 0)
+            return Mode(&status[0]) & 61440u;
+        int code = Error();
+        if (required && !(allowDangling && (code == 2 || code == 20))) Fail(Bolt.Runtime.NativeString.FromUtf8(name, Bolt.Runtime.StandaloneCore.CLength(name)), code);
+        return 0u;
+    }
+    void MoveExclusive(byte* sourceName, byte* destinationName, const string& source)
+    {
+#ifdef X64
+        long number = 316l;
+#else
+        long number = 276l;
+#endif
+        if (Bolt.Runtime.LinuxFile.RenameNoReplace(number, -100, sourceName, -100, destinationName, 1u) != 0)
+            LinuxPath.Fail(source, LinuxPath.Error());
+    }
+    bool Exists(const string& path, uint kind)
+    {
+        if (path == "") return false;
+        byte[] name = Name(path);
+        return Kind(&name[0], true, false) == kind;
+    }
+}
+public static class FileOps
+{
+public:
+    bool Exists(string path) { return LinuxPath.Exists(path, 32768u); }
+    void Delete(string path)
+    {
+        byte[] name = LinuxPath.Name(path);
+        if (LinuxPath.Kind(&name[0], true, false) == 16384u) throw IOException("Use Directory.Delete for a directory.");
+        if (Bolt.Runtime.LinuxFile.Unlink(&name[0]) == 0) return;
+        int code = LinuxPath.Error();
+        if (code != 2) LinuxPath.Fail(path, code);
+    }
+    void Move(string source, string destination, bool overwrite)
+    {
+        byte[] a = LinuxPath.Name(source), b = LinuxPath.Name(destination);
+        if (LinuxPath.Kind(&a[0], true, true) != 32768u) throw FileNotFoundException("Source is not a regular file.");
+        if (overwrite) {
+            if (Bolt.Runtime.LinuxFile.Rename(&a[0], &b[0]) != 0) LinuxPath.Fail(source, LinuxPath.Error());
+            return;
+        }
+        LinuxPath.MoveExclusive(&a[0], &b[0], source);
+    }
+    void Copy(string source, string destination, bool overwrite)
+    {
+        byte[] a = LinuxPath.Name(source), b = LinuxPath.Name(destination);
+        // O_CLOEXEC | O_NONBLOCK avoids blocking on a named pipe before fstat.
+        int input = Bolt.Runtime.LinuxFile.OpenAt(-100, &a[0], 526336, 0u);
+        if (input < 0) LinuxPath.Fail(source, LinuxPath.Error());
+        try {
+            ulong[] src = new ulong[32], dst = new ulong[32];
+            if (Bolt.Runtime.LinuxFile.Status(input, &src[0]) != 0) LinuxPath.Fail(source, LinuxPath.Error());
+            uint mode = LinuxPath.Mode(&src[0]);
+            if ((mode & 61440u) != 32768u) throw IOException("Source is not a regular file.");
+            // Open without O_TRUNC. First reject non-files and same-inode aliases.
+            int flags = 526336 | 1 | 64;
+            if (!overwrite) flags |= 128;
+            int output = Bolt.Runtime.LinuxFile.OpenAt(-100, &b[0], flags, mode & 511u);
+            if (output < 0) LinuxPath.Fail(destination, LinuxPath.Error());
+            try {
+                if (Bolt.Runtime.LinuxFile.Status(output, &dst[0]) != 0) LinuxPath.Fail(destination, LinuxPath.Error());
+                if ((LinuxPath.Mode(&dst[0]) & 61440u) != 32768u || (src[0] == dst[0] && src[1] == dst[1]))
+                    throw IOException("Invalid copy destination.");
+                if (Bolt.Runtime.LinuxFile.Truncate(output, 0l) != 0) LinuxPath.Fail(destination, LinuxPath.Error());
+                byte[] chunk = new byte[65536];
+                while (true) {
+                    long count = Bolt.Runtime.Linux.Read(input, &chunk[0], 65536ul);
+                    if (count == 0l) break;
+                    if (count < 0l) {
+                        int code = LinuxPath.Error();
+                        if (code == 4) continue;
+                        LinuxPath.Fail(source, code);
+                    }
+                    int offset = 0;
+                    while (offset < count) {
+                        long n = Bolt.Runtime.Linux.Write(output, &chunk[offset], (ulong)(count - offset));
+                        if (n < 0l) {
+                            int code = LinuxPath.Error();
+                            if (code == 4) continue;
+                            LinuxPath.Fail(destination, code);
+                        }
+                        if (n == 0l) throw IOException("Write made no progress.");
+                        offset += (int)n;
+                    }
+                }
+                if (Bolt.Runtime.LinuxFile.Permissions(output, mode & 4095u) != 0) LinuxPath.Fail(destination, LinuxPath.Error());
+            } finally {
+                if (Bolt.Runtime.LinuxFile.Close(output) != 0) LinuxPath.Fail(destination, LinuxPath.Error());
+            }
+        } finally { Bolt.Runtime.LinuxFile.Close(input); }
+    }
+}
+public static class DirectoryOps
+{
+public:
+    bool IsDirectory(string path) { return LinuxPath.Exists(path, 16384u); }
+    bool IsLink(string path)
+    {
+        byte[] name = LinuxPath.Name(path);
+        return LinuxPath.Kind(&name[0], false, true) == 40960u;
+    }
+    void CreateOne(string path)
+    {
+        byte[] name = LinuxPath.Name(path);
+        if (Bolt.Runtime.LinuxFile.MakeDirectory(&name[0], 511u) == 0) return;
+        int code = LinuxPath.Error();
+        if (code == 17 && IsDirectory(path)) return;
+        LinuxPath.Fail(path, code);
+    }
+    void RemoveOne(string path)
+    {
+        byte[] name = LinuxPath.Name(path);
+        int result = LinuxPath.Kind(&name[0], false, true) == 16384u
+            ? Bolt.Runtime.LinuxFile.RemoveDirectory(&name[0]) : Bolt.Runtime.LinuxFile.Unlink(&name[0]);
+        if (result != 0) LinuxPath.Fail(path, LinuxPath.Error());
+    }
+    void Move(string source, string destination)
+    {
+        if (!IsDirectory(source)) throw DirectoryNotFoundException("Source directory not found.");
+        byte[] a = LinuxPath.Name(source), b = LinuxPath.Name(destination);
+        LinuxPath.MoveExclusive(&a[0], &b[0], source);
+    }
+    string Current() { return Environment.CurrentDirectory; }
+    void Current(string path)
+    {
+        byte[] name = LinuxPath.Name(path);
+        if (Bolt.Runtime.StandalonePosix.SetDirectory(&name[0]) != 0) LinuxPath.Fail(path, LinuxPath.Error());
+    }
+    DirectoryEntry[] Entries(string path)
+    {
+        byte[] name = LinuxPath.Name(path);
+        void* directory = Bolt.Runtime.LinuxFile.OpenDirectory(&name[0]);
+        if (directory == null) {
+            int code = LinuxPath.Error();
+            if (code == 20) throw DirectoryNotFoundException("Not a directory: " + path);
+            LinuxPath.Fail(path, code);
+        }
+        List<DirectoryEntry> entries;
+        int* error = Bolt.Runtime.Linux.ErrnoLocation();
+        try {
+            while (true) {
+                *error = 0;
+                byte* record = Bolt.Runtime.LinuxFile.NextEntry(directory);
+                if (record == null) {
+                    if (*error != 0) LinuxPath.Fail(path, *error);
+                    break;
+                }
+                // LP64 Linux dirent: ino64, off64, reclen16, type8, name.
+                byte* start = &record[19];
+                string child = Bolt.Runtime.NativeString.FromUtf8(start, Bolt.Runtime.StandaloneCore.CLength(start));
+                if (child == "." || child == "..") continue;
+                DirectoryEntry entry;
+                entry.Path = Path.Combine(path, child);
+                byte[] childName = LinuxPath.Name(entry.Path);
+                uint kind = LinuxPath.Kind(&childName[0], false, true);
+                entry.IsLink = kind == 40960u;
+                if (entry.IsLink) kind = LinuxPath.Kind(&childName[0], true, true, true);
+                entry.IsFile = kind == 32768u;
+                entry.IsDirectory = kind == 16384u;
+                entries.Add(entry);
+            }
+        } finally { Bolt.Runtime.LinuxFile.CloseDirectory(directory); }
+        return entries.ToArray();
+    }
+}
+#endif

@@ -1,0 +1,5 @@
+
+int Read(const int& x){return x;}
+static class Program { public: void Main() {
+int x=7; Console.WriteLine(Read(x));
+} }

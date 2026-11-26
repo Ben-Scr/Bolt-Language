@@ -1,0 +1,1 @@
+static class Program { public: void Main(){int n=0;Print(1/n);} }

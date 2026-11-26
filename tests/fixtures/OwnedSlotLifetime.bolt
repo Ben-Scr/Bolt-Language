@@ -1,0 +1,41 @@
+import System
+class Tracked {
+public:
+    static int Made = 0;
+    static int Freed = 0;
+    Tracked() { Made++; }
+    ~Tracked() { Freed++; }
+}
+class Broken {
+public:
+    Tracked Child;
+    static int Freed = 0;
+    Broken() { throw Exception("constructor failed"); }
+    ~Broken() { Freed++; }
+}
+static class Program {
+private:
+    int Exercise(int mode) {
+        if (mode == 0) return 0;
+        Tracked outer;
+        try {
+            if (mode == 1) { Tracked inner; return 1; }
+            if (mode == 2) { Broken broken; }
+            for (int i = 0; i < 3; i++) {
+                Tracked iteration;
+                if (i == 0) continue;
+                break;
+            }
+        } finally {}
+        return 2;
+    }
+public:
+    int Main() {
+        if (Exercise(0) != 0 || Tracked.Made != 0 || Tracked.Freed != 0) return 1;
+        if (Exercise(1) != 1 || Tracked.Made != 2 || Tracked.Freed != 2) return 2;
+        try { Exercise(2); return 3; } catch (Exception& expected) {}
+        if (Tracked.Made != 4 || Tracked.Freed != 4 || Broken.Freed != 0) return 4;
+        if (Exercise(3) != 2 || Tracked.Made != 7 || Tracked.Freed != 7) return 5;
+        return 0;
+    }
+}

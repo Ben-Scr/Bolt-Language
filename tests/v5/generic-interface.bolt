@@ -1,0 +1,15 @@
+
+interface IRead<T> { T Get(); }
+interface IWrite<T> { void Set(T value); }
+interface IValue<T> : IRead<T>, IWrite<T> {}
+class Holder<T> : IValue<T>, IStringable {
+public:
+ T Value;
+ Holder(T value){Value=value;}
+ T Get(){return Value;}
+ void Set(T value){Value=value;}
+ string ToString(){return $"Holder({Value})";}
+}
+static class Program {public: void Main(){
+Holder<int> h=Holder<int>(7); IValue<int>& r=h; Print(r.Get()); r.Set(9); Print(h); IValue<int> copy=h; copy.Set(12); Print(copy.Get()); Print(h); Holder<string> s=Holder<string>("ok"); IValue<string> v=s; Print(v.Get());
+}}

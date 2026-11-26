@@ -1,0 +1,494 @@
+import System
+import System.Numerics
+namespace System.Numerics;
+
+// Arbitrary-precision decimal floating-point number implemented in Bolt.
+//
+// Value = Mantissa * 10^Exponent
+//
+// Mantissa is a BigInteger and Precision is the maximum number of significant
+// decimal digits retained after arithmetic. There are no native bigint/decimal
+// calls in this implementation; BigFloat builds entirely on BigInteger.bolt.
+public sealed class BigFloat : IStringable
+{
+private:
+    BigInteger mantissa;
+    long exponent;
+    int precision;
+
+    static BigInteger Pow10(int count)
+    {
+        if (count < 0) throw ArgumentOutOfRangeException("Power-of-ten exponent must be nonnegative.");
+        BigInteger result = BigInteger.One;
+        BigInteger factor = BigInteger(10l);
+        int power = count;
+        while (power != 0)
+        {
+            if ((power & 1) != 0) result = result * factor;
+            power >>= 1;
+            if (power != 0) factor = factor * factor;
+        }
+        return result;
+    }
+
+    static long AddExponent(long value, long amount)
+    {
+        if (amount > 0l && value > long.MaxValue - amount)
+            throw OverflowException("BigFloat exponent overflow.");
+        if (amount < 0l && value < long.MinValue - amount)
+            throw OverflowException("BigFloat exponent overflow.");
+        return value + amount;
+    }
+
+    static long SubtractExponent(long value, long amount)
+    {
+        if (amount == long.MinValue)
+        {
+            if (value >= 0l) throw OverflowException("BigFloat exponent overflow.");
+            return value - amount;
+        }
+        return AddExponent(value, -amount);
+    }
+
+    static int DigitCount(const BigInteger& value)
+    {
+        if (value.IsZero) return 1;
+        return value.Abs().ToString().Length;
+    }
+
+    static BigInteger DecimalOrder(const BigFloat& value)
+    {
+        if (value.mantissa.IsZero) return BigInteger();
+        return BigInteger(value.exponent) + BigInteger((long)DigitCount(value.mantissa) - 1l);
+    }
+
+    static BigFloat FromParts(BigInteger coefficient, long decimalExponent, int digits)
+    {
+        if (digits < 1) throw ArgumentOutOfRangeException("BigFloat precision must be at least one digit.");
+        BigFloat result;
+        result.mantissa = coefficient;
+        result.exponent = decimalExponent;
+        result.precision = digits;
+        result.Normalize();
+        return result;
+    }
+
+    void Normalize()
+    {
+        if (precision < 1) throw ArgumentOutOfRangeException("BigFloat precision must be at least one digit.");
+        if (mantissa.IsZero)
+        {
+            mantissa = BigInteger.Zero;
+            exponent = 0l;
+            return;
+        }
+
+        // Round to the requested number of significant decimal digits.
+        int digits = DigitCount(mantissa);
+        if (digits > precision)
+        {
+            int remove = digits - precision;
+            BigInteger divisor = Pow10(remove);
+            BigInteger quotient = mantissa / divisor;
+            BigInteger remainder = (mantissa % divisor).Abs();
+            BigInteger twiceRemainder = remainder + remainder;
+            if (twiceRemainder >= divisor)
+                quotient = quotient + BigInteger(mantissa.Sign < 0 ? -1l : 1l);
+            mantissa = quotient;
+            exponent = AddExponent(exponent, (long)remove);
+
+            // 9.99... can round to 10.0..., adding one significant digit.
+            digits = DigitCount(mantissa);
+            if (digits > precision)
+            {
+                mantissa = mantissa / BigInteger(10l);
+                exponent = AddExponent(exponent, 1l);
+            }
+        }
+
+        // Canonical form: no decimal zero at the end of the mantissa.
+        string absoluteText = mantissa.Abs().ToString();
+        byte[] bytes = absoluteText.ToUtf8();
+        int trailingZeros = 0;
+        for (int i = bytes.Length - 1; i >= 0 && bytes[i] == 48; i--) trailingZeros++;
+        if (trailingZeros != 0)
+        {
+            mantissa = mantissa / Pow10(trailingZeros);
+            exponent = AddExponent(exponent, (long)trailingZeros);
+        }
+
+        if (mantissa.IsZero) exponent = 0l;
+    }
+
+    static int ResultPrecision(const BigFloat& a, const BigFloat& b)
+    {
+        return a.precision > b.precision ? a.precision : b.precision;
+    }
+
+    static BigFloat DominantForAddition(const BigFloat& a, const BigFloat& b, int resultPrecision, bool& found)
+    {
+        found = false;
+        if (a.mantissa.IsZero) { found = true; return b.WithPrecision(resultPrecision); }
+        if (b.mantissa.IsZero) { found = true; return a.WithPrecision(resultPrecision); }
+
+        BigInteger orderA = DecimalOrder(a);
+        BigInteger orderB = DecimalOrder(b);
+        BigInteger difference = (orderA - orderB).Abs();
+        if (difference > BigInteger((long)resultPrecision + 2l))
+        {
+            found = true;
+            return orderA > orderB ? a.WithPrecision(resultPrecision) : b.WithPrecision(resultPrecision);
+        }
+        return BigFloat(BigInteger.Zero, resultPrecision);
+    }
+
+    static bool TryExponent(const byte[]& data, int start, long& exponent)
+    {
+        bool negative = start < data.Length && data[start] == 45;
+        if (start < data.Length && (negative || data[start] == 43)) start++;
+        if (start == data.Length) return false;
+        ulong limit = negative ? 9223372036854775808ul : 9223372036854775807ul;
+        ulong value = 0ul;
+        for (int i = start; i < data.Length; i++)
+        {
+            if (data[i] < 48 || data[i] > 57) return false;
+            ulong digit = (ulong)(data[i] - 48);
+            if (value > (limit - digit) / 10ul) return false;
+            value = value * 10ul + digit;
+        }
+        exponent = negative && value != 0ul ? -(long)(value - 1ul) - 1l : (long)value;
+        return true;
+    }
+
+public:
+    BigFloat()
+    {
+        mantissa = BigInteger.Zero;
+        exponent = 0l;
+        precision = 50;
+    }
+
+    BigFloat(long value, int digits = 50)
+    {
+        BigFloat created = FromParts(BigInteger(value), 0l, digits);
+        mantissa = created.mantissa;
+        exponent = created.exponent;
+        precision = created.precision;
+    }
+
+    BigFloat(ulong value, int digits = 50)
+    {
+        BigFloat created = FromParts(BigInteger(value), 0l, digits);
+        mantissa = created.mantissa;
+        exponent = created.exponent;
+        precision = created.precision;
+    }
+
+    BigFloat(BigInteger value, int digits = 50)
+    {
+        BigFloat created = FromParts(value, 0l, digits);
+        mantissa = created.mantissa;
+        exponent = created.exponent;
+        precision = created.precision;
+    }
+
+    BigFloat(const string& value, int digits = 50)
+    {
+        BigFloat parsed = Parse(value, digits);
+        mantissa = parsed.mantissa;
+        exponent = parsed.exponent;
+        precision = parsed.precision;
+    }
+
+    static BigFloat Zero => BigFloat();
+    static BigFloat One => BigFloat(1l);
+
+    BigInteger Mantissa => mantissa;
+    long Exponent => exponent;
+    int Precision => precision;
+    bool IsZero => mantissa.IsZero;
+    bool IsNegative => mantissa.IsNegative;
+    int Sign => mantissa.Sign;
+
+    static bool TryParse(const string& text, int digits, BigFloat& result)
+    {
+        result = BigFloat();
+        if (digits < 1) return false;
+        byte[] data = text.Trim().ToUtf8();
+        if (data.Length == 0) return false;
+        bool negative = data[0] == 45;
+        int i = negative || data[0] == 43 ? 1 : 0;
+
+        // Keep only the requested significant digits. The first discarded
+        // digit determines BigFloat's decimal half-away-from-zero rounding.
+        int first = negative ? 1 : 0, end = first;
+        int capacity = data.Length - i;
+        byte[] coefficient = new byte[first + (digits < capacity ? digits : capacity)];
+        if (negative) coefficient[0] = 45;
+        bool point = false, seenDigit = false, roundUp = false;
+        int discarded = 0, fractional = 0;
+        for (; i < data.Length && data[i] != 101 && data[i] != 69; i++)
+        {
+            byte c = data[i];
+            if (c == 46 && !point) { point = true; continue; }
+            if (c < 48 || c > 57) return false;
+            seenDigit = true;
+            if (point) fractional++;
+            if (end == first && c == 48) continue;
+            if (end - first < digits) coefficient[end++] = c;
+            else
+            {
+                if (discarded == 0) roundUp = c >= 53;
+                discarded++;
+            }
+        }
+        if (!seenDigit) return false;
+        long exponent = 0l;
+        if (i < data.Length && !TryExponent(data, i + 1, exponent)) return false;
+        if (end == first) { result.precision = digits; return true; }
+
+        long adjustment = (long)discarded - (long)fractional;
+        if (roundUp)
+        {
+            int last = end - 1;
+            while (last >= first && coefficient[last] == 57) last--;
+            adjustment += (long)(end - 1 - last);
+            if (last < first) { coefficient[first] = 49; end = first + 1; }
+            else { coefficient[last]++; end = last + 1; }
+        }
+        while (end > first + 1 && coefficient[end - 1] == 48) { end--; adjustment++; }
+        if ((adjustment > 0l && exponent > long.MaxValue - adjustment) ||
+            (adjustment < 0l && exponent < long.MinValue - adjustment)) return false;
+
+        byte[] normalized = new byte[end];
+        for (int j = 0; j < end; j++) normalized[j] = coefficient[j];
+        BigInteger mantissa;
+        if (!BigInteger.TryParse(string.FromUtf8(normalized), mantissa)) return false;
+        result.mantissa = mantissa;
+        result.exponent = exponent + adjustment;
+        result.precision = digits;
+        return true;
+    }
+
+    static bool TryParse(const string& text, BigFloat& result)
+    {
+        return TryParse(text, 50, result);
+    }
+
+    static BigFloat Parse(const string& text, int digits = 50)
+    {
+        BigFloat result;
+        if (!TryParse(text, digits, result)) throw FormatException("Invalid BigFloat value.");
+        return result;
+    }
+
+    [ReadOnly]
+    BigFloat WithPrecision(int digits)
+    {
+        return FromParts(mantissa, exponent, digits);
+    }
+
+    [ReadOnly]
+    BigFloat Abs()
+    {
+        return FromParts(mantissa.Abs(), exponent, precision);
+    }
+
+    [ReadOnly]
+    BigFloat Negate()
+    {
+        return FromParts(-mantissa, exponent, precision);
+    }
+
+    [ReadOnly]
+    BigInteger Truncate()
+    {
+        if (mantissa.IsZero) return BigInteger.Zero;
+        if (exponent >= 0l)
+        {
+            if (exponent > (long)int.MaxValue) throw OverflowException("BigFloat is too large to materialize as BigInteger.");
+            return mantissa * Pow10((int)exponent);
+        }
+        if (exponent == long.MinValue) return BigInteger.Zero;
+        long places = -exponent;
+        if (places > (long)int.MaxValue) return BigInteger.Zero;
+        return mantissa / Pow10((int)places);
+    }
+
+    [ReadOnly]
+    BigFloat Pow(int power)
+    {
+        if (power == 0) return BigFloat(1l, precision);
+        bool reciprocal = power < 0;
+        long remaining = reciprocal ? -(long)power : (long)power;
+        BigFloat factor = this;
+        BigFloat result = BigFloat(1l, precision);
+        while (remaining != 0l)
+        {
+            if ((remaining & 1l) != 0l) result = result * factor;
+            remaining >>= 1;
+            if (remaining != 0l) factor = factor * factor;
+        }
+        return reciprocal ? BigFloat(1l, precision) / result : result;
+    }
+
+    [ReadOnly]
+    int CompareTo(const BigFloat& other)
+    {
+        if (mantissa.Sign != other.mantissa.Sign)
+            return mantissa.Sign < other.mantissa.Sign ? -1 : 1;
+        if (mantissa.IsZero) return 0;
+
+        int sign = mantissa.Sign;
+        BigInteger orderA = DecimalOrder(this);
+        BigInteger orderB = DecimalOrder(other);
+        if (orderA < orderB) return sign > 0 ? -1 : 1;
+        if (orderA > orderB) return sign > 0 ? 1 : -1;
+
+        long commonExponent = exponent < other.exponent ? exponent : other.exponent;
+        long shiftA = exponent - commonExponent;
+        long shiftB = other.exponent - commonExponent;
+        if (shiftA > (long)int.MaxValue || shiftB > (long)int.MaxValue)
+            throw OverflowException("BigFloat comparison requires an impractically large decimal alignment.");
+
+        BigInteger a = mantissa.Abs() * Pow10((int)shiftA);
+        BigInteger b = other.mantissa.Abs() * Pow10((int)shiftB);
+        int compare = a.CompareTo(b);
+        return sign > 0 ? compare : -compare;
+    }
+
+    static BigFloat operator +(const BigFloat& a, const BigFloat& b)
+    {
+        int digits = ResultPrecision(a, b);
+        bool dominant = false;
+        BigFloat shortcut = DominantForAddition(a, b, digits, dominant);
+        if (dominant) return shortcut;
+
+        long commonExponent = a.exponent < b.exponent ? a.exponent : b.exponent;
+        long shiftA = a.exponent - commonExponent;
+        long shiftB = b.exponent - commonExponent;
+        if (shiftA > (long)int.MaxValue || shiftB > (long)int.MaxValue)
+            throw OverflowException("BigFloat addition requires an impractically large decimal alignment.");
+
+        BigInteger left = a.mantissa * Pow10((int)shiftA);
+        BigInteger right = b.mantissa * Pow10((int)shiftB);
+        return FromParts(left + right, commonExponent, digits);
+    }
+
+    static BigFloat operator -(const BigFloat& a, const BigFloat& b)
+    {
+        return a + b.Negate();
+    }
+
+    static BigFloat operator *(const BigFloat& a, const BigFloat& b)
+    {
+        int digits = ResultPrecision(a, b);
+        long combinedExponent = AddExponent(a.exponent, b.exponent);
+        return FromParts(a.mantissa * b.mantissa, combinedExponent, digits);
+    }
+
+    static BigFloat operator /(const BigFloat& a, const BigFloat& b)
+    {
+        if (b.mantissa.IsZero) throw DivideByZeroException("BigFloat division by zero.");
+        int digits = ResultPrecision(a, b);
+        if (a.mantissa.IsZero) return BigFloat(0l, digits);
+
+        int aDigits = DigitCount(a.mantissa);
+        int bDigits = DigitCount(b.mantissa);
+        long wantedScale = (long)digits + 3l + (long)bDigits - (long)aDigits;
+        if (wantedScale < 0l) wantedScale = 0l;
+        if (wantedScale > (long)int.MaxValue)
+            throw OverflowException("BigFloat division requires an impractically large precision scale.");
+
+        int scale = (int)wantedScale;
+        BigInteger scaledNumerator = a.mantissa * Pow10(scale);
+        BigInteger quotient = scaledNumerator / b.mantissa;
+        long resultExponent = SubtractExponent(a.exponent, b.exponent);
+        resultExponent = AddExponent(resultExponent, -(long)scale);
+        return FromParts(quotient, resultExponent, digits);
+    }
+
+    static BigFloat operator +(const BigFloat& value) { return value; }
+    static BigFloat operator -(const BigFloat& value) { return value.Negate(); }
+
+    static bool operator ==(const BigFloat& a, const BigFloat& b)
+    {
+        return a.mantissa == b.mantissa && a.exponent == b.exponent;
+    }
+
+    static bool operator !=(const BigFloat& a, const BigFloat& b) { return !(a == b); }
+    static bool operator <(const BigFloat& a, const BigFloat& b) { return a.CompareTo(b) < 0; }
+    static bool operator >(const BigFloat& a, const BigFloat& b) { return a.CompareTo(b) > 0; }
+    static bool operator <=(const BigFloat& a, const BigFloat& b) { return a.CompareTo(b) <= 0; }
+    static bool operator >=(const BigFloat& a, const BigFloat& b) { return a.CompareTo(b) >= 0; }
+
+    [ReadOnly]
+    string ToScientificString()
+    {
+        if (mantissa.IsZero) return "0";
+        bool negative = mantissa.IsNegative;
+        byte[] digits = mantissa.Abs().ToString().ToUtf8();
+        int extra = digits.Length > 1 ? 1 : 0;
+        byte[] output = new byte[digits.Length + extra + (negative ? 1 : 0)];
+        int p = 0;
+        if (negative) output[p++] = 45;
+        output[p++] = digits[0];
+        if (digits.Length > 1)
+        {
+            output[p++] = 46;
+            for (int i = 1; i < digits.Length; i++) output[p++] = digits[i];
+        }
+        BigInteger scientificExponent = BigInteger(exponent) + BigInteger((long)digits.Length - 1l);
+        return string.FromUtf8(output) + "e" + scientificExponent.ToString();
+    }
+
+    [ReadOnly]
+    string ToString()
+    {
+        if (mantissa.IsZero) return "0";
+
+        byte[] digits = mantissa.Abs().ToString().ToUtf8();
+        bool negative = mantissa.IsNegative;
+
+        // Avoid attempting gigantic allocations for values such as 1e1000000000.
+        BigInteger prospectiveLength = BigInteger((long)digits.Length) + BigInteger(exponent).Abs();
+        if (prospectiveLength > BigInteger(4096l)) return ToScientificString();
+
+        if (exponent >= 0l)
+        {
+            int zeros = (int)exponent;
+            byte[] output = new byte[(negative ? 1 : 0) + digits.Length + zeros];
+            int p = 0;
+            if (negative) output[p++] = 45;
+            for (int i = 0; i < digits.Length; i++) output[p++] = digits[i];
+            for (int i = 0; i < zeros; i++) output[p++] = 48;
+            return string.FromUtf8(output);
+        }
+
+        if (exponent == long.MinValue) return ToScientificString();
+        long pointLong = (long)digits.Length + exponent;
+        if (pointLong > 0l)
+        {
+            int point = (int)pointLong;
+            byte[] output = new byte[(negative ? 1 : 0) + digits.Length + 1];
+            int p = 0;
+            if (negative) output[p++] = 45;
+            for (int i = 0; i < digits.Length; i++)
+            {
+                if (i == point) output[p++] = 46;
+                output[p++] = digits[i];
+            }
+            return string.FromUtf8(output);
+        }
+
+        int leadingZeros = (int)(-pointLong);
+        byte[] small = new byte[(negative ? 1 : 0) + 2 + leadingZeros + digits.Length];
+        int q = 0;
+        if (negative) small[q++] = 45;
+        small[q++] = 48;
+        small[q++] = 46;
+        for (int i = 0; i < leadingZeros; i++) small[q++] = 48;
+        for (int i = 0; i < digits.Length; i++) small[q++] = digits[i];
+        return string.FromUtf8(small);
+    }
+}

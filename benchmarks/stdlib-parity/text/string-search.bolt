@@ -1,0 +1,16 @@
+static class Program {
+public:
+    void Main() {
+        string block = "the quick brown fox jumps over the lazy dog. ";
+        for (int i = 0; i < 5; i++) block += block;
+        string text = block + "key-a-" + block + "key-b-" + block;
+        string[] keys = ["key-a-", "key-b-", "key-c-", "dog"];
+        uint state = 13u;
+        long total = 0l;
+        for (int i = 0; i < 750000; i++) {
+            state = (uint)(((ulong)state * 1664525ul + 1013904223ul) & 4294967295ul);
+            total += (long)text.IndexOf(keys[(int)(state >> 30)], (int)(state & 1023u));
+        }
+        Print(total);
+    }
+}

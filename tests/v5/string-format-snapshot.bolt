@@ -1,0 +1,5 @@
+
+class Tick:IStringable {public:int Value;string ToString(){Value++;return (string)Value;}}
+static class Program {public: void Main(){
+Tick t; const Tick frozen=Tick(); Print(t);Print((string)t);Print($"{t}");Print(frozen);Print(t.Value);Print(t.ToString());Print(t.Value);
+}}

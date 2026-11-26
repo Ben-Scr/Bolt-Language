@@ -1,0 +1,142 @@
+#if BoltStandaloneCore && (Windows || MacOS || FreeBSD || (Linux && (X64 || ARM64 || RISCV64)))
+import Type
+import System
+import System.Collections.Generic
+import Bolt.Runtime.IO
+namespace System.IO;
+
+public class StreamReader
+{
+private:
+    StreamView view;
+    bool leave, closed;
+    int pending = -1;
+    void Check() { if (closed) throw ObjectDisposedException("The reader is closed."); }
+    int ReadNext() {
+        Check();
+        if (pending < 0) return view.ReadByte();
+        int result = pending; pending = -1; return result;
+    }
+public:
+    StreamReader(string path) {
+        FileStream file = FileStream(path, FileMode.Open, FileAccess.Read);
+        view = StreamView(file);
+    }
+    StreamReader(Stream& stream, bool leaveOpen = false) { view = StreamView(stream); leave = leaveOpen; }
+    bool EndOfStream { get { Check(); if (pending < 0) pending = view.ReadByte(); return pending < 0; } }
+    string ReadLine() {
+        List<byte> bytes;
+        while (true) {
+            int next = ReadNext();
+            if (next < 0 || next == 10) break;
+            if (next == 13) { next = ReadNext(); if (next != 10) pending = next; break; }
+            bytes.Add((byte)next);
+        }
+        return string.FromUtf8(bytes.ToArray());
+    }
+    string ReadToEnd() {
+        Check();
+        byte[] tail = view.ReadAllBytes();
+        if (pending < 0) return string.FromUtf8(tail);
+        byte[] bytes = new byte[tail.Length + 1];
+        bytes[0] = (byte)pending; pending = -1;
+        for (int i = 0; i < tail.Length; i++) bytes[i+1] = tail[i];
+        return string.FromUtf8(bytes);
+    }
+    void Close() { if (closed) return; if (!leave) view.Close(); view = StreamView(); closed = true; }
+    void Dispose() { Close(); }
+}
+
+static class BinaryCodec
+{
+    // Lowering resolves this against the specialized Bolt type. Only scalars
+    // and enums may use their little-endian memory representation on the wire.
+public:
+    static int Kind<T>() { return 0; }
+}
+
+public class BinaryWriter
+{
+private:
+    StreamView view;
+    bool leave, closed;
+    void Check() { if (closed) throw ObjectDisposedException("The binary writer is closed."); }
+public:
+    BinaryWriter(Stream& stream, bool leaveOpen = false) { view = StreamView(stream); leave = leaveOpen; }
+    void Write<T>(T value) {
+        Check();
+        int kind = BinaryCodec.Kind<T>();
+        if (kind == 1) {
+            byte* data = (byte*)&value;
+            byte[] bytes = new byte[(int)sizeof(T)];
+            for (int i = 0; i < bytes.Length; i++) bytes[i] = data[i];
+            view.Write(bytes);
+        } elif (kind == 2) {
+            string text = *((string*)&value);
+            byte[] bytes = text.ToUtf8();
+            Write<uint>((uint)bytes.Length);
+            view.Write(bytes);
+        } elif (kind == 3) { view.Write(*((byte[]*)&value)); }
+        else throw NotSupportedException("Unsupported binary value type.");
+    }
+    void Flush() { Check(); view.Flush(); }
+    void Close() { if (closed) return; Flush(); if (!leave) view.Close(); view = StreamView(); closed = true; }
+    void Dispose() { Close(); }
+}
+
+public class BinaryReader
+{
+private:
+    StreamView view;
+    bool leave, closed;
+    void Check() { if (closed) throw ObjectDisposedException("The binary reader is closed."); }
+public:
+    BinaryReader(Stream& stream, bool leaveOpen = false) { view = StreamView(stream); leave = leaveOpen; }
+    byte[] ReadBytes(int count) {
+        if (count < 0) throw ArgumentOutOfRangeException("Negative byte count.");
+        byte[] bytes = new byte[count];
+        int used = 0;
+        while (used < count) {
+            Check();
+            int n = view.Read(bytes, used, count - used);
+            if (n == 0) throw EndOfStreamException("Not enough bytes remain.");
+            used += n;
+        }
+        return bytes;
+    }
+    T Read<T>() {
+        Check();
+        T result;
+        int kind = BinaryCodec.Kind<T>();
+        if (kind == 1) {
+            byte[] bytes = ReadBytes((int)sizeof(T));
+            if (Type.Name<T>() == "bool" && bytes[0] > 1) throw FormatException("Invalid binary bool byte.");
+            if (Type.Name<T>() == "char") {
+                uint scalar = *((uint*)&bytes[0]);
+                if (scalar > 1114111u || (scalar >= 55296u && scalar <= 57343u)) throw FormatException("Invalid binary Unicode scalar.");
+            }
+            byte* dest = (byte*)&result;
+            for (int i = 0; i < bytes.Length; i++) dest[i] = bytes[i];
+        } elif (kind == 2) {
+            uint length = Read<uint>();
+            if (length > 67108864u) throw IOException("Binary string exceeds 64 MiB.");
+            *((string*)&result) = string.FromUtf8(ReadBytes((int)length));
+        } else throw NotSupportedException("Unsupported binary value type.");
+        return result;
+    }
+    void Close() { if (closed) return; if (!leave) view.Close(); view = StreamView(); closed = true; }
+    void Dispose() { Close(); }
+    int ReadInt() { return Read<int>(); }
+    short ReadInt16() { return Read<short>(); }
+    long ReadInt64() { return Read<long>(); }
+    byte ReadUInt8() { return Read<byte>(); }
+    ushort ReadUInt16() { return Read<ushort>(); }
+    uint ReadUInt32() { return Read<uint>(); }
+    ulong ReadUInt64() { return Read<ulong>(); }
+    bool ReadBool() { return Read<bool>(); }
+    char ReadChar() { return Read<char>(); }
+    float ReadFloat() { return Read<float>(); }
+    double ReadDouble() { return Read<double>(); }
+    string ReadString() { return Read<string>(); }
+}
+#endif

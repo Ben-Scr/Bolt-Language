@@ -1,0 +1,88 @@
+import System
+import System.Threading
+import System.Threading.Tasks
+
+private class Payload { public: int Id = 12; }
+
+private class LocalJob {
+    public ThreadLocal<string> Local;
+    public LocalJob(ThreadLocal<string> local) : Local(local) {}
+    public void Run() {
+        if (Local.IsValueCreated || Local.Value != "" || !Local.IsValueCreated)
+            throw InvalidOperationException("A new OS thread inherited an old slot.");
+        Local.Value = "worker";
+    }
+}
+class RegisterJob {
+    public Task<int> Pending;
+    public Action<Task<int>> Callback;
+    public RegisterJob(Task<int> pending, Action<Task<int>> callback) : Pending(pending), Callback(callback) {}
+    public void Run() { Pending.OnCompleted(Callback); }
+}
+static class Program {
+    static async Task<Payload> GetPayload() { return Payload(); }
+    static async Task<int> Gated(Semaphore gate) {
+        gate.Wait();
+        return 42;
+    }
+    static void Abandon(Semaphore signal) {
+        var task = Task<int>.CreatePending();
+        task.OnCompleted((Task<int> unused) => { signal.Release(); });
+    }
+public:
+    static int Main() {
+        ThreadLocal<string> local;
+        ThreadLocal<string> alias = local;
+        if (alias.IsValueCreated) return 1;
+        alias.Value = "main";
+        for (int i = 0; i < 32; i++) {
+            Thread worker = Thread.Start(LocalJob(alias));
+            if (!worker.Join(5000) || local.Value != "main") return 2;
+        }
+        alias.Dispose();
+        local.Dispose();
+        try { local.Value = "closed"; return 3; } catch (ObjectDisposedException& error) {}
+        try { bool ignored = alias.IsValueCreated; return 4; } catch (ObjectDisposedException& error) {}
+
+        Semaphore signals;
+        Atomic<int> count;
+        Action<Task<int>> record = (Task<int> done) => {
+            if (done.Result == 42) count.Add(1);
+            signals.Release();
+        };
+        Semaphore start;
+        Task<int> pending = Gated(start);
+        pending.OnCompleted(record);
+        Thread writer = Thread.Start(RegisterJob(pending, record));
+        start.Release();
+        if (pending.Result != 42 || !writer.Join(5000)) return 5;
+        pending.OnCompleted(record);
+        for (int i = 0; i < 3; i++) if (!signals.Wait(5000)) return 6;
+        if (count.Load() != 3 || signals.Wait(0)) return 7;
+
+        var canceled = Task<int>.CreatePending();
+        canceled.OnCompleted((Task<int> done) => {
+            if (!done.IsCanceled || done.IsFaulted) return;
+            try { done.Wait(); }
+            catch (OperationCanceledException& error) { signals.Release(); }
+        });
+        OperationCanceledException reason("canceled");
+        canceled.SetCanceled(reason);
+        canceled.Complete();
+        canceled.Complete();
+        if (!signals.Wait(5000) || signals.Wait(0)) return 8;
+
+        // A registration alone must never keep a worker or the process alive.
+        Abandon(signals);
+        if (signals.Wait(0)) return 9;
+
+        ThreadLocal<Payload> items;
+        var typed = GetPayload();
+        typed.OnCompleted((Task<Payload> done) => { if (done.Result.Id == 12) signals.Release(); });
+        if (items.Value.Id != 12 || !signals.Wait(5000)) return 10;
+        var nothing = Task<void>.CreatePending();
+        nothing.OnCompleted((Task<void> done) => { done.GetResult(); signals.Release(); });
+        nothing.Complete();
+        return signals.Wait(5000) ? 0 : 11;
+    }
+}

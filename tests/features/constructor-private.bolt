@@ -1,0 +1,5 @@
+
+class Cell {Cell(int x){} }
+static class Program { public: void Main() {
+Cell x=Cell(1);
+} }

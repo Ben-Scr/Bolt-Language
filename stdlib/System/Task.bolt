@@ -1,0 +1,71 @@
+import System
+import System.Threading
+import Bolt.Runtime
+namespace System.Threading.Tasks;
+
+// Public Task is an ordinary Bolt value containing a shared completion handle.
+// Copies share one operation; no worker is launched by default construction.
+public class Task<T>
+{
+private:
+    Bolt.Runtime.TaskState<T> state;
+    static async Task<void> DelayWorker(int milliseconds) { Thread.Sleep(milliseconds); }
+public:
+    Task() {}
+    // Native async lowering supplies this typed state; not a stable external ABI.
+    Task(Bolt.Runtime.TaskState<T> completion) : state(completion) {}
+    static Task<T> CreatePending() { return Task<T>(Bolt.Runtime.TaskState<T>.Pending()); }
+    void SetResult(T value) { state.SetResult(value); }
+    void SetException(System.Exception& error) {
+        state.SetFailure(error,false);
+    }
+    void SetCanceled(System.Exception& error) {
+        state.SetFailure(error,true);
+    }
+    void Complete() { state.Complete(); }
+    bool IsCanceled => state.IsCanceled();
+    public void OnCompleted(System.Action<Task<T>> callback) { state.OnCompleted(callback); }
+    bool IsCompleted => state.IsReady();
+    bool IsFaulted => state.IsFaulted() && !IsCanceled;
+    bool IsCompletedSuccessfully => IsCompleted && !IsFaulted && !IsCanceled;
+    T Result { get { return GetResult(); } }
+    [ReadOnly] T GetResult() { return state.GetResult(); }
+    [ReadOnly] void Wait() { state.Observe(); }
+    [ReadOnly] bool Wait(int milliseconds)
+    {
+        if (milliseconds < -1) Bolt.Runtime.Failure.Range("Timeout must be -1 or non-negative.");
+        if (!state.WaitReady(milliseconds)) return false;
+        state.Observe();
+        return true;
+    }
+    static Task<U> FromResult<U>(U value) { return Task<U>(Bolt.Runtime.TaskState<U>.Ready<U>(value)); }
+    static Task<void> CompletedTask => Task<void>(Bolt.Runtime.TaskState<void>.Completed());
+    static Task<void> Delay(int milliseconds)
+    {
+        if (milliseconds < 0) Bolt.Runtime.Failure.Range("Delay must be non-negative.");
+        if (milliseconds == 0) return CompletedTask;
+        return DelayWorker(milliseconds);
+    }
+    static async Task<void> Delay(int milliseconds, CancellationToken token) {
+        if(token.WaitCancellation(milliseconds))token.ThrowIfCancellationRequested();
+    }
+    static Task<void> Delay(TimeSpan duration)
+    {
+        long ticks = duration.Ticks;
+        if (ticks < 0l || ticks > 21474836470000l) Bolt.Runtime.Failure.Range("Delay is out of range.");
+        long milliseconds = ticks / 10000l;
+        if (ticks % 10000l != 0l) milliseconds++;
+        return Delay((int)milliseconds);
+    }
+    static async Task<void> WhenAll(Task<T>[] tasks)
+    {
+        Bolt.Runtime.ExceptionState firstFailure;
+        bool failed = false;
+        for (int i = 0; i < tasks.Length; i++)
+        {
+            try { tasks[i].Wait(); }
+            catch (System.Exception& error) { if (!failed) { firstFailure.Capture(error); failed = true; } }
+        }
+        if (failed) firstFailure.Rethrow();
+    }
+}

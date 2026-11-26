@@ -1,0 +1,22 @@
+import System.Collections.Generic
+static class Program {
+public:
+    void Main() {
+        Dictionary<int,int> table;
+        table.Reserve(31);
+        for (int i = 0; i < 31; ++i) table.Add(i * 37, i + 2);
+        bool ok = table.Length == 31;
+        for (int i = 0; i < 31; ++i) ok = ok && table[i * 37] == i + 2;
+        table.Reserve(173);
+        for (int i = 31; i < 250; ++i) table.Add(i * 37, i + 2);
+        for (int i = 0; i < 250; i += 3) ok = ok && table.Remove(i * 37);
+        Dictionary<int,int> cloned = table;
+        table.Clear();
+        for (int i = 0; i < 250; ++i) {
+            ok = ok && cloned.ContainsKey(i * 37) == (i % 3 != 0);
+            if (i % 3 != 0) ok = ok && cloned[i * 37] == i + 2;
+        }
+        table.Add(192, 728); table.Add(-5, 8);
+        Print(ok && table[192] == 728 && table[-5] == 8);
+    }
+}

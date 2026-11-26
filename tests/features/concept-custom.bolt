@@ -1,0 +1,5 @@
+
+concept Scalar<T> = Number<T> && Addable<T>; T Add<T>(T a,T b):Scalar{return a+b;}
+static class Program { public: void Main() {
+Console.WriteLine(Add<int>(3,4));
+} }

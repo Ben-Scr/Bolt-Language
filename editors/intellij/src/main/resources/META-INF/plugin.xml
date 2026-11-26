@@ -1,0 +1,69 @@
+<idea-plugin>
+    <id>dev.bolt.intellij</id>
+    <name>Bolt Language</name>
+    <version>0.10.4</version>
+    <vendor>Ben Schneider / Bolt</vendor>
+    <description><![CDATA[
+        Bolt LLVM/LLDB debugging with breakpoints, stepping, variables and watches; .bolt syntax highlighting, C#-style colors, New Bolt Class creation, whole-file formatting, brace-block folding, member completion, and compiler diagnostics through bolt lsp.
+        Install Bolt separately; configure its executable under Tools &gt; Bolt.
+        Works without a commercial LSP plugin. Never executes or builds Bolt applications merely because a project is opened. Trusted projects query bolt project info for configuration.
+    ]]></description>
+    <change-notes>Import completion shows class icons for standard types and module icons for namespaces, including with older Bolt SDKs.</change-notes>
+    <idea-version since-build="243"/>
+    <depends>com.intellij.modules.platform</depends>
+    <extensions defaultExtensionNs="com.intellij">
+        <programRunner implementation="dev.bolt.idea.BoltDebugRunner"/>
+        <xdebugger.breakpointType implementation="dev.bolt.idea.BoltBreakpointType"/>
+        <newProjectWizard.languageGenerator implementation="dev.bolt.idea.BoltNewProjectWizard"/>
+        <actionPromoter implementation="dev.bolt.idea.BoltFormatActionPromoter" order="last"/>
+        <configurationType implementation="dev.bolt.idea.BoltRunType"/>
+        <runConfigurationProducer implementation="dev.bolt.idea.BoltRunProducer"/>
+        <runConfigurationProducer implementation="dev.bolt.idea.BoltBuildProducer"/>
+        <runLineMarkerContributor language="Bolt" implementationClass="dev.bolt.idea.BoltRunMarker"/>
+        <postStartupActivity implementation="dev.bolt.idea.BoltProjectStartup"/>
+        <fileType name="Bolt" language="Bolt" implementationClass="dev.bolt.idea.BoltFileType" fieldName="INSTANCE" extensions="bolt"/>
+        <lang.parserDefinition language="Bolt" implementationClass="dev.bolt.idea.BoltParserDefinition"/>
+        <lang.fileViewProviderFactory language="Bolt" implementationClass="dev.bolt.idea.BoltFileViewProviderFactory"/>
+        <lang.syntaxHighlighterFactory language="Bolt" implementationClass="dev.bolt.idea.BoltSyntaxHighlighterFactory"/>
+        <lang.braceMatcher language="Bolt" implementationClass="dev.bolt.idea.BoltBraceMatcher"/>
+        <lang.foldingBuilder language="Bolt" implementationClass="dev.bolt.idea.BoltFoldingBuilder"/>
+        <quoteHandler fileType="Bolt" className="dev.bolt.idea.BoltQuoteHandler"/>
+        <enterHandlerDelegate implementation="dev.bolt.idea.BoltEnterHandler"/>
+        <codeInsight.parameterInfo language="Bolt" implementationClass="dev.bolt.idea.BoltParameterInfo"/>
+        <lang.documentationProvider language="Bolt" implementationClass="dev.bolt.idea.BoltDocumentationProvider"/>
+        <gotoDeclarationHandler implementation="dev.bolt.idea.BoltGotoDeclaration"/>
+        <lang.findUsagesProvider language="Bolt" implementationClass="dev.bolt.idea.BoltFindUsagesProvider"/>
+        <findUsagesHandlerFactory implementation="dev.bolt.idea.BoltFindUsagesFactory"/>
+        <renameHandler implementation="dev.bolt.idea.BoltRenameHandler"/>
+        <lang.commenter language="Bolt" implementationClass="dev.bolt.idea.BoltCommenter"/>
+        <colorSettingsPage implementation="dev.bolt.idea.BoltColorSettingsPage"/>
+        <completion.contributor language="Bolt" implementationClass="dev.bolt.idea.BoltCompletionContributor"/>
+        <typedHandler implementation="dev.bolt.idea.BoltTypedHandler"/>
+        <completion.confidence language="Bolt" order="first" implementationClass="dev.bolt.idea.BoltCompletionConfidence"/>
+        <additionalTextAttributes scheme="Darcula" file="colorSchemes/BoltCSharpDarkAttributes.xml"/>
+        <additionalTextAttributes scheme="Dark" file="colorSchemes/BoltCSharpDarkAttributes.xml"/>
+        <bundledColorScheme path="colorSchemes/BoltCSharpDark"/>
+        <additionalTextAttributes scheme="Default" file="colorSchemes/BoltCSharpLightAttributes.xml"/>
+        <additionalTextAttributes scheme="IntelliJ Light" file="colorSchemes/BoltCSharpLightAttributes.xml"/>
+        <additionalTextAttributes scheme="Light" file="colorSchemes/BoltCSharpLightAttributes.xml"/>
+        <bundledColorScheme path="colorSchemes/BoltCSharpLight"/>
+        <externalAnnotator language="Bolt" implementationClass="dev.bolt.idea.BoltExternalAnnotator"/>
+        <applicationConfigurable id="dev.bolt.idea.settings" parentId="tools" displayName="Bolt" instance="dev.bolt.idea.BoltConfigurable"/>
+    </extensions>
+    <actions>
+        <action id="Bolt.NewClass" class="dev.bolt.idea.BoltCreateClassAction"
+                text="Bolt Class" description="Create a new Bolt class" icon="/icons/bolt.png">
+            <add-to-group group-id="NewGroup" anchor="first"/>
+        </action>
+        <action id="Bolt.FormatFile" class="dev.bolt.idea.BoltFormatFileAction"
+                text="Format Bolt File" description="Format the entire Bolt file with Allman braces and four-space indentation">
+            <keyboard-shortcut keymap="$default" first-keystroke="control K" second-keystroke="control D"/>
+            <add-to-group group-id="CodeMenu" anchor="last"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+        <action id="Bolt.RestartLanguageServer" class="dev.bolt.idea.BoltRestartAction"
+                text="Restart Bolt Language Server" description="Restart Bolt analysis for this project">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+    </actions>
+</idea-plugin>

@@ -1,0 +1,56 @@
+import System
+namespace System.Security.Cryptography;
+
+// RFC 8018 PBKDF2 using HMAC-SHA-256 or HMAC-SHA-512.
+public static class PBKDF2
+{
+private:
+    byte[] Derive(const byte[]& password, const byte[]& salt, int iterations, int length, bool sha512)
+    {
+        if (iterations <= 0) throw ArgumentOutOfRangeException("PBKDF2 iterations must be positive.");
+        if (length < 0) throw ArgumentOutOfRangeException("PBKDF2 output length must be nonnegative.");
+        int hashLength = sha512 ? 64 : 32;
+        if (length == 0) return new byte[0];
+        int blocks = (length + hashLength - 1) / hashLength;
+        byte[] output = new byte[length];
+        int outputOffset = 0;
+
+        for (int block = 1; block <= blocks; block++)
+        {
+            byte[] initial = new byte[salt.Length + 4];
+            for (int i = 0; i < salt.Length; i++) initial[i] = salt[i];
+            uint index = (uint)block;
+            initial[salt.Length] = (byte)(index >> 24);
+            initial[salt.Length + 1] = (byte)(index >> 16);
+            initial[salt.Length + 2] = (byte)(index >> 8);
+            initial[salt.Length + 3] = (byte)index;
+
+            byte[] u = sha512 ? HMAC.SHA512(password, initial) : HMAC.SHA256(password, initial);
+            byte[] t = CryptoPrimitives.Copy(u);
+            for (int iteration = 1; iteration < iterations; iteration++)
+            {
+                u = sha512 ? HMAC.SHA512(password, u) : HMAC.SHA256(password, u);
+                for (int i = 0; i < hashLength; i++) t[i] = (byte)(t[i] ^ u[i]);
+            }
+
+            int remaining = length - outputOffset;
+            int take = remaining < hashLength ? remaining : hashLength;
+            for (int i = 0; i < take; i++) output[outputOffset + i] = t[i];
+            outputOffset += take;
+        }
+        return output;
+    }
+
+public:
+    byte[] SHA256(const byte[]& password, const byte[]& salt, int iterations, int length)
+    { return Derive(password, salt, iterations, length, false); }
+
+    byte[] SHA512(const byte[]& password, const byte[]& salt, int iterations, int length)
+    { return Derive(password, salt, iterations, length, true); }
+
+    byte[] SHA256(const string& password, const byte[]& salt, int iterations, int length)
+    { return SHA256(password.ToUtf8(), salt, iterations, length); }
+
+    byte[] SHA512(const string& password, const byte[]& salt, int iterations, int length)
+    { return SHA512(password.ToUtf8(), salt, iterations, length); }
+}

@@ -1,0 +1,17 @@
+import System.Collections.Generic
+
+static class Program {
+public:
+    void Main() {
+        HashSet<int> keys;
+        long sum = 0l;
+        for (int round = 0; round < 512; round++) {
+            for (int i = 0; i < 4096; i++) keys.Add((i ^ round) * 7);
+            for (int i = 0; i < 4096; i += 3) keys.Remove(i * 7);
+            int[] copy = keys.ToArray();
+            keys.Clear();
+            for (int i = 0; i < copy.Length; i++) sum += copy[i];
+        }
+        Print(sum);
+    }
+}

@@ -1,0 +1,16 @@
+extern "C" ulong FunkeEntity(ulong unused1, ulong unused2);
+extern "C" ulong FunkeDeltaMicros(ulong unused1, ulong unused2);
+extern "C" ulong FunkeMoveRight(ulong entity, ulong milliUnits);
+extern "C" ulong FunkeLogValue(ulong unused, ulong value);
+
+public static class Program {
+public:
+    int Main() {
+        ulong entity = FunkeEntity(0ul, 0ul);
+        ulong elapsed = FunkeDeltaMicros(0ul, 0ul);
+        ulong distance = (4000ul * elapsed) / 1000000ul;
+        FunkeMoveRight(entity, distance);
+        FunkeLogValue(0ul, distance);
+        return 0;
+    }
+}

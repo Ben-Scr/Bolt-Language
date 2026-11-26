@@ -1,0 +1,5 @@
+
+
+static class Program {public: void Main(){
+int i=0;Print($"{i++}:{i++}:{i}");Print(i);
+}}

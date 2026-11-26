@@ -1,0 +1,36 @@
+import Bolt.Runtime
+
+static class Program
+{
+public:
+    void Main()
+    {
+        ulong total = 0ul;
+        long add = 0l, copy = 0l, read = 0l, release = 0l;
+        for (int batch = 0; batch < 256; batch++)
+        {
+            long afterAdd = 0l, afterCopy = 0l, afterRead = 0l;
+            long start = Clock.MonotonicTicks();
+            {
+                Buffer<int> values;
+                for (int i = 0; i < 524288; i++)
+                    values.Add(((i ^ 117) & 65535) + (batch & 31));
+                afterAdd = Clock.MonotonicTicks();
+                int[] copied = values.ToArray();
+                afterCopy = Clock.MonotonicTicks();
+                for (int i = 0; i < copied.Length; i++) total += (ulong)copied[i];
+                afterRead = Clock.MonotonicTicks();
+            }
+            long end = Clock.MonotonicTicks();
+            add += afterAdd - start;
+            copy += afterCopy - afterAdd;
+            read += afterRead - afterCopy;
+            release += end - afterRead;
+        }
+        Print(total);
+        Print(add * 100l);
+        Print(copy * 100l);
+        Print(read * 100l);
+        Print(release * 100l);
+    }
+}

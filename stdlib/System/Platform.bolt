@@ -1,0 +1,60 @@
+import Type
+namespace Bolt.Runtime;
+
+// Unsigned wrapping arithmetic is a code-generation primitive, not a foreign call
+// on the Fast/LLVM backends. Ordinary Bolt arithmetic remains overflow checked.
+[Native("bolt::platform::Bits")]
+public static class Bits
+{
+public:
+    ulong Add64(ulong a, ulong b);
+    ulong Multiply64(ulong a, ulong b);
+}
+// Type-erased value operations use the compiler's normal type descriptors.
+[Native("bolt::platform::Values")]
+public static class Values
+{
+public:
+    ulong Hash<T>(const T& value);
+    bool Equal<T>(const T& a, const T& b);
+    string Format<T>(const T& value);
+}
+[Native("bolt::platform::Failure")]
+public static class Failure
+{
+public:
+    void Argument(string message);
+    void Range(string message);
+    void Index(string message);
+    void MissingKey(string message);
+    void InvalidOperation(string message);
+    void Overflow(string message);
+    void Format(string message);
+    void IO(string message);
+    void DirectoryMissing(string message);
+}
+
+public static class ScalarConversion
+{
+public:
+    bool Float<T>(const string& text, T& value, int& error)
+    {
+        int status = 0;
+        bool ok = NumericParsing.TryValue(text, value, status);
+        // The compatibility API classifies an overflowing signed suffix before
+        // reporting the extra '+'; it never accepts two signs.
+        if (!ok && status == 1 && Type.IsInteger<T>()) {
+            byte[] bytes = text.ToUtf8();
+            int begin = 0, end = 0;
+            NumericParsing.Bounds(bytes, begin, end);
+            if (end - begin > 2 && bytes[begin] == 43 && bytes[begin+1] == 45) {
+                T ignored = default;
+                int suffixError = 0;
+                NumericParsing.TryValue(text.Substring(begin+1), ignored, suffixError);
+                if (suffixError == 2) status = 2;
+            }
+        }
+        error = status;
+        return ok;
+    }
+}

@@ -1,0 +1,348 @@
+import System
+import System.Net
+import Bolt.Runtime
+namespace Bolt.Runtime.Net;
+
+// These records are passed by address to WSARecvFrom or recvmsg.
+struct PacketVector {
+public:
+#ifdef Windows
+    uint Length;
+    byte* Data;
+#else
+    byte* Data;
+#if ARM32 || X86
+    uint Length;
+#else
+    ulong Length;
+#endif
+#endif
+}
+#ifndef Windows
+struct PacketVectors {
+public:
+    PacketVector Payload, Overflow;
+}
+struct PacketMessage {
+public:
+    byte* Address;
+    uint AddressLength;
+    PacketVector* Vectors;
+#if (Linux || Android || Web) && !(ARM32 || X86)
+    ulong VectorCount;
+    void* Control;
+    ulong ControlLength;
+#else
+    int VectorCount;
+    void* Control;
+    uint ControlLength;
+#endif
+    int Flags;
+}
+#endif
+
+public sealed class SocketHandle {
+    SystemLease lease;
+    void RequireOpen() {
+        if(!IsOpen)throw ObjectDisposedException("Socket is closed or uninitialized.");
+    }
+#ifdef Windows
+    long Fd => lease.State->Descriptor;
+#else
+    int Fd => (int)lease.State->Descriptor;
+#endif
+    static int LastError() {
+#ifdef Windows
+        return Bolt.Runtime.NetApi.WSAGetLastError();
+#else
+        return SystemCalls.Error();
+#endif
+    }
+    static void Fail(string action,int error) { throw SocketException(action+" failed: "+(string)error); }
+    static bool Interrupted(int e) {
+#ifdef Windows
+        return e==10004;
+#elif Web
+        return e==27; // WASI EINTR
+#else
+        return e==4;
+#endif
+    }
+    static bool Pending(int e) {
+#ifdef Windows
+        return e==10035 || e==10036 || e==10037;
+#elif Web
+        return e==6 || e==7 || e==26; // WASI EAGAIN, EALREADY, EINPROGRESS
+#elif Linux || Android
+        return e==11 || e==114 || e==115;
+#else
+        return e==35 || e==36 || e==37;
+#endif
+    }
+    void Ready(bool read,int timeout,long deadline) {
+        while(true){
+            int ms=SystemCalls.Remaining(deadline);
+#ifdef Windows
+            ulong[] pollfd=new ulong[2];
+            *((long*)&pollfd[0])=Fd;
+            *((short*)&pollfd[1])=(short)(read?256:16);
+            int ready=Bolt.Runtime.NetApi.WSAPoll(&pollfd[0],1u,ms);
+#else
+            ulong pollfd=0ul;
+            *((int*)&pollfd)=Fd;
+            ((short*)&pollfd)[2]=(short)(read?1:4);
+            int ready=Bolt.Runtime.ProcessApi.Poll(&pollfd,1,ms);
+#endif
+            if(ready>0)return;
+            if(ready==0){
+                if(timeout==0)throw SocketWouldBlockException("Socket operation would block.");
+                throw TimeoutException("Socket operation timed out.");
+            }
+            int e=LastError();
+            if(!Interrupted(e))Fail("poll",e);
+        }
+    }
+    void Retry(int e,bool read,int timeout,long deadline,string action) {
+        if(!Interrupted(e) && !Pending(e))Fail(action,e);
+        Ready(read,timeout,deadline);
+    }
+    void Prepare() {
+#ifdef Windows
+        uint one=1u;
+        if(Bolt.Runtime.NetApi.IoctlSocket(Fd,-2147195266,&one)!=0)Fail("FIONBIO",LastError());
+        if(Bolt.Runtime.NetApi.SetInheritance(*((void**)&lease.State->Descriptor),1u,0u)==0)Fail("SetHandleInformation",SystemCalls.Error());
+#else
+#if Linux || Android || Web
+        int nonblocking=2048;
+#else
+        int nonblocking=4;
+#endif
+        int flags=Bolt.Runtime.ProcessApi.FileControl(Fd,3,0);
+        if(flags<0 || Bolt.Runtime.ProcessApi.FileControl(Fd,4,flags|nonblocking)<0 ||
+            Bolt.Runtime.ProcessApi.FileControl(Fd,2,1)<0)Fail("fcntl",LastError());
+#if MacOS || IOS
+        int one=1;
+        if(Bolt.Runtime.NetApi.SetOption(Fd,65535,4130,&one,4)!=0)Fail("SO_NOSIGPIPE",LastError());
+#endif
+#endif
+    }
+    static int SendFlags {
+        get {
+#if Linux || Android || Web
+            return 16384;
+#elif FreeBSD
+            return 131072;
+#else
+            return 0;
+#endif
+        }
+    }
+    IPEndPoint Endpoint(bool remote) {
+        RequireOpen();
+        byte[] address=new byte[128];
+        int size=address.Length;
+        int status=remote ? Bolt.Runtime.NetApi.PeerName(Fd,&address[0],&size) :
+                            Bolt.Runtime.NetApi.LocalName(Fd,&address[0],&size);
+        if(status!=0)Fail("socket endpoint",LastError());
+        return IPEndPoint.Decode(&address[0],size);
+    }
+public:
+    SocketHandle() {}
+    static SocketHandle Create(bool ipv6=false,bool datagram=false) {
+        SocketHandle value;
+        value.lease.Initialize(ResourceKind.Socket);
+        SystemState* s=value.lease.State;
+        s->IPv6=ipv6; s->Datagram=datagram;
+        int family=ipv6?IPAddress.IPv6Family:2, kind=datagram?2:1;
+        Network.Start();
+#ifdef Windows
+        s->Descriptor=Bolt.Runtime.NetApi.WSASocketW(family,kind,0,null,0u,129u);
+#elif Linux || Android || Web
+        s->Descriptor=Bolt.Runtime.NetApi.OpenSocket(family,kind|524288,0);
+#else
+        s->Descriptor=Bolt.Runtime.NetApi.OpenSocket(family,kind,0);
+#endif
+        if(s->Descriptor == -1l){int e=LastError(); Network.Finish(); Fail("socket",e);}
+        s->Open=true;
+        value.Prepare();
+        if(ipv6){
+            int one=1;
+#if Linux || Android || Web
+            int option=26;
+#else
+            int option=27;
+#endif
+            if(Bolt.Runtime.NetApi.SetOption(value.Fd,41,option,&one,4)!=0)Fail("IPV6_V6ONLY",LastError());
+        }
+        return value;
+    }
+    bool IsOpen => lease.State!=null && lease.State->Open;
+    void Close() {
+        if(lease.State==null)return;
+        SystemCalls.Lock(lease.State);
+        SystemLifetime.Close(lease.State);
+        SystemCalls.Unlock(lease.State);
+    }
+    IPEndPoint LocalEndpoint => Endpoint(false);
+    IPEndPoint RemoteEndpoint => Endpoint(true);
+    void SetTimeouts(int receive=-1,int send=-1) {
+        RequireOpen();
+        if(receive < -1 || send < -1)throw ArgumentOutOfRangeException("Invalid socket timeout.");
+        lease.State->ReceiveTimeout=receive;lease.State->SendTimeout=send;
+    }
+    void Bind(IPEndPoint endpoint) {
+        RequireOpen();
+        byte[] address=endpoint.Encode(lease.State->IPv6);
+        if(Bolt.Runtime.NetApi.BindSocket(Fd,&address[0],address.Length)!=0)Fail("bind",LastError());
+    }
+    void Listen(int backlog=128) {
+        RequireOpen();
+        if(lease.State->Datagram || backlog<1)throw ArgumentException("Listen requires TCP and a positive backlog.");
+        if(Bolt.Runtime.NetApi.ListenSocket(Fd,backlog)!=0)Fail("listen",LastError());
+    }
+    SocketHandle Accept() {
+        RequireOpen();
+        if(lease.State->Datagram)throw InvalidOperationException("UDP does not accept connections.");
+        int timeout=lease.State->ReceiveTimeout;
+        long end=SystemCalls.Deadline(timeout);
+        SocketHandle peer;
+        peer.lease.Initialize(ResourceKind.Socket);
+        Network.Start();
+        long fd = -1l;
+        try {
+            while(fd == -1l){
+                fd=Bolt.Runtime.NetApi.AcceptSocket(Fd,null,null);
+                if(fd == -1l)Retry(LastError(),true,timeout,end,"accept");
+            }
+        } catch(Exception& e){Network.Finish();throw;}
+        peer.lease.State->Descriptor=fd;peer.lease.State->Open=true;
+        peer.lease.State->IPv6=lease.State->IPv6;
+        peer.SetTimeouts(timeout,lease.State->SendTimeout);
+        peer.Prepare();
+        return peer;
+    }
+    void Connect(IPEndPoint endpoint) {
+        RequireOpen();
+        byte[] address=endpoint.Encode(lease.State->IPv6);
+        int timeout=lease.State->SendTimeout;
+        long end=SystemCalls.Deadline(timeout);
+        if(Bolt.Runtime.NetApi.ConnectSocket(Fd,&address[0],address.Length)==0)return;
+        Retry(LastError(),false,timeout,end,"connect");
+        int status=0,size=4;
+#if Linux || Android || Web
+        int level=1,option=4;
+#else
+        int level=65535,option=4103;
+#endif
+        if(Bolt.Runtime.NetApi.GetOption(Fd,level,option,&status,&size)!=0)Fail("connect status",LastError());
+        if(status!=0)Fail("connect",status);
+    }
+    void Shutdown(bool receive=true,bool send=true) {
+        RequireOpen();
+        if((receive || send) && Bolt.Runtime.NetApi.ShutdownSocket(Fd,receive?(send?2:0):1)!=0)Fail("shutdown",LastError());
+    }
+private:
+    int Transfer(byte* data,const byte& first,int count,bool read) {
+        RequireOpen();
+        if(lease.State->Datagram)throw InvalidOperationException("Use SendTo or ReceiveFrom for UDP.");
+        if(count==0)return 0;
+        int timeout=read?lease.State->ReceiveTimeout:lease.State->SendTimeout;
+        long end=SystemCalls.Deadline(timeout);
+        while(true){
+#ifdef Windows
+            int size=count;
+#else
+            ulong size=(ulong)count;
+#endif
+            long n=read ? Bolt.Runtime.NetApi.ReceiveBytes(Fd,data,size,0) :
+                          Bolt.Runtime.NetApi.SendBytes(Fd,first,size,SendFlags);
+            if(n>=0l)return (int)n;
+            Retry(LastError(),read,timeout,end,read?"recv":"send");
+        }
+        return 0;
+    }
+public:
+    int Send(const byte[]& data,int offset,int count) {
+        SystemCalls.CheckRange(data.Length,offset,count);
+        byte dummy=0;
+        if(count==0)return Transfer(null,dummy,0,false);
+        return Transfer(null,data[offset],count,false);
+    }
+    int Receive(byte[]& data,int offset,int count) {
+        SystemCalls.CheckRange(data.Length,offset,count);
+        byte dummy=0;
+        return Transfer(count==0?null:&data[offset],dummy,count,true);
+    }
+    int SendTo(const byte[]& data,IPEndPoint destination) {
+        RequireOpen();
+        if(!lease.State->Datagram)throw InvalidOperationException("SendTo requires UDP.");
+        byte[] address=destination.Encode(lease.State->IPv6);
+        byte dummy=0;
+        
+        int timeout=lease.State->SendTimeout;
+        long end=SystemCalls.Deadline(timeout);
+        while(true){
+#ifdef Windows
+            int count=data.Length;
+#else
+            ulong count=(ulong)data.Length;
+#endif
+            long n=data.Length==0 ? Bolt.Runtime.NetApi.SendPacket(Fd,dummy,count,SendFlags,&address[0],address.Length) :
+                Bolt.Runtime.NetApi.SendPacket(Fd,data[0],count,SendFlags,&address[0],address.Length);
+            if(n>=0l){
+                if(n!=data.Length)throw SocketException("Partial datagram write.");
+                return (int)n;
+            }
+            Retry(LastError(),false,timeout,end,"sendto");
+        }
+        return 0;
+    }
+    int ReceiveFrom(byte[]& data,IPEndPoint& sender,bool& truncated) {
+        RequireOpen();
+        if(!lease.State->Datagram)throw InvalidOperationException("ReceiveFrom requires UDP.");
+        byte[] address=new byte[128];
+        byte dummy=0;byte* first=data.Length==0?&dummy:&data[0];
+        int timeout=lease.State->ReceiveTimeout;
+        long end=SystemCalls.Deadline(timeout);
+#ifdef Windows
+        PacketVector vector;
+        vector.Length=(uint)data.Length;
+        vector.Data=first;
+#else
+        // A spare byte distinguishes an exact fit from a truncated datagram
+        // even on socket providers that do not return MSG_TRUNC.
+        PacketVectors vectors;
+        vectors.Payload.Data=first;
+        vectors.Payload.Length=(uint)data.Length;
+        vectors.Overflow.Data=&dummy;
+        vectors.Overflow.Length=1;
+        PacketMessage message;
+        message.Address=&address[0];
+        message.Vectors=&vectors.Payload;
+        message.VectorCount=2;
+#endif
+        while(true){
+            int size=address.Length;
+#ifdef Windows
+            uint received=0u,flags=0u;
+            int result=Bolt.Runtime.NetApi.WSARecvFrom(Fd,&vector,1u,&received,&flags,&address[0],&size,null,null);
+            int e=result==0?0:LastError();
+            if(result==0 || e==10040){
+                sender=IPEndPoint.Decode(&address[0],size);truncated=e==10040;
+                return truncated?data.Length:(int)received;
+            }
+#else
+            message.AddressLength=(uint)size;
+            long n=Bolt.Runtime.NetApi.ReceiveMessage(Fd,&message,0);
+            if(n>=0l){
+                sender=IPEndPoint.Decode(&address[0],(int)message.AddressLength);
+                truncated=n>data.Length;
+                return truncated?data.Length:(int)n;
+            }
+            int e=LastError();
+#endif
+            Retry(e,true,timeout,end,"recvfrom");
+        }
+        return 0;
+    }
+}

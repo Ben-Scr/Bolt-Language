@@ -1,0 +1,11 @@
+namespace Bolt.Runtime;
+[Native("bolt::system::DiagnosticOps")]
+public static class DiagnosticOps
+{
+public:
+    void WriteError(const string& text);
+    void Fail(const string& message);
+    bool IsAttached();
+    bool Break();
+    string[] Stack(int skip = 0, int maximum = 64);
+}

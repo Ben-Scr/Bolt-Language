@@ -1,0 +1,29 @@
+import Random
+import System.Collections.Generic
+
+static class Program { public: void Main() {
+    Random.Seed(123);
+    List<float> values;
+    bool ok=true;
+    bool fractionalFloat=false;
+    bool fractionalFloatMax=false;
+    bool fractionalDouble=false;
+    bool fractionalDoubleMax=false;
+    for(int i=0;i<100;i++) {
+        int a=Random.Next<int>(10);
+        float b=Random.Next<float>(-2,3);
+        ulong c=Random.Next<ulong>(3ul,20ul);
+        values.Add(Random.Next<float>(0,1.0f));
+        float f=Random.Next<float>(1.0f);
+        double d=Random.Next<double>(0,1.0);
+        double e=Random.Next<double>(1.0);
+        ok=ok && a>=0 && a<10 && b>=-2 && b<3 && c>=3ul && c<20ul;
+        ok=ok && values[i]>=0 && values[i]<1 && f>=0 && f<1;
+        ok=ok && d>=0 && d<1 && e>=0 && e<1;
+        fractionalFloat=fractionalFloat || values[i]>0;
+        fractionalFloatMax=fractionalFloatMax || f>0;
+        fractionalDouble=fractionalDouble || d>0;
+        fractionalDoubleMax=fractionalDoubleMax || e>0;
+    }
+    Console.WriteLine(ok && values.Count==100 && fractionalFloat && fractionalFloatMax && fractionalDouble && fractionalDoubleMax);
+} }

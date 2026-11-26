@@ -1,0 +1,54 @@
+import System
+
+public static class Program {
+public:
+    int Main() {
+        int[] values = [7, 3, 4, -1, 10, 1];
+        ulong total = 5ul;
+        bool caught = false;
+        try {
+            for (int i = 1; i < values.Length; i++) total += (ulong)values[i];
+        } catch (Exception error) { caught = error.Message == "integer conversion out of range"; }
+        if (!caught || total != 12ul) return 1;
+
+        total = ulong.MaxValue - 2ul;
+        caught = false;
+        try {
+            for (int i = 0; i < values.Length; i++) total += (ulong)values[i];
+        } catch (Exception error) { caught = error.Message == "integer overflow in +"; }
+        if (!caught || total != ulong.MaxValue - 2ul) return 2;
+
+        int[] positives = [1, 2, 4];
+        total = ulong.MaxValue - 2ul;
+        caught = false;
+        try {
+            for (int i = 0; i < positives.Length; i++) total += (ulong)positives[i];
+        } catch (Exception error) { caught = error.Message == "integer overflow in +"; }
+        if (!caught || total != ulong.MaxValue - 1ul) return 3;
+
+        int[] empty;
+        total = 0ul;
+        for (int i = 0; i < empty.Length; i++) total += (ulong)empty[i];
+        caught = false;
+        try {
+            for (int i = -1; i < empty.Length; i++) total += (ulong)empty[i];
+        } catch (Exception error) { caught = error.Message == "index out of range"; }
+        if (!caught || total != 0ul) return 4;
+        for (int i = 20; i < positives.Length; i++) total += (ulong)positives[i];
+        for (int i = 1; i < positives.Length; i++) total += (ulong)positives[i];
+        if (total != 6ul) return 5;
+        uint[] wide = [4294967295u, 1u, 4294967295u, 2u];
+        for (int i = 0; i < wide.Count; i++) total += (ulong)wide[i];
+        if (total != 8589934599ul) return 6;
+
+        byte[] bytes = [(byte)255, (byte)0, (byte)255];
+        for (int i = 0; i < bytes.Length; i++) total += (ulong)bytes[i];
+        if (total != 8589935109ul) return 7;
+        short[] signed = [(short)1, (short)-2, (short)5];
+        caught = false;
+        try {
+            for (int i = 0; i < signed.Length; i++) total += (ulong)signed[i];
+        } catch (Exception error) { caught = error.Message == "integer conversion out of range"; }
+        return caught && total == 8589935110ul ? 0 : 8;
+    }
+}

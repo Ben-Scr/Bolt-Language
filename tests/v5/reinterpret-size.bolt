@@ -1,0 +1,5 @@
+
+
+static class Program {public: void Main(){
+Print(Reinterpret<long>(1.0f));
+}}

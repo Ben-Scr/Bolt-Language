@@ -1,0 +1,21 @@
+import System.Collections.Generic
+
+static class Program {
+public:
+    void Main() {
+        int count = 2097151;
+        List<int> items;
+        items.Reserve(count);
+        for (int i = 0; i < count; i++) items.Add((i ^ 123456) & 1023);
+
+        int[] snapshot = items.ToArray();
+        for (int i = 0; i < count; i += 193) items[i] ^= 511;
+        long original = 0l, edited = 0l;
+        for (int i = 0; i < count; i++) {
+            original += snapshot[i];
+            edited += items[i];
+        }
+        Print(original);
+        Print(edited);
+    }
+}

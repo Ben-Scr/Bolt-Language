@@ -1,0 +1,5 @@
+import Type
+void Print<Fixed,T...>(){Console.WriteLine(Type.Name<T>());}
+static class Program { public: void Main() {
+Print<int,string,double>();
+} }

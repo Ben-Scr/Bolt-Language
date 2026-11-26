@@ -1,0 +1,481 @@
+import Type
+import Math
+namespace Bolt.Runtime;
+
+public static class ScalarMath
+{
+public:
+    T Min<T>(T a, T b) : Number<T> { return b < a ? b : a; }
+    T Max<T>(T a, T b) : Number<T> { return a < b ? b : a; }
+    T Abs<T>(T value) : Number<T>
+    {
+        if (value < (T)0) return (T)((T)0 - value);
+        return value;
+    }
+    T Sign<T>(T value) : Number<T>
+    {
+        int sign = value > (T)0 ? 1 : (value < (T)0 ? -1 : 0);
+        return (T)sign;
+    }
+    T Clamp<T>(T value, T min, T max) : Number<T>
+    {
+        if (min > max) throw System.Exception("Math.Clamp min exceeds max");
+        return value < min ? min : (value > max ? max : value);
+    }
+    T Truncate<T>(T value) : Number<T>
+    {
+        if (Type.IsInteger<T>() || !(value >= T.MinValue && value <= T.MaxValue)) return value;
+        return (T)Integral((double)value);
+    }
+    T Floor<T>(T value) : Number<T>
+    {
+        if (Type.IsInteger<T>() || !(value >= T.MinValue && value <= T.MaxValue)) return value;
+        double x = (double)value, t = Integral(x);
+        return (T)(x < t ? t - 1.0 : t);
+    }
+    T Ceiling<T>(T value) : Number<T>
+    {
+        if (Type.IsInteger<T>() || !(value >= T.MinValue && value <= T.MaxValue)) return value;
+        double x = (double)value, t = Integral(x);
+        return (T)(x > t ? t + 1.0 : t);
+    }
+    T Ceil<T>(T value) : Number<T> { return Ceiling<T>(value); }
+    T Round<T>(T value) : Number<T>
+    {
+        if (Type.IsInteger<T>() || !(value >= T.MinValue && value <= T.MaxValue)) return value;
+        double x = (double)value, t = Integral(x);
+        if (x - t >= 0.5) return (T)(t + 1.0);
+        if (t - x >= 0.5) return (T)(t - 1.0);
+        return (T)t;
+    }
+    T Sqrt<T>(T value) : FloatingPoint<T> { return (T)Root((double)value); }
+    T Exp<T>(T value) : FloatingPoint<T> { return (T)Exponential(Widen<T>(value)); }
+    T Log<T>(T value) : FloatingPoint<T> { return (T)Logarithm((double)value, 0); }
+    T Log2<T>(T value) : FloatingPoint<T> { return (T)Logarithm((double)value, 2); }
+    T Log10<T>(T value) : FloatingPoint<T> { return (T)Logarithm((double)value, 10); }
+    T Pow<T>(T x, T y) : FloatingPoint<T> { return (T)Power(Widen<T>(x), Widen<T>(y)); }
+    T Sin<T>(T value) : FloatingPoint<T> { return (T)Trigonometric((double)value, false); }
+    T Cos<T>(T value) : FloatingPoint<T> { return (T)Trigonometric((double)value, true); }
+    T Tan<T>(T value) : FloatingPoint<T>
+    {
+        int quadrant = 0;
+        double r = ReducedAngle((double)value, quadrant);
+        double sine = SineKernel(r), cosine = CosineKernel(r);
+        return (T)(quadrant % 2 == 0 ? sine / cosine : -cosine / sine);
+    }
+    T Atan<T>(T value) : FloatingPoint<T> { return (T)ArcTangent(Widen<T>(value)); }
+    T Atan2<T>(T y, T x) : FloatingPoint<T> { return (T)Angle(Widen<T>(y), Widen<T>(x)); }
+    T Asin<T>(T value) : FloatingPoint<T>
+    {
+        double x = Finite((double)value);
+        if (Magnitude(x) > 1.0) Failure.Overflow("floating-point overflow");
+        return (T)Angle(x, Root((1.0 - x) * (1.0 + x)));
+    }
+    T Acos<T>(T value) : FloatingPoint<T>
+    {
+        double x = Finite((double)value);
+        if (Magnitude(x) > 1.0) Failure.Overflow("floating-point overflow");
+        return (T)Angle(Root((1.0 - x) * (1.0 + x)), x);
+    }
+
+private:
+    // A checked float-to-double cast rejects infinities and NaNs. Some
+    // functions still have finite results for those explicit bit patterns.
+    double Widen<T>(T x) : FloatingPoint<T>
+    {
+        if (Type.IsFloat32<T>())
+        {
+            if (x > T.MaxValue) return Reinterpret<double>(9218868437227405312ul);
+            if (x < T.MinValue) return Reinterpret<double>(18442240474082181120ul);
+            if (x != x) return Reinterpret<double>(9221120237041090560ul);
+        }
+        return (double)x;
+    }
+    double Finite(double x)
+    {
+        if ((Reinterpret<ulong>(x) & 9218868437227405312ul) == 9218868437227405312ul)
+            Failure.Overflow("floating-point overflow");
+        return x;
+    }
+    double Magnitude(double x) { return Reinterpret<double>(Reinterpret<ulong>(x) & 9223372036854775807ul); }
+    double Negate(double x) { return Reinterpret<double>(Reinterpret<ulong>(x) ^ 9223372036854775808ul); }
+    bool Negative(double x) { return (Reinterpret<ulong>(x) >> 63) != 0ul; }
+    double Integral(double x)
+    {
+        ulong bits = Reinterpret<ulong>(x);
+        int exponent = (int)((bits >> 52) & 2047ul) - 1023;
+        if (exponent < 0) return Reinterpret<double>(bits & 9223372036854775808ul);
+        if (exponent >= 52) return x;
+        ulong mask = (1ul << (52 - exponent)) - 1ul;
+        return Reinterpret<double>(bits & ~mask);
+    }
+    // For positive finite x, return m in [1, 2) such that x = m * 2^exponent.
+    double Normalize(double x, int& exponent)
+    {
+        int adjustment = 0;
+        if (x < 2.2250738585072014e-308) { x *= 18014398509481984.0; adjustment = -54; }
+        ulong bits = Reinterpret<ulong>(x);
+        exponent = (int)((bits >> 52) & 2047ul) - 1023 + adjustment;
+        return Reinterpret<double>((bits & 4503599627370495ul) | 4607182418800017408ul);
+    }
+    // Scaling in exact powers of two also handles subnormal inputs/results.
+    double Scale(double x, int exponent)
+    {
+        while (exponent > 1023)
+        {
+            if (Magnitude(x) > double.MaxValue / 2.0) Failure.Overflow("floating-point overflow");
+            x *= 2.0; exponent--;
+        }
+        while (exponent < -1022) { x *= 7.4583407312002067433e-155; exponent += 512; }
+        x *= Reinterpret<double>((ulong)(exponent + 1023) << 52);
+        return x;
+    }
+    double Root(double x)
+    {
+        Finite(x);
+        if (x < 0.0) Failure.Overflow("floating-point overflow");
+        if (x == 0.0) return x;
+        return PositiveRoot(x);
+    }
+    double PositiveRoot(double x)
+    {
+        int exponent = 0;
+        double m = Normalize(x, exponent);
+        if (exponent % 2 != 0) { m *= 2.0; exponent--; }
+        double estimate = (m + 1.0) * 0.5;
+        for (int i = 0; i < 7; i++) estimate = (estimate + m / estimate) * 0.5;
+        // Newton can stop one ulp away. Compare m to the square of the
+        // midpoint to the next neighbor using the residual of estimate².
+        double square = estimate * estimate;
+        double residual = (m - square) - ProductError(estimate, estimate, square);
+        ulong bits = Reinterpret<ulong>(estimate);
+        if (residual > 0.0)
+        {
+            double next = Reinterpret<double>(bits + 1ul);
+            if (residual > estimate * (next - estimate)) estimate = next;
+        }
+        else if (residual < 0.0)
+        {
+            double previous = Reinterpret<double>(bits - 1ul);
+            if (-residual >= estimate * (estimate - previous)) estimate = previous;
+        }
+        return Scale(estimate, exponent / 2);
+    }
+    double Exponential(double x, double tail = 0.0)
+    {
+        if (x > 710.0) Failure.Overflow("floating-point overflow");
+        if (x < -746.0) return 0.0;
+        Finite(x);
+        int exponent = (int)Round<double>(x * 1.442695040888963407359924681001892137);
+        double r = (x - (double)exponent * 0.69314718036912381649017333984375)
+                   + (tail - (double)exponent * 1.90821492927058770002e-10);
+        // |r| <= log(2)/2. The degree-14 Taylor remainder is below 2e-19.
+        // Constant reciprocal factorials avoid a division at each term.
+        double p = 1.0 / 87178291200.0;
+        p = p * r + 1.0 / 6227020800.0;
+        p = p * r + 1.0 / 479001600.0;
+        p = p * r + 1.0 / 39916800.0;
+        p = p * r + 1.0 / 3628800.0;
+        p = p * r + 1.0 / 362880.0;
+        p = p * r + 1.0 / 40320.0;
+        p = p * r + 1.0 / 5040.0;
+        p = p * r + 1.0 / 720.0;
+        p = p * r + 1.0 / 120.0;
+        p = p * r + 1.0 / 24.0;
+        p = p * r + 1.0 / 6.0;
+        p = p * r + 0.5;
+        // Recover the rounding residual of the leading sum before adding the tail.
+        double high = 1.0 + r;
+        return Scale(high + (((1.0 - high) + r) + (r * r) * p), exponent);
+    }
+    double LogFraction(double x, int& exponent, double& tail)
+    {
+        double m = Normalize(x, exponent);
+        if (m > 1.4142135623730950488) { m *= 0.5; exponent++; }
+        // log(m) = 2 atanh(z). Keep the division residual and series tail
+        // separate so a large exponent in Pow cannot magnify a rounded log.
+        double numerator = m - 1.0, denominator = 2.0 + numerator;
+        double z = numerator / denominator, product = z * denominator;
+        double zTail = ((numerator - product) - ProductError(z, denominator, product)
+                       - z * ((2.0 - denominator) + numerator)) / denominator;
+        double square = z * z, series = 0.0;
+        for (int i = 39; i >= 3; i -= 2) series = 1.0 / (double)i + square * series;
+        double correction = 2.0 * (z * square * series + zTail / (1.0 - square));
+        double fraction = 2.0 * z + correction;
+        tail = (2.0 * z - fraction) + correction;
+        return fraction;
+    }
+    double NaturalLog(double x, double& tail)
+    {
+        int exponent = 0;
+        double fraction = LogFraction(x, exponent, tail);
+        double high = (double)exponent * 0.69314718036912381649;
+        double sum = high + fraction;
+        tail += ((high - sum) + fraction) + (double)exponent * 1.90821492927058770002e-10;
+        high = sum + tail;
+        tail = (sum - high) + tail;
+        return high;
+    }
+    double Logarithm(double x, int radix)
+    {
+        Finite(x);
+        if (x <= 0.0) Failure.Overflow("floating-point overflow");
+        int exponent = 0;
+        double tail = 0.0;
+        if (radix == 0)
+        {
+            double high = NaturalLog(x, tail);
+            return high + tail;
+        }
+        double fraction = LogFraction(x, exponent, tail);
+        fraction += tail;
+        if (radix == 2) return (double)exponent + fraction * 1.4426950408889634074;
+        return (double)exponent * 0.30102999566398119521 + fraction * 0.43429448190325182765;
+    }
+    double Power(double x, double y)
+    {
+        if (y == 0.0 || x == 1.0) return 1.0;
+        if (x != x || y != y) Failure.Overflow("floating-point overflow");
+        double magnitude = Magnitude(x);
+        if (Magnitude(y) > double.MaxValue)
+        {
+            if (magnitude == 1.0) return 1.0;
+            if ((magnitude > 1.0) == (y > 0.0)) Failure.Overflow("floating-point overflow");
+            return 0.0;
+        }
+        bool integral = Integral(y) == y;
+        bool odd = integral && Magnitude(y) < 9007199254740992.0 && ((long)y % 2l != 0l);
+        if (magnitude > double.MaxValue)
+        {
+            if (y > 0.0) Failure.Overflow("floating-point overflow");
+            return Negative(x) && odd ? Negate(0.0) : 0.0;
+        }
+        if (x == 0.0)
+        {
+            if (y < 0.0) Failure.Overflow("floating-point overflow");
+            return Negative(x) && odd ? x : 0.0;
+        }
+        if (x < 0.0 && !integral) Failure.Overflow("floating-point overflow");
+        if (y == 0.5) return Root(x);
+        if (y == -0.5) return 1.0 / Root(x);
+        if (integral && Magnitude(y) <= 2048.0)
+        {
+            double result = IntegerPower(Magnitude(x), (int)y);
+            return odd && x < 0.0 ? Negate(result) : result;
+        }
+        double tail = 0.0;
+        double log = NaturalLog(magnitude, tail);
+        // Check the product before multiplying; underflow is a finite zero.
+        if (log != 0.0 && Magnitude(y) > 746.0 / Magnitude(log))
+        {
+            if ((log > 0.0) == (y > 0.0)) Failure.Overflow("floating-point overflow");
+            return odd && x < 0.0 ? Reinterpret<double>(9223372036854775808ul) : 0.0;
+        }
+        double product = y * log;
+        double result = Exponential(product, ProductError(y, log, product) + y * tail);
+        return odd && x < 0.0 ? Negate(result) : result;
+    }
+    // Compensated products retain the rounding residual without an FMA or
+    // foreign call. Masking the significands avoids overflow while splitting.
+    double ProductError(double a, double b, double product)
+    {
+        double ah = Reinterpret<double>(Reinterpret<ulong>(a) & 18446744073575333888ul), al = a - ah;
+        double bh = Reinterpret<double>(Reinterpret<ulong>(b) & 18446744073575333888ul), bl = b - bh;
+        return ((ah * bh - product) + ah * bl + al * bh) + al * bl;
+    }
+    void Multiply(double a, double al, double b, double bl, double& high, double& low)
+    {
+        double product = a * b;
+        double residual = ProductError(a, b, product) + a * bl + al * b + al * bl;
+        high = product + residual;
+        low = (product - high) + residual;
+    }
+    double IntegerPower(double x, int n)
+    {
+        int exponent = 0;
+        double factor = Normalize(x, exponent), tail = 0.0;
+        if (n < 0)
+        {
+            double inverse = 1.0 / factor;
+            double product = inverse * factor;
+            tail = ((1.0 - product) - ProductError(inverse, factor, product)) / factor;
+            factor = inverse; exponent = -exponent; n = -n;
+            if (factor < 1.0) { factor *= 2.0; tail *= 2.0; exponent--; }
+        }
+        double result = 1.0, resultTail = 0.0;
+        int resultExponent = 0;
+        while (n != 0)
+        {
+            if (n % 2 != 0)
+            {
+                Multiply(result, resultTail, factor, tail, result, resultTail);
+                resultExponent += exponent;
+                if (result >= 2.0) { result *= 0.5; resultTail *= 0.5; resultExponent++; }
+            }
+            n /= 2;
+            if (n != 0)
+            {
+                Multiply(factor, tail, factor, tail, factor, tail);
+                exponent *= 2;
+                if (factor >= 2.0) { factor *= 0.5; tail *= 0.5; exponent++; }
+            }
+        }
+        if (resultExponent > 1023) Failure.Overflow("floating-point overflow");
+        if (resultExponent < -1075) return 0.0;
+        return Scale(result + resultTail, resultExponent);
+    }
+    double ArcTangent(double x)
+    {
+        if (Magnitude(x) > double.MaxValue) return Negative(x) ? -1.57079632679489661923 : 1.57079632679489661923;
+        Finite(x);
+        if (x == 0.0) return x;
+        double a = Magnitude(x);
+        bool inverse = a > 1.0;
+        if (inverse) a = 1.0 / a;
+        double offset = 0.0;
+        if (a > 0.4142135623730950488) { a = (a - 1.0) / (a + 1.0); offset = 0.78539816339744830962; }
+        double square = a * a, series = 0.0;
+        for (int i = 59; i >= 3; i -= 2) series = 1.0 / (double)i - square * series;
+        double result = offset + (a - a * square * series);
+        if (inverse) result = 1.57079632679489661923 - result;
+        return Negative(x) ? Negate(result) : result;
+    }
+    double Angle(double y, double x)
+    {
+        if (x != x || y != y) Failure.Overflow("floating-point overflow");
+        if (Magnitude(y) > double.MaxValue)
+        {
+            y = Negative(y) ? -1.0 : 1.0;
+            x = Magnitude(x) > double.MaxValue ? (Negative(x) ? -1.0 : 1.0) : 0.0;
+        }
+        else if (Magnitude(x) > double.MaxValue) y = Negative(y) ? Negate(0.0) : 0.0;
+        if (y == 0.0) return Negative(x) ? (Negative(y) ? -Math.Pi : Math.Pi) : y;
+        if (x == 0.0) return Negative(y) ? -1.57079632679489661923 : 1.57079632679489661923;
+        double ay = Magnitude(y), ax = Magnitude(x);
+        double angle = ay > ax ? 1.57079632679489661923 - ArcTangent(ax / ay) : ArcTangent(ay / ax);
+        if (Negative(x)) angle = Math.Pi<double> - angle;
+        return Negative(y) ? Negate(angle) : angle;
+    }
+    double SineKernel(double x)
+    {
+        if (Magnitude(x) < 1.0e-8) return x;
+        // Reduced arguments satisfy |x| <= Pi/4. The first omitted term
+        // after x^17 is below 9e-20 throughout the interval.
+        double z = x * x;
+        double p = 1.0 / 355687428096000.0;
+        p = p * z - 1.0 / 1307674368000.0;
+        p = p * z + 1.0 / 6227020800.0;
+        p = p * z - 1.0 / 39916800.0;
+        p = p * z + 1.0 / 362880.0;
+        p = p * z - 1.0 / 5040.0;
+        p = p * z + 1.0 / 120.0;
+        double cube = x * z, third = cube / 6.0, high = x - third;
+        return high + (((x - high) - third) + (cube * z) * p);
+    }
+    double CosineKernel(double x)
+    {
+        // Through x^18, the next term is below 4e-21 on the same interval.
+        double z = x * x;
+        double p = -1.0 / 6402373705728000.0;
+        p = p * z + 1.0 / 20922789888000.0;
+        p = p * z - 1.0 / 87178291200.0;
+        p = p * z + 1.0 / 479001600.0;
+        p = p * z - 1.0 / 3628800.0;
+        p = p * z + 1.0 / 40320.0;
+        p = p * z - 1.0 / 720.0;
+        p = p * z + 1.0 / 24.0;
+        double half = z * 0.5, high = 1.0 - half;
+        return high + (((1.0 - high) - half) + (z * z) * p);
+    }
+    double Trigonometric(double x, bool cosine)
+    {
+        int quadrant = 0;
+        double r = ReducedAngle(x, quadrant);
+        if (cosine) quadrant = (quadrant + 1) % 4;
+        if (quadrant == 0) return SineKernel(r);
+        if (quadrant == 1) return CosineKernel(r);
+        if (quadrant == 2) return Negate(SineKernel(r));
+        return Negate(CosineKernel(r));
+    }
+    double ReducedAngle(double x, int& quadrant)
+    {
+        Finite(x);
+        if (Magnitude(x) <= 0.78539816339744830962) { quadrant = 0; return x; }
+        double r = Reduce(Magnitude(x), quadrant);
+        if (Negative(x)) { quadrant = (4 - quadrant) % 4; return Negate(r); }
+        return r;
+    }
+
+    // Fixed-point reduction covers every finite binary64 angle. The 1536-bit
+    // 2/Pi expansion is multiplied by the exact 53-bit significand in base 2^24.
+    // Only quadrant bits and the signed fractional remainder are converted to
+    // floating point; no large quotient is rounded through a double.
+    double Reduce(double x, int& quadrant)
+    {
+        // Three non-overlapping Pi/2 parts make both products exact for this
+        // range, avoiding heap buffers for everyday angles.
+        if (x < 1048576.0)
+        {
+            int n = (int)Round<double>(x * 0.63661977236758134308);
+            quadrant = n % 4;
+            return ((x - (double)n * 1.57079632673412561417)
+                      - (double)n * 6.07710050630396597660e-11)
+                      - (double)n * 2.02226624879595063154e-21;
+        }
+        ulong[] digits = TwoOverPi();
+        ulong[] product = new ulong[67];
+        ulong bits = Reinterpret<ulong>(x);
+        int exponent = (int)((bits >> 52) & 2047ul) - 1023;
+        ulong mantissa = (bits & 4503599627370495ul) | 4503599627370496ul;
+        for (int part = 0; part < 3; part++)
+        {
+            ulong limb = (mantissa >> (24 * part)) & 16777215ul, carry = 0ul;
+            for (int i = 0; i < 64; i++)
+            {
+                ulong value = product[i + part] + digits[i] * limb + carry;
+                product[i + part] = value & 16777215ul; carry = value >> 24;
+            }
+            product[64 + part] = carry;
+        }
+        int shift = 1588 - exponent;
+        quadrant = Bit(product, shift) + 2 * Bit(product, shift + 1);
+        bool up = Bit(product, shift - 1) != 0;
+        if (up)
+        {
+            quadrant = (quadrant + 1) % 4;
+            ulong carry = 1ul;
+            for (int i = 0; i * 24 < shift; i++)
+            {
+                ulong mask = i * 24 + 24 <= shift ? 16777215ul : (1ul << (shift - i * 24)) - 1ul;
+                ulong value = (product[i] ^ mask) + carry;
+                product[i] = value & mask; carry = value > mask ? 1ul : 0ul;
+            }
+        }
+        double fraction = 0.0, weight = 0.5;
+        int significant = 0;
+        for (int position = shift - 1; position >= 0 && significant < 64; position--)
+        {
+            int bit = Bit(product, position);
+            if (bit != 0) fraction += weight;
+            if (bit != 0 || significant != 0) significant++;
+            weight *= 0.5;
+        }
+        double remainder = fraction * 1.570796326794896558 + fraction * 6.1232339957367660359e-17;
+        return up ? Negate(remainder) : remainder;
+    }
+    int Bit(const ulong[]& digits, int position) { return (int)((digits[position / 24] >> (position % 24)) & 1ul); }
+    ulong[] TwoOverPi()
+    {
+        // Least significant limb first, floor((2/Pi) * 2^1536).
+        return {
+            7579849ul, 1398474ul, 3212806ul, 5075751ul, 16767104ul, 6832269ul, 6231200ul, 6658437ul,
+            15080200ul, 9527646ul, 1944035ul, 10155062ul, 13614112ul, 7056368ul, 4652155ul, 5636912ul,
+            9264392ul, 6271263ul, 15363067ul, 9065106ul, 473591ul, 15825725ul, 13102053ul, 7677882ul,
+            6285869ul, 4155038ul, 12013382ul, 2607881ul, 3571407ul, 7151469ul, 9132554ul, 15675153ul,
+            366607ul, 9961438ul, 3874808ul, 12450088ul, 8675211ul, 3798172ul, 3769171ul, 3772886ul,
+            6258241ul, 7349940ul, 8710556ul, 3062596ul, 8533493ul, 10960616ul, 1880361ul, 16653803ul,
+            13734428ul, 3074569ul, 14681673ul, 4345298ul, 2387514ul, 12935607ul, 11263675ul, 16666979ul,
+            4427841ul, 9804092ul, 12639074ul, 16069853ul, 2578385ul, 1387004ul, 7228996ul, 10680707ul
+        };
+    }
+}

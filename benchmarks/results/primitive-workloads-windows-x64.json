@@ -1,0 +1,5478 @@
+{
+  "utc": "2026-11-21T11:25:23.017174+00:00",
+  "method": "whole process wall time, paired balanced random order",
+  "host": {
+    "platform": "Windows-11-10.0.26300-SP0",
+    "machine": "AMD64",
+    "cpu": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+    "advertised_features": null,
+    "python": "3.13.7",
+    "cpu_affinity": null
+  },
+  "warmup": 1,
+  "runs": 7,
+  "seed": 1604,
+  "toolchains": {
+    "before": {
+      "compiler": "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+      "sha256": "040d6c5a7e6d9aa38e968d7b299d28ce60b417f2518dc3ee42998f68cd39bca8",
+      "version": "Bolt 0.1.0 (x86_64-pc-windows-msvc)",
+      "cases": {
+        "struct-copy-small": {
+          "fixture": "struct-copy-small.bolt",
+          "fixture_sha256": "cb32c567fb2a05ec09781a1b82cb65e03bfafcc6c761770901e8da0695cf3bac",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "struct-copy-small.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "cb32c567fb2a05ec09781a1b82cb65e03bfafcc6c761770901e8da0695cf3bac",
+          "executable_sha256": "8536d7b1db459a29c879fec656458ce194888e55438dcb2ec5bc7db3d12f22d8",
+          "build_ms": 623.9405,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-0z3fmu5f/before/struct-copy-small/release/program.exe\n\n[bolt] Release compilation: 600.92 ms",
+          "runtime_sha256": {}
+        },
+        "struct-copy-wide": {
+          "fixture": "struct-copy-wide.bolt",
+          "fixture_sha256": "0a6bc9d04f73ec0998ca021d4bcb35390d80309ea6e3e8c7a2382fef41969024",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "struct-copy-wide.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "0a6bc9d04f73ec0998ca021d4bcb35390d80309ea6e3e8c7a2382fef41969024",
+          "executable_sha256": "8fea52e8eba6882ce4d4f28deeaa0cd8676a7214fdef73a261e9e302d2ba30ad",
+          "build_ms": 469.8227,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-kjfv1a49/before/struct-copy-wide/release/program.exe\n\n[bolt] Release compilation: 445.88 ms",
+          "runtime_sha256": {}
+        },
+        "string-affixes": {
+          "fixture": "string-affixes.bolt",
+          "fixture_sha256": "f655ee073e32edf5c654d847d4667bd14df80d8a33ec8a73c5f64d5a74c288f0",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "string-affixes.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "f655ee073e32edf5c654d847d4667bd14df80d8a33ec8a73c5f64d5a74c288f0",
+          "executable_sha256": "1c9b0f1b2fbd04ff8f6a7b4603b00b7688ad56ec04f2ef7ec23c1973bacc179b",
+          "build_ms": 401.9625,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-jgy1iaml/before/string-affixes/release/program.exe\n\n[bolt] Release compilation: 379.72 ms",
+          "runtime_sha256": {}
+        },
+        "list-fill-clear": {
+          "fixture": "list-fill-clear.bolt",
+          "fixture_sha256": "3629443134530d521b378b0f21be545409a330f42a6308385dba0447e3b45d79",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "list-fill-clear.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "3629443134530d521b378b0f21be545409a330f42a6308385dba0447e3b45d79",
+          "executable_sha256": "cd2f3b0bd2143152613a0687edd820f5c608fc36048b55f56fa4f3103fe1ba5c",
+          "build_ms": 400.2196,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-h8v68hj0/before/list-fill-clear/release/program.exe\n\n[bolt] Release compilation: 377.73 ms",
+          "runtime_sha256": {}
+        },
+        "buffer-record-add": {
+          "fixture": "buffer-record-add.bolt",
+          "fixture_sha256": "2b9c49ce237795e0507ea63f20081c20aff8c3fdd4218263d5c7d48049978a8d",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "buffer-record-add.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "2b9c49ce237795e0507ea63f20081c20aff8c3fdd4218263d5c7d48049978a8d",
+          "executable_sha256": "887179823c9dcbc3ef47e49970a512c20c1bf508cf03b83ca8277fb36c53fa9a",
+          "build_ms": 597.158,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-a22j6_tg/before/buffer-record-add/release/program.exe\n\n[bolt] Release compilation: 573.91 ms",
+          "runtime_sha256": {}
+        },
+        "arithmetic": {
+          "fixture": "arithmetic.bolt",
+          "fixture_sha256": "4fad334107d7aa0a9925d333365d6436e505cbea4ebf3ff7910a66923a0852be",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "arithmetic.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "4fad334107d7aa0a9925d333365d6436e505cbea4ebf3ff7910a66923a0852be",
+          "executable_sha256": "cd05e494a52880c8689998788aad99eb936624a5e14ff51de1e800ce0bd5641c",
+          "build_ms": 365.0355,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-57a79pe9/before/arithmetic/release/program.exe\n\n[bolt] Release compilation: 337.57 ms",
+          "runtime_sha256": {}
+        },
+        "pointers": {
+          "fixture": "pointers.bolt",
+          "fixture_sha256": "13657a7a059c3c5f766b19c65bfea35b47bd790b1009fb94965d65213fb90b4f",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "pointers.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "13657a7a059c3c5f766b19c65bfea35b47bd790b1009fb94965d65213fb90b4f",
+          "executable_sha256": "a9063a4a912801993a7b8fb46dbed89d30c612b83c9742f2e97f63ea616ccf5a",
+          "build_ms": 380.9637,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-f5l_c6gn/before/pointers/release/program.exe\n\n[bolt] Release compilation: 358.68 ms",
+          "runtime_sha256": {}
+        },
+        "memory": {
+          "fixture": "memory.bolt",
+          "fixture_sha256": "2ca256e2114ab152f6b9ab5040c5031c4f12b8dcc29ff01308ed29b70d6fa2f8",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "memory.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "2ca256e2114ab152f6b9ab5040c5031c4f12b8dcc29ff01308ed29b70d6fa2f8",
+          "executable_sha256": "a386f41048f55551dcb6d8a656a946170036d4bd39dbbc5ec1d123d03114dbe8",
+          "build_ms": 469.5741,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-sktj2kx0/before/memory/release/program.exe\n\n[bolt] Release compilation: 446.28 ms",
+          "runtime_sha256": {}
+        },
+        "memory-long": {
+          "fixture": "memory.bolt",
+          "fixture_sha256": "2ca256e2114ab152f6b9ab5040c5031c4f12b8dcc29ff01308ed29b70d6fa2f8",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "memory-long.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "c1ec12456e44adb6b45721217244889da692e6bee1ecd085b1a10cb477767bc7",
+          "executable_sha256": "34d85df8ccb7394a5e45d1f7f2587f0a4d82564360c848bff082d7229b9e5d97",
+          "build_ms": 484.5626,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-0jxwrxka/before/memory-long/release/program.exe\n\n[bolt] Release compilation: 461.11 ms",
+          "runtime_sha256": {}
+        },
+        "buffer": {
+          "fixture": "buffer.bolt",
+          "fixture_sha256": "20b2307100520e6943353483cb72c2b08443dcf6db1b2e58f7305b1c9127ac41",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "buffer.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "20b2307100520e6943353483cb72c2b08443dcf6db1b2e58f7305b1c9127ac41",
+          "executable_sha256": "45eb66336d900df947e4f10b6210e53ba7f02bacdff780a97d48d33ff32f81ff",
+          "build_ms": 375.3806,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-4myqifl9/before/buffer/release/program.exe\n\n[bolt] Release compilation: 340.94 ms",
+          "runtime_sha256": {}
+        },
+        "buffer-long": {
+          "fixture": "buffer-long.bolt",
+          "fixture_sha256": "b123d5547d317faed85cc6692d517505740386cbfc4a431fc631fce116992356",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "buffer-long.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "b123d5547d317faed85cc6692d517505740386cbfc4a431fc631fce116992356",
+          "executable_sha256": "a832b4d969110b2c531d188af778b11c7c80c1adb0ef0591abacc1f398df0f39",
+          "build_ms": 378.3958,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-w_yf6osn/before/buffer-long/release/program.exe\n\n[bolt] Release compilation: 332.20 ms",
+          "runtime_sha256": {}
+        },
+        "buffer-truncate": {
+          "fixture": "buffer-truncate.bolt",
+          "fixture_sha256": "54ec3336dbc7c3e1d3750da92e5f7078033a529ce5b6da1deb8e359da24381d5",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "buffer-truncate.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "54ec3336dbc7c3e1d3750da92e5f7078033a529ce5b6da1deb8e359da24381d5",
+          "executable_sha256": "4975a4f5cafd4d7aba37ca441197908888af0c026ac1f61b4da915212f9fb0a8",
+          "build_ms": 520.9202,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-rhh7krzs/before/buffer-truncate/release/program.exe\n\n[bolt] Release compilation: 488.76 ms",
+          "runtime_sha256": {}
+        },
+        "buffer-truncate-long": {
+          "fixture": "buffer-truncate.bolt",
+          "fixture_sha256": "54ec3336dbc7c3e1d3750da92e5f7078033a529ce5b6da1deb8e359da24381d5",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "buffer-truncate-long.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "ce6ac06bde50c14cfb824cde2aac5754282533652085982acd157f5504e6a0df",
+          "executable_sha256": "c22c468f4da215d352e3be0bb70df32901f52a54dd6d6a95e2a4c7f674e43730",
+          "build_ms": 466.786,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-njf7of1f/before/buffer-truncate-long/release/program.exe\n\n[bolt] Release compilation: 441.85 ms",
+          "runtime_sha256": {}
+        },
+        "struct-buffer": {
+          "fixture": "struct-buffer.bolt",
+          "fixture_sha256": "05f8305de52f85f1737a41a8371cfaa335576c05fcb48d4dde367f090c7dc754",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "struct-buffer.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "05f8305de52f85f1737a41a8371cfaa335576c05fcb48d4dde367f090c7dc754",
+          "executable_sha256": "2e55b2d17a1f3cc45dae3473c3cbd2e78ecd57a8965553f886bfe5e76ab77410",
+          "build_ms": 520.6015,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-27eweceo/before/struct-buffer/release/program.exe\n\n[bolt] Release compilation: 497.03 ms",
+          "runtime_sha256": {}
+        },
+        "struct-zero": {
+          "fixture": "struct-zero.bolt",
+          "fixture_sha256": "ce29bdfd692e891fee79d14a1390661044b29afeeb6c8a3dca2ee1d68713d624",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "struct-zero.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "ce29bdfd692e891fee79d14a1390661044b29afeeb6c8a3dca2ee1d68713d624",
+          "executable_sha256": "b0490f1c989fa43d3552503eb639c272509d61615cb1719d219efcc10c66d78d",
+          "build_ms": 548.2295,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-87jzhnlc/before/struct-zero/release/program.exe\n\n[bolt] Release compilation: 525.90 ms",
+          "runtime_sha256": {}
+        },
+        "queue-worklist": {
+          "fixture": "queue-worklist.bolt",
+          "fixture_sha256": "57625251820fbd86e05f067177285862f5f832b1a0d010b3056573dc398b6292",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "queue-worklist.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "57625251820fbd86e05f067177285862f5f832b1a0d010b3056573dc398b6292",
+          "executable_sha256": "1ab9c4c89ba42437587684bd37b1f860cef81c91c791fd77f1d911a8740fe239",
+          "build_ms": 363.0899,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-jpzwnpmj/before/queue-worklist/release/program.exe\n\n[bolt] Release compilation: 332.47 ms",
+          "runtime_sha256": {}
+        },
+        "utf8-index-long": {
+          "fixture": "utf8-index.bolt",
+          "fixture_sha256": "dd114f153b67abf7379e7bf7b09a230ad75572f0840ea5ff76e813fd6ca3dcec",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "utf8-index-long.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "6d50fee40771e0e96cc3b32f27148065b40a43cb66e8dd318c5aed941f85311a",
+          "executable_sha256": "d45d3478ee814e9ed60b6b96465508764a9e75d9f391c10283fdc5b3222a4902",
+          "build_ms": 415.1392,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-vjhrsc9p/before/utf8-index-long/release/program.exe\n\n[bolt] Release compilation: 389.03 ms",
+          "runtime_sha256": {}
+        },
+        "list-edit-long": {
+          "fixture": "list-edit.bolt",
+          "fixture_sha256": "7c0fff639cf84f573105cfd807c5b03bc5068eef838efb03f412532405364630",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "list-edit-long.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "697f92229cc4f00936e5c20b231af2947e7ed010c0603dbcc090d15dfdefe218",
+          "executable_sha256": "76658cf03f7649105ba39e110b7d60f7bf7337e7e930df48030bf173b043e0f2",
+          "build_ms": 478.7358,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-taerh11i/before/list-edit-long/release/program.exe\n\n[bolt] Release compilation: 455.07 ms",
+          "runtime_sha256": {}
+        },
+        "dictionary-string-long": {
+          "fixture": "dictionary-string.bolt",
+          "fixture_sha256": "2be50af70359f59134bb199f511f60924dd1d422be3938679dab8916a2627c32",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "dictionary-string-long.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "6c2b2e3e2034deea68521c3dada668e6e5bf3ea902da9332ec4aa0f0b75d7fc6",
+          "executable_sha256": "ba45163ab4224e397858c64dbb5474645c52d553068457d89d9e5dffd442b72b",
+          "build_ms": 520.8332,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-b32oe27r/before/dictionary-string-long/release/program.exe\n\n[bolt] Release compilation: 493.62 ms",
+          "runtime_sha256": {}
+        },
+        "queue-worklist-long": {
+          "fixture": "queue-worklist.bolt",
+          "fixture_sha256": "57625251820fbd86e05f067177285862f5f832b1a0d010b3056573dc398b6292",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "queue-worklist-long.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "89a9ea20a1bd844fb949e3f3fc87a10706b767112bbfebff5e9afcf5934220a6",
+          "executable_sha256": "6ea8af3c9974d3013fffd40e2c7fd007603a5436b4d466bb90b419735e2bd560",
+          "build_ms": 358.6827,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-lseowycn/before/queue-worklist-long/release/program.exe\n\n[bolt] Release compilation: 331.03 ms",
+          "runtime_sha256": {}
+        },
+        "list-search-long": {
+          "fixture": "list-search.bolt",
+          "fixture_sha256": "1b97c10820624ab1b4f3b4e39afbecd14117b66c98092433aa12f8148facf8ba",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "list-search-long.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "44571220d7a66ff970d586615e4abf0f14161f7efb05fbab2a6285cefda0b464",
+          "executable_sha256": "d54408987157f3998637d43e1c483261988aeb7c5a86576d244273baedce5ce9",
+          "build_ms": 508.2061,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-a9u8cbk_/before/list-search-long/release/program.exe\n\n[bolt] Release compilation: 468.63 ms",
+          "runtime_sha256": {}
+        },
+        "list-search-u64": {
+          "fixture": "list-search-u64.bolt",
+          "fixture_sha256": "d1f0310bbe93ac19a03c6622a75e2c174223e7ad9396fa84e236e8401e2b1900",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "list-search-u64.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "d1f0310bbe93ac19a03c6622a75e2c174223e7ad9396fa84e236e8401e2b1900",
+          "executable_sha256": "fc28a30c7fec564480368ed9cb96175834cd2825efe0d1b593e693317f72b641",
+          "build_ms": 460.176,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-ey7wpq94/before/list-search-u64/release/program.exe\n\n[bolt] Release compilation: 426.51 ms",
+          "runtime_sha256": {}
+        },
+        "utf8-roundtrip-long": {
+          "fixture": "utf8-roundtrip.bolt",
+          "fixture_sha256": "5718d019430825dae289f8be1ba6aaddd67093654c33f101f03a160e4576a50c",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "utf8-roundtrip-long.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "49a06e12ce68a487e3e9c2ec57016698c1b5e278b1979777aaba5fc62b73d5e0",
+          "executable_sha256": "35ac07463fcb28ad26b2b93846b4acefd177246ad6c348ae0061dcf41b4cc626",
+          "build_ms": 485.6731,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-cx0gxoax/before/utf8-roundtrip-long/release/program.exe\n\n[bolt] Release compilation: 462.54 ms",
+          "runtime_sha256": {}
+        },
+        "struct-values": {
+          "fixture": "struct-values.bolt",
+          "fixture_sha256": "af5ecbb564c089f5cc754e73330fa03e8d908e2975b8f9379dca5882ba43ada7",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "struct-values.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "af5ecbb564c089f5cc754e73330fa03e8d908e2975b8f9379dca5882ba43ada7",
+          "executable_sha256": "99b0a92134be6e7f8198192320704015332e31d7c012d5bbd751a2dcc4513aa7",
+          "build_ms": 375.7074,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-w4qjiej5/before/struct-values/release/program.exe\n\n[bolt] Release compilation: 352.43 ms",
+          "runtime_sha256": {}
+        },
+        "float-parse": {
+          "fixture": "float-parse.bolt",
+          "fixture_sha256": "9d5b629b2d54aa82402e7a089e2207d96c5e7216111576bd6cd26ba84b4719ae",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "float-parse.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "9d5b629b2d54aa82402e7a089e2207d96c5e7216111576bd6cd26ba84b4719ae",
+          "executable_sha256": "97f1aec57fbe44bc6bd4ba59bb4c165c5b940061922c0e8553f430ec78cd1484",
+          "build_ms": 434.8296,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-ukj66bjq/before/float-parse/release/program.exe\n\n[bolt] Release compilation: 409.95 ms",
+          "runtime_sha256": {}
+        },
+        "fp-integrate": {
+          "fixture": "fp-integrate.bolt",
+          "fixture_sha256": "d1334a3f76a004da2149ea7c72971e72b279006820d82f0e43d716035056dd7e",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "fp-integrate.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "d1334a3f76a004da2149ea7c72971e72b279006820d82f0e43d716035056dd7e",
+          "executable_sha256": "794d14a6c1bda9903656546bf5ebe113b5627f05149733b2f2505e9d8fc63512",
+          "build_ms": 389.1331,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-sq5d2rn7/before/fp-integrate/release/program.exe\n\n[bolt] Release compilation: 367.27 ms",
+          "runtime_sha256": {}
+        },
+        "indirect-array": {
+          "fixture": "indirect-array.bolt",
+          "fixture_sha256": "4d96059eb7953de0a8bb412819bd4f7148bb23cee8edd9136b55ec17bf9af54c",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "indirect-array.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "4d96059eb7953de0a8bb412819bd4f7148bb23cee8edd9136b55ec17bf9af54c",
+          "executable_sha256": "f57d45ea23b075b3c6d32068e390db59a10ce4e39e76ff3d6344adb852e680ea",
+          "build_ms": 530.5989,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-y1glkq_8/before/indirect-array/release/program.exe\n\n[bolt] Release compilation: 508.43 ms",
+          "runtime_sha256": {}
+        },
+        "string-equality": {
+          "fixture": "string-equality.bolt",
+          "fixture_sha256": "034e429ff01b0d302b7c95e4474be650aa8f6c945077ab932bf6dd4d25bc467d",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "string-equality.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "034e429ff01b0d302b7c95e4474be650aa8f6c945077ab932bf6dd4d25bc467d",
+          "executable_sha256": "9187e958ef91ec4d58316bf3d6e9788a8e9b5c6189df1704e4581485739329fa",
+          "build_ms": 465.8411,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-zhumtisb/before/string-equality/release/program.exe\n\n[bolt] Release compilation: 443.73 ms",
+          "runtime_sha256": {}
+        },
+        "utf8-roundtrip": {
+          "fixture": "utf8-roundtrip.bolt",
+          "fixture_sha256": "5718d019430825dae289f8be1ba6aaddd67093654c33f101f03a160e4576a50c",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "utf8-roundtrip.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "5718d019430825dae289f8be1ba6aaddd67093654c33f101f03a160e4576a50c",
+          "executable_sha256": "c6ef1944dc9bb41b2672a047a82bed03e098418cf16d06ebda051a180b11cd7d",
+          "build_ms": 509.0114,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-fqvli520/before/utf8-roundtrip/release/program.exe\n\n[bolt] Release compilation: 479.74 ms",
+          "runtime_sha256": {}
+        },
+        "utf8-index": {
+          "fixture": "utf8-index.bolt",
+          "fixture_sha256": "dd114f153b67abf7379e7bf7b09a230ad75572f0840ea5ff76e813fd6ca3dcec",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "utf8-index.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "dd114f153b67abf7379e7bf7b09a230ad75572f0840ea5ff76e813fd6ca3dcec",
+          "executable_sha256": "2a580f5ba6c36149a47ce10d9c6038f2093406f79261dfba151ae455a8af5345",
+          "build_ms": 400.6323,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-b3rj2ttw/before/utf8-index/release/program.exe\n\n[bolt] Release compilation: 373.70 ms",
+          "runtime_sha256": {}
+        },
+        "list-search": {
+          "fixture": "list-search.bolt",
+          "fixture_sha256": "1b97c10820624ab1b4f3b4e39afbecd14117b66c98092433aa12f8148facf8ba",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "list-search.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "1b97c10820624ab1b4f3b4e39afbecd14117b66c98092433aa12f8148facf8ba",
+          "executable_sha256": "3634018f1632b2dd2f1ada75c632170a1465308e383670c7f5239b1434aad8ab",
+          "build_ms": 500.9038,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-4lnuwtgy/before/list-search/release/program.exe\n\n[bolt] Release compilation: 439.21 ms",
+          "runtime_sha256": {}
+        },
+        "list-edit": {
+          "fixture": "list-edit.bolt",
+          "fixture_sha256": "7c0fff639cf84f573105cfd807c5b03bc5068eef838efb03f412532405364630",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "list-edit.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "7c0fff639cf84f573105cfd807c5b03bc5068eef838efb03f412532405364630",
+          "executable_sha256": "9b0ccff095e29a1c847f069c1b70b3fcf60660449b0e1ece619920b60c45ff18",
+          "build_ms": 466.2281,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-scy088e5/before/list-edit/release/program.exe\n\n[bolt] Release compilation: 443.36 ms",
+          "runtime_sha256": {}
+        },
+        "dictionary-string": {
+          "fixture": "dictionary-string.bolt",
+          "fixture_sha256": "2be50af70359f59134bb199f511f60924dd1d422be3938679dab8916a2627c32",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-scalar-39f99e97\\before\\bolt.exe",
+            "compile",
+            "dictionary-string.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "2be50af70359f59134bb199f511f60924dd1d422be3938679dab8916a2627c32",
+          "executable_sha256": "52617ad66f3f5501a737cafe478929de3ffee2f0cc91bcd8420e950e19e70574",
+          "build_ms": 501.5039,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-skmq7v6o/before/dictionary-string/release/program.exe\n\n[bolt] Release compilation: 477.01 ms",
+          "runtime_sha256": {}
+        }
+      }
+    },
+    "after": {
+      "compiler": "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+      "sha256": "704b90017c1596a6480b83901b4dd4ff8ff18a2055caac5707a6b264581450da",
+      "version": "Bolt 0.1.0 (x86_64-pc-windows-msvc)",
+      "cases": {
+        "struct-copy-small": {
+          "fixture": "struct-copy-small.bolt",
+          "fixture_sha256": "cb32c567fb2a05ec09781a1b82cb65e03bfafcc6c761770901e8da0695cf3bac",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "struct-copy-small.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "cb32c567fb2a05ec09781a1b82cb65e03bfafcc6c761770901e8da0695cf3bac",
+          "executable_sha256": "8914366b7d35c7ddb0adc3c192190f479ae22c43b28db4585d7d354dcf31d31b",
+          "build_ms": 378.9279,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-0z3fmu5f/after/struct-copy-small/release/program.exe\n\n[bolt] Release compilation: 355.32 ms",
+          "runtime_sha256": {}
+        },
+        "struct-copy-wide": {
+          "fixture": "struct-copy-wide.bolt",
+          "fixture_sha256": "0a6bc9d04f73ec0998ca021d4bcb35390d80309ea6e3e8c7a2382fef41969024",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "struct-copy-wide.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "0a6bc9d04f73ec0998ca021d4bcb35390d80309ea6e3e8c7a2382fef41969024",
+          "executable_sha256": "ba650c5a7045ca24d99caffdf50604dc642fc49a108f46e2d485889a2ced79c2",
+          "build_ms": 452.175,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-kjfv1a49/after/struct-copy-wide/release/program.exe\n\n[bolt] Release compilation: 429.74 ms",
+          "runtime_sha256": {}
+        },
+        "string-affixes": {
+          "fixture": "string-affixes.bolt",
+          "fixture_sha256": "f655ee073e32edf5c654d847d4667bd14df80d8a33ec8a73c5f64d5a74c288f0",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "string-affixes.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "f655ee073e32edf5c654d847d4667bd14df80d8a33ec8a73c5f64d5a74c288f0",
+          "executable_sha256": "feabc1f852bd67f8eb8ad0d707b69bba4f1f74587879c57fb8289a2ffb973f14",
+          "build_ms": 395.0884,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-jgy1iaml/after/string-affixes/release/program.exe\n\n[bolt] Release compilation: 373.11 ms",
+          "runtime_sha256": {}
+        },
+        "list-fill-clear": {
+          "fixture": "list-fill-clear.bolt",
+          "fixture_sha256": "3629443134530d521b378b0f21be545409a330f42a6308385dba0447e3b45d79",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "list-fill-clear.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "3629443134530d521b378b0f21be545409a330f42a6308385dba0447e3b45d79",
+          "executable_sha256": "bbdc1a361c5ab8b51b43f6cebcc3333a8334cd9dbc24c4faceb4fcd6f3d8787e",
+          "build_ms": 409.0071,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-h8v68hj0/after/list-fill-clear/release/program.exe\n\n[bolt] Release compilation: 385.99 ms",
+          "runtime_sha256": {}
+        },
+        "buffer-record-add": {
+          "fixture": "buffer-record-add.bolt",
+          "fixture_sha256": "2b9c49ce237795e0507ea63f20081c20aff8c3fdd4218263d5c7d48049978a8d",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "buffer-record-add.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "2b9c49ce237795e0507ea63f20081c20aff8c3fdd4218263d5c7d48049978a8d",
+          "executable_sha256": "b4510f90a12f15b104c73cdf88cbbc9d2718c3e2ac96a908a32a5363f55ac455",
+          "build_ms": 391.6496,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-a22j6_tg/after/buffer-record-add/release/program.exe\n\n[bolt] Release compilation: 369.65 ms",
+          "runtime_sha256": {}
+        },
+        "arithmetic": {
+          "fixture": "arithmetic.bolt",
+          "fixture_sha256": "4fad334107d7aa0a9925d333365d6436e505cbea4ebf3ff7910a66923a0852be",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "arithmetic.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "4fad334107d7aa0a9925d333365d6436e505cbea4ebf3ff7910a66923a0852be",
+          "executable_sha256": "f494e1d273cdd0cd7696f62121fbdf532ab21f80c3717ca8b720a5171550924f",
+          "build_ms": 358.5965,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-57a79pe9/after/arithmetic/release/program.exe\n\n[bolt] Release compilation: 337.07 ms",
+          "runtime_sha256": {}
+        },
+        "pointers": {
+          "fixture": "pointers.bolt",
+          "fixture_sha256": "13657a7a059c3c5f766b19c65bfea35b47bd790b1009fb94965d65213fb90b4f",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "pointers.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "13657a7a059c3c5f766b19c65bfea35b47bd790b1009fb94965d65213fb90b4f",
+          "executable_sha256": "9eabcd889062c216becb40c1581c301273243fa3e5b4be92663d61e1ae4b2f15",
+          "build_ms": 378.1716,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-f5l_c6gn/after/pointers/release/program.exe\n\n[bolt] Release compilation: 355.71 ms",
+          "runtime_sha256": {}
+        },
+        "memory": {
+          "fixture": "memory.bolt",
+          "fixture_sha256": "2ca256e2114ab152f6b9ab5040c5031c4f12b8dcc29ff01308ed29b70d6fa2f8",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "memory.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "2ca256e2114ab152f6b9ab5040c5031c4f12b8dcc29ff01308ed29b70d6fa2f8",
+          "executable_sha256": "ba502810bf10cd232ba26c75f842a212cfea3c9f70e1fbcfbef1a5301491f8f9",
+          "build_ms": 459.2353,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-sktj2kx0/after/memory/release/program.exe\n\n[bolt] Release compilation: 436.53 ms",
+          "runtime_sha256": {}
+        },
+        "memory-long": {
+          "fixture": "memory.bolt",
+          "fixture_sha256": "2ca256e2114ab152f6b9ab5040c5031c4f12b8dcc29ff01308ed29b70d6fa2f8",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "memory-long.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "c1ec12456e44adb6b45721217244889da692e6bee1ecd085b1a10cb477767bc7",
+          "executable_sha256": "576647609952ea8c3d068fa1febc316b02049ff195add376e4b35eb8072c89e9",
+          "build_ms": 473.2408,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-0jxwrxka/after/memory-long/release/program.exe\n\n[bolt] Release compilation: 449.00 ms",
+          "runtime_sha256": {}
+        },
+        "buffer": {
+          "fixture": "buffer.bolt",
+          "fixture_sha256": "20b2307100520e6943353483cb72c2b08443dcf6db1b2e58f7305b1c9127ac41",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "buffer.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "20b2307100520e6943353483cb72c2b08443dcf6db1b2e58f7305b1c9127ac41",
+          "executable_sha256": "58af85589f6800d4eecf6ecbd3070fdeb64b6229e6f262d02b5e40411505463e",
+          "build_ms": 356.4386,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-4myqifl9/after/buffer/release/program.exe\n\n[bolt] Release compilation: 330.73 ms",
+          "runtime_sha256": {}
+        },
+        "buffer-long": {
+          "fixture": "buffer-long.bolt",
+          "fixture_sha256": "b123d5547d317faed85cc6692d517505740386cbfc4a431fc631fce116992356",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "buffer-long.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "b123d5547d317faed85cc6692d517505740386cbfc4a431fc631fce116992356",
+          "executable_sha256": "013aa555d4cbc77982af868865f0dd06b58c6daf68a7b074b2c2abc2703e4261",
+          "build_ms": 350.7077,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-w_yf6osn/after/buffer-long/release/program.exe\n\n[bolt] Release compilation: 327.26 ms",
+          "runtime_sha256": {}
+        },
+        "buffer-truncate": {
+          "fixture": "buffer-truncate.bolt",
+          "fixture_sha256": "54ec3336dbc7c3e1d3750da92e5f7078033a529ce5b6da1deb8e359da24381d5",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "buffer-truncate.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "54ec3336dbc7c3e1d3750da92e5f7078033a529ce5b6da1deb8e359da24381d5",
+          "executable_sha256": "8d15743d0bd1cae48e8fd9bb1ec2a8b371b4e3edd0d054c452d23c5f248737d6",
+          "build_ms": 450.5935,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-rhh7krzs/after/buffer-truncate/release/program.exe\n\n[bolt] Release compilation: 427.00 ms",
+          "runtime_sha256": {}
+        },
+        "buffer-truncate-long": {
+          "fixture": "buffer-truncate.bolt",
+          "fixture_sha256": "54ec3336dbc7c3e1d3750da92e5f7078033a529ce5b6da1deb8e359da24381d5",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "buffer-truncate-long.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "ce6ac06bde50c14cfb824cde2aac5754282533652085982acd157f5504e6a0df",
+          "executable_sha256": "fe756e60f7efe7c0f93490c681c2e31ab342dad491370baf6d6a8375d3bd59fd",
+          "build_ms": 442.3502,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-njf7of1f/after/buffer-truncate-long/release/program.exe\n\n[bolt] Release compilation: 419.62 ms",
+          "runtime_sha256": {}
+        },
+        "struct-buffer": {
+          "fixture": "struct-buffer.bolt",
+          "fixture_sha256": "05f8305de52f85f1737a41a8371cfaa335576c05fcb48d4dde367f090c7dc754",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "struct-buffer.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "05f8305de52f85f1737a41a8371cfaa335576c05fcb48d4dde367f090c7dc754",
+          "executable_sha256": "508ce1da2555a81a1896944be5ffd0d5977b69c838e10a4c517b1524906905c4",
+          "build_ms": 453.0447,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-27eweceo/after/struct-buffer/release/program.exe\n\n[bolt] Release compilation: 429.98 ms",
+          "runtime_sha256": {}
+        },
+        "struct-zero": {
+          "fixture": "struct-zero.bolt",
+          "fixture_sha256": "ce29bdfd692e891fee79d14a1390661044b29afeeb6c8a3dca2ee1d68713d624",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "struct-zero.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "ce29bdfd692e891fee79d14a1390661044b29afeeb6c8a3dca2ee1d68713d624",
+          "executable_sha256": "1b4b58fbb85f79cccf9cf98debcec8f43d7e73d8a5395f3f987b4c0bcd8ff8f2",
+          "build_ms": 549.3626,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-87jzhnlc/after/struct-zero/release/program.exe\n\n[bolt] Release compilation: 526.11 ms",
+          "runtime_sha256": {}
+        },
+        "queue-worklist": {
+          "fixture": "queue-worklist.bolt",
+          "fixture_sha256": "57625251820fbd86e05f067177285862f5f832b1a0d010b3056573dc398b6292",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "queue-worklist.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "57625251820fbd86e05f067177285862f5f832b1a0d010b3056573dc398b6292",
+          "executable_sha256": "0f7f60ed63a0d917a2ab3e2806de84f757be199d5e178f2cebd45871ea84037f",
+          "build_ms": 349.9523,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-jpzwnpmj/after/queue-worklist/release/program.exe\n\n[bolt] Release compilation: 326.32 ms",
+          "runtime_sha256": {}
+        },
+        "utf8-index-long": {
+          "fixture": "utf8-index.bolt",
+          "fixture_sha256": "dd114f153b67abf7379e7bf7b09a230ad75572f0840ea5ff76e813fd6ca3dcec",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "utf8-index-long.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "6d50fee40771e0e96cc3b32f27148065b40a43cb66e8dd318c5aed941f85311a",
+          "executable_sha256": "f008875e8011486ea8d43f84d972fcc8a2682dc434c66fa6859582a50dccd01d",
+          "build_ms": 407.6077,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-vjhrsc9p/after/utf8-index-long/release/program.exe\n\n[bolt] Release compilation: 384.93 ms",
+          "runtime_sha256": {}
+        },
+        "list-edit-long": {
+          "fixture": "list-edit.bolt",
+          "fixture_sha256": "7c0fff639cf84f573105cfd807c5b03bc5068eef838efb03f412532405364630",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "list-edit-long.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "697f92229cc4f00936e5c20b231af2947e7ed010c0603dbcc090d15dfdefe218",
+          "executable_sha256": "1b75f079532f3b9b253b5a8a781b7ddd7e10c4a6e2d34f6434703bcfc0e81446",
+          "build_ms": 454.1979,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-taerh11i/after/list-edit-long/release/program.exe\n\n[bolt] Release compilation: 431.21 ms",
+          "runtime_sha256": {}
+        },
+        "dictionary-string-long": {
+          "fixture": "dictionary-string.bolt",
+          "fixture_sha256": "2be50af70359f59134bb199f511f60924dd1d422be3938679dab8916a2627c32",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "dictionary-string-long.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "6c2b2e3e2034deea68521c3dada668e6e5bf3ea902da9332ec4aa0f0b75d7fc6",
+          "executable_sha256": "2c40fcba64ff7eacd8a728632f0aa6a0cf2dadb0fcf57799de553a65a3e0559f",
+          "build_ms": 503.3181,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-b32oe27r/after/dictionary-string-long/release/program.exe\n\n[bolt] Release compilation: 476.97 ms",
+          "runtime_sha256": {}
+        },
+        "queue-worklist-long": {
+          "fixture": "queue-worklist.bolt",
+          "fixture_sha256": "57625251820fbd86e05f067177285862f5f832b1a0d010b3056573dc398b6292",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "queue-worklist-long.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "89a9ea20a1bd844fb949e3f3fc87a10706b767112bbfebff5e9afcf5934220a6",
+          "executable_sha256": "e58fee340d114ac2c1eead7d42fd5f3a66b05e821443ac743f70ccf01350984f",
+          "build_ms": 365.7599,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-lseowycn/after/queue-worklist-long/release/program.exe\n\n[bolt] Release compilation: 341.20 ms",
+          "runtime_sha256": {}
+        },
+        "list-search-long": {
+          "fixture": "list-search.bolt",
+          "fixture_sha256": "1b97c10820624ab1b4f3b4e39afbecd14117b66c98092433aa12f8148facf8ba",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "list-search-long.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "44571220d7a66ff970d586615e4abf0f14161f7efb05fbab2a6285cefda0b464",
+          "executable_sha256": "b81a9002bf925fd016a01ad08d0e7df74e7ae4aa4b2b07355a5fd40a04616605",
+          "build_ms": 460.379,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-a9u8cbk_/after/list-search-long/release/program.exe\n\n[bolt] Release compilation: 437.19 ms",
+          "runtime_sha256": {}
+        },
+        "list-search-u64": {
+          "fixture": "list-search-u64.bolt",
+          "fixture_sha256": "d1f0310bbe93ac19a03c6622a75e2c174223e7ad9396fa84e236e8401e2b1900",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "list-search-u64.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "d1f0310bbe93ac19a03c6622a75e2c174223e7ad9396fa84e236e8401e2b1900",
+          "executable_sha256": "3bc9b1359af5b0ff4a2afd6f69d602c615cc01d7bfdc269efab872194ebb4054",
+          "build_ms": 457.7897,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-ey7wpq94/after/list-search-u64/release/program.exe\n\n[bolt] Release compilation: 434.83 ms",
+          "runtime_sha256": {}
+        },
+        "utf8-roundtrip-long": {
+          "fixture": "utf8-roundtrip.bolt",
+          "fixture_sha256": "5718d019430825dae289f8be1ba6aaddd67093654c33f101f03a160e4576a50c",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "utf8-roundtrip-long.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "49a06e12ce68a487e3e9c2ec57016698c1b5e278b1979777aaba5fc62b73d5e0",
+          "executable_sha256": "89bb8ae690cf8b785f3a0e79a6bdecdb5f00c5aff424b0a8028f2d65ef11d2cf",
+          "build_ms": 492.9139,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-cx0gxoax/after/utf8-roundtrip-long/release/program.exe\n\n[bolt] Release compilation: 469.83 ms",
+          "runtime_sha256": {}
+        },
+        "struct-values": {
+          "fixture": "struct-values.bolt",
+          "fixture_sha256": "af5ecbb564c089f5cc754e73330fa03e8d908e2975b8f9379dca5882ba43ada7",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "struct-values.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "af5ecbb564c089f5cc754e73330fa03e8d908e2975b8f9379dca5882ba43ada7",
+          "executable_sha256": "1027e751a9f912089a34d25ab3d6c61e14fa512efd5bea97bcb83c803fee5f75",
+          "build_ms": 372.0637,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-w4qjiej5/after/struct-values/release/program.exe\n\n[bolt] Release compilation: 349.69 ms",
+          "runtime_sha256": {}
+        },
+        "float-parse": {
+          "fixture": "float-parse.bolt",
+          "fixture_sha256": "9d5b629b2d54aa82402e7a089e2207d96c5e7216111576bd6cd26ba84b4719ae",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "float-parse.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "9d5b629b2d54aa82402e7a089e2207d96c5e7216111576bd6cd26ba84b4719ae",
+          "executable_sha256": "8cc333eab22b46a172406a7ed37992d711b6b5992f1c1e246c836b59a455b057",
+          "build_ms": 423.9203,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-ukj66bjq/after/float-parse/release/program.exe\n\n[bolt] Release compilation: 401.14 ms",
+          "runtime_sha256": {}
+        },
+        "fp-integrate": {
+          "fixture": "fp-integrate.bolt",
+          "fixture_sha256": "d1334a3f76a004da2149ea7c72971e72b279006820d82f0e43d716035056dd7e",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "fp-integrate.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "d1334a3f76a004da2149ea7c72971e72b279006820d82f0e43d716035056dd7e",
+          "executable_sha256": "64146a364f6f01787af1b5883a5f9cb2fdf87e50c44d30e039945c638e463866",
+          "build_ms": 381.5121,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-sq5d2rn7/after/fp-integrate/release/program.exe\n\n[bolt] Release compilation: 359.62 ms",
+          "runtime_sha256": {}
+        },
+        "indirect-array": {
+          "fixture": "indirect-array.bolt",
+          "fixture_sha256": "4d96059eb7953de0a8bb412819bd4f7148bb23cee8edd9136b55ec17bf9af54c",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "indirect-array.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "4d96059eb7953de0a8bb412819bd4f7148bb23cee8edd9136b55ec17bf9af54c",
+          "executable_sha256": "37d3caa8ec7b63d7b14b0597b9c2631163574f19be7ebed5acb2a1c2e56564c5",
+          "build_ms": 536.0947,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-y1glkq_8/after/indirect-array/release/program.exe\n\n[bolt] Release compilation: 513.81 ms",
+          "runtime_sha256": {}
+        },
+        "string-equality": {
+          "fixture": "string-equality.bolt",
+          "fixture_sha256": "034e429ff01b0d302b7c95e4474be650aa8f6c945077ab932bf6dd4d25bc467d",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "string-equality.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "034e429ff01b0d302b7c95e4474be650aa8f6c945077ab932bf6dd4d25bc467d",
+          "executable_sha256": "4366815a838417cefe76ff3d30ddb553312b1e33628258b43cfe2b6585305d3c",
+          "build_ms": 479.3046,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-zhumtisb/after/string-equality/release/program.exe\n\n[bolt] Release compilation: 456.29 ms",
+          "runtime_sha256": {}
+        },
+        "utf8-roundtrip": {
+          "fixture": "utf8-roundtrip.bolt",
+          "fixture_sha256": "5718d019430825dae289f8be1ba6aaddd67093654c33f101f03a160e4576a50c",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "utf8-roundtrip.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "5718d019430825dae289f8be1ba6aaddd67093654c33f101f03a160e4576a50c",
+          "executable_sha256": "831fd56ef5e7bdc25a8b360d06e170b358415993acfed7669731094c63a56c85",
+          "build_ms": 507.4451,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-fqvli520/after/utf8-roundtrip/release/program.exe\n\n[bolt] Release compilation: 484.51 ms",
+          "runtime_sha256": {}
+        },
+        "utf8-index": {
+          "fixture": "utf8-index.bolt",
+          "fixture_sha256": "dd114f153b67abf7379e7bf7b09a230ad75572f0840ea5ff76e813fd6ca3dcec",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "utf8-index.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "dd114f153b67abf7379e7bf7b09a230ad75572f0840ea5ff76e813fd6ca3dcec",
+          "executable_sha256": "eff18dcd91bf6c7c56ab2fb4676df49bba6263559f710b45a28815c57b353af7",
+          "build_ms": 391.5454,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-b3rj2ttw/after/utf8-index/release/program.exe\n\n[bolt] Release compilation: 368.83 ms",
+          "runtime_sha256": {}
+        },
+        "list-search": {
+          "fixture": "list-search.bolt",
+          "fixture_sha256": "1b97c10820624ab1b4f3b4e39afbecd14117b66c98092433aa12f8148facf8ba",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "list-search.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "1b97c10820624ab1b4f3b4e39afbecd14117b66c98092433aa12f8148facf8ba",
+          "executable_sha256": "ba9f7cad153f212e176e0cde9ecb256b0e80452d2379722997b51bdd475714fd",
+          "build_ms": 475.418,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-4lnuwtgy/after/list-search/release/program.exe\n\n[bolt] Release compilation: 452.64 ms",
+          "runtime_sha256": {}
+        },
+        "list-edit": {
+          "fixture": "list-edit.bolt",
+          "fixture_sha256": "7c0fff639cf84f573105cfd807c5b03bc5068eef838efb03f412532405364630",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "list-edit.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "7c0fff639cf84f573105cfd807c5b03bc5068eef838efb03f412532405364630",
+          "executable_sha256": "e0716da38f13d925a4b4f3ad46ca51a00a4e1015241eb0d6bdaba7cfa46e4780",
+          "build_ms": 460.4645,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-scy088e5/after/list-edit/release/program.exe\n\n[bolt] Release compilation: 437.23 ms",
+          "runtime_sha256": {}
+        },
+        "dictionary-string": {
+          "fixture": "dictionary-string.bolt",
+          "fixture_sha256": "2be50af70359f59134bb199f511f60924dd1d422be3938679dab8916a2627c32",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\primitives\\bin\\bolt.exe",
+            "compile",
+            "dictionary-string.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "2be50af70359f59134bb199f511f60924dd1d422be3938679dab8916a2627c32",
+          "executable_sha256": "ac56b0004ff225960fbeffc2fb13277f3bbc672b46b485b320b340b3172c986c",
+          "build_ms": 495.7644,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-release-comparison-skmq7v6o/after/dictionary-string/release/program.exe\n\n[bolt] Release compilation: 471.32 ms",
+          "runtime_sha256": {}
+        }
+      }
+    }
+  },
+  "cases": {
+    "struct-copy-small": {
+      "expected_stdout": "441344",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 70.3549,
+            "before": 65.3448
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 5.1638,
+            "after": 5.4355
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 5.1551,
+            "after": 5.409
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 5.1278,
+            "before": 5.2069
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 5.0353,
+            "before": 5.04
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 5.6709,
+            "after": 5.1924
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 5.1684,
+            "after": 5.5589
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 5.2167,
+            "before": 5.1275
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 5.1638,
+        "p95_ms": 5.6709,
+        "min_ms": 5.04,
+        "max_ms": 5.6709,
+        "raw_ms": [
+          5.1638,
+          5.1551,
+          5.2069,
+          5.04,
+          5.6709,
+          5.1684,
+          5.1275
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 5.2167,
+        "p95_ms": 5.5589,
+        "min_ms": 5.0353,
+        "max_ms": 5.5589,
+        "raw_ms": [
+          5.4355,
+          5.409,
+          5.1278,
+          5.0353,
+          5.1924,
+          5.5589,
+          5.2167
+        ]
+      }
+    },
+    "struct-copy-wide": {
+      "expected_stdout": "1695744",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 134.7519,
+            "before": 134.1981
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 7.2425,
+            "after": 9.164
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 7.2224,
+            "after": 6.988
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 7.252,
+            "before": 6.9564
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 7.0928,
+            "before": 6.8317
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 6.8303,
+            "after": 7.1254
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 7.3202,
+            "after": 6.8848
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 6.8658,
+            "before": 6.7615
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 6.9564,
+        "p95_ms": 7.3202,
+        "min_ms": 6.7615,
+        "max_ms": 7.3202,
+        "raw_ms": [
+          7.2425,
+          7.2224,
+          6.9564,
+          6.8317,
+          6.8303,
+          7.3202,
+          6.7615
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 7.0928,
+        "p95_ms": 9.164,
+        "min_ms": 6.8658,
+        "max_ms": 9.164,
+        "raw_ms": [
+          9.164,
+          6.988,
+          7.252,
+          7.0928,
+          7.1254,
+          6.8848,
+          6.8658
+        ]
+      }
+    },
+    "string-affixes": {
+      "expected_stdout": "3000000",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 96.8452,
+            "before": 95.6248
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 6.3059,
+            "after": 6.6431
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 6.5373,
+            "after": 6.1776
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 6.1092,
+            "before": 6.0467
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 6.5657,
+            "before": 6.4492
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 6.1073,
+            "after": 7.5149
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 6.4803,
+            "after": 6.1305
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 6.2343,
+            "before": 6.8495
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 6.4492,
+        "p95_ms": 6.8495,
+        "min_ms": 6.0467,
+        "max_ms": 6.8495,
+        "raw_ms": [
+          6.3059,
+          6.5373,
+          6.0467,
+          6.4492,
+          6.1073,
+          6.4803,
+          6.8495
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 6.2343,
+        "p95_ms": 7.5149,
+        "min_ms": 6.1092,
+        "max_ms": 7.5149,
+        "raw_ms": [
+          6.6431,
+          6.1776,
+          6.1092,
+          6.5657,
+          7.5149,
+          6.1305,
+          6.2343
+        ]
+      }
+    },
+    "list-fill-clear": {
+      "expected_stdout": "267386880",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 101.2222,
+            "before": 105.18
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 7.2651,
+            "after": 7.3408
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 7.4249,
+            "after": 8.1621
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 8.1813,
+            "before": 8.5486
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 7.309,
+            "before": 8.0177
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 7.4261,
+            "after": 7.7623
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 7.2828,
+            "after": 7.1797
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 6.955,
+            "before": 7.1906
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 7.4249,
+        "p95_ms": 8.5486,
+        "min_ms": 7.1906,
+        "max_ms": 8.5486,
+        "raw_ms": [
+          7.2651,
+          7.4249,
+          8.5486,
+          8.0177,
+          7.4261,
+          7.2828,
+          7.1906
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 7.3408,
+        "p95_ms": 8.1813,
+        "min_ms": 6.955,
+        "max_ms": 8.1813,
+        "raw_ms": [
+          7.3408,
+          8.1621,
+          8.1813,
+          7.309,
+          7.7623,
+          7.1797,
+          6.955
+        ]
+      }
+    },
+    "buffer-record-add": {
+      "expected_stdout": "534773760",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 96.067,
+            "before": 95.6438
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 7.6717,
+            "after": 7.4545
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 7.4252,
+            "after": 7.6627
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 8.2412,
+            "before": 8.1342
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 7.7112,
+            "before": 7.0032
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 7.0397,
+            "after": 9.0807
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 7.1312,
+            "after": 7.0998
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 7.4034,
+            "before": 7.4083
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 7.4083,
+        "p95_ms": 8.1342,
+        "min_ms": 7.0032,
+        "max_ms": 8.1342,
+        "raw_ms": [
+          7.6717,
+          7.4252,
+          8.1342,
+          7.0032,
+          7.0397,
+          7.1312,
+          7.4083
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 7.6627,
+        "p95_ms": 9.0807,
+        "min_ms": 7.0998,
+        "max_ms": 9.0807,
+        "raw_ms": [
+          7.4545,
+          7.6627,
+          8.2412,
+          7.7112,
+          9.0807,
+          7.0998,
+          7.4034
+        ]
+      }
+    },
+    "arithmetic": {
+      "expected_stdout": "17925543158443646234",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 464.3258,
+            "before": 466.6907
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 406.273,
+            "after": 404.8207
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 405.2451,
+            "after": 406.9267
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 440.4859,
+            "before": 406.331
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 406.1335,
+            "before": 405.6718
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 405.096,
+            "after": 405.4217
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 407.323,
+            "after": 410.0102
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 407.4463,
+            "before": 404.86
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 405.6718,
+        "p95_ms": 407.323,
+        "min_ms": 404.86,
+        "max_ms": 407.323,
+        "raw_ms": [
+          406.273,
+          405.2451,
+          406.331,
+          405.6718,
+          405.096,
+          407.323,
+          404.86
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 406.9267,
+        "p95_ms": 440.4859,
+        "min_ms": 404.8207,
+        "max_ms": 440.4859,
+        "raw_ms": [
+          404.8207,
+          406.9267,
+          440.4859,
+          406.1335,
+          405.4217,
+          410.0102,
+          407.4463
+        ]
+      }
+    },
+    "pointers": {
+      "expected_stdout": "3495758670\n313794096",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 161.4839,
+            "before": 165.7314
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 90.5358,
+            "after": 90.0468
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 90.6854,
+            "after": 89.5196
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 90.2052,
+            "before": 89.3834
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 89.6112,
+            "before": 89.2526
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 89.5512,
+            "after": 89.7714
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 89.6417,
+            "after": 90.2503
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 90.4529,
+            "before": 89.5893
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 89.5893,
+        "p95_ms": 90.6854,
+        "min_ms": 89.2526,
+        "max_ms": 90.6854,
+        "raw_ms": [
+          90.5358,
+          90.6854,
+          89.3834,
+          89.2526,
+          89.5512,
+          89.6417,
+          89.5893
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 90.0468,
+        "p95_ms": 90.4529,
+        "min_ms": 89.5196,
+        "max_ms": 90.4529,
+        "raw_ms": [
+          90.0468,
+          89.5196,
+          90.2052,
+          89.6112,
+          89.7714,
+          90.2503,
+          90.4529
+        ]
+      }
+    },
+    "memory": {
+      "expected_stdout": "63747311",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 212.63,
+            "before": 213.3475
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 58.7055,
+            "after": 59.3937
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 58.7239,
+            "after": 106.7511
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 59.0547,
+            "before": 59.2936
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 58.8068,
+            "before": 59.755
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 58.6085,
+            "after": 58.8467
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 58.8852,
+            "after": 59.2647
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 59.3773,
+            "before": 60.7829
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 58.8852,
+        "p95_ms": 60.7829,
+        "min_ms": 58.6085,
+        "max_ms": 60.7829,
+        "raw_ms": [
+          58.7055,
+          58.7239,
+          59.2936,
+          59.755,
+          58.6085,
+          58.8852,
+          60.7829
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 59.2647,
+        "p95_ms": 106.7511,
+        "min_ms": 58.8068,
+        "max_ms": 106.7511,
+        "raw_ms": [
+          59.3937,
+          106.7511,
+          59.0547,
+          58.8068,
+          58.8467,
+          59.2647,
+          59.3773
+        ]
+      }
+    },
+    "memory-long": {
+      "expected_stdout": "509997311",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 600.255,
+            "before": 595.7717
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 445.2365,
+            "after": 444.2705
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 444.9385,
+            "after": 445.762
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 447.7057,
+            "before": 439.846
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 442.0718,
+            "before": 441.7321
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 440.9866,
+            "after": 448.5588
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 445.6342,
+            "after": 444.7996
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 440.6629,
+            "before": 443.7993
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 443.7993,
+        "p95_ms": 445.6342,
+        "min_ms": 439.846,
+        "max_ms": 445.6342,
+        "raw_ms": [
+          445.2365,
+          444.9385,
+          439.846,
+          441.7321,
+          440.9866,
+          445.6342,
+          443.7993
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 444.7996,
+        "p95_ms": 448.5588,
+        "min_ms": 440.6629,
+        "max_ms": 448.5588,
+        "raw_ms": [
+          444.2705,
+          445.762,
+          447.7057,
+          442.0718,
+          448.5588,
+          444.7996,
+          440.6629
+        ]
+      }
+    },
+    "buffer": {
+      "expected_stdout": "17179607040",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 55.2223,
+            "before": 57.0461
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 5.1564,
+            "after": 5.137
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 4.6501,
+            "after": 4.7271
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 4.7814,
+            "before": 4.7825
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 4.711,
+            "before": 4.5791
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 4.7694,
+            "after": 5.1549
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 4.8525,
+            "after": 4.7081
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 4.405,
+            "before": 4.8427
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 4.7825,
+        "p95_ms": 5.1564,
+        "min_ms": 4.5791,
+        "max_ms": 5.1564,
+        "raw_ms": [
+          5.1564,
+          4.6501,
+          4.7825,
+          4.5791,
+          4.7694,
+          4.8525,
+          4.8427
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 4.7271,
+        "p95_ms": 5.1549,
+        "min_ms": 4.405,
+        "max_ms": 5.1549,
+        "raw_ms": [
+          5.137,
+          4.7271,
+          4.7814,
+          4.711,
+          5.1549,
+          4.7081,
+          4.405
+        ]
+      }
+    },
+    "buffer-long": {
+      "expected_stdout": "4400059777024",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 194.9786,
+            "before": 196.0375
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 161.8046,
+            "after": 160.1482
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 160.9124,
+            "after": 159.6533
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 158.3451,
+            "before": 157.9667
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 160.7115,
+            "before": 162.5264
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 161.3725,
+            "after": 154.2564
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 156.1512,
+            "after": 155.3777
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 156.4752,
+            "before": 155.5559
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 160.9124,
+        "p95_ms": 162.5264,
+        "min_ms": 155.5559,
+        "max_ms": 162.5264,
+        "raw_ms": [
+          161.8046,
+          160.9124,
+          157.9667,
+          162.5264,
+          161.3725,
+          156.1512,
+          155.5559
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 158.3451,
+        "p95_ms": 160.7115,
+        "min_ms": 154.2564,
+        "max_ms": 160.7115,
+        "raw_ms": [
+          160.1482,
+          159.6533,
+          158.3451,
+          160.7115,
+          154.2564,
+          155.3777,
+          156.4752
+        ]
+      }
+    },
+    "buffer-truncate": {
+      "expected_stdout": "2854466355082",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 146.6883,
+            "before": 144.3552
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 7.6706,
+            "after": 7.1326
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 7.2774,
+            "after": 7.6573
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 7.4419,
+            "before": 7.9875
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 9.5443,
+            "before": 8.1119
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 7.5053,
+            "after": 7.1893
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 7.0892,
+            "after": 7.5234
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 7.2992,
+            "before": 7.0718
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 7.5053,
+        "p95_ms": 8.1119,
+        "min_ms": 7.0718,
+        "max_ms": 8.1119,
+        "raw_ms": [
+          7.6706,
+          7.2774,
+          7.9875,
+          8.1119,
+          7.5053,
+          7.0892,
+          7.0718
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 7.4419,
+        "p95_ms": 9.5443,
+        "min_ms": 7.1326,
+        "max_ms": 9.5443,
+        "raw_ms": [
+          7.1326,
+          7.6573,
+          7.4419,
+          9.5443,
+          7.1893,
+          7.5234,
+          7.2992
+        ]
+      }
+    },
+    "buffer-truncate-long": {
+      "expected_stdout": "3902022818554",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 277.0392,
+            "before": 276.8224
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 142.8518,
+            "after": 142.502
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 142.506,
+            "after": 142.5798
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 142.3418,
+            "before": 142.5984
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 142.4697,
+            "before": 142.6927
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 142.4768,
+            "after": 142.8708
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 142.6515,
+            "after": 143.5729
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 142.8133,
+            "before": 142.9786
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 142.6515,
+        "p95_ms": 142.9786,
+        "min_ms": 142.4768,
+        "max_ms": 142.9786,
+        "raw_ms": [
+          142.8518,
+          142.506,
+          142.5984,
+          142.6927,
+          142.4768,
+          142.6515,
+          142.9786
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 142.5798,
+        "p95_ms": 143.5729,
+        "min_ms": 142.3418,
+        "max_ms": 143.5729,
+        "raw_ms": [
+          142.502,
+          142.5798,
+          142.3418,
+          142.4697,
+          142.8708,
+          143.5729,
+          142.8133
+        ]
+      }
+    },
+    "struct-buffer": {
+      "expected_stdout": "1376475264",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 162.8774,
+            "before": 150.203
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 9.3957,
+            "after": 9.0351
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 8.9989,
+            "after": 8.698
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 10.0411,
+            "before": 8.9872
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 8.984,
+            "before": 8.7542
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 8.3965,
+            "after": 8.9279
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 9.2926,
+            "after": 9.0716
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 8.6893,
+            "before": 8.6712
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 8.9872,
+        "p95_ms": 9.3957,
+        "min_ms": 8.3965,
+        "max_ms": 9.3957,
+        "raw_ms": [
+          9.3957,
+          8.9989,
+          8.9872,
+          8.7542,
+          8.3965,
+          9.2926,
+          8.6712
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 8.984,
+        "p95_ms": 10.0411,
+        "min_ms": 8.6893,
+        "max_ms": 10.0411,
+        "raw_ms": [
+          9.0351,
+          8.698,
+          10.0411,
+          8.984,
+          8.9279,
+          9.0716,
+          8.6893
+        ]
+      }
+    },
+    "struct-zero": {
+      "expected_stdout": "1774290578",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 370.861,
+            "before": 369.4811
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 130.0987,
+            "after": 128.1024
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 132.0568,
+            "after": 143.3728
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 133.6896,
+            "before": 132.9842
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 126.483,
+            "before": 125.0842
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 126.7751,
+            "after": 131.9556
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 126.1754,
+            "after": 125.7057
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 131.9737,
+            "before": 127.9295
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 127.9295,
+        "p95_ms": 132.9842,
+        "min_ms": 125.0842,
+        "max_ms": 132.9842,
+        "raw_ms": [
+          130.0987,
+          132.0568,
+          132.9842,
+          125.0842,
+          126.7751,
+          126.1754,
+          127.9295
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 131.9556,
+        "p95_ms": 143.3728,
+        "min_ms": 125.7057,
+        "max_ms": 143.3728,
+        "raw_ms": [
+          128.1024,
+          143.3728,
+          133.6896,
+          126.483,
+          131.9556,
+          125.7057,
+          131.9737
+        ]
+      }
+    },
+    "queue-worklist": {
+      "expected_stdout": "262063072224",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 50.3657,
+            "before": 50.5286
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 19.0077,
+            "after": 18.0084
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 17.7462,
+            "after": 17.983
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 17.9052,
+            "before": 17.6472
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 17.9499,
+            "before": 17.7184
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 17.6725,
+            "after": 17.947
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 19.4561,
+            "after": 17.8561
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 17.8642,
+            "before": 18.953
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 17.7462,
+        "p95_ms": 19.4561,
+        "min_ms": 17.6472,
+        "max_ms": 19.4561,
+        "raw_ms": [
+          19.0077,
+          17.7462,
+          17.6472,
+          17.7184,
+          17.6725,
+          19.4561,
+          18.953
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 17.947,
+        "p95_ms": 18.0084,
+        "min_ms": 17.8561,
+        "max_ms": 18.0084,
+        "raw_ms": [
+          18.0084,
+          17.983,
+          17.9052,
+          17.9499,
+          17.947,
+          17.8561,
+          17.8642
+        ]
+      }
+    },
+    "utf8-index-long": {
+      "expected_stdout": "1632783826944",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 291.7055,
+            "before": 291.6647
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 193.2456,
+            "after": 193.7915
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 191.8971,
+            "after": 192.2862
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 192.1774,
+            "before": 192.1477
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 191.809,
+            "before": 191.9207
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 192.16,
+            "after": 193.2391
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 192.0605,
+            "after": 191.8708
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 191.8957,
+            "before": 192.2824
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 192.1477,
+        "p95_ms": 193.2456,
+        "min_ms": 191.8971,
+        "max_ms": 193.2456,
+        "raw_ms": [
+          193.2456,
+          191.8971,
+          192.1477,
+          191.9207,
+          192.16,
+          192.0605,
+          192.2824
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 192.1774,
+        "p95_ms": 193.7915,
+        "min_ms": 191.809,
+        "max_ms": 193.7915,
+        "raw_ms": [
+          193.7915,
+          192.2862,
+          192.1774,
+          191.809,
+          193.2391,
+          191.8708,
+          191.8957
+        ]
+      }
+    },
+    "list-edit-long": {
+      "expected_stdout": "7249103406\n59953795191145",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 339.6111,
+            "before": 341.5597
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 188.3739,
+            "after": 187.7054
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 188.1168,
+            "after": 187.8158
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 187.8281,
+            "before": 189.3598
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 187.635,
+            "before": 187.8726
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 188.2302,
+            "after": 188.392
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 190.8317,
+            "after": 188.6972
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 188.535,
+            "before": 188.6508
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 188.3739,
+        "p95_ms": 190.8317,
+        "min_ms": 187.8726,
+        "max_ms": 190.8317,
+        "raw_ms": [
+          188.3739,
+          188.1168,
+          189.3598,
+          187.8726,
+          188.2302,
+          190.8317,
+          188.6508
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 187.8281,
+        "p95_ms": 188.6972,
+        "min_ms": 187.635,
+        "max_ms": 188.6972,
+        "raw_ms": [
+          187.7054,
+          187.8158,
+          187.8281,
+          187.635,
+          188.392,
+          188.6972,
+          188.535
+        ]
+      }
+    },
+    "dictionary-string-long": {
+      "expected_stdout": "120242307072",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 412.5027,
+            "before": 410.6965
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 288.3215,
+            "after": 281.4676
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 285.9695,
+            "after": 281.3949
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 281.2806,
+            "before": 280.574
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 281.2744,
+            "before": 280.1466
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 282.4153,
+            "after": 281.4866
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 279.0318,
+            "after": 282.3801
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 281.7224,
+            "before": 281.7961
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 281.7961,
+        "p95_ms": 288.3215,
+        "min_ms": 279.0318,
+        "max_ms": 288.3215,
+        "raw_ms": [
+          288.3215,
+          285.9695,
+          280.574,
+          280.1466,
+          282.4153,
+          279.0318,
+          281.7961
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 281.4676,
+        "p95_ms": 282.3801,
+        "min_ms": 281.2744,
+        "max_ms": 282.3801,
+        "raw_ms": [
+          281.4676,
+          281.3949,
+          281.2806,
+          281.2744,
+          281.4866,
+          282.3801,
+          281.7224
+        ]
+      }
+    },
+    "queue-worklist-long": {
+      "expected_stdout": "3932022988769",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 218.2578,
+            "before": 215.5773
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 182.4781,
+            "after": 192.0792
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 182.298,
+            "after": 182.7994
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 183.3914,
+            "before": 183.6976
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 182.9128,
+            "before": 182.0352
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 183.7531,
+            "after": 183.9264
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 182.6317,
+            "after": 182.9631
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 183.1402,
+            "before": 182.1111
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 182.4781,
+        "p95_ms": 183.7531,
+        "min_ms": 182.0352,
+        "max_ms": 183.7531,
+        "raw_ms": [
+          182.4781,
+          182.298,
+          183.6976,
+          182.0352,
+          183.7531,
+          182.6317,
+          182.1111
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 183.1402,
+        "p95_ms": 192.0792,
+        "min_ms": 182.7994,
+        "max_ms": 192.0792,
+        "raw_ms": [
+          192.0792,
+          182.7994,
+          183.3914,
+          182.9128,
+          183.9264,
+          182.9631,
+          183.1402
+        ]
+      }
+    },
+    "list-search-long": {
+      "expected_stdout": "1073348608",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 239.0927,
+            "before": 240.0714
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 86.9026,
+            "after": 85.3931
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 85.5137,
+            "after": 84.464
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 86.7802,
+            "before": 86.2362
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 85.649,
+            "before": 85.5618
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 85.0896,
+            "after": 85.9351
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 85.9887,
+            "after": 86.0615
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 85.5388,
+            "before": 85.4344
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 85.5618,
+        "p95_ms": 86.9026,
+        "min_ms": 85.0896,
+        "max_ms": 86.9026,
+        "raw_ms": [
+          86.9026,
+          85.5137,
+          86.2362,
+          85.5618,
+          85.0896,
+          85.9887,
+          85.4344
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 85.649,
+        "p95_ms": 86.7802,
+        "min_ms": 84.464,
+        "max_ms": 86.7802,
+        "raw_ms": [
+          85.3931,
+          84.464,
+          86.7802,
+          85.649,
+          85.9351,
+          86.0615,
+          85.5388
+        ]
+      }
+    },
+    "list-search-u64": {
+      "expected_stdout": "1073348608",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 326.6382,
+            "before": 328.6672
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 175.9995,
+            "after": 175.2887
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 175.512,
+            "after": 177.5432
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 178.1743,
+            "before": 176.362
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 176.5135,
+            "before": 176.5874
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 175.9172,
+            "after": 175.5627
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 175.994,
+            "after": 176.2666
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 175.8205,
+            "before": 176.4421
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 175.9995,
+        "p95_ms": 176.5874,
+        "min_ms": 175.512,
+        "max_ms": 176.5874,
+        "raw_ms": [
+          175.9995,
+          175.512,
+          176.362,
+          176.5874,
+          175.9172,
+          175.994,
+          176.4421
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 176.2666,
+        "p95_ms": 178.1743,
+        "min_ms": 175.2887,
+        "max_ms": 178.1743,
+        "raw_ms": [
+          175.2887,
+          177.5432,
+          178.1743,
+          176.5135,
+          175.5627,
+          176.2666,
+          175.8205
+        ]
+      }
+    },
+    "utf8-roundtrip-long": {
+      "expected_stdout": "409522176",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 352.7615,
+            "before": 362.2726
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 186.5505,
+            "after": 185.5647
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 183.5517,
+            "after": 183.2709
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 186.2501,
+            "before": 186.1083
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 185.7141,
+            "before": 187.9109
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 185.0919,
+            "after": 182.5082
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 183.9071,
+            "after": 184.7449
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 184.3937,
+            "before": 183.3826
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 185.0919,
+        "p95_ms": 187.9109,
+        "min_ms": 183.3826,
+        "max_ms": 187.9109,
+        "raw_ms": [
+          186.5505,
+          183.5517,
+          186.1083,
+          187.9109,
+          185.0919,
+          183.9071,
+          183.3826
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 184.7449,
+        "p95_ms": 186.2501,
+        "min_ms": 182.5082,
+        "max_ms": 186.2501,
+        "raw_ms": [
+          185.5647,
+          183.2709,
+          186.2501,
+          185.7141,
+          182.5082,
+          184.7449,
+          184.3937
+        ]
+      }
+    },
+    "struct-values": {
+      "expected_stdout": "3957781007\n3107464877",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 158.5096,
+            "before": 159.3343
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 78.9221,
+            "after": 78.7988
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 78.7519,
+            "after": 78.7252
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 79.0237,
+            "before": 79.0254
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 79.025,
+            "before": 79.0895
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 79.0813,
+            "after": 81.0298
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 79.3328,
+            "after": 78.941
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 79.3335,
+            "before": 79.3428
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 79.0813,
+        "p95_ms": 79.3428,
+        "min_ms": 78.7519,
+        "max_ms": 79.3428,
+        "raw_ms": [
+          78.9221,
+          78.7519,
+          79.0254,
+          79.0895,
+          79.0813,
+          79.3328,
+          79.3428
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 79.0237,
+        "p95_ms": 81.0298,
+        "min_ms": 78.7252,
+        "max_ms": 81.0298,
+        "raw_ms": [
+          78.7988,
+          78.7252,
+          79.0237,
+          79.025,
+          81.0298,
+          78.941,
+          79.3335
+        ]
+      }
+    },
+    "float-parse": {
+      "expected_stdout": "14337334190765761419",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 326.503,
+            "before": 326.3287
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 198.6125,
+            "after": 195.6741
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 195.552,
+            "after": 196.9622
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 196.6057,
+            "before": 194.0412
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 213.1876,
+            "before": 202.4375
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 197.6252,
+            "after": 196.2897
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 196.1155,
+            "after": 195.497
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 198.3077,
+            "before": 195.5572
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 196.1155,
+        "p95_ms": 202.4375,
+        "min_ms": 194.0412,
+        "max_ms": 202.4375,
+        "raw_ms": [
+          198.6125,
+          195.552,
+          194.0412,
+          202.4375,
+          197.6252,
+          196.1155,
+          195.5572
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 196.6057,
+        "p95_ms": 213.1876,
+        "min_ms": 195.497,
+        "max_ms": 213.1876,
+        "raw_ms": [
+          195.6741,
+          196.9622,
+          196.6057,
+          213.1876,
+          196.2897,
+          195.497,
+          198.3077
+        ]
+      }
+    },
+    "fp-integrate": {
+      "expected_stdout": "4628760643300657334",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 237.2181,
+            "before": 235.7861
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 149.9751,
+            "after": 150.1956
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 149.9999,
+            "after": 149.9477
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 150.0389,
+            "before": 151.6036
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 149.9529,
+            "before": 150.1441
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 150.0663,
+            "after": 149.8473
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 150.0171,
+            "after": 150.1944
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 150.1658,
+            "before": 150.0223
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 150.0223,
+        "p95_ms": 151.6036,
+        "min_ms": 149.9751,
+        "max_ms": 151.6036,
+        "raw_ms": [
+          149.9751,
+          149.9999,
+          151.6036,
+          150.1441,
+          150.0663,
+          150.0171,
+          150.0223
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 150.0389,
+        "p95_ms": 150.1956,
+        "min_ms": 149.8473,
+        "max_ms": 150.1956,
+        "raw_ms": [
+          150.1956,
+          149.9477,
+          150.0389,
+          149.9529,
+          149.8473,
+          150.1944,
+          150.1658
+        ]
+      }
+    },
+    "indirect-array": {
+      "expected_stdout": "1572842680832",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 351.0513,
+            "before": 351.221
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 130.6068,
+            "after": 129.9824
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 129.8745,
+            "after": 129.7332
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 129.7129,
+            "before": 129.5262
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 129.4676,
+            "before": 129.0837
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 129.403,
+            "after": 129.534
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 128.9883,
+            "after": 129.2722
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 129.301,
+            "before": 129.3842
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 129.403,
+        "p95_ms": 130.6068,
+        "min_ms": 128.9883,
+        "max_ms": 130.6068,
+        "raw_ms": [
+          130.6068,
+          129.8745,
+          129.5262,
+          129.0837,
+          129.403,
+          128.9883,
+          129.3842
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 129.534,
+        "p95_ms": 129.9824,
+        "min_ms": 129.2722,
+        "max_ms": 129.9824,
+        "raw_ms": [
+          129.9824,
+          129.7332,
+          129.7129,
+          129.4676,
+          129.534,
+          129.2722,
+          129.301
+        ]
+      }
+    },
+    "string-equality": {
+      "expected_stdout": "10862172",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 168.6206,
+            "before": 169.3531
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 30.2975,
+            "after": 29.4537
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 29.6658,
+            "after": 29.054
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 28.6296,
+            "before": 28.9174
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 30.9061,
+            "before": 30.2895
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 28.7796,
+            "after": 28.7834
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 29.4349,
+            "after": 28.8244
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 28.8105,
+            "before": 28.4293
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 29.4349,
+        "p95_ms": 30.2975,
+        "min_ms": 28.4293,
+        "max_ms": 30.2975,
+        "raw_ms": [
+          30.2975,
+          29.6658,
+          28.9174,
+          30.2895,
+          28.7796,
+          29.4349,
+          28.4293
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 28.8244,
+        "p95_ms": 30.9061,
+        "min_ms": 28.6296,
+        "max_ms": 30.9061,
+        "raw_ms": [
+          29.4537,
+          29.054,
+          28.6296,
+          30.9061,
+          28.7834,
+          28.8244,
+          28.8105
+        ]
+      }
+    },
+    "utf8-roundtrip": {
+      "expected_stdout": "31294464",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 217.4354,
+            "before": 215.1411
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 40.4749,
+            "after": 36.796
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 36.3597,
+            "after": 37.1576
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 37.8641,
+            "before": 37.6138
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 38.2855,
+            "before": 38.4416
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 36.1231,
+            "after": 36.8936
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 37.5157,
+            "after": 39.536
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 36.0392,
+            "before": 37.5004
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 37.5157,
+        "p95_ms": 40.4749,
+        "min_ms": 36.1231,
+        "max_ms": 40.4749,
+        "raw_ms": [
+          40.4749,
+          36.3597,
+          37.6138,
+          38.4416,
+          36.1231,
+          37.5157,
+          37.5004
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 37.1576,
+        "p95_ms": 39.536,
+        "min_ms": 36.0392,
+        "max_ms": 39.536,
+        "raw_ms": [
+          36.796,
+          37.1576,
+          37.8641,
+          38.2855,
+          36.8936,
+          39.536,
+          36.0392
+        ]
+      }
+    },
+    "utf8-index": {
+      "expected_stdout": "6378061824",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 83.8497,
+            "before": 83.9059
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 6.1494,
+            "after": 5.7925
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 5.4551,
+            "after": 6.0995
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 6.223,
+            "before": 6.0488
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 5.7688,
+            "before": 5.9348
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 7.4957,
+            "after": 5.6149
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 5.8459,
+            "after": 6.0801
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 5.6947,
+            "before": 5.7297
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 5.9348,
+        "p95_ms": 7.4957,
+        "min_ms": 5.4551,
+        "max_ms": 7.4957,
+        "raw_ms": [
+          6.1494,
+          5.4551,
+          6.0488,
+          5.9348,
+          7.4957,
+          5.8459,
+          5.7297
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 5.7925,
+        "p95_ms": 6.223,
+        "min_ms": 5.6149,
+        "max_ms": 6.223,
+        "raw_ms": [
+          5.7925,
+          6.0995,
+          6.223,
+          5.7688,
+          5.6149,
+          6.0801,
+          5.6947
+        ]
+      }
+    },
+    "list-search": {
+      "expected_stdout": "8395412",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 160.3967,
+            "before": 162.5995
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 6.3704,
+            "after": 6.045
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 6.354,
+            "after": 5.4275
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 5.1571,
+            "before": 5.1886
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 6.1069,
+            "before": 5.4956
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 5.384,
+            "after": 5.2675
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 5.6946,
+            "after": 5.2076
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 5.662,
+            "before": 5.6523
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 5.6523,
+        "p95_ms": 6.3704,
+        "min_ms": 5.1886,
+        "max_ms": 6.3704,
+        "raw_ms": [
+          6.3704,
+          6.354,
+          5.1886,
+          5.4956,
+          5.384,
+          5.6946,
+          5.6523
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 5.4275,
+        "p95_ms": 6.1069,
+        "min_ms": 5.1571,
+        "max_ms": 6.1069,
+        "raw_ms": [
+          6.045,
+          5.4275,
+          5.1571,
+          6.1069,
+          5.2675,
+          5.2076,
+          5.662
+        ]
+      }
+    },
+    "list-edit": {
+      "expected_stdout": "173240731\n9176763356425",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 172.8998,
+            "before": 172.5963
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 20.4673,
+            "after": 20.5802
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 20.4113,
+            "after": 20.7166
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 20.575,
+            "before": 20.4644
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 21.1364,
+            "before": 22.0117
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 20.8155,
+            "after": 21.0731
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 20.8036,
+            "after": 20.9848
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 21.7693,
+            "before": 21.4524
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 20.8036,
+        "p95_ms": 22.0117,
+        "min_ms": 20.4113,
+        "max_ms": 22.0117,
+        "raw_ms": [
+          20.4673,
+          20.4113,
+          20.4644,
+          22.0117,
+          20.8155,
+          20.8036,
+          21.4524
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 20.9848,
+        "p95_ms": 21.7693,
+        "min_ms": 20.575,
+        "max_ms": 21.7693,
+        "raw_ms": [
+          20.5802,
+          20.7166,
+          20.575,
+          21.1364,
+          21.0731,
+          20.9848,
+          21.7693
+        ]
+      }
+    },
+    "dictionary-string": {
+      "expected_stdout": "3757572096",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 141.2058,
+            "before": 139.7775
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 15.1704,
+            "after": 14.85
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 15.3782,
+            "after": 15.5369
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 14.8151,
+            "before": 14.8661
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 14.6449,
+            "before": 14.9377
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 14.6064,
+            "after": 14.9069
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 14.9473,
+            "after": 15.3447
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 15.234,
+            "before": 15.9186
+          }
+        }
+      ],
+      "before": {
+        "n": 7,
+        "median_ms": 14.9473,
+        "p95_ms": 15.9186,
+        "min_ms": 14.6064,
+        "max_ms": 15.9186,
+        "raw_ms": [
+          15.1704,
+          15.3782,
+          14.8661,
+          14.9377,
+          14.6064,
+          14.9473,
+          15.9186
+        ]
+      },
+      "after": {
+        "n": 7,
+        "median_ms": 14.9069,
+        "p95_ms": 15.5369,
+        "min_ms": 14.6449,
+        "max_ms": 15.5369,
+        "raw_ms": [
+          14.85,
+          15.5369,
+          14.8151,
+          14.6449,
+          14.9069,
+          15.3447,
+          15.234
+        ]
+      }
+    }
+  }
+}

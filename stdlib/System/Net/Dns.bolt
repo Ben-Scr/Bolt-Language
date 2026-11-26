@@ -1,0 +1,8 @@
+import Bolt.Runtime.Net
+namespace System.Net;
+public static class Dns
+{
+public:
+    // OS resolver: blocking, no fabricated per-call DNS deadline.
+    IPAddress[] Resolve(string host) { return Resolver.Resolve(host); }
+}

@@ -1,0 +1,40 @@
+import System
+import System.IO
+
+static class Program
+{
+public:
+    int Main()
+    {
+        string binaryPath = "Daten-ü😀.bin";
+        byte[] payload = new byte[65539];
+        for (int i = 0; i < payload.Length; i++) payload[i] = (byte)(i % 256);
+        File.WriteAllBytes(binaryPath, payload);
+        byte[] restored = File.ReadAllBytes(binaryPath);
+        if (restored.Length != payload.Length) return 1;
+        for (int i = 0; i < restored.Length; i++) if (restored[i] != (byte)(i % 256)) return 2;
+
+        byte[] shorter = [(byte)255, (byte)0, (byte)128];
+        File.WriteAllBytes(binaryPath, shorter);
+        restored = File.ReadAllBytes(binaryPath);
+        if (restored.Length != 3 || restored[0] != (byte)255 || restored[1] != (byte)0 || restored[2] != (byte)128) return 3;
+
+        string textPath = "Grüße-😀.txt";
+        File.WriteAllText(textPath, "This old content must be replaced in full.");
+        string text = "Grüße\0😀\r\n";
+        File.WriteAllText(textPath, text);
+        if (File.ReadAllText(textPath) != text) return 4;
+        byte[] utf8 = File.ReadAllBytes(textPath);
+        if (utf8.Length != 14 || utf8[0] != (byte)71 || utf8[7] != (byte)0) return 5;
+
+        File.WriteAllText("empty-text", "old");
+        File.WriteAllText("empty-text", "");
+        File.WriteAllBytes("empty-bytes", shorter);
+        File.WriteAllBytes("empty-bytes", new byte[0]);
+        if (File.ReadAllBytes("empty-text").Length != 0 || File.ReadAllText("empty-bytes") != "") return 6;
+        try { File.WriteAllText(textPath + "\0suffix", "invalid"); return 7; } catch (ArgumentException& e) {}
+        if (File.ReadAllText(textPath) != text) return 8;
+        try { File.WriteAllBytes("missing-parent/file", shorter); return 9; } catch (FileNotFoundException& e) {}
+        return 0;
+    }
+}

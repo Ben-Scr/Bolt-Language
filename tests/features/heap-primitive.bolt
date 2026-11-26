@@ -1,0 +1,5 @@
+
+
+static class Program { public: void Main() {
+int* p=new int(7); Console.WriteLine(*p); delete p; p=null; Console.WriteLine(p==null);
+} }

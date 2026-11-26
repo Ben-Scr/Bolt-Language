@@ -1,0 +1,5 @@
+import System.Collections.Generic
+class Container<T>{public:T Value; U Echo<U>(U x){return x;} }
+static class Program { public: void Main() {
+Container<List<int>> c; c.Value.Add(6); Console.WriteLine(c.Value[0]); Console.WriteLine(c.Echo<string>("yes"));
+} }

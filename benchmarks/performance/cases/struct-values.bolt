@@ -1,0 +1,26 @@
+struct Pair {
+public:
+    uint X;
+    uint Y;
+}
+static class Program {
+public:
+    Pair Advance(Pair value, uint salt) {
+        uint mixed = value.X ^ salt ^ (value.Y >> 3);
+        value.X = (mixed << 7) | (mixed >> 25);
+        value.Y = value.Y ^ value.X;
+        return value;
+    }
+    void Main() {
+        Pair state;
+        state.X = 1u;
+        state.Y = 7u;
+        for (int i = 0; i < 96000000; i++) {
+            Pair previous = state;
+            state = Advance(previous, (uint)i);
+            state.Y = state.Y ^ (previous.X >> 1);
+        }
+        Print(state.X);
+        Print(state.Y);
+    }
+}

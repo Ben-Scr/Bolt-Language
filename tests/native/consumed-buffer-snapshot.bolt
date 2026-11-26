@@ -1,0 +1,38 @@
+import Bolt.Runtime
+
+static class Program {
+public:
+    int Main() {
+        for (int n = 0; n <= 9; n++) {
+            Buffer<int> source;
+            for (int i = 0; i < n; i++) source.Add(i);
+            int[] snapshot = source.ToArray();
+            int[] independent = snapshot;
+            if (snapshot.GetLength(0) != n || independent.Length != n) return 1;
+            if (n > 0) {
+                snapshot[0] = 51;
+                if (independent[0] != 0 || independent[n - 1] != n - 1) return 2;
+            }
+        }
+        Buffer<int> live;
+        for (int i = 0; i < 4; i++) live.Add(i);
+        int[] separate = live.ToArray();
+        live[1] = 77;
+        if (separate[1] != 1) return 3;
+
+        Buffer<int> escaped;
+        for (int i = 0; i < 4; i++) escaped.Add(i);
+        int* element = &escaped[1];
+        int[] detached = escaped.ToArray();
+        *element = 81;
+        if (detached[1] != 1) return 4;
+
+        Buffer<int> shared;
+        for (int i = 0; i < 4; i++) shared.Add(i);
+        Buffer<int>& view = shared;
+        int[] saved = shared.ToArray();
+        view[2] = 82;
+        if (saved[2] != 2) return 5;
+        return 0;
+    }
+}

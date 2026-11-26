@@ -1,0 +1,9 @@
+import System
+namespace Example;
+public interface IValue { int Get(); }
+public class Value : IValue, System.IStringable {
+public:
+ int Get(){return 7;}
+ string ToString(){return "value";}
+}
+static class Program {public: void Main(){Value v; Example.IValue& view=v;Print(view.Get());System.IStringable text=v;Print(text);}}

@@ -1,0 +1,43 @@
+import System
+import System.Threading
+import System.Diagnostics
+public class SharedPayload {
+public:
+    int Value;
+    Atomic<int> Destroyed;
+    SharedPayload(int value, Atomic<int> destroyed) { Value = value; Destroyed = destroyed; }
+    ~SharedPayload() { Destroyed.Add(1); }
+}
+public class PayloadOutput { public: SharedPayload* Value = null; }
+public class AllocatePayloadJob {
+public:
+    PayloadOutput* Output;
+    Atomic<int> Destroyed;
+    AllocatePayloadJob(PayloadOutput* output, Atomic<int> destroyed) { Output = output; Destroyed = destroyed; }
+    void Run() { Output->Value = new SharedPayload(73, Destroyed); }
+}
+public class DeletePayloadJob {
+public:
+    SharedPayload* Value;
+    DeletePayloadJob(SharedPayload* value) { Value = value; }
+    void Run() { delete Value; }
+}
+static class Program {
+public:
+    void Main() {
+        Atomic<int> destroyed;
+        PayloadOutput output;
+        Thread producer = Thread.Start(AllocatePayloadJob(&output, destroyed));
+        Assert.That(producer.Join(5000));
+        Assert.That(destroyed.Load() == 0);
+        Assert.That(output.Value->Value == 73);
+        delete output.Value;
+        output.Value = null;
+        Assert.That(destroyed.Load() == 1);
+        SharedPayload* fromMain = new SharedPayload(42, destroyed);
+        Thread consumer = Thread.Start(DeletePayloadJob(fromMain));
+        Assert.That(consumer.Join(5000));
+        Assert.That(destroyed.Load() == 2);
+        Print("RAWTRANSFER14:6");
+    }
+}

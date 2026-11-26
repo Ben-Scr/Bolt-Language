@@ -1,0 +1,12 @@
+import System.Collections.Generic
+static class Program {
+public:
+    ulong Key(int value) { return ((ulong)(value & 255) << 40) | (ulong)value; }
+    void Main() {
+        List<ulong> values(8192);
+        for (int i = 0; i < 8192; i++) values.Add(Key((i * 9751) & 8191));
+        long sum = 0L;
+        for (int i = 0; i < 524288; i++) sum += values.IndexOf(Key((i * 977) & 16383));
+        Print(sum);
+    }
+}

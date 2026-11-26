@@ -1,0 +1,5 @@
+import System.Collections.Generic
+void Flip(bool& value){value=!value;}
+static class Program { public: void Main() {
+bool[] a={true,false}; Flip(a[0]); Console.WriteLine(a[0]); List<bool> b; b.Add(false); Flip(b[0]); Console.WriteLine(b[0]);
+} }

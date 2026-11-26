@@ -1,0 +1,23 @@
+#if Web || Android || IOS
+namespace Bolt.Runtime;
+
+[Native("bolt::platform::HostConsole")]
+public static class HostConsole
+{
+public:
+    void Write(const string& text);
+    void WriteLine(const string& text);
+    string ReadLine();
+    void ClearDisplay();
+}
+
+[Native("bolt::platform::HostDateTime")]
+public static class HostDateTime
+{
+public:
+    long UtcNowTicks();
+    long OffsetSeconds(long ticks);
+    long LocalMidnightTicks(long ticks);
+}
+
+#endif

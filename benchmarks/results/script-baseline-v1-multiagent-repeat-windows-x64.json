@@ -1,0 +1,1216 @@
+{
+  "baseline": "v1",
+  "utc": "2026-11-21T00:03:51.764183+00:00",
+  "os": "Windows-11-10.0.26200-SP0",
+  "cpu": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+  "rounds": 12,
+  "warmups": 4,
+  "seed": 73491,
+  "dotnet_sdk": "10.0.403",
+  "reference_pack": "10.0.14",
+  "bolt": {
+    "compilerHostAbi": 1,
+    "executable": "C:/Users/benso/AppData/Local/Temp/bolt-orchestrated-20261120/sdk/bolt.exe",
+    "runtimeAbi": 1048580,
+    "target": "x86_64-pc-windows-msvc",
+    "version": "0.16.0"
+  },
+  "clang": "clang version 23.1.2 (https://github.com/llvm/llvm-project 85ac560262434c9ccfc0c183ec22d4138ed647fb)",
+  "msvc_path": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\cl.EXE",
+  "tool_hashes": {
+    "bolt.exe": "ce38ed7b4eaacdd8ee70e1962e865a815556a98b17570e8cad75282cb4bf9d94",
+    "BoltCompiler.dll": "103ef02a6a0ce116e5e9f79795e70b47d4cefdcd6ed8645a76405e9f7cc4f086",
+    "BoltRuntime.dll": "1904a3651b5d92a8ffc72bf9293046ce6531daf9aae22b3ba633ae0439d2df52",
+    "csc.dll": "f9ea6e4b51f4ac07b9005fddf3e5a0022d9d60cf95a1c404809de63ba6d0eb3b",
+    "cl.EXE": "b0a1818ebae6da7f18230a84e76ce839212584ac4c2ab55b97a0d5268085da57",
+    "clang.exe": "e7956e325bc32a1a96838a19a14c58a18916e710f202776c62f27c621ec79411"
+  },
+  "source_hashes": {
+    "fixture_io.h": "52248eca61b0b28755e22efd2987eef34ca12b6a96a8cd86c24e99466d31ceca",
+    "fixtures.py": "55a409e745ef941fb9adb91b0be0749676de5993e230c1d7879eb4836299b74b",
+    "inventory/main.c": "d5705b71b3150626a901e56a4c9f04f33117f41ccc754bd2eb3d54ccdc434993",
+    "inventory/Program.bolt": "8ed2b64eb86d12074b9abab5cd24b392126237df412a7c4883886fc46f188366",
+    "inventory/Program.cs": "42658485f9d327728f7b4936d75772c6e00a3850c9634ceb44e01b4c14ce171b",
+    "navigation/main.c": "92aa00c61b033d8b250203891f5aee7dd1105dd86f2ffb0683e32a2fd5b37cd0",
+    "navigation/Program.bolt": "77fd8834d38b7a57c0fa288cc92e89eb028e000b5158bf58552f8812ca29fe2e",
+    "navigation/Program.cs": "96f4d6358e2e06bf34ec2e02730747c9cb23043411629bef33fbc4d0d29206bc",
+    "phases.py": "c112586b1c5e3a21e724fe3c7ab4ddd0d81f2d2fdc25a6a12a016331df3a8edb",
+    "run.py": "717432dbda86ff81a58f6f681bae0f9310440d74e0499772a1ba64c7b71f91f0",
+    "terrain/main.c": "6c7310d27dbdb041cdb7ec5c6a3f7ae2edfbdfe415f85a8d453a506d86aeee04",
+    "terrain/Program.bolt": "53148fb75e398aad68c488a7f806cc1d0f38d269cbc79cc7646cf7710c8c2d2f",
+    "terrain/Program.cs": "bcc77f2ff63f0a3fd30e7c336b95ac25376d9443aa255a6a826968b17aa50ab5",
+    "v1.json": "f084cd09241c252ac5ab5a8ce737c447d3b4dcc3cb61a8c28706621a5ef35eb1",
+    "WarmHost.cs": "27390c6ff5b62e7c1f3faa7200edc71ebafad9e8dfbeb4e07fa48bc9483c6d0e"
+  },
+  "flags": {
+    "bolt_debug": [
+      "--debug",
+      "--backend",
+      "fast",
+      "--require-native"
+    ],
+    "bolt_release": [
+      "--release",
+      "--backend",
+      "llvm",
+      "--require-native"
+    ],
+    "csc": [
+      "-nologo",
+      "-nostdlib+",
+      "-target:exe",
+      "-optimize-",
+      "-debug:portable"
+    ],
+    "msvc": "/O2 /DNDEBUG /std:c11",
+    "clang_c": "-O3 -DNDEBUG -std=c11"
+  },
+  "cases": {
+    "navigation": {
+      "fixture": {
+        "input_bytes": 17408,
+        "input_sha256": "29d95ce67203db9c2ad60eb873d9f746fc75a262ed00789806b12e81cfade299",
+        "output_sha256": [
+          "33b6f48fa2e3432a58a4f21c5a4ff576e01664328c42f74eb03d73f030d79d51",
+          "5df3e3d702d40749d26a4032271877251d7e13990d6aff237a2c073227c4ecc6"
+        ]
+      },
+      "release": {
+        "order": [
+          [
+            "bolt",
+            "clang",
+            "msvc"
+          ],
+          [
+            "msvc",
+            "bolt",
+            "clang"
+          ],
+          [
+            "clang",
+            "msvc",
+            "bolt"
+          ],
+          [
+            "msvc",
+            "clang",
+            "bolt"
+          ],
+          [
+            "clang",
+            "bolt",
+            "msvc"
+          ],
+          [
+            "bolt",
+            "msvc",
+            "clang"
+          ],
+          [
+            "msvc",
+            "bolt",
+            "clang"
+          ],
+          [
+            "bolt",
+            "clang",
+            "msvc"
+          ],
+          [
+            "clang",
+            "msvc",
+            "bolt"
+          ],
+          [
+            "bolt",
+            "msvc",
+            "clang"
+          ],
+          [
+            "clang",
+            "bolt",
+            "msvc"
+          ],
+          [
+            "msvc",
+            "clang",
+            "bolt"
+          ]
+        ],
+        "timings": {
+          "bolt": {
+            "n": 12,
+            "median_ms": 23.4646,
+            "p95_ms": 33.4675,
+            "min_ms": 20.4791,
+            "max_ms": 33.4675,
+            "raw_ms": [
+              26.2958,
+              30.5631,
+              33.4675,
+              23.3583,
+              22.4094,
+              23.571,
+              23.9198,
+              23.0101,
+              20.4791,
+              24.4314,
+              22.4086,
+              22.1908
+            ]
+          },
+          "msvc": {
+            "n": 12,
+            "median_ms": 25.2765,
+            "p95_ms": 31.5874,
+            "min_ms": 22.5077,
+            "max_ms": 31.5874,
+            "raw_ms": [
+              28.3089,
+              29.8814,
+              28.6185,
+              31.5874,
+              27.0676,
+              25.3987,
+              25.1542,
+              24.1903,
+              22.5077,
+              23.7561,
+              22.6015,
+              22.8163
+            ]
+          },
+          "clang": {
+            "n": 12,
+            "median_ms": 25.6989,
+            "p95_ms": 31.7196,
+            "min_ms": 21.5515,
+            "max_ms": 31.7196,
+            "raw_ms": [
+              25.8878,
+              31.7196,
+              29.1746,
+              27.914,
+              28.9136,
+              24.5983,
+              22.7968,
+              21.5515,
+              25.5101,
+              22.8384,
+              23.6916,
+              26.5224
+            ]
+          }
+        }
+      },
+      "debug_cli": {
+        "order": [
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ]
+        ],
+        "timings": {
+          "bolt": {
+            "n": 12,
+            "median_ms": 151.0144,
+            "p95_ms": 912.5711,
+            "min_ms": 142.9047,
+            "max_ms": 912.5711,
+            "raw_ms": [
+              149.0746,
+              151.8194,
+              482.4626,
+              150.2093,
+              145.7336,
+              912.5711,
+              142.9047,
+              154.6613,
+              171.1384,
+              146.2241,
+              143.5183,
+              327.3863
+            ]
+          },
+          "roslyn": {
+            "n": 12,
+            "median_ms": 466.6968,
+            "p95_ms": 2310.9352,
+            "min_ms": 406.319,
+            "max_ms": 2310.9352,
+            "raw_ms": [
+              446.2,
+              407.6843,
+              1291.3057,
+              2310.9352,
+              411.8119,
+              406.319,
+              419.2398,
+              418.0699,
+              689.6955,
+              487.1937,
+              740.2211,
+              1210.4976
+            ]
+          }
+        }
+      },
+      "editor_validation": {
+        "input_bytes": 16396,
+        "input_sha256": "3fdadd9683d199dd5f3d44b5679f18b4669c5498f4b0be2f937fac3ee0dc0174",
+        "output_sha256": [
+          "556150e2b942afef0a271927f22e28496ead32d2ddfa4699be13b72a0bec1692",
+          "444750fdd885165bb5ec4fc5656a155f2e45699b79ce0b4f340c55bd2c29e7ae"
+        ]
+      },
+      "debug_warm": {
+        "order": [
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ]
+        ],
+        "timings": {
+          "bolt": {
+            "n": 12,
+            "median_ms": 3.1562,
+            "p95_ms": 3.6495,
+            "min_ms": 2.5044,
+            "max_ms": 3.6495,
+            "raw_ms": [
+              3.3556,
+              2.8388,
+              3.2242,
+              2.8435,
+              3.1773,
+              3.2701,
+              2.7545,
+              2.5044,
+              3.6495,
+              3.1351,
+              3.5496,
+              2.873
+            ]
+          },
+          "roslyn": {
+            "n": 12,
+            "median_ms": 31.3665,
+            "p95_ms": 67.6582,
+            "min_ms": 19.419,
+            "max_ms": 67.6582,
+            "raw_ms": [
+              43.3195,
+              21.4538,
+              40.0462,
+              67.6582,
+              32.352,
+              20.4616,
+              19.419,
+              20.7313,
+              30.3809,
+              42.5425,
+              53.1849,
+              28.068
+            ]
+          }
+        }
+      }
+    },
+    "terrain": {
+      "fixture": {
+        "input_bytes": 4194304,
+        "input_sha256": "5f2c02dc55b1109434c72d7ee904e6c518d1d95aac8e46f3a460e8980a6aa6dd",
+        "output_sha256": [
+          "b02d0072a17dbb8cba47938e6b1c1b74b5d9735d53667d592fe0d1d4f89d7d10",
+          "b938cb2eed0ea27f2d76b5285f21ef2848f4648d1943c6a38eb003d4ff63d549"
+        ]
+      },
+      "release": {
+        "order": [
+          [
+            "msvc",
+            "clang",
+            "bolt"
+          ],
+          [
+            "bolt",
+            "msvc",
+            "clang"
+          ],
+          [
+            "clang",
+            "bolt",
+            "msvc"
+          ],
+          [
+            "clang",
+            "bolt",
+            "msvc"
+          ],
+          [
+            "bolt",
+            "msvc",
+            "clang"
+          ],
+          [
+            "msvc",
+            "clang",
+            "bolt"
+          ],
+          [
+            "bolt",
+            "clang",
+            "msvc"
+          ],
+          [
+            "msvc",
+            "bolt",
+            "clang"
+          ],
+          [
+            "clang",
+            "msvc",
+            "bolt"
+          ],
+          [
+            "bolt",
+            "msvc",
+            "clang"
+          ],
+          [
+            "clang",
+            "bolt",
+            "msvc"
+          ],
+          [
+            "msvc",
+            "clang",
+            "bolt"
+          ]
+        ],
+        "timings": {
+          "bolt": {
+            "n": 12,
+            "median_ms": 86.9236,
+            "p95_ms": 148.0203,
+            "min_ms": 19.1028,
+            "max_ms": 148.0203,
+            "raw_ms": [
+              138.8061,
+              78.0885,
+              148.0203,
+              116.8363,
+              138.0681,
+              128.7638,
+              63.051,
+              95.7587,
+              36.1509,
+              27.1011,
+              25.6534,
+              19.1028
+            ]
+          },
+          "msvc": {
+            "n": 12,
+            "median_ms": 65.7364,
+            "p95_ms": 147.9246,
+            "min_ms": 26.632,
+            "max_ms": 147.9246,
+            "raw_ms": [
+              140.4852,
+              123.3645,
+              120.3086,
+              139.1653,
+              147.9246,
+              62.8786,
+              58.7657,
+              68.5942,
+              41.7105,
+              30.3946,
+              29.4873,
+              26.632
+            ]
+          },
+          "clang": {
+            "n": 12,
+            "median_ms": 66.9373,
+            "p95_ms": 376.7275,
+            "min_ms": 29.2189,
+            "max_ms": 376.7275,
+            "raw_ms": [
+              62.2512,
+              144.1952,
+              224.1021,
+              164.9725,
+              376.7275,
+              72.0733,
+              66.5119,
+              58.2636,
+              67.3627,
+              29.2189,
+              32.1642,
+              31.5439
+            ]
+          }
+        }
+      },
+      "debug_cli": {
+        "order": [
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ]
+        ],
+        "timings": {
+          "bolt": {
+            "n": 12,
+            "median_ms": 163.163,
+            "p95_ms": 761.4151,
+            "min_ms": 144.3425,
+            "max_ms": 761.4151,
+            "raw_ms": [
+              215.9844,
+              147.8274,
+              200.3356,
+              146.2851,
+              504.5249,
+              540.0818,
+              154.4404,
+              147.6456,
+              144.3425,
+              144.444,
+              761.4151,
+              171.8856
+            ]
+          },
+          "roslyn": {
+            "n": 12,
+            "median_ms": 417.6438,
+            "p95_ms": 825.412,
+            "min_ms": 383.7466,
+            "max_ms": 825.412,
+            "raw_ms": [
+              409.8034,
+              417.5908,
+              737.3251,
+              825.412,
+              385.2157,
+              421.6316,
+              398.4038,
+              417.6967,
+              383.7466,
+              442.783,
+              418.7429,
+              405.1772
+            ]
+          }
+        }
+      },
+      "editor_validation": {
+        "input_bytes": 6144,
+        "input_sha256": "694a5ae3bae72f971d9f6701589ef8adc426b0b32237e82647713888529bc0c4",
+        "output_sha256": [
+          "a55ab2dd96cb5cb62d480b350cf8188ebc01807fccad488c086980e69aaf3edc",
+          "3369332a2bae8a89a378e65fb20e00f50cd1db0000b87a6d3f26cae7d51c9d9a"
+        ]
+      },
+      "debug_warm": {
+        "order": [
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ]
+        ],
+        "timings": {
+          "bolt": {
+            "n": 12,
+            "median_ms": 1.5964,
+            "p95_ms": 1.7863,
+            "min_ms": 1.3212,
+            "max_ms": 1.7863,
+            "raw_ms": [
+              1.5854,
+              1.3902,
+              1.5634,
+              1.6138,
+              1.6075,
+              1.3212,
+              1.7863,
+              1.6763,
+              1.7574,
+              1.3772,
+              1.5355,
+              1.6186
+            ]
+          },
+          "roslyn": {
+            "n": 12,
+            "median_ms": 3.5278,
+            "p95_ms": 9.3701,
+            "min_ms": 3.0004,
+            "max_ms": 9.3701,
+            "raw_ms": [
+              3.5343,
+              3.3587,
+              9.3701,
+              3.1954,
+              3.5212,
+              3.5032,
+              3.9408,
+              3.5408,
+              3.2663,
+              3.0004,
+              4.1013,
+              4.0097
+            ]
+          }
+        }
+      }
+    },
+    "inventory": {
+      "fixture": {
+        "input_bytes": 3000000,
+        "input_sha256": "45dea152a040696146b14e042828befbbfc4bd96904019f3a8baed9be36759a1",
+        "output_sha256": [
+          "c940200dfaecfb60618dfe8b59efacc5bceb6eba529b889e305bf86cced40e23",
+          "52a8b4453034027fb90ffc5b6c3f55d8872c36d9137557711d67c511c7a8838c"
+        ]
+      },
+      "release": {
+        "order": [
+          [
+            "bolt",
+            "clang",
+            "msvc"
+          ],
+          [
+            "clang",
+            "msvc",
+            "bolt"
+          ],
+          [
+            "msvc",
+            "bolt",
+            "clang"
+          ],
+          [
+            "clang",
+            "msvc",
+            "bolt"
+          ],
+          [
+            "msvc",
+            "bolt",
+            "clang"
+          ],
+          [
+            "bolt",
+            "clang",
+            "msvc"
+          ],
+          [
+            "bolt",
+            "clang",
+            "msvc"
+          ],
+          [
+            "msvc",
+            "bolt",
+            "clang"
+          ],
+          [
+            "clang",
+            "msvc",
+            "bolt"
+          ],
+          [
+            "clang",
+            "msvc",
+            "bolt"
+          ],
+          [
+            "msvc",
+            "bolt",
+            "clang"
+          ],
+          [
+            "bolt",
+            "clang",
+            "msvc"
+          ]
+        ],
+        "timings": {
+          "bolt": {
+            "n": 12,
+            "median_ms": 15.7905,
+            "p95_ms": 18.0447,
+            "min_ms": 14.128,
+            "max_ms": 18.0447,
+            "raw_ms": [
+              14.128,
+              14.6627,
+              15.2937,
+              15.5457,
+              16.0353,
+              16.829,
+              18.0447,
+              17.6266,
+              15.444,
+              15.3834,
+              16.8171,
+              16.4575
+            ]
+          },
+          "msvc": {
+            "n": 12,
+            "median_ms": 17.9918,
+            "p95_ms": 19.5456,
+            "min_ms": 15.8126,
+            "max_ms": 19.5456,
+            "raw_ms": [
+              16.3045,
+              16.2776,
+              16.6569,
+              18.8807,
+              17.6205,
+              19.1748,
+              19.5456,
+              18.3631,
+              19.0815,
+              15.8126,
+              15.9503,
+              19.3201
+            ]
+          },
+          "clang": {
+            "n": 12,
+            "median_ms": 17.6987,
+            "p95_ms": 19.8038,
+            "min_ms": 15.1873,
+            "max_ms": 19.8038,
+            "raw_ms": [
+              15.4118,
+              15.1873,
+              16.8232,
+              17.2252,
+              16.8545,
+              19.5297,
+              19.023,
+              19.8038,
+              19.2938,
+              15.5541,
+              19.1552,
+              18.1722
+            ]
+          }
+        }
+      },
+      "debug_cli": {
+        "order": [
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ]
+        ],
+        "timings": {
+          "bolt": {
+            "n": 12,
+            "median_ms": 142.9152,
+            "p95_ms": 154.8922,
+            "min_ms": 134.0953,
+            "max_ms": 154.8922,
+            "raw_ms": [
+              134.0953,
+              141.6594,
+              154.8922,
+              147.5496,
+              137.4346,
+              148.976,
+              141.7572,
+              144.0731,
+              147.8305,
+              134.8633,
+              146.6608,
+              134.2785
+            ]
+          },
+          "roslyn": {
+            "n": 12,
+            "median_ms": 395.7389,
+            "p95_ms": 427.3637,
+            "min_ms": 387.459,
+            "max_ms": 427.3637,
+            "raw_ms": [
+              388.2863,
+              395.3681,
+              389.2152,
+              396.1098,
+              390.4534,
+              397.242,
+              397.7974,
+              394.2527,
+              408.1268,
+              408.6394,
+              427.3637,
+              387.459
+            ]
+          }
+        }
+      },
+      "editor_validation": {
+        "input_bytes": 16384,
+        "input_sha256": "602f9370b36e624c2ae5ed28250d7190833684db5d267d66b0fe0dfe4f0fa1c4",
+        "output_sha256": [
+          "6f3af85d0084da029d96cf21b40df8bf0262528f2515af5d8bc365c562bf56dc",
+          "9cc77ec1750458a696c0404ba69cc2fc5a3e2a55ae74d8ec4b84df38543787a3"
+        ]
+      },
+      "debug_warm": {
+        "order": [
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "bolt",
+            "roslyn"
+          ],
+          [
+            "roslyn",
+            "bolt"
+          ]
+        ],
+        "timings": {
+          "bolt": {
+            "n": 12,
+            "median_ms": 1.7279,
+            "p95_ms": 1.9156,
+            "min_ms": 1.4349,
+            "max_ms": 1.9156,
+            "raw_ms": [
+              1.7241,
+              1.4349,
+              1.7316,
+              1.8776,
+              1.8029,
+              1.5576,
+              1.8101,
+              1.9156,
+              1.7737,
+              1.6782,
+              1.716,
+              1.7134
+            ]
+          },
+          "roslyn": {
+            "n": 12,
+            "median_ms": 3.401,
+            "p95_ms": 10.4812,
+            "min_ms": 3.1093,
+            "max_ms": 10.4812,
+            "raw_ms": [
+              3.5397,
+              10.4812,
+              3.8126,
+              3.1919,
+              4.0708,
+              3.7171,
+              3.1941,
+              3.3673,
+              3.1965,
+              3.4347,
+              3.1836,
+              3.1093
+            ]
+          }
+        }
+      }
+    }
+  },
+  "empty_process": {
+    "order": [
+      [
+        "clang",
+        "msvc",
+        "bolt"
+      ],
+      [
+        "bolt",
+        "clang",
+        "msvc"
+      ],
+      [
+        "msvc",
+        "bolt",
+        "clang"
+      ],
+      [
+        "msvc",
+        "bolt",
+        "clang"
+      ],
+      [
+        "clang",
+        "msvc",
+        "bolt"
+      ],
+      [
+        "bolt",
+        "clang",
+        "msvc"
+      ],
+      [
+        "msvc",
+        "clang",
+        "bolt"
+      ],
+      [
+        "clang",
+        "bolt",
+        "msvc"
+      ],
+      [
+        "bolt",
+        "msvc",
+        "clang"
+      ],
+      [
+        "msvc",
+        "bolt",
+        "clang"
+      ],
+      [
+        "bolt",
+        "clang",
+        "msvc"
+      ],
+      [
+        "clang",
+        "msvc",
+        "bolt"
+      ]
+    ],
+    "timings": {
+      "bolt": {
+        "n": 12,
+        "median_ms": 12.9748,
+        "p95_ms": 14.9899,
+        "min_ms": 11.3901,
+        "max_ms": 14.9899,
+        "raw_ms": [
+          13.9637,
+          14.9899,
+          13.0314,
+          12.8252,
+          13.5387,
+          13.1889,
+          12.8881,
+          12.9183,
+          11.3901,
+          13.2826,
+          12.7506,
+          12.6129
+        ]
+      },
+      "msvc": {
+        "n": 12,
+        "median_ms": 13.9064,
+        "p95_ms": 20.4864,
+        "min_ms": 12.2115,
+        "max_ms": 20.4864,
+        "raw_ms": [
+          14.4086,
+          15.3328,
+          20.4864,
+          13.5953,
+          13.939,
+          14.203,
+          13.8738,
+          13.184,
+          12.2115,
+          14.3947,
+          12.5159,
+          13.6431
+        ]
+      },
+      "clang": {
+        "n": 12,
+        "median_ms": 13.9939,
+        "p95_ms": 14.842,
+        "min_ms": 12.2692,
+        "max_ms": 14.842,
+        "raw_ms": [
+          14.6251,
+          14.842,
+          13.1412,
+          14.141,
+          13.2914,
+          14.0333,
+          14.0995,
+          13.7085,
+          14.3258,
+          13.9545,
+          13.7452,
+          12.2692
+        ]
+      }
+    }
+  }
+}

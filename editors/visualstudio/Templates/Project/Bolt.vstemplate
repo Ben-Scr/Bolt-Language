@@ -1,0 +1,13 @@
+<VSTemplate Version="3.0.0" Type="Project" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005">
+  <TemplateData>
+    <Name>Bolt Console Application</Name><Description>A native Bolt program with Debug and Release configurations.</Description>
+    <Icon>bolt-file.png</Icon><ProjectType>VC</ProjectType><DefaultName>BoltApp</DefaultName>
+    <TemplateID>Bolt.ConsoleApplication</TemplateID>
+    <CreateNewFolder>true</CreateNewFolder><ProvideDefaultName>true</ProvideDefaultName>
+    <LanguageTag>Bolt</LanguageTag><PlatformTag>windows</PlatformTag><ProjectTypeTag>console</ProjectTypeTag>
+  </TemplateData>
+  <TemplateContent><Project File="Bolt.vcxproj" ReplaceParameters="true" TargetFileName="$projectname$.vcxproj">
+    <ProjectItem ReplaceParameters="true">bolt.proj</ProjectItem>
+    <ProjectItem OpenInEditor="true">src\Main.bolt</ProjectItem>
+  </Project></TemplateContent>
+</VSTemplate>

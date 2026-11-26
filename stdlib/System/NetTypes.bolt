@@ -1,0 +1,118 @@
+import System
+import Bolt.Runtime
+namespace System.Net;
+
+struct AddressBytes { public: ulong Low, High; }
+public sealed class IPAddress : IStringable {
+    AddressBytes bytes;
+    uint scope;
+    bool ipv6;
+public:
+    IPAddress() {}
+    IPAddress(string text) { IPAddress p=Parse(text); bytes=p.bytes; scope=p.scope; ipv6=p.ipv6; }
+    static int IPv6Family {
+        get {
+#ifdef Windows
+            return 23;
+#elif MacOS || IOS
+            return 30;
+#elif FreeBSD
+            return 28;
+#else
+            return 10;
+#endif
+        }
+    }
+    static IPAddress Parse(string text) {
+        SystemCalls.CheckText(text);
+        IPAddress result;
+        int percent=text.IndexOf('%');
+        if(percent>=0){
+            string suffix=text.Substring(percent+1);
+            if(suffix.Length==0)throw FormatException("Empty IPv6 scope.");
+            for(int i=0;i<suffix.Length;i++){
+                char c=suffix[i];
+                if(c<'0' || c>'9')throw FormatException("Invalid IPv6 scope.");
+                uint digit=(uint)c-48u;
+                if(result.scope>(uint.MaxValue-digit)/10u)throw FormatException("IPv6 scope is too large.");
+                result.scope=result.scope*10u+digit;
+            }
+            text=text.Substring(0,percent);
+        }
+        byte[] name=(text+"\0").ToUtf8();
+        if(percent<0 && Bolt.Runtime.NetApi.ParseAddress(2,&name[0],(byte*)&result.bytes)==1)return result;
+        if(Bolt.Runtime.NetApi.ParseAddress(IPv6Family,&name[0],(byte*)&result.bytes)!=1)
+            throw FormatException("Invalid IPv4 or IPv6 address.");
+        result.ipv6=true;
+        return result;
+    }
+    static bool TryParse(string text, IPAddress& result) {
+        try { result=Parse(text); return true; }
+        catch(FormatException& e){return false;}
+        catch(ArgumentException& e){return false;}
+    }
+    string ToString() {
+        byte[] buffer=new byte[46];
+        if(Bolt.Runtime.NetApi.FormatAddress(ipv6?IPv6Family:2,(byte*)&bytes,&buffer[0],46)==0ul)
+            throw SocketException("Cannot format IP address.");
+        string value=NativeString.FromUtf8(&buffer[0],SystemCalls.CLength(&buffer[0]));
+        return ipv6 && scope!=0u ? value+"%"+(string)scope : value;
+    }
+    bool IsIPv6 => ipv6;
+    static IPAddress Any => IPAddress();
+    static IPAddress Loopback => Parse("127.0.0.1");
+    static IPAddress IPv6Any => Parse("::");
+    static IPAddress IPv6Loopback => Parse("::1");
+    void Encode(byte* data) {
+        SystemCalls.Bytes(&data[ipv6?8:4],(byte*)&bytes,ipv6?16ul:4ul);
+        if(ipv6)*((uint*)&data[24])=scope;
+    }
+    static IPAddress Decode(byte* data, int length) {
+        if(data==null || length<2)throw SocketException("Truncated socket address.");
+#if MacOS || IOS || FreeBSD
+        int family=(int)data[1];
+#else
+        int family=(int)(*((ushort*)data));
+#endif
+        IPAddress result;
+        result.ipv6=family==IPv6Family;
+        if((family!=2 && !result.ipv6) || length<(result.ipv6?28:16))
+            throw SocketException("Unsupported socket address.");
+        SystemCalls.Bytes((byte*)&result.bytes,&data[result.ipv6?8:4],result.ipv6?16ul:4ul);
+        if(result.ipv6)result.scope=*((uint*)&data[24]);
+        return result;
+    }
+}
+public sealed class IPEndPoint : IStringable {
+    IPAddress address;
+    int port;
+public:
+    IPEndPoint() {}
+    IPEndPoint(IPAddress value,int number) {
+        if(number<0 || number>65535)throw ArgumentOutOfRangeException("Invalid port.");
+        address=value; port=number;
+    }
+    IPAddress Address => address;
+    int Port => port;
+    string ToString() {
+        string host=address.ToString();
+        return (address.IsIPv6 ? "["+host+"]" : host)+":"+(string)port;
+    }
+    byte[] Encode(bool ipv6) {
+        if(ipv6!=address.IsIPv6)throw ArgumentException("Socket/address family mismatch.");
+        byte[] data=new byte[ipv6?28:16];
+#if MacOS || IOS || FreeBSD
+        data[0]=(byte)data.Length;
+        data[1]=(byte)(ipv6?IPAddress.IPv6Family:2);
+#else
+        *((ushort*)&data[0])=(ushort)(ipv6?IPAddress.IPv6Family:2);
+#endif
+        data[2]=(byte)(port>>8);data[3]=(byte)(port&255);
+        address.Encode(&data[0]);
+        return data;
+    }
+    static IPEndPoint Decode(byte* data,int length) {
+        IPAddress host=IPAddress.Decode(data,length);
+        return IPEndPoint(host,(int)data[2]*256+(int)data[3]);
+    }
+}

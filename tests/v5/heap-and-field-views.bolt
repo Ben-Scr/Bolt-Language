@@ -1,0 +1,13 @@
+interface ICounter { int Get(); void Add(int n); }
+class Counter:ICounter,IStringable {public:int Value=1;int Get(){return Value;}void Add(int n){Value+=n;}string ToString(){return $"Counter({Value})";} }
+class Holder {public:IStringable Value=Counter();}
+static class Program{public:
+IStringable& Echo(IStringable& value){return value;}
+void Main(){
+ Counter* concrete=new Counter(); ICounter* counter=concrete; IStringable* text=concrete;
+ counter->Add(4);Print(counter->Get());Print(text->ToString());delete counter;
+ Counter local;Print(Echo(local).ToString());
+ Holder holder;IStringable& field=holder.Value; holder.Value=(IStringable)7;Print(field);
+ ICounter value=Counter(); ICounter* view=&value; view->Add(3);Print(value.Get());
+ ICounter copy=value;copy.Add(2);Print(copy.Get());Print(value.Get());
+}}

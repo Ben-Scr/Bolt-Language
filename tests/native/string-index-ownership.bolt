@@ -1,0 +1,72 @@
+import Bolt.Runtime
+
+class TextField {
+public:
+    string Value;
+    TextField(string value) { Value = value; }
+}
+
+static class Program {
+public:
+    int Replace(string& value) { value = "different"; return 2; }
+    string ChangeNeedle(string& value) { value = "nothing here"; return "begin"; }
+
+    void Main() {
+        string text = "";
+        for (int i = 0; i < 16; i++) text += "abcdefghijk😀";
+        bool ok = text.Length == 192;
+        for (int i = 47; i < 192; i += 12) ok = ok && text[i] == '😀';
+        string copy = text;
+        ulong byteCount = 0ul;
+        byte* raw = NativeString.Bytes(text, byteCount);
+        ok = ok && byteCount == 240ul;
+        raw[45] = (byte)90;
+        ok = ok && text[36] == 'Z' && copy[36] == 'a';
+        raw[45] = (byte)89;
+        ok = ok && text[36] == 'Y' && text.Length == 192;
+
+        string alias = "begin here";
+        ok = ok && alias[Replace(alias)] == 'g' && alias == "different";
+        alias = "begin here";
+        ok = ok && alias.Contains(ChangeNeedle(alias)) && alias == "nothing here";
+        Arena arena = Arena.Fixed(32768);
+        TextField* field = new(arena) TextField(copy);
+        for (int i = 47; i < 192; i += 12) ok = ok && field->Value[i] == '😀';
+        string survivor = field->Value;
+        arena.Dispose();
+        ok = ok && survivor.Length == 192 && survivor[191] == '😀';
+        string large = "abcdefghijk😀";
+        for (int i = 0; i < 13; i++) large += large;
+        ok = ok && large.Length == 98304 && large[98303] == '😀';
+        ok = ok && large[98302] == 'k' && large[98301] == 'j';
+        bool pastEnd = false;
+        try { char unused = large[98304]; } catch { pastEnd = true; }
+        ok = ok && pastEnd;
+
+        // A later invalid byte may not change the result of an earlier access.
+        raw[235] = (byte)255;
+        string malformed = NativeString.FromUtf8(raw, byteCount);
+        byte[] exposedBytes = text.ToUtf8();
+        bool rejected = false;
+        try { text = string.FromUtf8(exposedBytes); } catch { rejected = true; }
+        ok = ok && rejected;
+        byte[] wideBytes = new byte[4097];
+        string wide = string.FromUtf8(wideBytes);
+        wideBytes[4096] = 65;
+        wide = string.FromUtf8(wideBytes);
+        byte* wideRaw = NativeString.Bytes(wide, byteCount);
+        wideRaw[63] = 255;
+        wideBytes[63] = 255;
+        rejected = false;
+        try { wide = string.FromUtf8(wideBytes); } catch { rejected = true; }
+        ok = ok && rejected;
+        wideBytes[63] = 66;
+        wide = string.FromUtf8(wideBytes);
+        ok = ok && wide[63] == 'B' && wide[4096] == 'A';
+        ok = ok && malformed[47] == '😀' && malformed[59] == '😀';
+        bool invalid = false;
+        try { int unused = malformed.Length; } catch { invalid = true; }
+        ok = ok && invalid;
+        Print(ok);
+    }
+}

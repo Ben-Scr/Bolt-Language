@@ -1,0 +1,77 @@
+import System
+import System.Collections.Generic
+
+interface IKey { int Read(); }
+class Label : IStringable {
+public:
+    int Calls;
+    string ToString() { Calls++;return (string)Calls; }
+}
+struct Tracked : IKey {
+public:
+    static int EmptyDrops;
+    int Number=42;
+    int Read() { return Number; }
+    ~Tracked() { if(Number==0)EmptyDrops++; }
+}
+struct Key : IKey {
+public:
+    int Number;
+    Key(int n) { Number=n; }
+    int Read() { return Number; }
+    static bool operator ==(Key a,Key b) { a.Number%=10;return a.Number==b.Number%10; }
+    [ReadOnly] ulong GetHashCode() {
+        if(Number<0)throw InvalidOperationException("invalid key");
+        return (ulong)(Number%10);
+    }
+}
+
+static class Program {
+private:
+    int Twice(int n) { return n*2; }
+    IKey& Borrow(Key& key) { return key; }
+    Func<int,int> Counter(int start) {
+        return n=>start+=n;
+    }
+public:
+    int Main() {
+        Func<int> answer=()=>42;
+        Func<int,int> twice=Twice;
+        if(answer()!=42 || twice.Invoke(21)!=42)return 1;
+
+        Func<int,int> counter=Counter(30);
+        List<Func<int,int>> callbacks;
+        callbacks.Add(counter);
+        if(callbacks[0].Invoke(5)!=35 || counter(7)!=42)return 2;
+        int total=0;
+        Action<int> add=n=>total+=n;
+        Action<int> copy=add;
+        add(19);copy.Invoke(23);
+        if(total!=42)return 3;
+
+        HashSet<IKey> keys;
+        IKey first=Key(12),other=Key(22);
+        if(!keys.Add(first) || keys.Add(other) || !keys.Contains(other))return 4;
+        Dictionary<IKey,IKey> map;
+        map.Add(first,Key(42));
+        if(map[other].Read()!=42)return 5;
+        Key key=Key(1);
+        IKey& alias=Borrow(key);
+        IKey* pointer=&key;
+        IKey snapshot=alias;
+        key.Number=42;
+        if(alias.Read()!=42 || pointer->Read()!=42 || snapshot.Read()!=1)return 6;
+        if(pointer!=&alias || pointer!=&key || (Key*)pointer!=&key)return 7;
+
+        Label label;
+        IStringable text=(IStringable)label;
+        if(text.ToString()!="1" || (string)text!="2" || text.ToString()!="2" || label.Calls!=0)return 8;
+        try { keys.Add(Key(-1));return 9; }
+        catch(InvalidOperationException& error) { if(keys.Count!=1 || first.Read()!=12)return 10; }
+        Tracked tracked;
+        int drops=Tracked.EmptyDrops;
+        IKey boxed=tracked;
+        if(boxed.Read()!=42 || Tracked.EmptyDrops!=drops)return 11;
+        return 0;
+    }
+}

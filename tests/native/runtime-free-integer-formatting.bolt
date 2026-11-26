@@ -1,0 +1,27 @@
+import System
+
+static class Program {
+private:
+    bool Matches<T>(T value, string expected) : Integer<T> {
+        return value.ToString() == expected && Converter.ToString(value) == expected;
+    }
+    bool BoxedMatches(IStringable value, string expected) {
+        return value.ToString() == expected && Converter.ToString(value) == expected;
+    }
+public:
+    int Main() {
+        if (!Matches(byte.MinValue, "0") || !Matches(byte.MaxValue, "255")) return 1;
+        if (!Matches(short.MinValue, "-32768") || !Matches(short.MaxValue, "32767")) return 2;
+        if (!Matches(ushort.MinValue, "0") || !Matches(ushort.MaxValue, "65535")) return 3;
+        if (!Matches(int.MinValue, "-2147483648") || !Matches(int.MaxValue, "2147483647")) return 4;
+        if (!Matches(uint.MinValue, "0") || !Matches(uint.MaxValue, "4294967295")) return 5;
+        if (!Matches(long.MinValue, "-9223372036854775808") || !Matches(long.MaxValue, "9223372036854775807")) return 6;
+        if (!Matches(ulong.MinValue, "0") || !Matches(ulong.MaxValue, "18446744073709551615")) return 7;
+        if (!Matches(0, "0") || !Matches(-1, "-1") || !Matches(10001, "10001")) return 8;
+        if (!BoxedMatches(long.MinValue, "-9223372036854775808") || !BoxedMatches(ulong.MaxValue, "18446744073709551615")) return 9;
+        short number = -100;
+        short* pointer = &number;
+        if (pointer->ToString() != "-100" || Converter.ToString(number++) != "-100" || number != -99) return 10;
+        return 0;
+    }
+}

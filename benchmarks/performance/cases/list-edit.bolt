@@ -1,0 +1,21 @@
+import System.Collections.Generic
+static class Program {
+public:
+    void Main() {
+        List<int> items;
+        items.Reserve(32769);
+        for (int i = 0; i < 32768; i++) items.Add(i);
+        ulong removed = 0ul;
+        for (int step = 0; step < 12000; step++) {
+            int insertAt = (step * 117 + 257) & 32767;
+            int removeAt = (step * 251 + 11) & 32767;
+            items.Insert(insertAt, step);
+            removed += (ulong)items[removeAt];
+            items.RemoveAt(removeAt);
+        }
+        ulong final = 0ul;
+        for (int i = 0; i < items.Count; i++) final += (ulong)(i + 1) * (ulong)items[i];
+        Print(removed);
+        Print(final);
+    }
+}

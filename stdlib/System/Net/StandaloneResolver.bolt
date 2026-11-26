@@ -1,0 +1,48 @@
+import System
+import System.Net
+import System.Collections.Generic
+import Bolt.Runtime
+import Bolt.Runtime.NetApi
+namespace Bolt.Runtime.Net;
+
+static class Network {
+public:
+    void Start() {
+#ifdef Windows
+        // One successful WSAStartup per owned socket or resolver scope.
+        ulong[] data=new ulong[64];
+        int error=Bolt.Runtime.NetApi.WSAStartup(514,&data[0]);
+        if(error!=0)throw SocketException("WSAStartup failed: "+(string)error);
+#endif
+    }
+    void Finish() {
+#ifdef Windows
+        Bolt.Runtime.NetApi.WSACleanup();
+#endif
+    }
+}
+public static class Resolver {
+public:
+    IPAddress[] Resolve(string host) {
+        SystemCalls.CheckText(host);
+        if(host=="")throw ArgumentException("Hostname is empty.");
+        byte[] name=(host+"\0").ToUtf8();
+        AddressInfo hints; hints.SocketType=1;
+        AddressInfo* first=null;
+        Network.Start();
+        try {
+            int error=Bolt.Runtime.NetApi.Lookup(&name[0],null,&hints,&first);
+            if(error!=0)throw SocketException("getaddrinfo failed: "+(string)error);
+            List<IPAddress> result;
+            for(AddressInfo* p=first;p!=null;p=p->Next){
+                if(p->Family!=2 && p->Family!=IPAddress.IPv6Family)continue;
+                IPAddress address=IPAddress.Decode(p->Address,(int)p->Length);
+                if(!result.Contains(address))result.Add(address);
+            }
+            return result.ToArray();
+        } finally {
+            if(first!=null)Bolt.Runtime.NetApi.FreeAddresses(first);
+            Network.Finish();
+        }
+    }
+}

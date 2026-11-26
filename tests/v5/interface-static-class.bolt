@@ -1,0 +1,5 @@
+
+interface I{} static class C:I{}
+static class Program {public: void Main(){
+
+}}

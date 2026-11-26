@@ -1,0 +1,75 @@
+import System
+import System.IO
+import System.Text.Json
+import System.Text.Json.Internal
+import System.Collections.Generic
+import Bolt.Runtime
+
+[Reflect] public class Item
+{
+public:
+    [JsonName("name")] string Name;
+    ulong Id;
+    int[] Values;
+    int Score { get; set; }
+    int Twice => Score * 2;
+    [JsonIgnore] string Secret = "hidden";
+}
+public static class Program
+{
+private:
+    int passed = 0;
+    void Check(bool yes, string name) { if (!yes) throw Exception("Check failed: " + name); passed++; }
+public:
+    void Main()
+    {
+        Item item; item.Name = "quotes \" slash \\ newline\nÄ😀"; item.Id = ulong.MaxValue;
+        item.Values = [int.MinValue, 0, int.MaxValue]; item.Score = 21;
+        string text = Json.Serialize<Item>(item); Item result = Json.Deserialize<Item>(text);
+        Check(result.Name == item.Name && result.Id == ulong.MaxValue, "reflected fields/ulong");
+        Check(result.Values.Length == 3 && result.Values[0] == int.MinValue, "arrays");
+        Check(result.Score == 21 && result.Twice == 42, "properties");
+        Check(!text.Contains("Secret") && result.Secret == "hidden", "JsonIgnore");
+        byte[] bytes = Json.SerializeBytes<Item>(item);
+        Check(Json.Deserialize<Item>(bytes).Name == item.Name, "UTF-8 API");
+        byte[] binary = Json.SerializeBinary<Item>(item); result = Json.DeserializeBinary<Item>(binary);
+        Check(binary[0] == 66 && binary[1] == 74 && binary[2] == 83 && binary[3] == 1, "BJS1 version unchanged");
+        Check(result.Id == item.Id && result.Values[2] == int.MaxValue, "BJS1 typed roundtrip");
+        Check(Json.Deserialize<long>("-9223372036854775808") == long.MinValue, "signed minimum");
+        Check(Json.Deserialize<ulong>("18446744073709551615") == ulong.MaxValue, "unsigned maximum");
+        Check(Json.Deserialize<string>("\"\\ud83d\\ude00\"") == "😀", "surrogate pair");
+        Check(Json.Deserialize<double>("1.25e2") == 125.0, "exponent");
+        string[] invalid = ["", " ", "01", "+1", "1.", "1e", "[1,]", "{\"a\":1,}", "{\"a\":1,\"a\":2}", "true false", "\"\\ud800\"", "\"\\udc00\"", "\"\\x\"", "18446744073709551616", "-9223372036854775809", "1e9999"];
+        for (string value : invalid) Check(!Json.IsValid(value), "invalid grammar");
+        byte[] badUtf8 = [(byte)34, (byte)192, (byte)175, (byte)34]; bool failed = false;
+        try { Json.Deserialize<string>(badUtf8); } catch (JsonException& error) { failed = true; }
+        Check(failed, "malformed UTF-8 exception type");
+        byte[] badBinary = [(byte)66,(byte)74,(byte)83,(byte)1,(byte)255]; failed = false;
+        try { Json.DeserializeBinary<int>(badBinary); } catch (JsonException& error) { failed = true; }
+        Check(failed, "unknown binary tag");
+        failed = false;
+        try { Json.Deserialize<int>("1.5"); } catch (JsonException& error) { failed = true; }
+        Check(failed, "fractional integer rejected");
+        Dictionary<string, int> map; map.Add("b", 2); map.Add("a", 1);
+        Check(Json.Serialize<Dictionary<string,int>>(map) == "{\"a\":1,\"b\":2}", "sorted map");
+        Dictionary<int,string> pairs; pairs.Add(1, "one");
+        Check(Json.Deserialize<Dictionary<int,string>>(Json.Serialize<Dictionary<int,string>>(pairs))[1] == "one", "non-string map");
+        DateTime stamp = DateTime(2026, 9, 29); TimeSpan span = TimeSpan.FromMilliseconds(123.5);
+        Check(Json.Deserialize<DateTime>(Json.Serialize<DateTime>(stamp)).Ticks == stamp.Ticks, "source DateTime contract");
+        Check(Json.Deserialize<TimeSpan>(Json.Serialize<TimeSpan>(span)).Ticks == span.Ticks, "source TimeSpan contract");
+        string deep = "0";
+        for (int i = 0; i < 97; i++) deep = "[" + deep + "]";
+        Check(!Json.IsValid(deep), "depth bound");
+        // The driver compares real generated BJS1 bytes with a separate Python codec.
+        string[] corpus = File.ReadAllLines("corpus.jsonl");
+        for (string input : corpus)
+        {
+            ValueTree tree = JsonText.Parse(input.ToUtf8()); byte[] encoded = JsonBinary.Encode(tree);
+            ValueTree decoded = JsonBinary.Parse(encoded);
+            Print("TEXT:" + string.FromUtf8(JsonText.Encode(tree)));
+            Print("BYTES:" + Json.Serialize<byte[]>(encoded));
+            Print("BACK:" + string.FromUtf8(JsonText.Encode(decoded)));
+        }
+        Print("Json11 checks: " + passed);
+    }
+}

@@ -1,0 +1,243 @@
+{
+  "host": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "pairs": 20,
+  "stopwatch_tick_ns": 100,
+  "results": [
+    {
+      "bytes": 8,
+      "copies": 524288,
+      "before_median_ns_per_copy": 136.33155822753906,
+      "after_median_ns_per_copy": 17.81930923461914,
+      "before_over_after": 7.65077683048879
+    },
+    {
+      "bytes": 256,
+      "copies": 524288,
+      "before_median_ns_per_copy": 150.28142929077148,
+      "after_median_ns_per_copy": 19.131088256835938,
+      "before_over_after": 7.855351837450899
+    },
+    {
+      "bytes": 4096,
+      "copies": 131072,
+      "before_median_ns_per_copy": 192.72804260253906,
+      "after_median_ns_per_copy": 81.61506652832031,
+      "before_over_after": 2.3614272560283056
+    }
+  ],
+  "raw_ticks_by_run": {
+    "before": [
+      [
+        855360,
+        807197,
+        184148
+      ],
+      [
+        914281,
+        882572,
+        313724
+      ],
+      [
+        959396,
+        908873,
+        402899
+      ],
+      [
+        911002,
+        869964,
+        284152
+      ],
+      [
+        881943,
+        913183,
+        320369
+      ],
+      [
+        713149,
+        650228,
+        170509
+      ],
+      [
+        521689,
+        516651,
+        283680
+      ],
+      [
+        859913,
+        802203,
+        183267
+      ],
+      [
+        757452,
+        832809,
+        303377
+      ],
+      [
+        716391,
+        634343,
+        170763
+      ],
+      [
+        822909,
+        773612,
+        275657
+      ],
+      [
+        584778,
+        658481,
+        174214
+      ],
+      [
+        616377,
+        857639,
+        329060
+      ],
+      [
+        634418,
+        552059,
+        324469
+      ],
+      [
+        574011,
+        702808,
+        172848
+      ],
+      [
+        538830,
+        623798,
+        171408
+      ],
+      [
+        630903,
+        577810,
+        296120
+      ],
+      [
+        707976,
+        846197,
+        149485
+      ],
+      [
+        688226,
+        633444,
+        165093
+      ],
+      [
+        932561,
+        912629,
+        229568
+      ]
+    ],
+    "after": [
+      [
+        82365,
+        90150,
+        222180
+      ],
+      [
+        102732,
+        106020,
+        110890
+      ],
+      [
+        92664,
+        101818,
+        102669
+      ],
+      [
+        109638,
+        105503,
+        373992
+      ],
+      [
+        124412,
+        272384,
+        119878
+      ],
+      [
+        87485,
+        102550,
+        149015
+      ],
+      [
+        163388,
+        88532,
+        122239
+      ],
+      [
+        128394,
+        92517,
+        141524
+      ],
+      [
+        88659,
+        99571,
+        103262
+      ],
+      [
+        61568,
+        52839,
+        115191
+      ],
+      [
+        94185,
+        101033,
+        103091
+      ],
+      [
+        92389,
+        168539,
+        98512
+      ],
+      [
+        74955,
+        184413,
+        118976
+      ],
+      [
+        96796,
+        87260,
+        96340
+      ],
+      [
+        205303,
+        296734,
+        58725
+      ],
+      [
+        85607,
+        93376,
+        96097
+      ],
+      [
+        85037,
+        91103,
+        96901
+      ],
+      [
+        70890,
+        121132,
+        99832
+      ],
+      [
+        106149,
+        59809,
+        71223
+      ],
+      [
+        94217,
+        99494,
+        110687
+      ]
+    ]
+  },
+  "workload": "MemoryCopy.bolt; hot source and destination; checked store, Memory.Copy, checked read, checksum and loop",
+  "build": {
+    "bolt_before": "Bolt(6).zip + build repairs, runtime ABI 0x000F0005",
+    "bolt_after": "development, runtime ABI 0x000F1001",
+    "bolt_programs": "compile --release --require-native, LLVM 19.1.7",
+    "runtime_and_driver": "g++ 14.2.0 -O3 -DNDEBUG -fPIC",
+    "cpu": "AMD EPYC 9V74 80-Core Processor; taskset -c 4, shared Linux x86-64 host"
+  },
+  "method": "One discarded process per build, 20 alternating pairs, in-process steady clock; 100 ns/tick; checksum verified on each sample. Output omitted from timed region. Other host jobs can affect results."
+}

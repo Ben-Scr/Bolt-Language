@@ -1,0 +1,116 @@
+import System
+import Bolt.Runtime
+namespace System.Threading;
+
+public sealed class Mutex {
+private:
+    ThreadHandle handle;
+public:
+    Mutex() { handle=ThreadHandles.Make(ThreadResourceKind.Mutex); }
+    [ReadOnly] bool IsOwnedByCurrentThread => AtomicOps.Add(handle.Pointer->Word,0ul)==ThreadKernel.Identity();
+    void Lock() {
+        if(IsOwnedByCurrentThread)throw InvalidOperationException("Mutex is non-recursive.");
+        ThreadKernel.Lock(handle.Pointer);
+        AtomicOps.Cas(handle.Pointer->Word,0ul,ThreadKernel.Identity());
+    }
+    bool TryLock(int milliseconds=0) {
+        ThreadHandles.Timeout(milliseconds);
+        if(IsOwnedByCurrentThread)throw InvalidOperationException("Mutex is non-recursive.");
+        if(milliseconds==-1){Lock();return true;}
+        long deadline=Clock.MonotonicTicks()+(long)milliseconds*10000l;
+        while(true){
+#ifdef Windows
+            bool acquired=Bolt.Runtime.Threading.MutexTry((void*)&handle.Pointer->Gate)!=0;
+#else
+            int status=Bolt.Runtime.Threading.MutexTry((void*)&handle.Pointer->Gate);
+            bool acquired=status==0;
+#ifdef Web
+            int busy=10;
+#else
+            int busy=16;
+#endif
+            if(!acquired && status!=busy)throw InvalidOperationException("Mutex try-lock failed.");
+#endif
+            if(acquired){AtomicOps.Cas(handle.Pointer->Word,0ul,ThreadKernel.Identity());return true;}
+            if(milliseconds==0 || Clock.MonotonicTicks()>=deadline)return false;
+            Thread.Sleep(1);
+        }
+        return false;
+    }
+    void Unlock() {
+        ulong id=ThreadKernel.Identity();
+        if(AtomicOps.Cas(handle.Pointer->Word,id,0ul)!=id)throw InvalidOperationException("Only the owning thread can unlock a Mutex.");
+        ThreadKernel.Unlock(handle.Pointer);
+    }
+    [ReadOnly] ThreadResource* Storage() {return handle.Pointer;}
+}
+public sealed class LockGuard {
+private:
+    ThreadHandle lease;
+public:
+    LockGuard(Mutex mutex) {
+        lease=ThreadHandles.Make(ThreadResourceKind.Guard);
+        mutex.Lock();lease.Pointer->Target=mutex.Storage();ThreadKernel.Retain(lease.Pointer->Target);
+        lease.Pointer->Word=ThreadKernel.Identity();
+    }
+    void Release() {
+        if(!IsHeld)return;
+        ulong id=ThreadKernel.Identity();
+        if(AtomicOps.Cas(lease.Pointer->Word,id,0ul)!=id)throw InvalidOperationException("A LockGuard cannot move to another thread.");
+        AtomicOps.Cas(lease.Pointer->Target->Word,id,0ul);ThreadKernel.Unlock(lease.Pointer->Target);
+    }
+    [ReadOnly] bool IsHeld => lease.Pointer!=null && AtomicOps.Add(lease.Pointer->Word,0ul)!=0ul;
+}
+public sealed class ConditionVariable {
+private:
+    ThreadHandle handle;
+public:
+    ConditionVariable() {handle=ThreadHandles.Make(ThreadResourceKind.Condition);}
+    bool Wait(Mutex& mutex,int milliseconds=-1) {
+        ThreadHandles.Timeout(milliseconds);
+        if(!mutex.IsOwnedByCurrentThread)throw InvalidOperationException("Condition wait requires mutex ownership.");
+        ThreadResource* gate=mutex.Storage();ulong id=ThreadKernel.Identity();
+        AtomicOps.Cas(gate->Word,id,0ul);
+        int status=ThreadKernel.Wait(handle.Pointer,gate,milliseconds);
+        AtomicOps.Cas(gate->Word,0ul,id);
+        if(status<0)throw InvalidOperationException("Condition wait failed.");
+        return status!=0;
+    }
+    void NotifyOne(){Bolt.Runtime.Threading.NotifyOne((void*)&handle.Pointer->Changed);}
+    void NotifyAll(){ThreadKernel.Wake(handle.Pointer);}
+}
+public sealed class Semaphore {
+private:
+    Mutex gate;
+    ConditionVariable changed;
+    ThreadHandle permits;
+    int limit;
+public:
+    Semaphore(int initial=0,int maximum=2147483647) {
+        if(initial<0 || maximum<=0 || initial>maximum)throw ArgumentOutOfRangeException("Invalid semaphore bounds.");
+        permits=ThreadHandles.Make(ThreadResourceKind.Word);permits.Pointer->Word=(ulong)initial;limit=maximum;
+    }
+    bool Wait(int milliseconds=-1) {
+        ThreadHandles.Timeout(milliseconds);
+        long deadline=milliseconds<0 ? 0l : Clock.MonotonicTicks()+(long)milliseconds*10000l;
+        gate.Lock();
+        try{
+            while(permits.Pointer->Word==0ul){
+                int remaining=ThreadHandles.Remaining(milliseconds,deadline);
+                if(remaining==0)return false;
+                changed.Wait(gate,remaining);
+            }
+            permits.Pointer->Word--;return true;
+        }finally{gate.Unlock();}
+    }
+    int Release(int count=1) {
+        if(count<=0)throw ArgumentOutOfRangeException("Semaphore release count must be positive.");
+        gate.Lock();
+        try{
+            int previous=(int)permits.Pointer->Word;
+            if(count>limit-previous)throw InvalidOperationException("Semaphore maximum exceeded.");
+            permits.Pointer->Word+=(ulong)count;changed.NotifyAll();return previous;
+        }finally{gate.Unlock();}
+    }
+    [ReadOnly] int CurrentCount {get{ThreadKernel.Lock(gate.Storage());try{return (int)permits.Pointer->Word;}finally{ThreadKernel.Unlock(gate.Storage());}}}
+}

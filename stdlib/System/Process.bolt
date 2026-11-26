@@ -1,0 +1,46 @@
+import Bolt.Runtime
+import System.IO
+namespace System;
+
+// Copies share one child handle. The last owner's cleanup kills/reaps a live child.
+// Explicitly use Wait/Capture before releasing it when normal completion is desired.
+public sealed class Process
+{
+private:
+    ProcessHandle handle;
+public:
+    Process() {}
+    static Process Start(string program, string[] arguments, string workingDirectory = "", bool redirect = false, string[] environment = [], bool inheritEnvironment = true)
+    {
+        Process result;
+        result.handle = ProcessHandle.Start(program, arguments, workingDirectory, redirect, environment, inheritEnvironment);
+        return result;
+    }
+    static void Terminate(int code = 0) { ProcessExit.Terminate(code); }
+    bool Wait(int milliseconds = -1) { return handle.Wait(milliseconds); }
+    void Kill() { handle.Kill(); }
+    void Close() { handle.Close(); }
+    bool IsRunning => handle.IsRunning;
+    int ExitCode => handle.ExitCode;
+    int TerminationSignal => handle.TerminationSignal;
+    long Id => handle.Id;
+    Pipe StandardInput => Pipe(handle.Input);
+    Pipe StandardOutput => Pipe(handle.Output);
+    Pipe StandardError => Pipe(handle.Error);
+    ProcessOutput Capture(int milliseconds = 30000, int maximumBytes = 16777216)
+    {
+        CapturedProcess data = handle.Capture(milliseconds, maximumBytes);
+        return ProcessOutput(data.Output, data.Error, data.ExitCode, data.TimedOut);
+    }
+}
+public sealed class ProcessOutput
+{
+public:
+    byte[] OutputBytes, ErrorBytes;
+    int ExitCode;
+    bool TimedOut;
+    ProcessOutput(byte[] output, byte[] error, int code, bool timedOut)
+    { OutputBytes = output; ErrorBytes = error; ExitCode = code; TimedOut = timedOut; }
+    string StandardOutput => string.FromUtf8(OutputBytes);
+    string StandardError => string.FromUtf8(ErrorBytes);
+}

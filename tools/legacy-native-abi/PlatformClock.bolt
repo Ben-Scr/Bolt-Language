@@ -1,0 +1,7 @@
+namespace Bolt.Runtime;
+[Native("bolt::platform::Clock")]
+public static class Clock
+{
+public:
+    long MonotonicTicks();
+}

@@ -1,0 +1,45 @@
+import Bolt.Runtime
+import Type
+namespace System.Threading;
+
+// A shared sequentially-consistent atomic cell, restricted to primitive integers.
+// Copying an Atomic shares the cell. Add is a checked CAS loop, not volatile.
+public sealed class Atomic<T>
+{
+private:
+    AtomicWord word;
+    static ulong Encode(T value) : Integer<T>
+    {
+        if (Type.IsUnsigned<T>()) return (ulong)value;
+        return Reinterpret<ulong>((long)value);
+    }
+    static T Decode(ulong value) : Integer<T>
+    {
+        if (Type.IsUnsigned<T>()) return (T)value;
+        return (T)Reinterpret<long>(value);
+    }
+public:
+    Atomic() { word.Store(Encode((T)0)); }
+    Atomic(T value) { word.Store(Encode(value)); }
+    T Load() { return Decode(word.Load()); }
+    void Store(T value) { word.Store(Encode(value)); }
+    T Exchange(T value) { return Decode(word.Exchange(Encode(value))); }
+    bool CompareExchange(T& expected, T desired)
+    {
+        ulong bits = Encode(expected);
+        bool success = word.CompareExchange(bits, Encode(desired));
+        expected = Decode(bits);
+        return success;
+    }
+    T Add(T amount)
+    {
+        T observed = Load();
+        while (true)
+        {
+            T next = observed + amount;
+            if (CompareExchange(observed, next)) return next;
+        }
+        return observed;
+    }
+    bool IsLockFree => word.IsLockFree;
+}

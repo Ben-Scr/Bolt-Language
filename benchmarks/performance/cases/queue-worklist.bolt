@@ -1,0 +1,18 @@
+import System.Collections.Generic
+
+static class Program {
+public:
+    void Main() {
+        Queue<uint> pending(4096);
+        for (int i = 0; i < 4096; i++) pending.Enqueue((uint)(i * 7));
+        ulong sum = 0ul;
+        for (int turn = 0; turn < 8000000; turn++) {
+            uint value = pending.Dequeue();
+            uint next = ((value << 7) ^ (value >> 13) ^ (uint)(turn * 17)) & 65535u;
+            pending.Enqueue(next);
+            sum += (ulong)value;
+        }
+        sum += (ulong)pending.Peek() + (ulong)pending.Count;
+        Print(sum);
+    }
+}

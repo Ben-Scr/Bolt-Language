@@ -1,0 +1,36 @@
+public class Counter {
+public:
+    int X = 1, Y = 2;
+    int Value { get; private set; } = 5;
+    int ReadOnly { get; }
+    int Sum => X + Y;
+    static int Calls { get; set; }
+    int Computed { get { Calls += 1; return X; } set { X = value; } }
+    int Positive { get => X; set => X = value; }
+    Counter() { ReadOnly = 9; }
+    void Change(int n) { Value = n; }
+}
+public class Buffer<T> {
+private:
+    T[] data = new T[3];
+public:
+    int Length { get { return data.Length; } }
+    T this[int i] { get { return data[i]; } set { data[i] = value; } }
+}
+public static class Program {
+public:
+    static int Order = 0;
+    static int RHS() { Order = Order * 10 + 2; return 4; }
+    static void Main() {
+        int a = 1, b = a + 2, c;
+        Print(a); Print(b); Print(c);
+        for(int i=0, j=2; i<2; i++, j++) Print(i+j);
+        Counter counter;
+        Print(counter.Value); counter.Change(7); Print(counter.Value); Print(counter.ReadOnly);
+        Print(counter.Sum); Print(counter.Computed++); Print(++counter.Computed);
+        counter.Computed += 5; Print(counter.Computed); Print(Counter.Calls);
+        counter.Positive = 12; Print(counter.Positive);
+        Buffer<int> numbers; numbers[0] = 4; numbers[1] = 2; numbers[0] += numbers[1];
+        Print(numbers[0]++); Print(numbers[0]); Print(numbers.Length);
+    }
+}

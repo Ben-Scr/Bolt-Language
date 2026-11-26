@@ -1,0 +1,109 @@
+struct Pair {
+public:
+    uint X = 11u;
+    uint Y;
+}
+struct Triple {
+public:
+    Pair First;
+    Pair Second;
+    uint Last;
+}
+struct Owned {
+public:
+    string Label;
+    Pair Position;
+}
+struct FiveWords {
+public:
+    ulong A, B, C, D, E;
+    FiveWords(ulong last = 0ul) { A = 13ul; E = last; }
+}
+struct EightWords {
+public:
+    FiveWords Prefix;
+    ulong F, G, H;
+}
+struct Page { public: EightWords A, B, C, D, E, F, G, H; }
+struct TwoPages { public: Page First, Last; }
+struct NineWords { public: EightWords Prefix; ulong Tail; }
+struct WideOwned { public: FiveWords Prefix; string Label; }
+struct WidePadded { public: byte Tag; FiveWords Value; }
+struct PaddedKey { public: byte Tag; uint Id; byte Last; }
+struct PaddedFrame { public: byte Head; PaddedKey Key; ulong Count; byte Tail; }
+static class Program {
+public:
+    Pair Shift(Pair p) {
+        p.Y = p.X;
+        p.X = 40u;
+        return p;
+    }
+    EightWords Update(EightWords value, ulong first) {
+        value.Prefix.A = first;
+        value.H = value.Prefix.E ^ first;
+        return value;
+    }
+    void AssignFrame(PaddedFrame& to, const PaddedFrame& from) { to = from; }
+    PaddedFrame CountOneMore(PaddedFrame frame) { frame.Count += 1ul; return frame; }
+    bool PaddedSnapshots() {
+        PaddedFrame saved;
+        saved.Head = (byte)11; saved.Key.Tag = (byte)12; saved.Key.Id = 123456u;
+        saved.Key.Last = (byte)13; saved.Count = 76ul; saved.Tail = (byte)14;
+        PaddedFrame[] frames = new PaddedFrame[2];
+        AssignFrame(frames[0],saved);
+        AssignFrame(frames[0],frames[0]);
+        frames[1] = CountOneMore(frames[0]);
+        saved.Key.Id = 0u; frames[0].Tail = (byte)1;
+        PaddedFrame copy = frames[1];
+        return copy.Head == (byte)11 && copy.Key.Tag == (byte)12 && copy.Key.Id == 123456u
+            && copy.Key.Last == (byte)13 && copy.Count == 77ul && copy.Tail == (byte)14
+            && frames[0].Count == 76ul;
+    }
+    bool WideSnapshots() {
+        FiveWords initial = FiveWords(91ul);
+        if (initial.A != 13ul || initial.B != 0ul || initial.C != 0ul || initial.D != 0ul) return false;
+        EightWords wide;
+        wide.Prefix = initial; wide.F = 22ul; wide.G = 33ul;
+        EightWords[] array = new EightWords[2];
+        array[0] = wide;
+        array[1] = Update(array[0], 7ul);
+        array[0] = array[0];
+        if (array[0].Prefix.A != 13ul || array[0].H != 0ul || array[1].H != (91ul ^ 7ul)) return false;
+        if (array[1].F != 22ul || array[1].G != 33ul || wide.Prefix.A != 13ul) return false;
+        NineWords outer; outer.Prefix = array[1]; outer.Tail = 81ul;
+        NineWords larger = outer; outer.Prefix.Prefix.E = 1ul;
+        if (larger.Prefix.Prefix.E != 91ul || larger.Tail != 81ul) return false;
+        TwoPages large; large.First.A.Prefix.A = 51ul; large.Last.H.H = 123ul;
+        TwoPages[] pages = new TwoPages[2];
+        pages[0] = large; pages[1] = pages[0]; pages[0].Last.H.H = 8ul;
+        if (pages[1].First.A.Prefix.A != 51ul || pages[1].Last.H.H != 123ul ||
+            large.Last.H.H != 123ul) return false;
+        WidePadded padded; padded.Tag = (byte)3; padded.Value = initial;
+        WidePadded paddedCopy = padded; padded.Value.A = 0ul;
+        if (paddedCopy.Tag != (byte)3 || paddedCopy.Value.A != 13ul) return false;
+        WideOwned item; item.Prefix = initial; item.Label = "saved";
+        WideOwned ownedCopy = item; item.Label = "changed"; item.Prefix.E = 0ul;
+        return ownedCopy.Label == "saved" && ownedCopy.Prefix.E == 91ul;
+    }
+    int Main() {
+        if (!WideSnapshots()) return 4;
+        if (!PaddedSnapshots()) return 5;
+        for (int i = 0; i < 3; i++) {
+            Triple a;
+            if (a.First.X != 11u || a.First.Y != 0u || a.Last != 0u) return 1;
+            a.First.Y = 20u;
+            a.Last = 100u;
+            Triple b = a;
+            a.First = Shift(a.First);
+            b.Second.X = 9u;
+            a = a;
+            if (a.First.Y != 11u || b.First.Y != 20u || a.Second.X != 11u || b.Last != 100u) return 2;
+            Owned first;
+            first.Label = "one";
+            Owned second = first;
+            first.Label = "two";
+            if (second.Label != "one" || second.Position.X != 11u) return 3;
+        }
+        return 0;
+    }
+}

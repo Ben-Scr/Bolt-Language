@@ -1,0 +1,5 @@
+
+T1 First<T1,T2>(T1 a,T2 b): T1: Number, T2: Equatable {return a;} class Pair<T1,T2> {public:T1 A; T2 B; Pair(T1 a,T2 b){A=a;B=b;}}
+static class Program { public: void Main() {
+Console.WriteLine(First<int,string>(9,"a")); Pair<int,string> p=Pair<int,string>(4,"four"); Console.WriteLine(p.A); Console.WriteLine(p.B);
+} }

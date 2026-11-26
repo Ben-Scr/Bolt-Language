@@ -1,0 +1,44 @@
+import System
+
+class Fields {
+public:
+    int[] Numbers;
+    bool[] Flags;
+    Fields() { Numbers = [1,2,3]; Flags = [false,true,false]; }
+}
+
+static class Program {
+public:
+    void Main() {
+        Arena arena = Arena.Fixed(65536);
+        Fields* fields = new(arena) Fields();
+        int visits = 0;
+        bool caught = false;
+        try {
+            for (int number : fields->Numbers) {
+                visits += number;
+                fields->Numbers = [41,42,43];
+            }
+        } catch (InvalidOperationException error) { caught = true; }
+        Print(caught && visits == 1 && fields->Numbers[1] == 42);
+
+        visits = 0;
+        caught = false;
+        try {
+            for (bool value : fields->Flags) {
+                visits++;
+                fields->Flags = [true,true,false];
+            }
+        } catch (InvalidOperationException error) { caught = true; }
+        Print(caught && visits == 1 && fields->Flags[0]);
+
+        int sum = 0;
+        int index = 0;
+        for (int number : fields->Numbers) {
+            sum += number;
+            fields->Numbers[index] = number + 1;
+            index++;
+        }
+        Print(sum == 126 && fields->Numbers[1] == 43);
+    }
+}

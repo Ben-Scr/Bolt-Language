@@ -1,0 +1,31 @@
+#if !(BoltStandaloneCore && (Windows || Linux || MacOS || FreeBSD))
+import System.Net
+namespace Bolt.Runtime.Net;
+[Native("bolt::system::Resolver")]
+public static class Resolver
+{
+public:
+    IPAddress[] Resolve(string host);
+}
+[Native("bolt::system::SocketHandle")]
+public sealed class SocketHandle
+{
+public:
+    SocketHandle();
+    static SocketHandle Create(bool ipv6 = false, bool datagram = false);
+    void Close();
+    [NativeProperty("IsOpen")] const bool IsOpen;
+    void SetTimeouts(int receive = -1, int send = -1);
+    void Bind(IPEndPoint endpoint);
+    void Listen(int backlog = 128);
+    SocketHandle Accept();
+    void Connect(IPEndPoint endpoint);
+    int Send(const byte[]& data, int offset, int count);
+    int Receive(byte[]& data, int offset, int count);
+    int SendTo(const byte[]& data, IPEndPoint destination);
+    int ReceiveFrom(byte[]& data, IPEndPoint& sender, bool& truncated);
+    void Shutdown(bool receive = true, bool send = true);
+    [NativeProperty("LocalEndpoint")] const IPEndPoint LocalEndpoint;
+    [NativeProperty("RemoteEndpoint")] const IPEndPoint RemoteEndpoint;
+}
+#endif

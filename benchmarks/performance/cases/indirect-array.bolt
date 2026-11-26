@@ -1,0 +1,16 @@
+static class Program {
+public:
+    void Main() {
+        int[] links = new int[65536];
+        for (int i = 0; i < 65536; i++) {
+            links[i] = (i * 5 + 12345) & 65535;
+        }
+        int cursor = 1;
+        ulong sum = 0ul;
+        for (int i = 0; i < 48000000; i++) {
+            cursor = links[cursor];
+            sum += (ulong)(uint)cursor;
+        }
+        Print(sum);
+    }
+}

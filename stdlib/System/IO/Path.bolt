@@ -1,0 +1,176 @@
+import System
+import System.Text
+namespace System.IO;
+
+public static class Path
+{
+private:
+    string Separators(const string& path)
+    {
+#ifdef Windows
+        return path.Contains('\\') ? path.Replace('\\', '/') : path;
+#else
+        return path;
+#endif
+    }
+    string Generic(const string& path)
+    {
+#ifdef Linux
+        string result = path;
+        while (result.Contains("//")) result = result.Replace("//", "/");
+        return result;
+#else
+        return path;
+#endif
+    }
+
+    // Input uses forward slashes. Drive-relative and UNC paths have root names.
+    int RootNameEnd(const string& path)
+    {
+#ifdef Windows
+        int length = path.Length;
+        if (length < 2) return 0;
+        char first = path[0];
+        if (path[1] == ':' && ((first >= 'A' && first <= 'Z') || (first >= 'a' && first <= 'z'))) return 2;
+        if (first != '/') return 0;
+        if (length >= 4 && path[3] == '/' && (length == 4 || path[4] != '/') &&
+            ((path[1] == '/' && (path[2] == '?' || path[2] == '.')) || (path[1] == '?' && path[2] == '?'))) return 3;
+        if (length >= 3 && path[1] == '/' && path[2] != '/')
+        {
+            int end = path.IndexOf('/', 2);
+            return end < 0 ? length : end;
+        }
+#endif
+        return 0;
+    }
+    bool Absolute(const string& path, int root)
+    {
+#ifdef Windows
+        return root == 2 ? path.Length > 2 && path[2] == '/' : root != 0;
+#else
+        return path.StartsWith("/");
+#endif
+    }
+    int FilenameStart(const string& path, int root)
+    {
+        int afterSlash = path.LastIndexOf('/') + 1;
+        return afterSlash > root ? afterSlash : root;
+    }
+    string BaseName(const string& path)
+    {
+        string filename = GetFileName(path);
+#ifdef Windows
+        int stream = filename.IndexOf(':');
+        if (stream >= 0) return filename.Substring(0, stream);
+#endif
+        return filename;
+    }
+    int ExtensionStart(const string& filename)
+    {
+        int dot = filename.LastIndexOf('.');
+        return dot <= 0 || filename == ".." ? filename.Length : dot;
+    }
+    string NormalizeAbsolute(const string& path)
+    {
+        int root = RootNameEnd(path);
+        string prefix = path.Substring(0, root);
+        if (root < path.Length && path[root] == '/') prefix += "/";
+        string[] parts = path.Substring(root).Split('/');
+        int used = 0;
+        bool directory = false;
+        for (int i = 0; i < parts.Length; i++)
+        {
+            string part = parts[i];
+            directory = part == "" || part == "." || part == "..";
+            if (part == "" || part == ".") continue;
+            if (part == "..") { if (used > 0) used--; }
+            else { parts[used] = part; used++; }
+        }
+        if (used == 0) return prefix;
+        string result = prefix + parts[0];
+        for (int i = 1; i < used; i++) result += "/" + parts[i];
+        return directory ? result + "/" : result;
+    }
+
+public:
+    bool IsPathRooted(string path)
+    {
+        string value = Separators(path);
+        return Absolute(value, RootNameEnd(value));
+    }
+    string Combine(string left, string right)
+    {
+        string a = Separators(left), b = Separators(right);
+        int leftRoot = RootNameEnd(a), rightRoot = RootNameEnd(b);
+        if (Absolute(b, rightRoot) ||
+            (rightRoot != 0 && left.Substring(0, leftRoot) != right.Substring(0, rightRoot))) return Generic(b);
+        if (rightRoot < b.Length && b[rightRoot] == '/') a = a.Substring(0, leftRoot);
+        else if ((a.Length > leftRoot && !a.EndsWith("/")) || (a.Length == leftRoot && leftRoot >= 3)) a += "/";
+        return Generic(a + b.Substring(rightRoot));
+    }
+    string GetFileName(string path)
+    {
+        string value = Separators(path);
+        return value.Substring(FilenameStart(value, RootNameEnd(value)));
+    }
+    string GetFileNameWithoutExtension(string path)
+    {
+        string filename = BaseName(path);
+        return filename.Substring(0, ExtensionStart(filename));
+    }
+    string GetExtension(string path)
+    {
+        string filename = BaseName(path);
+        return filename.Substring(ExtensionStart(filename));
+    }
+    string ChangeExtension(string path, string extension)
+    {
+        string value = Separators(path);
+        int end = FilenameStart(value, RootNameEnd(value)) + ExtensionStart(BaseName(path));
+        string dot = extension != "" && !extension.StartsWith(".") ? "." : "";
+        return Generic(value.Substring(0, end) + dot + Separators(extension));
+    }
+    string GetDirectoryName(string path)
+    {
+        string value = Separators(path);
+        int root = RootNameEnd(value);
+        int end = FilenameStart(value, root);
+        while (root < end && value[root] == '/') root++;
+        while (end > root && value[end - 1] == '/') end--;
+        return Generic(value.Substring(0, end));
+    }
+    string GetTempPath() { return Environment.TemporaryDirectory; }
+    string GetFullPath(string path)
+    {
+#if Windows && BoltStandaloneCore
+        byte[] name = Bolt.Runtime.IO.WindowsPath.Wide(path);
+#else
+        if (path == "") throw ArgumentException("The path must not be empty.");
+        if (path.Contains('\0')) throw ArgumentException("The path contains a NUL character.");
+#ifdef Windows
+        byte[] name = UTF16LEEncoding.GetBytes(path + "\0");
+#endif
+#endif
+#ifdef Windows
+        uint capacity = 260u;
+        ushort[] wide;
+        uint count = capacity;
+        while (count >= capacity)
+        {
+            capacity = count;
+            if (capacity > (uint)int.MaxValue) throw IOException("Absolute path is too long.");
+            wide = new ushort[(int)capacity];
+            count = Bolt.Runtime.Windows.FullPathName((ushort*)&name[0], capacity, &wide[0], null);
+            if (count == 0u) throw IOException("Cannot resolve absolute path.");
+        }
+        int bytes = Bolt.Runtime.Windows.WideCharToMultiByte(65001u, 0u, &wide[0], (int)count, null, 0, null, null);
+        if (bytes <= 0) throw IOException("Cannot convert absolute path to UTF-8.");
+        byte[] utf8 = new byte[bytes];
+        if (Bolt.Runtime.Windows.WideCharToMultiByte(65001u, 0u, &wide[0], (int)count, &utf8[0], bytes, null, null) != bytes)
+            throw IOException("Cannot convert absolute path to UTF-8.");
+        return NormalizeAbsolute(Separators(string.FromUtf8(utf8)));
+#else
+        return NormalizeAbsolute(path.StartsWith("/") ? path : Combine(Environment.CurrentDirectory, path));
+#endif
+    }
+}

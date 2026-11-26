@@ -1,0 +1,5 @@
+
+interface I{int Value;}
+static class Program {public: void Main(){
+
+}}

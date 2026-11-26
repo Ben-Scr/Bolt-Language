@@ -1,0 +1,178 @@
+#ifdef Windows
+import System
+namespace Bolt.Runtime;
+
+// Windows DateTime is implemented in Bolt and calls Kernel32 directly. FILETIME
+// and SYSTEMTIME are treated as opaque Win32 structures at the FFI boundary;
+// Bolt reads/writes their documented byte representation itself.
+public static class WindowsDateTime
+{
+private:
+    const ulong FileTimeUnixEpoch = 116444736000000000ul;
+
+    byte* Allocate(ulong bytes)
+    {
+        void* heap = Bolt.Runtime.Windows.GetProcessHeap();
+        byte* memory = (byte*)Bolt.Runtime.Windows.HeapAlloc(heap, 0u, bytes);
+        if (memory == null) throw OutOfMemoryException("Cannot allocate the Windows DateTime platform buffer.");
+        return memory;
+    }
+
+    void Free(byte* memory)
+    {
+        if (memory != null) Bolt.Runtime.Windows.HeapFree(Bolt.Runtime.Windows.GetProcessHeap(), 0u, memory);
+    }
+
+    ulong ReadU64(byte* memory, ulong offset)
+    {
+        ulong value = 0ul;
+        for (int index = 0; index < 8; index++)
+            value |= ((ulong)memory[offset + (ulong)index]) << (index * 8);
+        return value;
+    }
+
+    void WriteU64(byte* memory, ulong offset, ulong value)
+    {
+        for (int index = 0; index < 8; index++)
+            memory[offset + (ulong)index] = (byte)((value >> (index * 8)) & 255ul);
+    }
+
+    void WriteU16(byte* memory, ulong offset, ushort value)
+    {
+        memory[offset] = (byte)(value & (ushort)255);
+        memory[offset + 1ul] = (byte)((value >> 8) & (ushort)255);
+    }
+
+    void Require(int success, const string& message)
+    {
+        if (success == 0) Bolt.Runtime.Failure.Range(message);
+    }
+
+    ulong FileTicks(long utcTicks)
+    {
+        if (utcTicks < -116444736000000000l)
+            Bolt.Runtime.Failure.Range("Local DateTime is before the Windows FILETIME range (1601-01-01).");
+        return (ulong)(utcTicks + 116444736000000000l);
+    }
+
+    long UnixTicks(ulong fileTicks)
+    {
+        if (fileTicks >= FileTimeUnixEpoch)
+        {
+            ulong value = fileTicks - FileTimeUnixEpoch;
+            if (value > 9223372036854775807ul)
+                Bolt.Runtime.Failure.Range("Windows local time is outside the Bolt DateTime range.");
+            return (long)value;
+        }
+
+        // FILETIME starts in 1601, well before the Unix epoch. Bolt DateTime
+        // supports negative Unix ticks, so preserve them rather than rejecting
+        // pre-1970 local-midnight conversions.
+        ulong magnitude = FileTimeUnixEpoch - fileTicks;
+        if (magnitude > 9223372036854775807ul)
+            Bolt.Runtime.Failure.Range("Windows local time is outside the Bolt DateTime range.");
+        return -(long)magnitude;
+    }
+
+public:
+    long UtcNowTicks()
+    {
+        byte* value = Allocate(8ul);
+        try
+        {
+            Bolt.Runtime.Windows.GetSystemTimePreciseAsFileTime((Bolt.Runtime.Windows.FileTime*)value);
+            return UnixTicks(ReadU64(value, 0ul));
+        }
+        finally
+        {
+            Free(value);
+        }
+    }
+
+    long OffsetSeconds(long utcTicks)
+    {
+        // Layout: FILETIME(8), UTC SYSTEMTIME(16), local SYSTEMTIME(16),
+        // local wall-clock re-encoded as FILETIME(8).
+        byte* memory = Allocate(48ul);
+        try
+        {
+            byte* utcFile = memory;
+            byte* utcSystem = &memory[8ul];
+            byte* localSystem = &memory[24ul];
+            byte* localFile = &memory[40ul];
+            WriteU64(utcFile, 0ul, FileTicks(utcTicks));
+
+            Require(Bolt.Runtime.Windows.FileTimeToSystemTime(
+                (Bolt.Runtime.Windows.FileTime*)utcFile,
+                (Bolt.Runtime.Windows.SystemTime*)utcSystem),
+                "Windows cannot convert this UTC DateTime to SYSTEMTIME.");
+            Require(Bolt.Runtime.Windows.SystemTimeToTzSpecificLocalTime(
+                (Bolt.Runtime.Windows.TimeZoneInformation*)null,
+                (Bolt.Runtime.Windows.SystemTime*)utcSystem,
+                (Bolt.Runtime.Windows.SystemTime*)localSystem),
+                "Windows cannot convert this UTC DateTime to local time.");
+            Require(Bolt.Runtime.Windows.SystemTimeToFileTime(
+                (Bolt.Runtime.Windows.SystemTime*)localSystem,
+                (Bolt.Runtime.Windows.FileTime*)localFile),
+                "Windows cannot encode this local DateTime.");
+
+            long utcFileTicks = (long)ReadU64(utcFile, 0ul);
+            long localFileTicks = (long)ReadU64(localFile, 0ul);
+            return (localFileTicks - utcFileTicks) / 10000000l;
+        }
+        finally
+        {
+            Free(memory);
+        }
+    }
+
+    long LocalMidnightTicks(long utcTicks)
+    {
+        // FILETIME + UTC SYSTEMTIME + local SYSTEMTIME + midnight UTC
+        // SYSTEMTIME + output FILETIME = 64 bytes.
+        byte* memory = Allocate(64ul);
+        try
+        {
+            byte* utcFile = memory;
+            byte* utcSystem = &memory[8ul];
+            byte* localSystem = &memory[24ul];
+            byte* midnightUtcSystem = &memory[40ul];
+            byte* midnightFile = &memory[56ul];
+            WriteU64(utcFile, 0ul, FileTicks(utcTicks));
+
+            Require(Bolt.Runtime.Windows.FileTimeToSystemTime(
+                (Bolt.Runtime.Windows.FileTime*)utcFile,
+                (Bolt.Runtime.Windows.SystemTime*)utcSystem),
+                "Windows cannot convert this UTC DateTime to SYSTEMTIME.");
+            Require(Bolt.Runtime.Windows.SystemTimeToTzSpecificLocalTime(
+                (Bolt.Runtime.Windows.TimeZoneInformation*)null,
+                (Bolt.Runtime.Windows.SystemTime*)utcSystem,
+                (Bolt.Runtime.Windows.SystemTime*)localSystem),
+                "Windows cannot convert this UTC DateTime to local time.");
+
+            // SYSTEMTIME: year, month, day-of-week, day, hour, minute,
+            // second, millisecond; all fields are 16-bit little-endian values.
+            WriteU16(localSystem, 8ul, (ushort)0);
+            WriteU16(localSystem, 10ul, (ushort)0);
+            WriteU16(localSystem, 12ul, (ushort)0);
+            WriteU16(localSystem, 14ul, (ushort)0);
+
+            Require(Bolt.Runtime.Windows.TzSpecificLocalTimeToSystemTime(
+                (Bolt.Runtime.Windows.TimeZoneInformation*)null,
+                (Bolt.Runtime.Windows.SystemTime*)localSystem,
+                (Bolt.Runtime.Windows.SystemTime*)midnightUtcSystem),
+                "Windows cannot resolve local midnight for this DateTime.");
+            Require(Bolt.Runtime.Windows.SystemTimeToFileTime(
+                (Bolt.Runtime.Windows.SystemTime*)midnightUtcSystem,
+                (Bolt.Runtime.Windows.FileTime*)midnightFile),
+                "Windows cannot encode local midnight.");
+
+            return UnixTicks(ReadU64(midnightFile, 0ul));
+        }
+        finally
+        {
+            Free(memory);
+        }
+    }
+}
+#endif

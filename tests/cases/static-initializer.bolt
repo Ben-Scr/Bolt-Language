@@ -1,0 +1,1 @@
+static class Program {public:int Value=1/0;void Main(){Console.WriteLine("unreachable");}}

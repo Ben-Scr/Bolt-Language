@@ -1,0 +1,72 @@
+import System.Net
+import Bolt.Runtime.Net
+import Bolt.Runtime
+namespace System.Net.Sockets;
+
+// Stream/datagram policy is ordinary Bolt. Handle/OS operations are platform primitives.
+public sealed class Socket
+{
+private:
+    SocketHandle handle;
+    static int Range(int length, int offset, int count)
+    {
+        if (offset < 0 || offset > length) Failure.Range("Socket offset is out of range.");
+        if (count == -1) count = length - offset;
+        if (count < 0 || count > length - offset) Failure.Range("Socket count is out of range.");
+        return count;
+    }
+public:
+    Socket() {}
+    Socket(bool ipv6, bool datagram = false) { handle = SocketHandle.Create(ipv6, datagram); }
+    static Socket Tcp(bool ipv6 = false) { return Socket(ipv6, false); }
+    static Socket Udp(bool ipv6 = false) { return Socket(ipv6, true); }
+    bool IsOpen => handle.IsOpen;
+    IPEndPoint LocalEndpoint => handle.LocalEndpoint;
+    IPEndPoint RemoteEndpoint => handle.RemoteEndpoint;
+    void Close() { handle.Close(); }
+    void SetTimeouts(int receive = -1, int send = -1) { handle.SetTimeouts(receive, send); }
+    void Bind(IPEndPoint endpoint) { handle.Bind(endpoint); }
+    void Listen(int backlog = 128) { handle.Listen(backlog); }
+    void Connect(IPEndPoint endpoint) { handle.Connect(endpoint); }
+    Socket Accept() { Socket client; client.handle = handle.Accept(); return client; }
+    void Shutdown(bool receive = true, bool send = true) { handle.Shutdown(receive, send); }
+    int Send(const byte[]& data, int offset = 0, int count = -1)
+    {
+        count = Range(data.Length, offset, count);
+        return handle.Send(data, offset, count);
+    }
+    int Receive(byte[]& data, int offset = 0, int count = -1)
+    {
+        count = Range(data.Length, offset, count);
+        return handle.Receive(data, offset, count);
+    }
+    void SendAll(const byte[]& data)
+    {
+        int offset = 0;
+        while (offset < data.Length)
+        {
+            int n = Send(data, offset);
+            if (n <= 0) Failure.InvalidOperation("TCP send made no progress.");
+            offset += n;
+        }
+    }
+    bool ReceiveExactly(byte[]& data)
+    {
+        int offset = 0;
+        while (offset < data.Length)
+        {
+            int n = Receive(data, offset);
+            if (n == 0) return false;
+            offset += n;
+        }
+        return true;
+    }
+    int SendTo(const byte[]& data, IPEndPoint destination)
+    {
+        return handle.SendTo(data, destination);
+    }
+    int ReceiveFrom(byte[]& data, IPEndPoint& sender, bool& truncated)
+    {
+        return handle.ReceiveFrom(data, sender, truncated);
+    }
+}

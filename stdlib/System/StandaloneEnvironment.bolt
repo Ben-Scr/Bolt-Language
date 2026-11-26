@@ -1,0 +1,97 @@
+import System
+namespace Bolt.Runtime;
+
+public static class EnvironmentOps {
+#ifndef Windows
+    // getenv and environ return borrowed storage that setenv/unsetenv can replace.
+    static ulong variableGate;
+public:
+    void LockVariables() { while(AtomicOps.Cas(variableGate,0ul,1ul)!=0ul)ThreadOps.Yield(); }
+    void UnlockVariables() { AtomicOps.Cas(variableGate,1ul,0ul); }
+private:
+#endif
+    static byte[] Name(string name) {
+        if(name=="" || name.Contains('=') || name.Contains('\0'))throw ArgumentException("Invalid environment name.");
+#ifdef Windows
+        return System.Text.UTF16LEEncoding.GetBytes(name+"\0");
+#else
+        return (name+"\0").ToUtf8();
+#endif
+    }
+public:
+    string Get(string name) {
+        byte[] key=Name(name);
+#ifdef Windows
+        uint capacity=128u;
+        while(true){
+            ushort[] buffer=new ushort[(int)capacity];
+            uint n=Bolt.Runtime.ProcessApi.GetVariable((ushort*)&key[0],&buffer[0],capacity);
+            if(n==0u)return "";
+            if(n<capacity)return SystemCalls.FromWide(&buffer[0],(int)n);
+            capacity=n;
+        }
+        return "";
+#else
+        LockVariables();
+        try {
+            byte* value=Bolt.Runtime.StandalonePosix.Variable(&key[0]);
+            return value==null?"":NativeString.FromUtf8(value,SystemCalls.CLength(value));
+        } finally { UnlockVariables(); }
+#endif
+    }
+    bool Contains(string name) {
+        byte[] key=Name(name);
+#ifdef Windows
+        Bolt.Runtime.ProcessApi.ClearError(0u);
+        return Bolt.Runtime.ProcessApi.GetVariable((ushort*)&key[0],null,0u)!=0u || SystemCalls.Error()!=203;
+#else
+        LockVariables();
+        try { return Bolt.Runtime.StandalonePosix.Variable(&key[0])!=null; }
+        finally { UnlockVariables(); }
+#endif
+    }
+    void Set(string name,string value) {
+        byte[] key=Name(name);SystemCalls.CheckText(value);
+#ifdef Windows
+        byte[] data=System.Text.UTF16LEEncoding.GetBytes(value+"\0");
+        if(Bolt.Runtime.ProcessApi.SetVariable((ushort*)&key[0],(ushort*)&data[0])==0)throw IOException("Cannot set environment variable.");
+#else
+        byte[] data=(value+"\0").ToUtf8();
+        LockVariables();
+        try {
+            if(Bolt.Runtime.ProcessApi.SetVariable(&key[0],&data[0],1)!=0)throw IOException("Cannot set environment variable.");
+        } finally { UnlockVariables(); }
+#endif
+    }
+    void Remove(string name) {
+        byte[] key=Name(name);
+#ifdef Windows
+        if(Bolt.Runtime.ProcessApi.SetVariable((ushort*)&key[0],null)==0 && SystemCalls.Error()!=203)throw IOException("Cannot remove environment variable.");
+#else
+        LockVariables();
+        try {
+            if(Bolt.Runtime.ProcessApi.RemoveVariable(&key[0])!=0)throw IOException("Cannot remove environment variable.");
+        } finally { UnlockVariables(); }
+#endif
+    }
+    string CurrentDirectory() { return System.Environment.CurrentDirectory; }
+    void SetCurrentDirectory(string path) { System.Environment.CurrentDirectory=path; }
+    string TemporaryDirectory() { return System.Environment.TemporaryDirectory; }
+    int ProcessorCount() {
+#ifdef Windows
+        uint count=Bolt.Runtime.ProcessApi.Processors(65535);
+#else
+#if Linux || Web
+        int key=84;
+#elif Android
+        int key=97;
+#else
+        int key=58;
+#endif
+        long count=Bolt.Runtime.ProcessApi.SystemConfig(key);
+#endif
+        return count>0?(int)count:1;
+    }
+    string OS() { return System.Environment.OS; }
+    string Architecture() { return System.Environment.Architecture; }
+}

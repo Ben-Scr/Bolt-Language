@@ -1,0 +1,5 @@
+
+sealed class Base{} class Child:Base{}
+static class Program { public: void Main() {
+
+} }

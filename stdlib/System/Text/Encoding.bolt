@@ -1,0 +1,672 @@
+import System
+namespace System.Text;
+
+// Pure Bolt text/binary encoders. This file contains no OS calls, Native
+// declarations, extern functions, or C++ bridge code.
+public static class EncodingPrimitives
+{
+private:
+    bool IsValidScalar(int scalar)
+    {
+        return scalar >= 0 && scalar <= 1114111 && !(scalar >= 55296 && scalar <= 57343);
+    }
+
+public:
+    int Utf8Length(int scalar)
+    {
+        if (!IsValidScalar(scalar)) throw FormatException("Invalid Unicode scalar value.");
+        if (scalar <= 127) return 1;
+        if (scalar <= 2047) return 2;
+        if (scalar <= 65535) return 3;
+        return 4;
+    }
+
+    int WriteUtf8Scalar(int scalar, byte[]& output, int offset)
+    {
+        if (!IsValidScalar(scalar)) throw FormatException("Invalid Unicode scalar value.");
+
+        if (scalar <= 127)
+        {
+            output[offset] = (byte)scalar;
+            return offset + 1;
+        }
+
+        if (scalar <= 2047)
+        {
+            output[offset] = (byte)(192 | (scalar >> 6));
+            output[offset + 1] = (byte)(128 | (scalar & 63));
+            return offset + 2;
+        }
+
+        if (scalar <= 65535)
+        {
+            output[offset] = (byte)(224 | (scalar >> 12));
+            output[offset + 1] = (byte)(128 | ((scalar >> 6) & 63));
+            output[offset + 2] = (byte)(128 | (scalar & 63));
+            return offset + 3;
+        }
+
+        output[offset] = (byte)(240 | (scalar >> 18));
+        output[offset + 1] = (byte)(128 | ((scalar >> 12) & 63));
+        output[offset + 2] = (byte)(128 | ((scalar >> 6) & 63));
+        output[offset + 3] = (byte)(128 | (scalar & 63));
+        return offset + 4;
+    }
+
+    char HexDigit(int value, bool uppercase = true)
+    {
+        if (value < 0 || value > 15) throw ArgumentOutOfRangeException("Hex digit must be in the range 0..15.");
+        if (value < 10) return (char)((int)'0' + value);
+        return (char)((uppercase ? (int)'A' : (int)'a') + value - 10);
+    }
+
+    int HexValue(char value)
+    {
+        if (value >= '0' && value <= '9') return (int)value - (int)'0';
+        if (value >= 'A' && value <= 'F') return (int)value - (int)'A' + 10;
+        if (value >= 'a' && value <= 'f') return (int)value - (int)'a' + 10;
+        return -1;
+    }
+
+    bool IsAsciiWhitespace(char value)
+    {
+        return value == ' ' || value == '\t' || value == '\r' || value == '\n';
+    }
+
+    bool IsUrlUnreserved(byte value)
+    {
+        return (value >= (byte)'A' && value <= (byte)'Z') ||
+               (value >= (byte)'a' && value <= (byte)'z') ||
+               (value >= (byte)'0' && value <= (byte)'9') ||
+               value == (byte)'-' || value == (byte)'.' ||
+               value == (byte)'_' || value == (byte)'~';
+    }
+}
+
+public static class ASCIIEncoding
+{
+public:
+    byte[] GetBytes(const string& value)
+    {
+        if (value.Length != value.ByteLength)
+            throw FormatException("Character cannot be represented in ASCII.");
+        return value.ToUtf8();
+    }
+
+    string GetString(const byte[]& bytes)
+    {
+        for (int i = 0; i < bytes.Length; i++)
+            if (bytes[i] > 127) throw FormatException("Invalid ASCII byte.");
+        return string.FromUtf8(bytes);
+    }
+}
+
+public static class Latin1Encoding
+{
+public:
+    byte[] GetBytes(const string& value)
+    {
+        char[] scalars = value.ToCharArray();
+        byte[] result = new byte[scalars.Length];
+        for (int i = 0; i < scalars.Length; i++)
+        {
+            int scalar = (int)scalars[i];
+            if (scalar > 255) throw FormatException("Character cannot be represented in ISO-8859-1.");
+            result[i] = (byte)scalar;
+        }
+        return result;
+    }
+
+    string GetString(const byte[]& bytes)
+    {
+        long length = bytes.Length;
+        for (int i = 0; i < bytes.Length; i++) if (bytes[i] > 127) length++;
+        if (length == bytes.Length) return string.FromUtf8(bytes);
+        if (length > int.MaxValue) throw OverflowException("UTF-8 output is too long.");
+        byte[] utf8 = new byte[(int)length];
+        int at = 0;
+        for (int i = 0; i < bytes.Length; i++)
+        {
+            int value = (int)bytes[i];
+            if (value < 128) utf8[at++] = (byte)value;
+            else
+            {
+                utf8[at++] = (byte)(192 | (value >> 6));
+                utf8[at++] = (byte)(128 | (value & 63));
+            }
+        }
+        return string.FromUtf8(utf8);
+    }
+}
+
+public static class UTF8Encoding
+{
+public:
+    byte[] GetBytes(const string& value)
+    {
+        // Length also validates strings supplied by native callers.
+        if (value.Length == 0) return new byte[0];
+        return value.ToUtf8();
+    }
+
+    string GetString(const byte[]& bytes)
+    {
+        int p = 0;
+
+        while (p < bytes.Length)
+        {
+            int first = (int)bytes[p];
+            int count = 0;
+
+            if (first <= 127)
+            {
+                count = 1;
+            }
+            elif (first >= 194 && first <= 223)
+            {
+                count = 2;
+                if (bytes.Length - p <= 1) throw FormatException("Truncated UTF-8 sequence.");
+                int b1 = (int)bytes[p + 1];
+                if (b1 < 128 || b1 > 191) throw FormatException("Invalid UTF-8 continuation byte.");
+            }
+            elif (first >= 224 && first <= 239)
+            {
+                count = 3;
+                if (bytes.Length - p <= 2) throw FormatException("Truncated UTF-8 sequence.");
+                int b1 = (int)bytes[p + 1];
+                int b2 = (int)bytes[p + 2];
+                if (b1 < 128 || b1 > 191 || b2 < 128 || b2 > 191)
+                    throw FormatException("Invalid UTF-8 continuation byte.");
+                if (first == 224 && b1 < 160) throw FormatException("Overlong UTF-8 sequence.");
+                if (first == 237 && b1 > 159) throw FormatException("UTF-8 cannot encode surrogate code points.");
+            }
+            elif (first >= 240 && first <= 244)
+            {
+                count = 4;
+                if (bytes.Length - p <= 3) throw FormatException("Truncated UTF-8 sequence.");
+                int b1 = (int)bytes[p + 1];
+                int b2 = (int)bytes[p + 2];
+                int b3 = (int)bytes[p + 3];
+                if (b1 < 128 || b1 > 191 || b2 < 128 || b2 > 191 || b3 < 128 || b3 > 191)
+                    throw FormatException("Invalid UTF-8 continuation byte.");
+                if (first == 240 && b1 < 144) throw FormatException("Overlong UTF-8 sequence.");
+                if (first == 244 && b1 > 143) throw FormatException("UTF-8 scalar exceeds U+10FFFF.");
+            }
+            else
+            {
+                throw FormatException("Invalid UTF-8 leading byte.");
+            }
+
+            p += count;
+        }
+
+        return string.FromUtf8(bytes);
+    }
+}
+
+public static class UTF16Encoding
+{
+private:
+    int ReadUnit(const byte[]& bytes, int offset, bool littleEndian)
+    {
+        int a = (int)bytes[offset];
+        int b = (int)bytes[offset + 1];
+        return littleEndian ? (a | (b << 8)) : ((a << 8) | b);
+    }
+
+    int ReadScalar(const byte[]& bytes, int& p, bool littleEndian)
+    {
+        int unit = ReadUnit(bytes, p, littleEndian);
+        p += 2;
+
+        int scalar = 0;
+        if (unit >= 55296 && unit <= 56319)
+        {
+            if (p >= bytes.Length) throw FormatException("Truncated UTF-16 surrogate pair.");
+            int low = ReadUnit(bytes, p, littleEndian);
+            p += 2;
+            if (low < 56320 || low > 57343) throw FormatException("Invalid UTF-16 surrogate pair.");
+            scalar = 65536 + ((unit - 55296) << 10) + (low - 56320);
+        }
+        elif (unit >= 56320 && unit <= 57343)
+        {
+            throw FormatException("Unexpected UTF-16 low surrogate.");
+        }
+        else
+        {
+            scalar = unit;
+        }
+        return scalar;
+    }
+
+    void WriteUnit(int value, byte[]& output, int offset, bool littleEndian)
+    {
+        if (littleEndian)
+        {
+            output[offset] = (byte)(value & 255);
+            output[offset + 1] = (byte)((value >> 8) & 255);
+        }
+        else
+        {
+            output[offset] = (byte)((value >> 8) & 255);
+            output[offset + 1] = (byte)(value & 255);
+        }
+    }
+
+public:
+    byte[] GetBytes(const string& value, bool littleEndian = true, bool includeBom = false)
+    {
+        char[] scalars = value.ToCharArray();
+        int units = 0;
+        for (int i = 0; i < scalars.Length; i++)
+        {
+            int scalar = (int)scalars[i];
+            if (scalar < 0 || scalar > 1114111 || (scalar >= 55296 && scalar <= 57343))
+                throw FormatException("Invalid Unicode scalar value.");
+            units += scalar <= 65535 ? 1 : 2;
+        }
+
+        int prefix = includeBom ? 2 : 0;
+        byte[] result = new byte[prefix + units * 2];
+        int p = 0;
+
+        if (includeBom)
+        {
+            if (littleEndian) { result[0] = (byte)255; result[1] = (byte)254; }
+            else { result[0] = (byte)254; result[1] = (byte)255; }
+            p = 2;
+        }
+
+        for (int i = 0; i < scalars.Length; i++)
+        {
+            int scalar = (int)scalars[i];
+            if (scalar <= 65535)
+            {
+                WriteUnit(scalar, result, p, littleEndian);
+                p += 2;
+            }
+            else
+            {
+                int x = scalar - 65536;
+                int high = 55296 + (x >> 10);
+                int low = 56320 + (x & 1023);
+                WriteUnit(high, result, p, littleEndian);
+                WriteUnit(low, result, p + 2, littleEndian);
+                p += 4;
+            }
+        }
+
+        return result;
+    }
+
+    string GetString(const byte[]& bytes, bool littleEndian = true, bool detectBom = true)
+    {
+        int p = 0;
+        if (detectBom && bytes.Length >= 2)
+        {
+            if (bytes[0] == (byte)255 && bytes[1] == (byte)254) { littleEndian = true; p = 2; }
+            elif (bytes[0] == (byte)254 && bytes[1] == (byte)255) { littleEndian = false; p = 2; }
+        }
+
+        if (((bytes.Length - p) & 1) != 0) throw FormatException("UTF-16 byte length must be even.");
+
+        int start = p;
+        long length = 0l;
+        while (p < bytes.Length) length += EncodingPrimitives.Utf8Length(ReadScalar(bytes, p, littleEndian));
+        if (length > int.MaxValue) throw OverflowException("UTF-8 output is too long.");
+        byte[] utf8 = new byte[(int)length];
+        int at = 0;
+        p = start;
+        while (p < bytes.Length) at = EncodingPrimitives.WriteUtf8Scalar(ReadScalar(bytes, p, littleEndian), utf8, at);
+        return string.FromUtf8(utf8);
+    }
+}
+
+public static class UTF16LEEncoding
+{
+public:
+    byte[] GetBytes(const string& value, bool includeBom = false) { return UTF16Encoding.GetBytes(value, true, includeBom); }
+    string GetString(const byte[]& bytes, bool detectBom = true) { return UTF16Encoding.GetString(bytes, true, detectBom); }
+}
+
+public static class UTF16BEEncoding
+{
+public:
+    byte[] GetBytes(const string& value, bool includeBom = false) { return UTF16Encoding.GetBytes(value, false, includeBom); }
+    string GetString(const byte[]& bytes, bool detectBom = true) { return UTF16Encoding.GetString(bytes, false, detectBom); }
+}
+
+public static class UTF32Encoding
+{
+private:
+    uint ReadUnit(const byte[]& bytes, int offset, bool littleEndian)
+    {
+        uint a = (uint)bytes[offset];
+        uint b = (uint)bytes[offset + 1];
+        uint c = (uint)bytes[offset + 2];
+        uint d = (uint)bytes[offset + 3];
+        if (littleEndian) return a | (b << 8) | (c << 16) | (d << 24);
+        return (a << 24) | (b << 16) | (c << 8) | d;
+    }
+
+    void WriteUnit(uint value, byte[]& output, int offset, bool littleEndian)
+    {
+        if (littleEndian)
+        {
+            output[offset] = (byte)(value & 255u);
+            output[offset + 1] = (byte)((value >> 8) & 255u);
+            output[offset + 2] = (byte)((value >> 16) & 255u);
+            output[offset + 3] = (byte)((value >> 24) & 255u);
+        }
+        else
+        {
+            output[offset] = (byte)((value >> 24) & 255u);
+            output[offset + 1] = (byte)((value >> 16) & 255u);
+            output[offset + 2] = (byte)((value >> 8) & 255u);
+            output[offset + 3] = (byte)(value & 255u);
+        }
+    }
+
+public:
+    byte[] GetBytes(const string& value, bool littleEndian = true, bool includeBom = false)
+    {
+        char[] scalars = value.ToCharArray();
+        int prefix = includeBom ? 4 : 0;
+        byte[] result = new byte[prefix + scalars.Length * 4];
+        int p = 0;
+
+        if (includeBom)
+        {
+            if (littleEndian)
+            {
+                result[0] = (byte)255; result[1] = (byte)254; result[2] = (byte)0; result[3] = (byte)0;
+            }
+            else
+            {
+                result[0] = (byte)0; result[1] = (byte)0; result[2] = (byte)254; result[3] = (byte)255;
+            }
+            p = 4;
+        }
+
+        for (int i = 0; i < scalars.Length; i++)
+        {
+            int scalar = (int)scalars[i];
+            if (scalar < 0 || scalar > 1114111 || (scalar >= 55296 && scalar <= 57343))
+                throw FormatException("Invalid Unicode scalar value.");
+            WriteUnit((uint)scalar, result, p, littleEndian);
+            p += 4;
+        }
+
+        return result;
+    }
+
+    string GetString(const byte[]& bytes, bool littleEndian = true, bool detectBom = true)
+    {
+        int p = 0;
+        if (detectBom && bytes.Length >= 4)
+        {
+            if (bytes[0] == (byte)255 && bytes[1] == (byte)254 && bytes[2] == (byte)0 && bytes[3] == (byte)0)
+            { littleEndian = true; p = 4; }
+            elif (bytes[0] == (byte)0 && bytes[1] == (byte)0 && bytes[2] == (byte)254 && bytes[3] == (byte)255)
+            { littleEndian = false; p = 4; }
+        }
+
+        if (((bytes.Length - p) & 3) != 0) throw FormatException("UTF-32 byte length must be divisible by four.");
+
+        int start = p;
+        long length = 0l;
+        while (p < bytes.Length)
+        {
+            uint scalar = ReadUnit(bytes, p, littleEndian);
+            if (scalar > 1114111u || (scalar >= 55296u && scalar <= 57343u))
+                throw FormatException("Invalid UTF-32 Unicode scalar value.");
+            length += EncodingPrimitives.Utf8Length((int)scalar);
+            p += 4;
+        }
+        byte[] utf8 = new byte[(int)length]; // At most four UTF-8 bytes per UTF-32 unit.
+        int at = 0;
+        for (p = start; p < bytes.Length; p += 4)
+            at = EncodingPrimitives.WriteUtf8Scalar((int)ReadUnit(bytes, p, littleEndian), utf8, at);
+        return string.FromUtf8(utf8);
+    }
+}
+
+public static class UTF32LEEncoding
+{
+public:
+    byte[] GetBytes(const string& value, bool includeBom = false) { return UTF32Encoding.GetBytes(value, true, includeBom); }
+    string GetString(const byte[]& bytes, bool detectBom = true) { return UTF32Encoding.GetString(bytes, true, detectBom); }
+}
+
+public static class UTF32BEEncoding
+{
+public:
+    byte[] GetBytes(const string& value, bool includeBom = false) { return UTF32Encoding.GetBytes(value, false, includeBom); }
+    string GetString(const byte[]& bytes, bool detectBom = true) { return UTF32Encoding.GetString(bytes, false, detectBom); }
+}
+
+public static class HexEncoding
+{
+public:
+    string Encode(const byte[]& bytes, bool uppercase = true)
+    {
+        if (bytes.Length > int.MaxValue / 2) throw OverflowException("Hex output is too long.");
+        byte[] result = new byte[bytes.Length * 2];
+        for (int i = 0; i < bytes.Length; i++)
+        {
+            int value = (int)bytes[i];
+            result[i * 2] = (byte)EncodingPrimitives.HexDigit(value >> 4, uppercase);
+            result[i * 2 + 1] = (byte)EncodingPrimitives.HexDigit(value & 15, uppercase);
+        }
+        return string.FromUtf8(result);
+    }
+
+    byte[] Decode(const string& value)
+    {
+        if ((value.Length & 1) != 0) throw FormatException("Hex text must contain an even number of characters.");
+        byte[] result = new byte[value.Length / 2];
+        for (int i = 0; i < result.Length; i++)
+        {
+            int high = EncodingPrimitives.HexValue(value[i * 2]);
+            int low = EncodingPrimitives.HexValue(value[i * 2 + 1]);
+            if (high < 0 || low < 0) throw FormatException("Invalid hexadecimal character.");
+            result[i] = (byte)((high << 4) | low);
+        }
+        return result;
+    }
+}
+
+public static class Base64Encoding
+{
+private:
+    int Value(char c)
+    {
+        if (c >= 'A' && c <= 'Z') return (int)c - (int)'A';
+        if (c >= 'a' && c <= 'z') return (int)c - (int)'a' + 26;
+        if (c >= '0' && c <= '9') return (int)c - (int)'0' + 52;
+        if (c == '+') return 62;
+        if (c == '/') return 63;
+        return -1;
+    }
+
+public:
+    string Encode(const byte[]& bytes)
+    {
+        if (bytes.Length == 0) return "";
+        long size = (((long)bytes.Length + 2) / 3) * 4;
+        if (size > int.MaxValue) throw OverflowException("Base64 output is too long.");
+        byte[] result = new byte[(int)size];
+        byte[] alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".ToUtf8();
+        int p = 0;
+        int outIndex = 0;
+        while (p + 2 < bytes.Length)
+        {
+            int n = ((int)bytes[p] << 16) | ((int)bytes[p + 1] << 8) | (int)bytes[p + 2];
+            result[outIndex++] = alphabet[n >> 18];
+            result[outIndex++] = alphabet[(n >> 12) & 63];
+            result[outIndex++] = alphabet[(n >> 6) & 63];
+            result[outIndex++] = alphabet[n & 63];
+            p += 3;
+        }
+
+        int remaining = bytes.Length - p;
+        if (remaining > 0)
+        {
+            int n = (int)bytes[p] << 16;
+            if (remaining == 2) n |= (int)bytes[p + 1] << 8;
+            result[outIndex++] = alphabet[n >> 18];
+            result[outIndex++] = alphabet[(n >> 12) & 63];
+            result[outIndex++] = remaining == 2 ? alphabet[(n >> 6) & 63] : (byte)'=';
+            result[outIndex] = (byte)'=';
+        }
+
+        return string.FromUtf8(result);
+    }
+
+    byte[] Decode(const string& text)
+    {
+        char[] compact = text.ToCharArray();
+        int useful = 0;
+        for (int i = 0; i < compact.Length; i++)
+        {
+            char c = compact[i];
+            if (!EncodingPrimitives.IsAsciiWhitespace(c)) compact[useful++] = c;
+        }
+
+        if (useful == 0) return new byte[0];
+        if ((useful & 3) != 0) throw FormatException("Base64 length must be a multiple of four.");
+
+        int padding = 0;
+        if (compact[useful - 1] == '=') padding++;
+        if (compact[useful - 2] == '=') padding++;
+        int outputLength = (useful / 4) * 3 - padding;
+        byte[] result = new byte[outputLength];
+
+        int input = 0;
+        int output = 0;
+        while (input < useful)
+        {
+            char c0 = compact[input];
+            char c1 = compact[input + 1];
+            char c2 = compact[input + 2];
+            char c3 = compact[input + 3];
+            bool last = input + 4 == useful;
+
+            int v0 = Value(c0);
+            int v1 = Value(c1);
+            int v2 = c2 == '=' ? 0 : Value(c2);
+            int v3 = c3 == '=' ? 0 : Value(c3);
+
+            if (v0 < 0 || v1 < 0 || v2 < 0 || v3 < 0) throw FormatException("Invalid Base64 character.");
+            if (c0 == '=' || c1 == '=') throw FormatException("Invalid Base64 padding.");
+            if (!last && (c2 == '=' || c3 == '=')) throw FormatException("Base64 padding is only valid in the final quartet.");
+            if (c2 == '=' && c3 != '=') throw FormatException("Invalid Base64 padding.");
+
+            int n = (v0 << 18) | (v1 << 12) | (v2 << 6) | v3;
+            if (output < result.Length) result[output++] = (byte)((n >> 16) & 255);
+            if (output < result.Length) result[output++] = (byte)((n >> 8) & 255);
+            if (output < result.Length) result[output++] = (byte)(n & 255);
+            input += 4;
+        }
+
+        return result;
+    }
+}
+
+public static class Base64UrlEncoding
+{
+public:
+    string Encode(const byte[]& bytes, bool padding = false)
+    {
+        string value = Base64Encoding.Encode(bytes).Replace('+', '-').Replace('/', '_');
+        if (!padding)
+        {
+            while (value.Length > 0 && value[value.Length - 1] == '=')
+                value = value.Remove(value.Length - 1, 1);
+        }
+        return value;
+    }
+
+    byte[] Decode(const string& value)
+    {
+        string text = value.Replace('-', '+').Replace('_', '/');
+        int remainder = text.Length & 3;
+        if (remainder == 1) throw FormatException("Invalid Base64URL length.");
+        if (remainder == 2) text += "==";
+        elif (remainder == 3) text += "=";
+        return Base64Encoding.Decode(text);
+    }
+}
+
+public static class UrlEncoding
+{
+public:
+    string Encode(const string& value)
+    {
+        byte[] bytes = UTF8Encoding.GetBytes(value);
+        long size = bytes.Length;
+        for (int i = 0; i < bytes.Length; i++)
+            if (!EncodingPrimitives.IsUrlUnreserved(bytes[i])) size += 2;
+        if (size > int.MaxValue) throw OverflowException("URL output is too long.");
+        byte[] result = new byte[(int)size];
+        int outIndex = 0;
+        for (int i = 0; i < bytes.Length; i++)
+        {
+            byte b = bytes[i];
+            if (EncodingPrimitives.IsUrlUnreserved(b)) result[outIndex++] = b;
+            else
+            {
+                result[outIndex++] = (byte)'%';
+                result[outIndex++] = (byte)EncodingPrimitives.HexDigit((int)b >> 4, true);
+                result[outIndex++] = (byte)EncodingPrimitives.HexDigit((int)b & 15, true);
+            }
+        }
+        return string.FromUtf8(result);
+    }
+
+    string Decode(const string& value)
+    {
+        // Percent escapes and their hex digits are ASCII. Unescaped UTF-8 bytes
+        // can be copied directly and the combined result is validated below.
+        byte[] input = UTF8Encoding.GetBytes(value);
+        int byteCount = 0;
+        int i = 0;
+        while (i < input.Length)
+        {
+            if (input[i] == (byte)'%')
+            {
+                if (input.Length - i < 3) throw FormatException("Incomplete URL percent escape.");
+                if (EncodingPrimitives.HexValue((char)input[i + 1]) < 0 || EncodingPrimitives.HexValue((char)input[i + 2]) < 0)
+                    throw FormatException("Invalid URL percent escape.");
+                byteCount++;
+                i += 3;
+            }
+            else
+            {
+                byteCount++;
+                i++;
+            }
+        }
+
+        byte[] bytes = new byte[byteCount];
+        int p = 0;
+        i = 0;
+        while (i < input.Length)
+        {
+            if (input[i] == (byte)'%')
+            {
+                int high = EncodingPrimitives.HexValue((char)input[i + 1]);
+                int low = EncodingPrimitives.HexValue((char)input[i + 2]);
+                bytes[p++] = (byte)((high << 4) | low);
+                i += 3;
+            }
+            else
+            {
+                bytes[p++] = input[i];
+                i++;
+            }
+        }
+
+        return UTF8Encoding.GetString(bytes);
+    }
+}

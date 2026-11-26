@@ -1,0 +1,16 @@
+public static unsafe class Movement
+{
+    public static int Tick(nint countFn, nint elapsedFn, nint moveFn)
+    {
+        var entityCount = (delegate* unmanaged[Cdecl]<ulong, ulong, ulong>)countFn;
+        var deltaMicros = (delegate* unmanaged[Cdecl]<ulong, ulong, ulong>)elapsedFn;
+        var moveRight = (delegate* unmanaged[Cdecl]<ulong, ulong, ulong>)moveFn;
+        ulong count = entityCount(0ul, 0ul);
+        ulong elapsed = deltaMicros(0ul, 0ul);
+        for (ulong entity = 0ul; entity < count; entity++) {
+            ulong step = MovementRules.Step(SPEEDul, elapsed, entity);
+            moveRight(entity, step);
+        }
+        return 0;
+    }
+}

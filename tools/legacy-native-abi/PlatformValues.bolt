@@ -1,0 +1,21 @@
+namespace Bolt.Runtime;
+// Internal heterogeneous storage + reflected object adapter. No parser/writer here.
+[Native("bolt::platform::ValueTree")]
+public class ValueTree {
+public:
+    ValueTree();
+    int Null(); int Bool(bool value); int Signed(long value); int Unsigned(ulong value);
+    int Real(double value); int Text(const string& value); int Array(); int Object();
+    void Add(int parent, int child); void Put(int parent, const string& key, int child);
+    void SetRoot(int node);
+    [ReadOnly] int Root(); [ReadOnly] int Kind(int node);
+    [ReadOnly] bool Boolean(int node); [ReadOnly] long Integer(int node);
+    [ReadOnly] ulong Natural(int node); [ReadOnly] double Floating(int node);
+    [ReadOnly] string String(int node); [ReadOnly] int Count(int node);
+    [ReadOnly] int Child(int node, int index); [ReadOnly] string[] Keys(int node);
+    [ReadOnly] int Member(int node, const string& key);
+    int NumberBytes(const byte[]& bytes, int offset, int count, bool real, bool negative);
+    [ReadOnly] string NumberText(int node);
+    static ValueTree FromObject<T>(const T& value);
+    [ReadOnly] T ToObject<T>();
+}

@@ -1,0 +1,22 @@
+import System
+
+static class Program {
+public:
+    int Main() {
+        System.SharedRandom.Seed(42ul);
+        long sum = 0l;
+        int lowerHalf = 0;
+        for (int i = 0; i < 16000000; i++) {
+            int draw = System.SharedRandom.Next<int>(1000);
+            if (draw < 0 || draw >= 1000) return 1;
+            sum += (long)draw;
+            if (draw < 500) lowerHalf++;
+        }
+        // The two public RNGs produce different sequences. Both must pass the
+        // same range, mean and balance checks before reporting the draw count.
+        if (sum < 499l * 16000000l || sum > 500l * 16000000l) return 2;
+        if (lowerHalf < 7984000 || lowerHalf > 8016000) return 3;
+        Print(16000000);
+        return 0;
+    }
+}

@@ -1,0 +1,5 @@
+import System.Collections.Generic
+
+static class Program { public: void Main() {
+Dictionary<string,int> d; d.Add("a",1); d.Set("a",2); Console.WriteLine(d["a"]); int out=9; Console.WriteLine(d.TryGetValue("b",out)); Console.WriteLine(out); Console.WriteLine(d.ContainsKey("a")); Console.WriteLine(d.Remove("a")); d.Clear(); Console.WriteLine(d.Count);
+} }

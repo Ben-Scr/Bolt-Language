@@ -1,0 +1,28 @@
+import System.Collections.Generic
+class Document {public:string Text;List<string> Words;Document(string text){Text=text;Words.Add(text);}}
+class Summary {public:string Text;List<string> Words;}
+static class Program {
+public:
+    Summary Analyze(string text) {
+        Arena local = Arena.Fixed(65536);
+        Document* document = new(local) Document(text);
+        Summary result;
+        result.Text = document->Text;
+        result.Words = document->Words;
+        return result;
+    }
+    void Main() {
+        Arena work = Arena.Fixed(65536);
+        for(int i=0;i<20;++i) {
+            Document* document = new(work) Document("temporary");
+            string independent = document->Text;
+            work.Reset();
+            if(independent != "temporary") Print("invalid copy");
+        }
+        Summary summary = Analyze("survived return");
+        Print(summary.Text);
+        Print(summary.Words[0]);
+        Print(work.UsedBytes == 0ul);
+        Print(work.CapacityBytes == 65536ul);
+    }
+}

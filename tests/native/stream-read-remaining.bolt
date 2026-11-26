@@ -1,0 +1,23 @@
+import System
+import System.IO
+
+public static class Program {
+public:
+    byte[] Remaining(MemoryStream& stream) { return stream.ReadAllBytes(); }
+    int Main() {
+        byte[] original = new byte[18001];
+        for (int i = 0; i < original.Length; i++) original[i] = (byte)(i & 255);
+        MemoryStream stream = MemoryStream(original);
+        stream.Seek(1700L, SeekOrigin.Begin);
+        byte[] tail = Remaining(stream);
+        if (tail.Length != original.Length - 1700 || stream.Position != 18001L) return 1;
+        for (int i = 0; i < tail.Length; i++) if (tail[i] != original[i + 1700]) return 2;
+        byte[] empty = stream.ReadAllBytes();
+        if (empty.Length != 0) return 3;
+        stream.Seek(19000L, SeekOrigin.Begin);
+        if (stream.ReadAllBytes().Length != 0) return 4;
+        stream.Close();
+        try { stream.ReadAllBytes(); } catch (Exception e) { return 0; }
+        return 5;
+    }
+}

@@ -1,0 +1,16 @@
+
+public interface ICounter { int Add(int amount); int Get(); }
+public class Counter : ICounter, IStringable {
+public:
+ int Value;
+ Counter(int value) { Value=value; }
+ int Add(int amount) { Value+=amount; return Value; }
+ int Get() { return Value; }
+ string ToString() { return $"Counter({Value})"; }
+ static Counter operator +(Counter a,Counter b) { return Counter(a.Value+b.Value); }
+ static Counter operator ++(Counter a) { return Counter(a.Value+1); }
+ static Counter operator --(Counter a) { return Counter(a.Value-1); }
+}
+static class Program {public: void Main(){
+Counter c=Counter(4); ICounter& r=c; Print(r.Add(3)); ICounter* p=&c; Print(p->Add(2)); Print(c);
+}}

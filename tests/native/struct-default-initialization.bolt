@@ -1,0 +1,35 @@
+struct PlainState { public: int Count; ulong Mask; }
+struct Row { public: PlainState State; bool Ready; }
+struct Numbered {
+public:
+    static int Calls = 0;
+    int Value;
+    Numbered() { Calls++; Value = Calls; }
+}
+struct Marked {
+public:
+    int Value = 20 + 3;
+}
+struct Mixed { public: PlainState State; Numbered Ticket; Marked Mark; }
+static class Program {
+public:
+    void Main() {
+        bool ok = true;
+        for (int i = 0; i < 3; i++) {
+            Row row;
+            ok = ok && row.State.Count == 0 && row.State.Mask == 0ul && !row.Ready;
+            row.State.Count = i + 1; row.Ready = true;
+        }
+        Row[,] grid = new Row[3,5];
+        grid[1,2].State.Mask = 17ul;
+        ok = ok && grid[1,2].State.Mask == 17ul && grid[1,3].State.Mask == 0ul;
+        Mixed[] records = new Mixed[7];
+        ok = ok && Numbered.Calls == 7;
+        for (int i = 0; i < records.Length; i++)
+            ok = ok && records[i].Ticket.Value == i + 1 && records[i].Mark.Value == 23 &&
+                 records[i].State.Count == 0;
+        Mixed[] empty = new Mixed[0];
+        ok = ok && empty.Length == 0 && Numbered.Calls == 7;
+        Print(ok);
+    }
+}

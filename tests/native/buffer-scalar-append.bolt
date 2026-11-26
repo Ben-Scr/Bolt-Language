@@ -1,0 +1,152 @@
+import System
+import Bolt.Runtime
+
+struct SamplePair {
+public:
+    int X;
+    int Y;
+}
+public static class Program {
+public:
+    int Replace(Buffer<int>& buffer) {
+        Buffer<int> fresh;
+        fresh.Reserve(32);
+        fresh.Add(31);
+        buffer.Swap(fresh);
+        return 7;
+    }
+
+    bool AppendRecords(int bias, int reserve) {
+        Buffer<SamplePair> values;
+        values.Reserve(reserve);
+        bool failed = false;
+        try {
+            for (int i = 0; i < 4; i++) {
+                SamplePair pair;
+                pair.X = i;
+                pair.Y = i + bias;
+                values.Add(pair);
+            }
+        } catch { failed = true; }
+        int count = failed ? 2 : 4;
+        if (failed != (bias == int.MaxValue - 1) || values.Length != count) return false;
+        for (int i = 0; i < count; i++)
+            if (values[i].X != i || values[i].Y != i + bias) return false;
+        return true;
+    }
+
+    ulong Sample(int[] data, int baseIndex, ulong total) {
+        try {
+            for (int i = 0; i < 4; i++) {
+                int sample = (baseIndex + i * 2) % data.Length;
+                total += (ulong)data[sample];
+            }
+        } catch { return total; }
+        return total;
+    }
+
+    int DenseSum(int bias, int prefixed, int total) {
+        Buffer<SamplePair> items;
+        if (prefixed != 0) {
+            SamplePair head;
+            head.X = 2; head.Y = 1; items.Add(head);
+        }
+        try {
+            for (int i = 0; i < 8; i++) {
+                SamplePair p;
+                p.X = (i ^ bias) & 5;
+                p.Y = (bias - i) & 3;
+                items.Add(p);
+            }
+            for (int i = 0; i < items.Length; i++) total += items[i].X + items[i].Y;
+        } catch { return total; }
+        return total;
+    }
+
+    int PairSum(int x, int y, int total, bool empty) {
+        SamplePair[] items = new SamplePair[empty ? 0 : 2];
+        if (!empty) {
+            items[0].X = 2; items[0].Y = 3;
+            items[1].X = x; items[1].Y = y;
+        }
+        try { for (int i = 0; i < items.Length; i++) total += items[i].X + items[i].Y; }
+        catch { return total; }
+        return total;
+    }
+
+    bool AppendRanges() {
+        int[] source = new int[4];
+        for (int i = 0; i < 4; i++) source[i] = i + 10;
+        Buffer<int> dest;
+        dest.Reserve(8);
+        dest.AppendRange(source, 1, 2);
+        dest.AppendRange(source, 4, 0);
+        if (dest.Length != 2 || dest[0] != 11 || dest[1] != 12) return false;
+        int caught = 0;
+        try { dest.AppendRange(source, -1, 1); } catch { caught++; }
+        try { dest.AppendRange(source, 1, -1); } catch { caught++; }
+        try { dest.AppendRange(source, 3, 2); } catch { caught++; }
+        if (caught != 3 || dest.Length != 2) return false;
+        try { for (int item : dest) { dest.AppendRange(source, 0, 1); } } catch { caught++; }
+        return caught == 4 && dest.Length == 3 && dest[2] == 10;
+    }
+
+    int Main() {
+        Buffer<int> values;
+        values.Reserve(1);
+        values.Add(9);
+        values.Add(values[0]);
+        if (values.Length != 2 || values[0] != 9 || values[1] != 9) return 1;
+        values.Reserve(16);
+        values.Add(Replace(values));
+        if (values.Length != 2 || values[0] != 31 || values[1] != 7) return 2;
+        Buffer<float> floats;
+        floats.Reserve(4);
+        floats.Add(-2.5f);
+        if (floats[0] != -2.5f) return 3;
+        Buffer<bool> flags;
+        flags.Reserve(4);
+        flags.Add(true);
+        flags.Add(false);
+        if (!flags[0] || flags[1]) return 4;
+        int cell = 17;
+        Buffer<int*> pointers;
+        pointers.Reserve(4);
+        pointers.Add(&cell);
+        pointers.Add(pointers[0]);
+        cell = 29;
+        if (*pointers[1] != 29) return 5;
+        Buffer<byte> bytes;
+        bytes.Reserve(4);
+        bytes.Add((byte)255);
+        if (bytes[0] != (byte)255) return 6;
+        bool caught = false;
+        try {
+            for (int n : values) {
+                values.Add(n);
+                if (values.Length >= 5) return 7;
+            }
+        } catch (Exception e) {
+            caught = true;
+        }
+        if (!caught || values.Length != 3) return 8;
+        values.Add(42);
+        if (values[3] != 42) return 9;
+        if (!AppendRecords(9, 1) || !AppendRecords(int.MaxValue - 1, 8)) return 10;
+        int[] data = new int[8];
+        for (int i = 0; i < data.Length; i++) data[i] = i + 1;
+        if (Sample(data, 5, 0ul) != 20ul ||
+            Sample(data, 0, ulong.MaxValue - 5ul) != ulong.MaxValue - 1ul) return 11;
+        data[4] = -1;
+        if (Sample(data, 0, 0ul) != 4ul) return 12;
+        int[] shortData = new int[1];
+        shortData[0] = 3;
+        if (Sample(shortData, 0, 1ul) != 13ul) return 13;
+        if (DenseSum(1, 0, -2) != 30 || DenseSum(9, 1, 2) != 37 ||
+            DenseSum(1, 0, int.MaxValue - 2) != int.MaxValue) return 14;
+        if (PairSum(-6, 4, -2, false) != 1 || PairSum(int.MaxValue, 1, 10, false) != 15 ||
+            PairSum(1, 1, int.MaxValue - 5, false) != int.MaxValue || PairSum(1, 2, -3, true) != -3) return 15;
+        if (!AppendRanges()) return 16;
+        return 0;
+    }
+}

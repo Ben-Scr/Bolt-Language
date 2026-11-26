@@ -1,0 +1,13 @@
+import Math
+
+static class Program {
+public:
+    void Main() {
+        double sum = 0.0;
+        for (int i = 1; i <= 8000000; i++) {
+            double x = (double)i * (1.0 / 65536.0);
+            sum += Math.Sin(x) + Math.Cos(x);
+        }
+        Print((long)(sum * 1000.0));
+    }
+}

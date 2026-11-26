@@ -1,0 +1,68 @@
+import System
+import System.Numerics
+
+static class Program
+{
+private:
+    bool ConversionFails<T>(string text, bool overflow) : FloatingPoint<T>
+    {
+        T value = (T)7.5;
+        if (Converter.TryTo<T>(text, value) || value != (T)7.5) return false;
+        try { Converter.To<T>(text); }
+        catch (OverflowException e) { return overflow && e.Message == "The number is outside the target type's range."; }
+        catch (FormatException e) { return !overflow && e.Message == "The text does not represent the requested type."; }
+        return false;
+    }
+public:
+    int Main()
+    {
+        if (short.Parse("-32768") != short.MinValue || byte.Parse("255") != byte.MaxValue) return 1;
+        if (ushort.Parse("65535") != ushort.MaxValue || uint.Parse("+4294967295") != uint.MaxValue) return 2;
+        if (long.Parse("-9223372036854775808") != long.MinValue) return 3;
+        ulong natural = ulong.Parse("18446744073709551615");
+        if (ulong.TryParse("18446744073709551616", natural) || natural != ulong.MaxValue) return 4;
+        if (Converter.TryTo<ulong>("-0", natural) || natural != ulong.MaxValue) return 5;
+        if (Converter.To<long>(" -9223372036854775808 ") != long.MinValue) return 6;
+        try { Converter.To<int>("2147483648"); return 7; } catch (OverflowException e) {}
+        try { Converter.To<int>("2147483648x"); return 8; } catch (FormatException e) {}
+        try { int.Parse("1\0"); return 9; } catch (SystemException e) {}
+
+        // These straddle the same binary32 midpoint while rounding to the same binary64.
+        if (Reinterpret<uint>(float.Parse("1.000000059604644775390625")) != 1065353216u) return 10;
+        if (Reinterpret<uint>(float.Parse("1.00000005960464477539062500001")) != 1065353217u) return 11;
+        if (Reinterpret<uint>(float.Parse("1.000000178813934326171875")) != 1065353218u) return 12;
+        if (Reinterpret<uint>(float.Parse("-0e9999999999999")) != 2147483648u) return 13;
+        if (Reinterpret<ulong>(double.Parse("4.9406564584124654e-324")) != 1ul) return 14;
+        double real = double.MaxValue;
+        if (double.TryParse("2.4703282292062327e-324", real) || real != double.MaxValue) return 15;
+        if (double.TryParse("1.7976931348623159e308", real) || real != double.MaxValue) return 16;
+        string halfway = "1.00000000000000011102230246251565404236316680908203125";
+        if (Reinterpret<ulong>(double.Parse(halfway)) != 4607182418800017408ul) return 17;
+        if (Reinterpret<ulong>(double.Parse(halfway.PadRight(810, '0') + "1")) != 4607182418800017409ul) return 18;
+
+        BigInteger integer;
+        if (!BigInteger.TryParse(" -000123456789000000000987654321 ", integer)) return 19;
+        if (integer.ToString() != "-123456789000000000987654321") return 20;
+        if (BigInteger.TryParse("12x", integer) || !integer.IsZero) return 21;
+        BigFloat value;
+        if (!BigFloat.TryParse(" -.0009995E+5 ", 3, value) || value.Mantissa.ToString() != "-1" || value.Exponent != 2l) return 22;
+        if (!BigFloat.TryParse("1.234500", 4, value) || value.Mantissa.ToString() != "1235" || value.Exponent != -3l) return 23;
+        if (!BigFloat.TryParse("1e-9223372036854775808", value) || value.Exponent != long.MinValue) return 24;
+        if (BigFloat.TryParse("10e9223372036854775807", value) || !value.IsZero) return 25;
+        if (BigFloat.TryParse("9e+", value) || BigFloat.TryParse("12", 0, value)) return 26;
+        if (!BigFloat.TryParse("-0.000", 7, value) || !value.IsZero || value.Precision != 7) return 27;
+
+        if (Reinterpret<uint>(Converter.To<float>(" +1.00000005960464477539062500001 ")) != 1065353217u) return 28;
+        if (Reinterpret<ulong>(Converter.ToDouble("-0e9999999999999")) != 9223372036854775808ul) return 29;
+        float single = 7.0f;
+        if (!Converter.TryTo<float>("1.401298464324817e-45", single) || Reinterpret<uint>(single) != 1u) return 30;
+        if (!Converter.TryTo<double>("5e-324", real) || Reinterpret<ulong>(real) != 1ul) return 31;
+        if (Converter.ToFloat("3.4028234663852886e38") != float.MaxValue) return 32;
+        if (!ConversionFails<float>("3.4028236e38", true) || !ConversionFails<double>("1.7976931348623159e308", true)) return 33;
+        if (!ConversionFails<float>("-1e-50", true) || !ConversionFails<double>("2.4703282292062327e-324", true)) return 34;
+        if (!ConversionFails<float>("1e999x", false) || !ConversionFails<double>("1e-", false)) return 35;
+        if (!ConversionFails<float>("NaN", false) || !ConversionFails<double>("+Infinity", false)) return 36;
+        if (!ConversionFails<float>("+-1", false) || !ConversionFails<double>("+-1e999", true)) return 37;
+        return 0;
+    }
+}

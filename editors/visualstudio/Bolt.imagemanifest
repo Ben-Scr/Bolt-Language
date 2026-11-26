@@ -1,0 +1,5 @@
+<ImageManifest xmlns="http://schemas.microsoft.com/VisualStudio/ImageManifestSchema/2014">
+  <Images><Image Guid="{79a256bc-799b-47c4-8dfc-1fc26d70a907}" ID="1" AllowColorInversion="false">
+    <Source Uri="$(ManifestFolder)/Resources/bolt-file.png"><Size Value="256" /></Source>
+  </Image></Images>
+</ImageManifest>

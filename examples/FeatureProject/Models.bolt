@@ -1,0 +1,27 @@
+namespace Demo.Models;
+
+public class Container<T>
+{
+public:
+    T Value;
+    Container(T value) { Value = value; }
+}
+
+public enum Status : byte
+{
+    Idle = 0,
+    Running = 1,
+    Finished = 2
+}
+
+public class Logger
+{
+public:
+    void Write() { Console.WriteLine("Base logger"); }
+}
+
+public sealed class AppLogger : Logger
+{
+public:
+    sealed override void Write() { Console.WriteLine("Bolt logger"); }
+}

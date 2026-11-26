@@ -1,0 +1,45 @@
+import Bolt.Runtime
+namespace System.Collections.Generic;
+
+[StringableElements]
+[SerializeSequence("Length", "ItemAt", "Add")]
+public sealed class HashSet<T> : IStringable
+{
+private:
+    HashTable<T, bool> table;
+public:
+    HashSet(int capacity = 0) { table.Reserve(capacity); }
+    int Length => table.Length;
+    int Count => table.Length;
+    int Capacity => table.Capacity;
+    bool Add(T value) { return table.Put(value, false, false); }
+    bool Remove(const T& value) { return table.Remove(value); }
+    [ReadOnly] bool Contains(const T& value) { return table.ContainsKey(value); }
+    void Clear() { table.Clear(); }
+    void Reserve(int capacity) { table.Reserve(capacity); }
+    [ReadOnly] T ItemAt(int index) { return table.KeyAt(index); }
+    [ReadOnly] T[] ToArray()
+    {
+        Bolt.Runtime.Buffer<T> result; result.Reserve(table.Length);
+        for (int i = 0; i < table.Length; i++) result.Add(table.KeyAt(i));
+        return result.ToArray();
+    }
+    HashSetEnumerator<T> GetEnumerator() { return HashSetEnumerator<T>(table.GetEnumerator()); }
+    static bool operator ==(const HashSet<T>& a, const HashSet<T>& b) { return a.table.SameEntries(b.table, false); }
+    [ReadOnly] ulong GetHashCode() { return table.ContentHash(false); }
+    [SnapshotReceiver]
+    string ToString() : IStringable<T>
+    {
+        T[] values = ToArray(); string[] pieces = new string[values.Length];
+        for (int i = 0; i < values.Length; i++) pieces[i] = Bolt.Runtime.Values.Format<T>(values[i]);
+        return CollectionFormatting.Braces(pieces);
+    }
+}
+public struct HashSetEnumerator<T>
+{
+private: HashEnumerator<T, bool> inner;
+public:
+    HashSetEnumerator(HashEnumerator<T, bool> iterator) { inner = iterator; }
+    bool MoveNext() { return inner.MoveNext(); }
+    T Current => inner.Key;
+}

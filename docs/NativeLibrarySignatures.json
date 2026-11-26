@@ -1,0 +1,1562 @@
+[
+  {
+    "id": 0,
+    "signature": "bolt::library::ArgumentException::$new(string)->System.ArgumentException"
+  },
+  {
+    "id": 1,
+    "signature": "bolt::library::ArgumentNullException::$new(string)->System.ArgumentNullException"
+  },
+  {
+    "id": 2,
+    "signature": "bolt::library::ArgumentOutOfRangeException::$new(string)->System.ArgumentOutOfRangeException"
+  },
+  {
+    "id": 3,
+    "signature": "bolt::library::ArithmeticException::$new(string)->System.ArithmeticException"
+  },
+  {
+    "id": 4,
+    "signature": "bolt::library::AssertionException::$new(string)->System.AssertionException"
+  },
+  {
+    "id": 5,
+    "signature": "bolt::library::BinaryReader::$new(System.IO.Stream,bool)->System.IO.BinaryReader"
+  },
+  {
+    "id": 6,
+    "signature": "bolt::library::BinaryReader::Close()->void"
+  },
+  {
+    "id": 7,
+    "signature": "bolt::library::BinaryReader::Dispose()->void"
+  },
+  {
+    "id": 8,
+    "signature": "bolt::library::BinaryReader::Read()->bool"
+  },
+  {
+    "id": 9,
+    "signature": "bolt::library::BinaryReader::Read()->byte"
+  },
+  {
+    "id": 10,
+    "signature": "bolt::library::BinaryReader::Read()->char"
+  },
+  {
+    "id": 11,
+    "signature": "bolt::library::BinaryReader::Read()->double"
+  },
+  {
+    "id": 12,
+    "signature": "bolt::library::BinaryReader::Read()->float"
+  },
+  {
+    "id": 13,
+    "signature": "bolt::library::BinaryReader::Read()->int"
+  },
+  {
+    "id": 14,
+    "signature": "bolt::library::BinaryReader::Read()->long"
+  },
+  {
+    "id": 15,
+    "signature": "bolt::library::BinaryReader::Read()->short"
+  },
+  {
+    "id": 16,
+    "signature": "bolt::library::BinaryReader::Read()->string"
+  },
+  {
+    "id": 17,
+    "signature": "bolt::library::BinaryReader::Read()->uint"
+  },
+  {
+    "id": 18,
+    "signature": "bolt::library::BinaryReader::Read()->ulong"
+  },
+  {
+    "id": 19,
+    "signature": "bolt::library::BinaryReader::Read()->ushort"
+  },
+  {
+    "id": 20,
+    "signature": "bolt::library::BinaryReader::ReadBool()->bool"
+  },
+  {
+    "id": 21,
+    "signature": "bolt::library::BinaryReader::ReadBytes(int)->byte[]"
+  },
+  {
+    "id": 22,
+    "signature": "bolt::library::BinaryReader::ReadChar()->char"
+  },
+  {
+    "id": 23,
+    "signature": "bolt::library::BinaryReader::ReadDouble()->double"
+  },
+  {
+    "id": 24,
+    "signature": "bolt::library::BinaryReader::ReadFloat()->float"
+  },
+  {
+    "id": 25,
+    "signature": "bolt::library::BinaryReader::ReadInt()->int"
+  },
+  {
+    "id": 26,
+    "signature": "bolt::library::BinaryReader::ReadInt16()->short"
+  },
+  {
+    "id": 27,
+    "signature": "bolt::library::BinaryReader::ReadInt64()->long"
+  },
+  {
+    "id": 28,
+    "signature": "bolt::library::BinaryReader::ReadString()->string"
+  },
+  {
+    "id": 29,
+    "signature": "bolt::library::BinaryReader::ReadUInt16()->ushort"
+  },
+  {
+    "id": 30,
+    "signature": "bolt::library::BinaryReader::ReadUInt32()->uint"
+  },
+  {
+    "id": 31,
+    "signature": "bolt::library::BinaryReader::ReadUInt64()->ulong"
+  },
+  {
+    "id": 32,
+    "signature": "bolt::library::BinaryReader::ReadUInt8()->byte"
+  },
+  {
+    "id": 33,
+    "signature": "bolt::library::BinaryWriter::$new(System.IO.Stream,bool)->System.IO.BinaryWriter"
+  },
+  {
+    "id": 34,
+    "signature": "bolt::library::BinaryWriter::Close()->void"
+  },
+  {
+    "id": 35,
+    "signature": "bolt::library::BinaryWriter::Dispose()->void"
+  },
+  {
+    "id": 36,
+    "signature": "bolt::library::BinaryWriter::Flush()->void"
+  },
+  {
+    "id": 37,
+    "signature": "bolt::library::BinaryWriter::Write(bool)->void"
+  },
+  {
+    "id": 38,
+    "signature": "bolt::library::BinaryWriter::Write(byte)->void"
+  },
+  {
+    "id": 39,
+    "signature": "bolt::library::BinaryWriter::Write(char)->void"
+  },
+  {
+    "id": 40,
+    "signature": "bolt::library::BinaryWriter::Write(double)->void"
+  },
+  {
+    "id": 41,
+    "signature": "bolt::library::BinaryWriter::Write(float)->void"
+  },
+  {
+    "id": 42,
+    "signature": "bolt::library::BinaryWriter::Write(int)->void"
+  },
+  {
+    "id": 43,
+    "signature": "bolt::library::BinaryWriter::Write(long)->void"
+  },
+  {
+    "id": 44,
+    "signature": "bolt::library::BinaryWriter::Write(short)->void"
+  },
+  {
+    "id": 45,
+    "signature": "bolt::library::BinaryWriter::Write(string)->void"
+  },
+  {
+    "id": 46,
+    "signature": "bolt::library::BinaryWriter::Write(uint)->void"
+  },
+  {
+    "id": 47,
+    "signature": "bolt::library::BinaryWriter::Write(ulong)->void"
+  },
+  {
+    "id": 48,
+    "signature": "bolt::library::BinaryWriter::Write(ushort)->void"
+  },
+  {
+    "id": 49,
+    "signature": "bolt::library::DirectoryNotFoundException::$new(string)->System.DirectoryNotFoundException"
+  },
+  {
+    "id": 50,
+    "signature": "bolt::library::DivideByZeroException::$new(string)->System.DivideByZeroException"
+  },
+  {
+    "id": 51,
+    "signature": "bolt::library::EndOfStreamException::$new(string)->System.EndOfStreamException"
+  },
+  {
+    "id": 52,
+    "signature": "bolt::library::Exception::$new(string)->System.Exception"
+  },
+  {
+    "id": 53,
+    "signature": "bolt::library::Exception::Message()->string"
+  },
+  {
+    "id": 54,
+    "signature": "bolt::library::Exception::SourceColumn()->int"
+  },
+  {
+    "id": 55,
+    "signature": "bolt::library::Exception::SourceFile()->string"
+  },
+  {
+    "id": 56,
+    "signature": "bolt::library::Exception::SourceLine()->int"
+  },
+  {
+    "id": 57,
+    "signature": "bolt::library::Exception::StackTrace()->string"
+  },
+  {
+    "id": 58,
+    "signature": "bolt::library::Exception::ToString()->string"
+  },
+  {
+    "id": 59,
+    "signature": "bolt::library::FileNotFoundException::$new(string)->System.FileNotFoundException"
+  },
+  {
+    "id": 60,
+    "signature": "bolt::library::FileStream::$new()->System.IO.FileStream"
+  },
+  {
+    "id": 61,
+    "signature": "bolt::library::FileStream::$new(string,System.IO.FileMode,System.IO.FileAccess)->System.IO.FileStream"
+  },
+  {
+    "id": 62,
+    "signature": "bolt::library::FormatException::$new(string)->System.FormatException"
+  },
+  {
+    "id": 63,
+    "signature": "bolt::library::IOException::$new(string)->System.IOException"
+  },
+  {
+    "id": 64,
+    "signature": "bolt::library::IndexOutOfRangeException::$new(string)->System.IndexOutOfRangeException"
+  },
+  {
+    "id": 65,
+    "signature": "bolt::library::InvalidCastException::$new(string)->System.InvalidCastException"
+  },
+  {
+    "id": 66,
+    "signature": "bolt::library::InvalidOperationException::$new(string)->System.InvalidOperationException"
+  },
+  {
+    "id": 67,
+    "signature": "bolt::library::JsonException::$new(string)->System.JsonException"
+  },
+  {
+    "id": 68,
+    "signature": "bolt::library::KeyNotFoundException::$new(string)->System.KeyNotFoundException"
+  },
+  {
+    "id": 69,
+    "signature": "bolt::library::MemoryStream::$new()->System.IO.MemoryStream"
+  },
+  {
+    "id": 70,
+    "signature": "bolt::library::MemoryStream::$new(byte[])->System.IO.MemoryStream"
+  },
+  {
+    "id": 71,
+    "signature": "bolt::library::MemoryStream::$new(int)->System.IO.MemoryStream"
+  },
+  {
+    "id": 72,
+    "signature": "bolt::library::MemoryStream::ToArray()->byte[]"
+  },
+  {
+    "id": 73,
+    "signature": "bolt::library::NotImplementedException::$new(string)->System.NotImplementedException"
+  },
+  {
+    "id": 74,
+    "signature": "bolt::library::NotSupportedException::$new(string)->System.NotSupportedException"
+  },
+  {
+    "id": 75,
+    "signature": "bolt::library::NullReferenceException::$new(string)->System.NullReferenceException"
+  },
+  {
+    "id": 76,
+    "signature": "bolt::library::ObjectDisposedException::$new(string)->System.ObjectDisposedException"
+  },
+  {
+    "id": 77,
+    "signature": "bolt::library::OperationCanceledException::$new(string)->System.OperationCanceledException"
+  },
+  {
+    "id": 78,
+    "signature": "bolt::library::OutOfMemoryException::$new(string)->System.OutOfMemoryException"
+  },
+  {
+    "id": 79,
+    "signature": "bolt::library::OverflowException::$new(string)->System.OverflowException"
+  },
+  {
+    "id": 80,
+    "signature": "bolt::library::Process::Terminate(int)->void"
+  },
+  {
+    "id": 81,
+    "signature": "bolt::library::ReflectionException::$new(string)->System.ReflectionException"
+  },
+  {
+    "id": 82,
+    "signature": "bolt::library::SocketException::$new(string)->System.SocketException"
+  },
+  {
+    "id": 83,
+    "signature": "bolt::library::SocketWouldBlockException::$new(string)->System.SocketWouldBlockException"
+  },
+  {
+    "id": 84,
+    "signature": "bolt::library::Stream::CanRead()->bool"
+  },
+  {
+    "id": 85,
+    "signature": "bolt::library::Stream::CanSeek()->bool"
+  },
+  {
+    "id": 86,
+    "signature": "bolt::library::Stream::CanWrite()->bool"
+  },
+  {
+    "id": 87,
+    "signature": "bolt::library::Stream::Close()->void"
+  },
+  {
+    "id": 88,
+    "signature": "bolt::library::Stream::CopyTo(System.IO.Stream,int)->void"
+  },
+  {
+    "id": 89,
+    "signature": "bolt::library::Stream::Dispose()->void"
+  },
+  {
+    "id": 90,
+    "signature": "bolt::library::Stream::Flush()->void"
+  },
+  {
+    "id": 91,
+    "signature": "bolt::library::Stream::Length()->long"
+  },
+  {
+    "id": 92,
+    "signature": "bolt::library::Stream::Position()->long"
+  },
+  {
+    "id": 93,
+    "signature": "bolt::library::Stream::Read(byte[],int,int)->int"
+  },
+  {
+    "id": 94,
+    "signature": "bolt::library::Stream::ReadAllBytes()->byte[]"
+  },
+  {
+    "id": 95,
+    "signature": "bolt::library::Stream::ReadByte()->int"
+  },
+  {
+    "id": 96,
+    "signature": "bolt::library::Stream::Seek(long,System.IO.SeekOrigin)->long"
+  },
+  {
+    "id": 97,
+    "signature": "bolt::library::Stream::SetLength(long)->void"
+  },
+  {
+    "id": 98,
+    "signature": "bolt::library::Stream::Write(byte[],int,int)->void"
+  },
+  {
+    "id": 99,
+    "signature": "bolt::library::Stream::WriteByte(byte)->void"
+  },
+  {
+    "id": 100,
+    "signature": "bolt::library::StreamReader::$new(System.IO.Stream,bool)->System.IO.StreamReader"
+  },
+  {
+    "id": 101,
+    "signature": "bolt::library::StreamReader::$new(string)->System.IO.StreamReader"
+  },
+  {
+    "id": 102,
+    "signature": "bolt::library::StreamReader::Close()->void"
+  },
+  {
+    "id": 103,
+    "signature": "bolt::library::StreamReader::Dispose()->void"
+  },
+  {
+    "id": 104,
+    "signature": "bolt::library::StreamReader::EndOfStream()->bool"
+  },
+  {
+    "id": 105,
+    "signature": "bolt::library::StreamReader::ReadLine()->string"
+  },
+  {
+    "id": 106,
+    "signature": "bolt::library::StreamReader::ReadToEnd()->string"
+  },
+  {
+    "id": 107,
+    "signature": "bolt::library::Strings::At(string,int)->char"
+  },
+  {
+    "id": 108,
+    "signature": "bolt::library::Strings::ByteLength(string)->int"
+  },
+  {
+    "id": 109,
+    "signature": "bolt::library::Strings::Compare(string,string)->int"
+  },
+  {
+    "id": 110,
+    "signature": "bolt::library::Strings::Contains(string,char)->bool"
+  },
+  {
+    "id": 111,
+    "signature": "bolt::library::Strings::Contains(string,string)->bool"
+  },
+  {
+    "id": 112,
+    "signature": "bolt::library::Strings::EndsWith(string,string)->bool"
+  },
+  {
+    "id": 113,
+    "signature": "bolt::library::Strings::Equals(string,string)->bool"
+  },
+  {
+    "id": 114,
+    "signature": "bolt::library::Strings::FromUtf8(byte[])->string"
+  },
+  {
+    "id": 115,
+    "signature": "bolt::library::Strings::IndexOf(string,char)->int"
+  },
+  {
+    "id": 116,
+    "signature": "bolt::library::Strings::IndexOf(string,char,int)->int"
+  },
+  {
+    "id": 117,
+    "signature": "bolt::library::Strings::IndexOf(string,string)->int"
+  },
+  {
+    "id": 118,
+    "signature": "bolt::library::Strings::IndexOf(string,string,int)->int"
+  },
+  {
+    "id": 119,
+    "signature": "bolt::library::Strings::Insert(string,int,string)->string"
+  },
+  {
+    "id": 120,
+    "signature": "bolt::library::Strings::IsNullOrEmpty(string)->bool"
+  },
+  {
+    "id": 121,
+    "signature": "bolt::library::Strings::IsNullOrWhiteSpace(string)->bool"
+  },
+  {
+    "id": 122,
+    "signature": "bolt::library::Strings::Join(string,string[])->string"
+  },
+  {
+    "id": 123,
+    "signature": "bolt::library::Strings::LastIndexOf(string,char)->int"
+  },
+  {
+    "id": 124,
+    "signature": "bolt::library::Strings::LastIndexOf(string,string)->int"
+  },
+  {
+    "id": 125,
+    "signature": "bolt::library::Strings::Length(string)->int"
+  },
+  {
+    "id": 126,
+    "signature": "bolt::library::Strings::PadLeft(string,int)->string"
+  },
+  {
+    "id": 127,
+    "signature": "bolt::library::Strings::PadLeft(string,int,char)->string"
+  },
+  {
+    "id": 128,
+    "signature": "bolt::library::Strings::PadRight(string,int)->string"
+  },
+  {
+    "id": 129,
+    "signature": "bolt::library::Strings::PadRight(string,int,char)->string"
+  },
+  {
+    "id": 130,
+    "signature": "bolt::library::Strings::Remove(string,int)->string"
+  },
+  {
+    "id": 131,
+    "signature": "bolt::library::Strings::Remove(string,int,int)->string"
+  },
+  {
+    "id": 132,
+    "signature": "bolt::library::Strings::Replace(string,char,char)->string"
+  },
+  {
+    "id": 133,
+    "signature": "bolt::library::Strings::Replace(string,string,string)->string"
+  },
+  {
+    "id": 134,
+    "signature": "bolt::library::Strings::Split(string,char)->string[]"
+  },
+  {
+    "id": 135,
+    "signature": "bolt::library::Strings::Split(string,char,bool)->string[]"
+  },
+  {
+    "id": 136,
+    "signature": "bolt::library::Strings::Split(string,string)->string[]"
+  },
+  {
+    "id": 137,
+    "signature": "bolt::library::Strings::Split(string,string,bool)->string[]"
+  },
+  {
+    "id": 138,
+    "signature": "bolt::library::Strings::StartsWith(string,string)->bool"
+  },
+  {
+    "id": 139,
+    "signature": "bolt::library::Strings::Substring(string,int)->string"
+  },
+  {
+    "id": 140,
+    "signature": "bolt::library::Strings::Substring(string,int,int)->string"
+  },
+  {
+    "id": 141,
+    "signature": "bolt::library::Strings::ToCharArray(string)->char[]"
+  },
+  {
+    "id": 142,
+    "signature": "bolt::library::Strings::ToLower(string)->string"
+  },
+  {
+    "id": 143,
+    "signature": "bolt::library::Strings::ToUpper(string)->string"
+  },
+  {
+    "id": 144,
+    "signature": "bolt::library::Strings::ToUtf8(string)->byte[]"
+  },
+  {
+    "id": 145,
+    "signature": "bolt::library::Strings::Trim(string)->string"
+  },
+  {
+    "id": 146,
+    "signature": "bolt::library::Strings::TrimEnd(string)->string"
+  },
+  {
+    "id": 147,
+    "signature": "bolt::library::Strings::TrimStart(string)->string"
+  },
+  {
+    "id": 148,
+    "signature": "bolt::library::SystemException::$new(string)->System.SystemException"
+  },
+  {
+    "id": 149,
+    "signature": "bolt::library::TimeoutException::$new(string)->System.TimeoutException"
+  },
+  {
+    "id": 150,
+    "signature": "bolt::library::UnauthorizedAccessException::$new(string)->System.UnauthorizedAccessException"
+  },
+  {
+    "id": 151,
+    "signature": "bolt::platform::Bits::Add64(ulong,ulong)->ulong"
+  },
+  {
+    "id": 152,
+    "signature": "bolt::platform::Bits::Multiply64(ulong,ulong)->ulong"
+  },
+  {
+    "id": 153,
+    "signature": "bolt::platform::Clock::MonotonicTicks()->long"
+  },
+  {
+    "id": 154,
+    "signature": "bolt::platform::DirectoryEntry::IsDirectory()->bool"
+  },
+  {
+    "id": 155,
+    "signature": "bolt::platform::DirectoryEntry::IsFile()->bool"
+  },
+  {
+    "id": 156,
+    "signature": "bolt::platform::DirectoryEntry::IsLink()->bool"
+  },
+  {
+    "id": 157,
+    "signature": "bolt::platform::DirectoryEntry::Path()->string"
+  },
+  {
+    "id": 158,
+    "signature": "bolt::platform::DirectoryOps::CreateOne(string)->void"
+  },
+  {
+    "id": 159,
+    "signature": "bolt::platform::DirectoryOps::Current()->string"
+  },
+  {
+    "id": 160,
+    "signature": "bolt::platform::DirectoryOps::Current(string)->void"
+  },
+  {
+    "id": 161,
+    "signature": "bolt::platform::DirectoryOps::Entries(string)->Bolt.Runtime.IO.DirectoryEntry[]"
+  },
+  {
+    "id": 162,
+    "signature": "bolt::platform::DirectoryOps::IsDirectory(string)->bool"
+  },
+  {
+    "id": 163,
+    "signature": "bolt::platform::DirectoryOps::IsLink(string)->bool"
+  },
+  {
+    "id": 164,
+    "signature": "bolt::platform::DirectoryOps::Move(string,string)->void"
+  },
+  {
+    "id": 165,
+    "signature": "bolt::platform::DirectoryOps::RemoveOne(string)->void"
+  },
+  {
+    "id": 166,
+    "signature": "bolt::platform::Entropy::Seed()->ulong"
+  },
+  {
+    "id": 167,
+    "signature": "bolt::platform::Entropy::ThreadRandomState()->ulong*"
+  },
+  {
+    "id": 168,
+    "signature": "bolt::platform::Failure::Argument(string)->void"
+  },
+  {
+    "id": 169,
+    "signature": "bolt::platform::Failure::DirectoryMissing(string)->void"
+  },
+  {
+    "id": 170,
+    "signature": "bolt::platform::Failure::Format(string)->void"
+  },
+  {
+    "id": 171,
+    "signature": "bolt::platform::Failure::IO(string)->void"
+  },
+  {
+    "id": 172,
+    "signature": "bolt::platform::Failure::Index(string)->void"
+  },
+  {
+    "id": 173,
+    "signature": "bolt::platform::Failure::InvalidOperation(string)->void"
+  },
+  {
+    "id": 174,
+    "signature": "bolt::platform::Failure::MissingKey(string)->void"
+  },
+  {
+    "id": 175,
+    "signature": "bolt::platform::Failure::Overflow(string)->void"
+  },
+  {
+    "id": 176,
+    "signature": "bolt::platform::Failure::Range(string)->void"
+  },
+  {
+    "id": 177,
+    "signature": "bolt::platform::FileOps::Copy(string,string,bool)->void"
+  },
+  {
+    "id": 178,
+    "signature": "bolt::platform::FileOps::Delete(string)->void"
+  },
+  {
+    "id": 179,
+    "signature": "bolt::platform::FileOps::Exists(string)->bool"
+  },
+  {
+    "id": 180,
+    "signature": "bolt::platform::FileOps::Move(string,string,bool)->void"
+  },
+  {
+    "id": 181,
+    "signature": "bolt::platform::ScalarConversion::Float(string,bool,int)->bool"
+  },
+  {
+    "id": 182,
+    "signature": "bolt::platform::ScalarConversion::Float(string,byte,int)->bool"
+  },
+  {
+    "id": 183,
+    "signature": "bolt::platform::ScalarConversion::Float(string,char,int)->bool"
+  },
+  {
+    "id": 184,
+    "signature": "bolt::platform::ScalarConversion::Float(string,double,int)->bool"
+  },
+  {
+    "id": 185,
+    "signature": "bolt::platform::ScalarConversion::Float(string,float,int)->bool"
+  },
+  {
+    "id": 186,
+    "signature": "bolt::platform::ScalarConversion::Float(string,int,int)->bool"
+  },
+  {
+    "id": 187,
+    "signature": "bolt::platform::ScalarConversion::Float(string,long,int)->bool"
+  },
+  {
+    "id": 188,
+    "signature": "bolt::platform::ScalarConversion::Float(string,short,int)->bool"
+  },
+  {
+    "id": 189,
+    "signature": "bolt::platform::ScalarConversion::Float(string,string,int)->bool"
+  },
+  {
+    "id": 190,
+    "signature": "bolt::platform::ScalarConversion::Float(string,uint,int)->bool"
+  },
+  {
+    "id": 191,
+    "signature": "bolt::platform::ScalarConversion::Float(string,ulong,int)->bool"
+  },
+  {
+    "id": 192,
+    "signature": "bolt::platform::ScalarConversion::Float(string,ushort,int)->bool"
+  },
+  {
+    "id": 193,
+    "signature": "bolt::platform::Values::Equal(bool,bool)->bool"
+  },
+  {
+    "id": 194,
+    "signature": "bolt::platform::Values::Equal(byte,byte)->bool"
+  },
+  {
+    "id": 195,
+    "signature": "bolt::platform::Values::Equal(char,char)->bool"
+  },
+  {
+    "id": 196,
+    "signature": "bolt::platform::Values::Equal(double,double)->bool"
+  },
+  {
+    "id": 197,
+    "signature": "bolt::platform::Values::Equal(float,float)->bool"
+  },
+  {
+    "id": 198,
+    "signature": "bolt::platform::Values::Equal(int,int)->bool"
+  },
+  {
+    "id": 199,
+    "signature": "bolt::platform::Values::Equal(long,long)->bool"
+  },
+  {
+    "id": 200,
+    "signature": "bolt::platform::Values::Equal(short,short)->bool"
+  },
+  {
+    "id": 201,
+    "signature": "bolt::platform::Values::Equal(string,string)->bool"
+  },
+  {
+    "id": 202,
+    "signature": "bolt::platform::Values::Equal(uint,uint)->bool"
+  },
+  {
+    "id": 203,
+    "signature": "bolt::platform::Values::Equal(ulong,ulong)->bool"
+  },
+  {
+    "id": 204,
+    "signature": "bolt::platform::Values::Equal(ushort,ushort)->bool"
+  },
+  {
+    "id": 205,
+    "signature": "bolt::platform::Values::Format(bool)->string"
+  },
+  {
+    "id": 206,
+    "signature": "bolt::platform::Values::Format(byte)->string"
+  },
+  {
+    "id": 207,
+    "signature": "bolt::platform::Values::Format(char)->string"
+  },
+  {
+    "id": 208,
+    "signature": "bolt::platform::Values::Format(double)->string"
+  },
+  {
+    "id": 209,
+    "signature": "bolt::platform::Values::Format(float)->string"
+  },
+  {
+    "id": 210,
+    "signature": "bolt::platform::Values::Format(int)->string"
+  },
+  {
+    "id": 211,
+    "signature": "bolt::platform::Values::Format(long)->string"
+  },
+  {
+    "id": 212,
+    "signature": "bolt::platform::Values::Format(short)->string"
+  },
+  {
+    "id": 213,
+    "signature": "bolt::platform::Values::Format(string)->string"
+  },
+  {
+    "id": 214,
+    "signature": "bolt::platform::Values::Format(uint)->string"
+  },
+  {
+    "id": 215,
+    "signature": "bolt::platform::Values::Format(ulong)->string"
+  },
+  {
+    "id": 216,
+    "signature": "bolt::platform::Values::Format(ushort)->string"
+  },
+  {
+    "id": 217,
+    "signature": "bolt::platform::Values::Hash(bool)->ulong"
+  },
+  {
+    "id": 218,
+    "signature": "bolt::platform::Values::Hash(byte)->ulong"
+  },
+  {
+    "id": 219,
+    "signature": "bolt::platform::Values::Hash(char)->ulong"
+  },
+  {
+    "id": 220,
+    "signature": "bolt::platform::Values::Hash(double)->ulong"
+  },
+  {
+    "id": 221,
+    "signature": "bolt::platform::Values::Hash(float)->ulong"
+  },
+  {
+    "id": 222,
+    "signature": "bolt::platform::Values::Hash(int)->ulong"
+  },
+  {
+    "id": 223,
+    "signature": "bolt::platform::Values::Hash(long)->ulong"
+  },
+  {
+    "id": 224,
+    "signature": "bolt::platform::Values::Hash(short)->ulong"
+  },
+  {
+    "id": 225,
+    "signature": "bolt::platform::Values::Hash(string)->ulong"
+  },
+  {
+    "id": 226,
+    "signature": "bolt::platform::Values::Hash(uint)->ulong"
+  },
+  {
+    "id": 227,
+    "signature": "bolt::platform::Values::Hash(ulong)->ulong"
+  },
+  {
+    "id": 228,
+    "signature": "bolt::platform::Values::Hash(ushort)->ulong"
+  },
+  {
+    "id": 229,
+    "signature": "bolt::platform::WriterLease::$new()->Bolt.Runtime.IO.WriterLease"
+  },
+  {
+    "id": 230,
+    "signature": "bolt::platform::WriterLease::$new(System.IO.Stream,bool)->Bolt.Runtime.IO.WriterLease"
+  },
+  {
+    "id": 231,
+    "signature": "bolt::platform::WriterLease::Close()->void"
+  },
+  {
+    "id": 232,
+    "signature": "bolt::platform::WriterLease::Flush()->void"
+  },
+  {
+    "id": 233,
+    "signature": "bolt::platform::WriterLease::WriteText(string)->void"
+  },
+  {
+    "id": 234,
+    "signature": "bolt::system::Allocator::$new(long)->System.Memory.Allocator"
+  },
+  {
+    "id": 235,
+    "signature": "bolt::system::Allocator::Allocate(ulong,ulong)->System.Memory.MemoryBlock"
+  },
+  {
+    "id": 236,
+    "signature": "bolt::system::Allocator::FailAfter(long)->void"
+  },
+  {
+    "id": 237,
+    "signature": "bolt::system::Allocator::Free(System.Memory.MemoryBlock)->void"
+  },
+  {
+    "id": 238,
+    "signature": "bolt::system::Allocator::LiveAllocations()->ulong"
+  },
+  {
+    "id": 239,
+    "signature": "bolt::system::Allocator::LiveBytes()->ulong"
+  },
+  {
+    "id": 240,
+    "signature": "bolt::system::Allocator::Reallocate(System.Memory.MemoryBlock,ulong,ulong)->System.Memory.MemoryBlock"
+  },
+  {
+    "id": 241,
+    "signature": "bolt::system::ArenaSlice::$new()->System.Memory.ArenaSlice"
+  },
+  {
+    "id": 242,
+    "signature": "bolt::system::ArenaSlice::Data()->byte*"
+  },
+  {
+    "id": 243,
+    "signature": "bolt::system::ArenaSlice::IsAlive()->bool"
+  },
+  {
+    "id": 244,
+    "signature": "bolt::system::ArenaSlice::Length()->ulong"
+  },
+  {
+    "id": 245,
+    "signature": "bolt::system::ArenaSlice::Read(ulong)->byte"
+  },
+  {
+    "id": 246,
+    "signature": "bolt::system::ArenaSlice::Write(ulong,byte)->void"
+  },
+  {
+    "id": 247,
+    "signature": "bolt::system::ByteArena::$new(ulong,ulong)->System.Memory.ByteArena"
+  },
+  {
+    "id": 248,
+    "signature": "bolt::system::ByteArena::Allocate(ulong,ulong)->System.Memory.ArenaSlice"
+  },
+  {
+    "id": 249,
+    "signature": "bolt::system::ByteArena::Capacity()->ulong"
+  },
+  {
+    "id": 250,
+    "signature": "bolt::system::ByteArena::Close()->void"
+  },
+  {
+    "id": 251,
+    "signature": "bolt::system::ByteArena::Reset()->void"
+  },
+  {
+    "id": 252,
+    "signature": "bolt::system::ByteArena::Used()->ulong"
+  },
+  {
+    "id": 253,
+    "signature": "bolt::system::CapturedProcess::$new()->Bolt.Runtime.CapturedProcess"
+  },
+  {
+    "id": 254,
+    "signature": "bolt::system::CapturedProcess::Error()->byte[]"
+  },
+  {
+    "id": 255,
+    "signature": "bolt::system::CapturedProcess::ExitCode()->int"
+  },
+  {
+    "id": 256,
+    "signature": "bolt::system::CapturedProcess::Output()->byte[]"
+  },
+  {
+    "id": 257,
+    "signature": "bolt::system::CapturedProcess::TimedOut()->bool"
+  },
+  {
+    "id": 258,
+    "signature": "bolt::system::DiagnosticOps::Break()->bool"
+  },
+  {
+    "id": 259,
+    "signature": "bolt::system::DiagnosticOps::Fail(string)->void"
+  },
+  {
+    "id": 260,
+    "signature": "bolt::system::DiagnosticOps::IsAttached()->bool"
+  },
+  {
+    "id": 261,
+    "signature": "bolt::system::DiagnosticOps::Stack(int,int)->string[]"
+  },
+  {
+    "id": 262,
+    "signature": "bolt::system::DiagnosticOps::WriteError(string)->void"
+  },
+  {
+    "id": 263,
+    "signature": "bolt::system::EnvironmentOps::Architecture()->string"
+  },
+  {
+    "id": 264,
+    "signature": "bolt::system::EnvironmentOps::Contains(string)->bool"
+  },
+  {
+    "id": 265,
+    "signature": "bolt::system::EnvironmentOps::CurrentDirectory()->string"
+  },
+  {
+    "id": 266,
+    "signature": "bolt::system::EnvironmentOps::Get(string)->string"
+  },
+  {
+    "id": 267,
+    "signature": "bolt::system::EnvironmentOps::OS()->string"
+  },
+  {
+    "id": 268,
+    "signature": "bolt::system::EnvironmentOps::ProcessorCount()->int"
+  },
+  {
+    "id": 269,
+    "signature": "bolt::system::EnvironmentOps::Remove(string)->void"
+  },
+  {
+    "id": 270,
+    "signature": "bolt::system::EnvironmentOps::Set(string,string)->void"
+  },
+  {
+    "id": 271,
+    "signature": "bolt::system::EnvironmentOps::SetCurrentDirectory(string)->void"
+  },
+  {
+    "id": 272,
+    "signature": "bolt::system::EnvironmentOps::TemporaryDirectory()->string"
+  },
+  {
+    "id": 273,
+    "signature": "bolt::system::IPAddress::$new()->System.Net.IPAddress"
+  },
+  {
+    "id": 274,
+    "signature": "bolt::system::IPAddress::$new(string)->System.Net.IPAddress"
+  },
+  {
+    "id": 275,
+    "signature": "bolt::system::IPAddress::Any()->System.Net.IPAddress"
+  },
+  {
+    "id": 276,
+    "signature": "bolt::system::IPAddress::IPv6Any()->System.Net.IPAddress"
+  },
+  {
+    "id": 277,
+    "signature": "bolt::system::IPAddress::IPv6Loopback()->System.Net.IPAddress"
+  },
+  {
+    "id": 278,
+    "signature": "bolt::system::IPAddress::IsIPv6()->bool"
+  },
+  {
+    "id": 279,
+    "signature": "bolt::system::IPAddress::Loopback()->System.Net.IPAddress"
+  },
+  {
+    "id": 280,
+    "signature": "bolt::system::IPAddress::Parse(string)->System.Net.IPAddress"
+  },
+  {
+    "id": 281,
+    "signature": "bolt::system::IPAddress::ToString()->string"
+  },
+  {
+    "id": 282,
+    "signature": "bolt::system::IPAddress::TryParse(string,System.Net.IPAddress)->bool"
+  },
+  {
+    "id": 283,
+    "signature": "bolt::system::IPEndPoint::$new()->System.Net.IPEndPoint"
+  },
+  {
+    "id": 284,
+    "signature": "bolt::system::IPEndPoint::$new(System.Net.IPAddress,int)->System.Net.IPEndPoint"
+  },
+  {
+    "id": 285,
+    "signature": "bolt::system::IPEndPoint::Address()->System.Net.IPAddress"
+  },
+  {
+    "id": 286,
+    "signature": "bolt::system::IPEndPoint::Port()->int"
+  },
+  {
+    "id": 287,
+    "signature": "bolt::system::IPEndPoint::ToString()->string"
+  },
+  {
+    "id": 288,
+    "signature": "bolt::system::MemoryBlock::$new()->System.Memory.MemoryBlock"
+  },
+  {
+    "id": 289,
+    "signature": "bolt::system::MemoryBlock::Alignment()->ulong"
+  },
+  {
+    "id": 290,
+    "signature": "bolt::system::MemoryBlock::Close()->void"
+  },
+  {
+    "id": 291,
+    "signature": "bolt::system::MemoryBlock::Data()->byte*"
+  },
+  {
+    "id": 292,
+    "signature": "bolt::system::MemoryBlock::IsAlive()->bool"
+  },
+  {
+    "id": 293,
+    "signature": "bolt::system::MemoryBlock::Length()->ulong"
+  },
+  {
+    "id": 294,
+    "signature": "bolt::system::MemoryBlock::Read(ulong)->byte"
+  },
+  {
+    "id": 295,
+    "signature": "bolt::system::MemoryBlock::Write(ulong,byte)->void"
+  },
+  {
+    "id": 296,
+    "signature": "bolt::system::MemoryOps::Compare(byte*,byte*,ulong)->int"
+  },
+  {
+    "id": 297,
+    "signature": "bolt::system::MemoryOps::Copy(byte*,byte*,ulong)->void"
+  },
+  {
+    "id": 298,
+    "signature": "bolt::system::MemoryOps::IsAligned(byte*,ulong)->bool"
+  },
+  {
+    "id": 299,
+    "signature": "bolt::system::MemoryOps::Move(byte*,byte*,ulong)->void"
+  },
+  {
+    "id": 300,
+    "signature": "bolt::system::MemoryOps::Set(byte*,byte,ulong)->void"
+  },
+  {
+    "id": 301,
+    "signature": "bolt::system::PipeHandle::$new()->Bolt.Runtime.PipeHandle"
+  },
+  {
+    "id": 302,
+    "signature": "bolt::system::PipeHandle::Close()->void"
+  },
+  {
+    "id": 303,
+    "signature": "bolt::system::PipeHandle::IsOpen()->bool"
+  },
+  {
+    "id": 304,
+    "signature": "bolt::system::PipeHandle::Read(byte[],int,int,int)->int"
+  },
+  {
+    "id": 305,
+    "signature": "bolt::system::PipeHandle::Write(byte[],int,int,int)->int"
+  },
+  {
+    "id": 306,
+    "signature": "bolt::system::ProcessHandle::$new()->Bolt.Runtime.ProcessHandle"
+  },
+  {
+    "id": 307,
+    "signature": "bolt::system::ProcessHandle::Capture(int,int)->Bolt.Runtime.CapturedProcess"
+  },
+  {
+    "id": 308,
+    "signature": "bolt::system::ProcessHandle::Close()->void"
+  },
+  {
+    "id": 309,
+    "signature": "bolt::system::ProcessHandle::Error()->Bolt.Runtime.PipeHandle"
+  },
+  {
+    "id": 310,
+    "signature": "bolt::system::ProcessHandle::ExitCode()->int"
+  },
+  {
+    "id": 311,
+    "signature": "bolt::system::ProcessHandle::Id()->long"
+  },
+  {
+    "id": 312,
+    "signature": "bolt::system::ProcessHandle::Input()->Bolt.Runtime.PipeHandle"
+  },
+  {
+    "id": 313,
+    "signature": "bolt::system::ProcessHandle::IsRunning()->bool"
+  },
+  {
+    "id": 314,
+    "signature": "bolt::system::ProcessHandle::Kill()->void"
+  },
+  {
+    "id": 315,
+    "signature": "bolt::system::ProcessHandle::Output()->Bolt.Runtime.PipeHandle"
+  },
+  {
+    "id": 316,
+    "signature": "bolt::system::ProcessHandle::Start(string,string[],string,bool,string[],bool)->Bolt.Runtime.ProcessHandle"
+  },
+  {
+    "id": 317,
+    "signature": "bolt::system::ProcessHandle::TerminationSignal()->int"
+  },
+  {
+    "id": 318,
+    "signature": "bolt::system::ProcessHandle::Wait(int)->bool"
+  },
+  {
+    "id": 319,
+    "signature": "bolt::system::Resolver::Resolve(string)->System.Net.IPAddress[]"
+  },
+  {
+    "id": 320,
+    "signature": "bolt::system::SocketHandle::$new()->Bolt.Runtime.Net.SocketHandle"
+  },
+  {
+    "id": 321,
+    "signature": "bolt::system::SocketHandle::Accept()->Bolt.Runtime.Net.SocketHandle"
+  },
+  {
+    "id": 322,
+    "signature": "bolt::system::SocketHandle::Bind(System.Net.IPEndPoint)->void"
+  },
+  {
+    "id": 323,
+    "signature": "bolt::system::SocketHandle::Close()->void"
+  },
+  {
+    "id": 324,
+    "signature": "bolt::system::SocketHandle::Connect(System.Net.IPEndPoint)->void"
+  },
+  {
+    "id": 325,
+    "signature": "bolt::system::SocketHandle::Create(bool,bool)->Bolt.Runtime.Net.SocketHandle"
+  },
+  {
+    "id": 326,
+    "signature": "bolt::system::SocketHandle::IsOpen()->bool"
+  },
+  {
+    "id": 327,
+    "signature": "bolt::system::SocketHandle::Listen(int)->void"
+  },
+  {
+    "id": 328,
+    "signature": "bolt::system::SocketHandle::LocalEndpoint()->System.Net.IPEndPoint"
+  },
+  {
+    "id": 329,
+    "signature": "bolt::system::SocketHandle::Receive(byte[],int,int)->int"
+  },
+  {
+    "id": 330,
+    "signature": "bolt::system::SocketHandle::ReceiveFrom(byte[],System.Net.IPEndPoint,bool)->int"
+  },
+  {
+    "id": 331,
+    "signature": "bolt::system::SocketHandle::RemoteEndpoint()->System.Net.IPEndPoint"
+  },
+  {
+    "id": 332,
+    "signature": "bolt::system::SocketHandle::Send(byte[],int,int)->int"
+  },
+  {
+    "id": 333,
+    "signature": "bolt::system::SocketHandle::SendTo(byte[],System.Net.IPEndPoint)->int"
+  },
+  {
+    "id": 334,
+    "signature": "bolt::system::SocketHandle::SetTimeouts(int,int)->void"
+  },
+  {
+    "id": 335,
+    "signature": "bolt::system::SocketHandle::Shutdown(bool,bool)->void"
+  },
+  {
+    "id": 336,
+    "signature": "bolt::library::FieldInfo::$new()->System.Reflection.FieldInfo"
+  },
+  {
+    "id": 337,
+    "signature": "bolt::library::FieldInfo::Attributes()->string[]"
+  },
+  {
+    "id": 338,
+    "signature": "bolt::library::FieldInfo::IsProperty()->bool"
+  },
+  {
+    "id": 339,
+    "signature": "bolt::library::FieldInfo::IsReadOnly()->bool"
+  },
+  {
+    "id": 340,
+    "signature": "bolt::library::FieldInfo::Name()->string"
+  },
+  {
+    "id": 341,
+    "signature": "bolt::library::FieldInfo::ToString()->string"
+  },
+  {
+    "id": 342,
+    "signature": "bolt::library::FieldInfo::TypeName()->string"
+  },
+  {
+    "id": 343,
+    "signature": "bolt::library::MethodInfo::$new()->System.Reflection.MethodInfo"
+  },
+  {
+    "id": 344,
+    "signature": "bolt::library::MethodInfo::Attributes()->string[]"
+  },
+  {
+    "id": 345,
+    "signature": "bolt::library::MethodInfo::IsStatic()->bool"
+  },
+  {
+    "id": 346,
+    "signature": "bolt::library::MethodInfo::Name()->string"
+  },
+  {
+    "id": 347,
+    "signature": "bolt::library::MethodInfo::ParameterTypes()->string[]"
+  },
+  {
+    "id": 348,
+    "signature": "bolt::library::MethodInfo::ReturnType()->string"
+  },
+  {
+    "id": 349,
+    "signature": "bolt::library::MethodInfo::ToString()->string"
+  },
+  {
+    "id": 350,
+    "signature": "bolt::library::TypeInfo::$new()->System.Reflection.TypeInfo"
+  },
+  {
+    "id": 351,
+    "signature": "bolt::library::TypeInfo::Attributes()->string[]"
+  },
+  {
+    "id": 352,
+    "signature": "bolt::library::TypeInfo::GetField(string)->System.Reflection.FieldInfo"
+  },
+  {
+    "id": 353,
+    "signature": "bolt::library::TypeInfo::GetFields()->System.Reflection.FieldInfo[]"
+  },
+  {
+    "id": 354,
+    "signature": "bolt::library::TypeInfo::GetMethods()->System.Reflection.MethodInfo[]"
+  },
+  {
+    "id": 355,
+    "signature": "bolt::library::TypeInfo::GetProperties()->System.Reflection.FieldInfo[]"
+  },
+  {
+    "id": 356,
+    "signature": "bolt::library::TypeInfo::GetProperty(string)->System.Reflection.FieldInfo"
+  },
+  {
+    "id": 357,
+    "signature": "bolt::library::TypeInfo::HasField(string)->bool"
+  },
+  {
+    "id": 358,
+    "signature": "bolt::library::TypeInfo::HasMethod(string)->bool"
+  },
+  {
+    "id": 359,
+    "signature": "bolt::library::TypeInfo::HasProperty(string)->bool"
+  },
+  {
+    "id": 360,
+    "signature": "bolt::library::TypeInfo::IsClass()->bool"
+  },
+  {
+    "id": 361,
+    "signature": "bolt::library::TypeInfo::IsStruct()->bool"
+  },
+  {
+    "id": 362,
+    "signature": "bolt::library::TypeInfo::Name()->string"
+  },
+  {
+    "id": 363,
+    "signature": "bolt::library::TypeInfo::Namespace()->string"
+  },
+  {
+    "id": 364,
+    "signature": "bolt::library::TypeInfo::ToString()->string"
+  },
+  {
+    "id": 365,
+    "signature": "bolt::platform::ValueTree::$new()->Bolt.Runtime.ValueTree"
+  },
+  {
+    "id": 366,
+    "signature": "bolt::platform::ValueTree::Add(int,int)->void"
+  },
+  {
+    "id": 367,
+    "signature": "bolt::platform::ValueTree::Array()->int"
+  },
+  {
+    "id": 368,
+    "signature": "bolt::platform::ValueTree::Bool(bool)->int"
+  },
+  {
+    "id": 369,
+    "signature": "bolt::platform::ValueTree::Boolean(int)->bool"
+  },
+  {
+    "id": 370,
+    "signature": "bolt::platform::ValueTree::Child(int,int)->int"
+  },
+  {
+    "id": 371,
+    "signature": "bolt::platform::ValueTree::Count(int)->int"
+  },
+  {
+    "id": 372,
+    "signature": "bolt::platform::ValueTree::Floating(int)->double"
+  },
+  {
+    "id": 373,
+    "signature": "bolt::platform::ValueTree::Integer(int)->long"
+  },
+  {
+    "id": 374,
+    "signature": "bolt::platform::ValueTree::Keys(int)->string[]"
+  },
+  {
+    "id": 375,
+    "signature": "bolt::platform::ValueTree::Kind(int)->int"
+  },
+  {
+    "id": 376,
+    "signature": "bolt::platform::ValueTree::Member(int,string)->int"
+  },
+  {
+    "id": 377,
+    "signature": "bolt::platform::ValueTree::Natural(int)->ulong"
+  },
+  {
+    "id": 378,
+    "signature": "bolt::platform::ValueTree::Null()->int"
+  },
+  {
+    "id": 379,
+    "signature": "bolt::platform::ValueTree::NumberBytes(byte[],int,int,bool,bool)->int"
+  },
+  {
+    "id": 380,
+    "signature": "bolt::platform::ValueTree::NumberText(int)->string"
+  },
+  {
+    "id": 381,
+    "signature": "bolt::platform::ValueTree::Object()->int"
+  },
+  {
+    "id": 382,
+    "signature": "bolt::platform::ValueTree::Put(int,string,int)->void"
+  },
+  {
+    "id": 383,
+    "signature": "bolt::platform::ValueTree::Real(double)->int"
+  },
+  {
+    "id": 384,
+    "signature": "bolt::platform::ValueTree::Root()->int"
+  },
+  {
+    "id": 385,
+    "signature": "bolt::platform::ValueTree::SetRoot(int)->void"
+  },
+  {
+    "id": 386,
+    "signature": "bolt::platform::ValueTree::Signed(long)->int"
+  },
+  {
+    "id": 387,
+    "signature": "bolt::platform::ValueTree::String(int)->string"
+  },
+  {
+    "id": 388,
+    "signature": "bolt::platform::ValueTree::Text(string)->int"
+  },
+  {
+    "id": 389,
+    "signature": "bolt::platform::ValueTree::Unsigned(ulong)->int"
+  }
+]

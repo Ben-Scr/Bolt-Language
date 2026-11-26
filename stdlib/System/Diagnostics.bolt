@@ -1,0 +1,35 @@
+import Bolt.Runtime
+namespace System.Diagnostics;
+public static class Assert
+{
+public:
+    // Test assertions are active in every configuration.
+    void That(bool condition, string message = "Assertion failed.")
+    { if (!condition) DiagnosticOps.Fail(message); }
+    void Equal<T>(const T& expected, const T& actual, string message = "Values differ.") : Equatable<T>
+    { if (!(expected == actual)) DiagnosticOps.Fail(message); }
+}
+public static class Debug
+{
+public:
+    // Arguments are evaluated in both profiles; only the check is Debug-only.
+    void Assert(bool condition, string message = "Debug assertion failed.")
+    {
+#ifdef Debug
+        if (!condition) DiagnosticOps.Fail(message);
+#endif
+    }
+    bool IsAttached => DiagnosticOps.IsAttached();
+    bool Break() { return DiagnosticOps.Break(); }
+}
+public static class Trace
+{
+public:
+    void WriteLine<T>(const T& value) : IStringable<T> { DiagnosticOps.WriteError((string)value); }
+}
+public static class StackTrace
+{
+public:
+    // Native symbols/addresses only. No invented .bolt source locations.
+    string[] Capture(int skip = 0, int maximum = 64) { return DiagnosticOps.Stack(skip, maximum); }
+}

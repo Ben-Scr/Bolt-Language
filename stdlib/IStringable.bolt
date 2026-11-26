@@ -1,0 +1,8 @@
+namespace System;
+
+// Available without an import. Primitive values and enums satisfy this interface.
+public interface IStringable
+{
+    string ToString();
+    [SnapshotReceiver] explicit string() { return ToString(); }
+}

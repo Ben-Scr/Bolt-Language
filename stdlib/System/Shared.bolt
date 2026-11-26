@@ -1,0 +1,65 @@
+#ifdef BoltStandaloneCore
+import System
+import Bolt.Runtime
+namespace System.Memory;
+
+struct SharedCell<T> {
+public:
+    ulong References = 1ul;
+    T* Pointer;
+    ~SharedCell() { delete Pointer; }
+}
+public sealed class Shared<T> {
+private:
+    SharedCell<T>* cell;
+public:
+    Shared() {}
+    Shared(T initial) { cell=new SharedCell<T>(); cell->Pointer=TypedMemory.Copy<T>(initial); }
+    static Shared<T> Create() {
+        Shared<T> result;
+        result.cell=new SharedCell<T>();
+        result.cell->Pointer=new T();
+        return result;
+    }
+    [ReadOnly] bool HasValue => cell!=null && cell->Pointer!=null;
+    [ReadOnly] T& Get() {
+        if(!HasValue)throw InvalidOperationException("The Shared is empty.");
+        return *cell->Pointer;
+    }
+    [ReadOnly] T* Borrow() { return cell==null ? null : cell->Pointer; }
+}
+#else
+import Bolt.Runtime
+namespace System.Memory;
+
+class SharedPayload<T> {
+    public T* Pointer;
+    ~SharedPayload() { if(Pointer!=null)delete Pointer; }
+}
+
+public sealed class Shared<T> {
+private:
+    ICaptureCell<SharedPayload<T>>? cell;
+    static Shared<T> Allocate() {
+        Shared<T> result;
+        SharedPayload<T> empty;
+        result.cell=ClosureStorage.Create<SharedPayload<T>>(empty);
+        return result;
+    }
+public:
+    Shared() {}
+    Shared(T initial) {
+        cell=Allocate().cell;
+        cell.Value.Get().Pointer=new T();
+        *cell.Value.Get().Pointer=initial;
+    }
+    static Shared<T> Create() {
+        Shared<T> result=Allocate();
+        result.cell.Value.Get().Pointer=new T();
+        return result;
+    }
+    bool HasValue => cell!=null;
+    T& Get() { return *cell.Value.Get().Pointer; }
+    T* Borrow() { if(cell==null)return null; return cell.Value.Get().Pointer; }
+}
+#endif

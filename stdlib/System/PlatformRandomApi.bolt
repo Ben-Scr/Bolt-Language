@@ -1,0 +1,13 @@
+namespace Bolt.Runtime.RandomApi;
+
+#ifdef Web
+[Header("bolt/detail/WebRandom.h"), Native("bolt_web_random_fill")]
+extern "C" int Fill(void* buffer, ulong length);
+#elif Android || IOS
+[Header("stdlib.h"), Native("arc4random_buf")]
+#if ARM32 || X86
+extern "C" void Fill(void* buffer, uint length);
+#else
+extern "C" void Fill(void* buffer, ulong length);
+#endif
+#endif

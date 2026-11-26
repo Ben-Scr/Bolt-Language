@@ -1,0 +1,28 @@
+import Bolt.Runtime
+
+static class Program {
+public:
+    void Main() {
+        int[] input = new int[16384];
+        for (int i = 0; i < input.Length; i++) input[i] = (i * 17 + 5) & 65535;
+        Buffer<int> work;
+        work.Reserve(16384);
+        work.AppendRange(input, 0, 16384);
+        ulong checksum = 0ul;
+        for (int pass = 0; pass < 4096; pass++) {
+            int retained = 2048 + (pass & 1023);
+            int copied = 8192 + ((pass * 31) & 2047);
+            int offset = (pass * 13) & 2047;
+            work.Truncate(retained);
+            work[retained - 1] = pass;
+            input[offset] = pass ^ 37;
+            work.AppendRange(input, offset, copied);
+            for (int i = 0; i < 32; i++) {
+                int sample = (pass * 53 + i * 233) % work.Length;
+                checksum += (ulong)work[sample];
+            }
+        }
+        for (int i = 0; i < work.Length; i++) checksum += (ulong)work[i] * (ulong)(i + 1);
+        Print(checksum);
+    }
+}

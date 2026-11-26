@@ -1,0 +1,150 @@
+import System
+import System.Collections.Generic
+namespace Bolt.Runtime;
+
+public sealed class CapturedProcess {
+public:
+    CapturedProcess() {}
+    CapturedProcess(byte[] output,byte[] error,int code,bool timedOut) {
+        stdout=output;stderr=error;status=code;expired=timedOut;
+    }
+    byte[] Output => stdout;
+    byte[] Error => stderr;
+    int ExitCode => status;
+    bool TimedOut => expired;
+private:
+    byte[] stdout,stderr;
+    int status;
+    bool expired;
+}
+public static class ProcessExit {
+public:
+    void Terminate(int code=0) {
+#ifdef Windows
+        Bolt.Runtime.Threading.Terminate(*((uint*)&code));
+#else
+        Bolt.Runtime.ProcessApi.Exit(code);
+#endif
+    }
+}
+public sealed class ProcessHandle {
+    SystemLease child;
+    PipeHandle input,output,error;
+    SystemState* State() {
+        if(child.State==null)throw InvalidOperationException("Process has not been started.");
+        return child.State;
+    }
+    bool Poll(SystemState* s) {
+        if(s->Done)return true;
+#ifdef Windows
+        void* handle=*((void**)&s->Descriptor);
+        uint wait=Bolt.Runtime.StandaloneWindows.WaitFileJob(handle,0u);
+        if(wait==258u)return false;
+        uint status=0u;
+        if(wait!=0u || Bolt.Runtime.ProcessApi.Status(handle,&status)==0)throw IOException("Cannot read process status.");
+        s->Status=*((int*)&status);
+#else
+        int status=0;
+        int result=Bolt.Runtime.ProcessApi.Wait((int)s->Id,&status,1);
+        if(result==0 || (result<0 && SystemCalls.Error()==4))return false;
+        if(result<0)throw IOException("waitpid failed.");
+        int signal=status&127;
+        if(signal==127)return false;
+        s->Signal=signal;s->Status=signal==0?(status>>8)&255:128+signal;
+#endif
+        s->Done=true;return true;
+    }
+    bool Drain(PipeHandle& pipe,List<byte>& destination,byte[]& buffer,bool& active,int& left) {
+        if(!active)return false;
+        int n=pipe.Read(buffer,0,buffer.Length,0);
+        if(n==0)active=false;
+        if(n<=0)return false;
+        if(n>left)throw IOException("Captured output exceeds the total byte limit.");
+        left-=n;
+        for(int i=0;i<n;i++)destination.Add(buffer[i]);
+        return true;
+    }
+public:
+    ProcessHandle() {}
+    static ProcessHandle Start(string program,const string[]& arguments,string workingDirectory,bool redirect,const string[]& environment,bool inheritEnvironment) {
+        SystemCalls.CheckText(program);SystemCalls.CheckText(workingDirectory);
+        if(program=="")throw ArgumentException("Empty executable path.");
+        for(int i=0;i<arguments.Length;i++)SystemCalls.CheckText(arguments[i]);
+#ifdef Web
+        throw InvalidOperationException("Child processes are unavailable on Web.");
+#else
+        ProcessHandle child;
+        child.child.Initialize(ResourceKind.Child);
+        string[] env;
+#ifdef Windows
+        bool inheritBlock=inheritEnvironment && environment.Length==0;
+        if(!inheritBlock)env=ProcessEnvironment.Build(environment,inheritEnvironment);
+        ProcessLauncher.Start(child.child.State,child.input,child.output,child.error,program,arguments,workingDirectory,redirect,env,inheritBlock);
+#else
+        env=ProcessEnvironment.Build(environment,inheritEnvironment);
+        ProcessLauncher.Start(child.child.State,child.input,child.output,child.error,program,arguments,workingDirectory,redirect,env);
+#endif
+        return child;
+#endif
+    }
+    bool Wait(int milliseconds=-1) {
+        SystemState* s=State();
+        long end=SystemCalls.Deadline(milliseconds);
+        while(true){
+            SystemCalls.Lock(s);
+            try { if(Poll(s))return true; } finally { SystemCalls.Unlock(s); }
+            if(end>=0l && SystemCalls.Remaining(end)==0)return false;
+            ThreadOps.Sleep(1);
+        }
+        return false;
+    }
+    void Kill() {
+        SystemState* s=State();
+        SystemCalls.Lock(s);
+        try {
+            if(Poll(s))return;
+#ifdef Windows
+            if(Bolt.Runtime.ProcessApi.Kill(*((void**)&s->Descriptor),137u)==0 && SystemCalls.Error()!=5)throw IOException("TerminateProcess failed.");
+#else
+            if(Bolt.Runtime.ProcessApi.Kill((int)s->Id,9)!=0 && SystemCalls.Error()!=3)throw IOException("kill failed.");
+#endif
+        } finally { SystemCalls.Unlock(s); }
+        Wait();
+    }
+    void Close() {
+        if(child.State==null)return;
+        Kill();
+        SystemCalls.Lock(child.State);
+        SystemLifetime.Close(child.State);
+        SystemCalls.Unlock(child.State);
+        input.Close();output.Close();error.Close();
+    }
+    bool IsRunning => !Wait(0);
+    int ExitCode { get { if(!Wait(0))throw InvalidOperationException("Process is still running.");return child.State->Status; } }
+    int TerminationSignal { get { if(!Wait(0))throw InvalidOperationException("Process is still running.");return child.State->Signal; } }
+    long Id { get { SystemState* s=State();return s->Id; } }
+    PipeHandle Input { get { State();return input; } }
+    PipeHandle Output { get { State();return output; } }
+    PipeHandle Error { get { State();return error; } }
+    CapturedProcess Capture(int milliseconds=30000,int maximumBytes=16777216) {
+        State();
+        if(milliseconds<0 || maximumBytes<0)throw ArgumentOutOfRangeException("Capture requires finite limits.");
+        if(!output.IsOpen || !error.IsOpen)throw InvalidOperationException("Capture requires redirected output.");
+        input.Close();
+        long end=SystemCalls.Deadline(milliseconds);
+        try {
+            byte[] buffer=new byte[8192];
+            List<byte> stdout,stderr;
+            bool outOpen=true,errOpen=true;
+            bool timedOut=false;
+            while(outOpen || errOpen || IsRunning){
+                if(SystemCalls.Remaining(end)==0){timedOut=true;Kill();break;}
+                bool a=Drain(output,stdout,buffer,outOpen,maximumBytes);
+                bool b=Drain(error,stderr,buffer,errOpen,maximumBytes);
+                if(!a && !b)ThreadOps.Sleep(1);
+            }
+            return CapturedProcess(stdout.ToArray(),stderr.ToArray(),ExitCode,timedOut);
+        } catch(Exception& e){Kill();throw;}
+        finally {output.Close();error.Close();}
+    }
+}

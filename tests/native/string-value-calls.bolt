@@ -1,0 +1,37 @@
+import Bolt.Runtime
+import System.Collections.Generic
+
+static class Program {
+public:
+    static string Shared = "original";
+    void ChangeShared() { Shared = "changed"; }
+    bool ReadAfterCallback(string value) {
+        ChangeShared();
+        return Values.Equal<string>(value, "original");
+    }
+    bool ChangeParameter(string value) {
+        value = "local change";
+        return value == "local change";
+    }
+    bool ReadOnlyValue(string value) { return Values.Equal<string>(value, "original"); }
+    void Main() {
+        string first = "original";
+        bool ok = ReadOnlyValue(first) && ChangeParameter(first) && first == "original";
+        ok = ok && ReadAfterCallback(Shared) && Shared == "changed";
+        Dictionary<string,int> values;
+        values.Reserve(61);
+        for (int i = 0; i < 55; i++) values.Add($"tag={i}", i);
+        string key = "tag=39";
+        ok = ok && values[key] == 39 && values.Remove("tag=21") && values[key] == 39;
+        string pointerKey = "persistent text used for hashing";
+        ulong before = Values.Hash<string>(pointerKey);
+        ulong size = 0ul;
+        byte* data = NativeString.Bytes(pointerKey, size);
+        data[0] = (byte)80;
+        string changed = "Persistent text used for hashing";
+        ok = ok && Values.Hash<string>(pointerKey) == Values.Hash<string>(changed);
+        data[0] = (byte)112;
+        ok = ok && Values.Hash<string>(pointerKey) == before;
+        Print(ok);
+    }
+}

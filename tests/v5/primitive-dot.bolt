@@ -1,0 +1,3 @@
+static class Program { public: void Main() {
+Print(123.ToString()); Print(1.5f.ToString()); Print(true.ToString()); Print("abc".ToString());
+}}

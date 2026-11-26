@@ -1,0 +1,33 @@
+concept ExactPlus<T> { require (T a,T b) { a+b -> T; } }
+concept MixedPlus<A,B> { require (A a,B b) { a+b -> A; } }
+public class Box<T> { public: T Value; Box(T value=default) { Value=value; } }
+public class CountedDefault {
+public:
+    static int Count=0;
+    int Value;
+    CountedDefault(int n=8) { Count++; Value=n+1; }
+}
+public class DefaultBase { public: int BaseValue; DefaultBase(int n=13) { BaseValue=n; } }
+public class DefaultChild:DefaultBase { public: int ChildValue=4; }
+public class ParamsDefault { public: int Length; ParamsDefault(int... values) { Length=values.Length; } }
+public static class Program {
+public:
+    T Add<T>(T first,T... values) : Addable<T>, ExactPlus<T> {
+        T result=first;
+        for(int i=0;i<values.Length;i++)result+=values[i];
+        return result;
+    }
+    int Sum(int... values) { int sum=0;for(int i=0;i<values.Length;i++)sum+=values[i];return sum; }
+    int Defaults(int a,int b=2,int c=3){return a+b+c;}
+    A Mixed<A,B>(A a,B b):MixedPlus<A,B>{return a+b;}
+    void Main(){
+        Print(Add<int>(1,2,3,4));Print(Add<string>("a","b","c"));Print(Sum());Print(Sum(1,2,3));
+        Print(Defaults(1));Print(Defaults(1,10));Print(Defaults(1,10,20));
+        Box<int> value;Print(value.Value);Box<int> value2=Box<int>(5);Print(value2.Value);
+        Print(Mixed<double,int>(1.5,2));
+        CountedDefault counted; Print(counted.Value); Print(CountedDefault.Count);
+        CountedDefault[] instances=new CountedDefault[2]; Print(instances[1].Value); Print(CountedDefault.Count);
+        DefaultChild child; Print(child.BaseValue); Print(child.ChildValue);
+        ParamsDefault params; Print(params.Length);
+    }
+}

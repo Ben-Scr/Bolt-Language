@@ -1,0 +1,5 @@
+
+class Pair{public:static IStringable operator +(Pair p,int n){return n;}}
+static class Program {public: void Main(){
+Pair p;IStringable result=p+3;Print(result);
+}}

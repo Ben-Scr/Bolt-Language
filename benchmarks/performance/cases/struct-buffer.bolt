@@ -1,0 +1,43 @@
+import Bolt.Runtime
+
+struct Position {
+public:
+    uint X;
+    uint Y;
+}
+struct Vertex {
+public:
+    Position Point;
+    uint Color;
+    uint Id;
+}
+static class Program {
+public:
+    void Main() {
+        Vertex[] source = new Vertex[16384];
+        for (int i = 0; i < source.Length; i++) {
+            source[i].Point.X = (uint)((i * 619) & 65535);
+            source[i].Point.Y = (uint)((i * 317) & 65535);
+            source[i].Color = (uint)((i * 3) & 255);
+            source[i].Id = (uint)i;
+        }
+        Buffer<Vertex> current;
+        current.Reserve(8192);
+        ulong checksum = 0ul;
+        for (int frame = 0; frame < 1024; frame++) {
+            int first = (frame * 31) & 8191;
+            current.Clear();
+            current.AppendRange(source, first, 8192);
+            Vertex[] saved = current.ToArray();
+            int changed = (frame * 43) & 8191;
+            current[changed].Point.X = (uint)frame;
+            source[first + changed].Point.Y ^= (uint)frame;
+            checksum += (ulong)saved[changed].Point.X + (ulong)current[changed].Point.X;
+            for (int j = 0; j < 32; j++) {
+                int k = (frame * 13 + j * 977) & 8191;
+                checksum += (ulong)saved[k].Point.Y + (ulong)current[k].Color + (ulong)saved[k].Id;
+            }
+        }
+        Print(checksum);
+    }
+}

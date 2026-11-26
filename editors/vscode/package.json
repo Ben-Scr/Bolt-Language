@@ -1,0 +1,369 @@
+{
+  "name": "bolt-language",
+  "displayName": "Bolt Language",
+  "description": "Bolt compiler diagnostics and navigation, syntax highlighting, project tools and native build/run tasks.",
+  "version": "0.2.14",
+  "publisher": "ben-schneider",
+  "license": "MIT",
+  "icon": "media/bolt.png",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Formatters",
+    "Other"
+  ],
+  "main": "./dist/extension.cjs",
+  "extensionKind": [
+    "workspace"
+  ],
+  "activationEvents": [
+    "onLanguage:bolt",
+    "onTaskType:bolt"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "Local editing works in Restricted Mode. Using a Bolt compiler requires a trusted workspace.",
+      "restrictedConfigurations": [
+        "bolt.compilerPath",
+        "bolt.run.environment",
+        "bolt.run.workingDirectory"
+      ]
+    }
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "bolt",
+        "aliases": [
+          "Bolt",
+          "bolt"
+        ],
+        "extensions": [
+          ".bolt"
+        ],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./media/file.svg",
+          "dark": "./media/file.svg"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "bolt",
+        "scopeName": "source.bolt",
+        "path": "./syntaxes/bolt.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "bolt",
+        "path": "./snippets.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "bolt.run",
+        "category": "Bolt",
+        "title": "Run",
+        "enablement": "isWorkspaceTrusted",
+        "icon": {
+          "light": "media/run.svg",
+          "dark": "media/run.svg"
+        }
+      },
+      {
+        "command": "bolt.build",
+        "category": "Bolt",
+        "title": "Build",
+        "enablement": "isWorkspaceTrusted"
+      },
+      {
+        "command": "bolt.check",
+        "category": "Bolt",
+        "title": "Check",
+        "enablement": "isWorkspaceTrusted"
+      },
+      {
+        "command": "bolt.profile",
+        "category": "Bolt",
+        "title": "Select Build and Analysis Profile",
+        "enablement": "isWorkspaceTrusted"
+      },
+      {
+        "command": "bolt.restart",
+        "category": "Bolt",
+        "title": "Restart Language Server",
+        "enablement": "isWorkspaceTrusted"
+      },
+      {
+        "command": "bolt.newProject",
+        "category": "Bolt",
+        "title": "New Project…",
+        "enablement": "isWorkspaceTrusted"
+      },
+      {
+        "command": "bolt.newClass",
+        "category": "Bolt",
+        "title": "New Class…"
+      },
+      {
+        "command": "bolt.selectCompiler",
+        "category": "Bolt",
+        "title": "Select Compiler…"
+      },
+      {
+        "command": "bolt.showToolchain",
+        "category": "Bolt",
+        "title": "Show Toolchain Info",
+        "enablement": "isWorkspaceTrusted"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "bolt.run",
+          "when": "resourceLangId == bolt && resourceScheme == file && isWorkspaceTrusted",
+          "group": "navigation@1"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "bolt.run",
+          "when": "resourceLangId == bolt && resourceScheme == file && isWorkspaceTrusted",
+          "group": "bolt@0"
+        },
+        {
+          "command": "bolt.build",
+          "when": "resourceLangId == bolt && resourceScheme == file && isWorkspaceTrusted",
+          "group": "bolt@1"
+        },
+        {
+          "command": "bolt.check",
+          "when": "resourceLangId == bolt && resourceScheme == file && isWorkspaceTrusted",
+          "group": "bolt@2"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "bolt.newClass",
+          "when": "explorerResourceIsFolder && resourceScheme == file",
+          "group": "navigation@5"
+        },
+        {
+          "command": "bolt.newProject",
+          "when": "explorerResourceIsFolder && isFileSystemResource && isWorkspaceTrusted",
+          "group": "navigation@6"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "editor.action.formatDocument",
+        "key": "ctrl+k ctrl+d",
+        "mac": "cmd+k cmd+d",
+        "when": "editorLangId == bolt && editorTextFocus && !editorReadonly"
+      },
+      {
+        "command": "bolt.run",
+        "key": "ctrl+f5",
+        "mac": "ctrl+f5",
+        "when": "editorLangId == bolt && isWorkspaceTrusted && editorTextFocus"
+      }
+    ],
+    "taskDefinitions": [
+      {
+        "type": "bolt",
+        "required": [
+          "operation"
+        ],
+        "properties": {
+          "operation": {
+            "type": "string",
+            "enum": [
+              "run",
+              "build",
+              "check"
+            ]
+          },
+          "target": {
+            "type": "string",
+            "description": "Source file, project or directory. Relative to the workspace folder. Defaults to the project containing the active file."
+          },
+          "profile": {
+            "type": "string",
+            "enum": [
+              "Project default",
+              "Debug",
+              "Release"
+            ],
+            "default": "Project default"
+          },
+          "args": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cwd": {
+            "type": "string"
+          },
+          "env": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    ],
+    "problemMatchers": [
+      {
+        "name": "bolt",
+        "owner": "bolt-build",
+        "source": "Bolt",
+        "fileLocation": "absolute",
+        "pattern": {
+          "regexp": "^(.+)\\((\\d+),(\\d+)\\):\\s*(error|warning|info)\\s+([A-Z]+\\d+)\\s*:\\s*(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "code": 5,
+          "message": 6
+        }
+      }
+    ],
+    "semanticTokenModifiers": [
+      {
+        "id": "boltInactive",
+        "description": "Source excluded by Bolt conditional compilation."
+      }
+    ],
+    "semanticTokenTypes": [
+      {
+        "id": "field",
+        "superType": "property",
+        "description": "Bolt field"
+      },
+      {
+        "id": "concept",
+        "superType": "type",
+        "description": "Bolt concept"
+      },
+      {
+        "id": "character",
+        "superType": "string",
+        "description": "Bolt character"
+      },
+      {
+        "id": "identifier",
+        "superType": "variable",
+        "description": "Bolt identifier"
+      },
+      {
+        "id": "boltControlFlow",
+        "superType": "keyword",
+        "description": "Bolt control-flow keyword"
+      },
+      {
+        "id": "boltPrimitive",
+        "superType": "type",
+        "description": "Built-in Bolt type"
+      },
+      {
+        "id": "boltInactiveCode",
+        "superType": "comment",
+        "description": "Code excluded by the active Bolt preprocessor profile"
+      }
+    ],
+    "configuration": {
+      "title": "Bolt",
+      "properties": {
+        "bolt.compilerPath": {
+          "type": "string",
+          "scope": "machine-overridable",
+          "default": "",
+          "description": "Absolute path to bolt or bolt.exe. An empty value searches BOLT_COMPILER, PATH and common SDK locations."
+        },
+        "bolt.profile": {
+          "type": "string",
+          "enum": [
+            "Project default",
+            "Debug",
+            "Release"
+          ],
+          "default": "Project default",
+          "scope": "window",
+          "description": "Profile for build, run and conditional code analysis."
+        },
+        "bolt.run.arguments": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "default": null,
+          "items": {
+            "type": "string"
+          },
+          "description": "Arguments passed individually to the program. Null inherits the project configuration."
+        },
+        "bolt.run.environment": {
+          "type": "object",
+          "default": {},
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "bolt.run.workingDirectory": {
+          "type": "string",
+          "default": "",
+          "description": "Working directory for the Bolt application. Relative paths use the project directory."
+        }
+      }
+    },
+    "themes": [
+      {
+        "label": "Bolt C# Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/dark.json"
+      },
+      {
+        "label": "Bolt C# Light",
+        "uiTheme": "vs",
+        "path": "./themes/light.json"
+      }
+    ],
+    "configurationDefaults": {
+      "[bolt]": {
+        "editor.bracketPairColorization.enabled": false,
+        "editor.quickSuggestions": {
+          "other": "on"
+        },
+        "editor.quickSuggestionsDelay": 0,
+        "editor.semanticHighlighting.enabled": true
+      }
+    },
+    "breakpoints": [
+      {
+        "language": "bolt"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "node scripts/build.cjs",
+    "package": "npm run build && vsce package --no-dependencies --allow-missing-repository",
+    "test": "node --test test/local.test.cjs test/palette.test.cjs"
+  },
+  "devDependencies": {
+    "@vscode/vsce": "3.6.2",
+    "esbuild": "0.25.10",
+    "vscode-jsonrpc": "8.2.0",
+    "vscode-languageclient": "9.0.1",
+    "vscode-textmate": "9.2.0",
+    "vscode-oniguruma": "2.0.1"
+  }
+}

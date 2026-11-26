@@ -1,0 +1,2 @@
+
+static class Program{public:void Main(){int x=1;const int* p=&x;p=null;}}

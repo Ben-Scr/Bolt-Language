@@ -1,0 +1,64 @@
+import Type
+
+string Name<T>(T value) { return Type.Name<T>(); }
+T Lowest<T>() : Number { return T.MinValue; }
+T Highest<T>() : Number { return T.MaxValue; }
+
+enum Byte : byte { First=byte.MinValue, Next, Last=byte.MaxValue }
+enum Long : long { First=long.MinValue, Last=long.MaxValue }
+enum Big : ulong { First=ulong.MinValue, Last=ulong.MaxValue }
+enum NearMax : int { Before=int.MaxValue-1, Last }
+
+class Limits<T> {
+public:
+    T Low=T.MinValue;
+    T High=T.MaxValue;
+}
+
+class FloatingLimits {
+public:
+    float Low=float.MinValue;
+    static double High=double.MaxValue;
+}
+
+static class Program {
+public:
+    void Main() {
+        Print(short.MinValue+","+short.MaxValue);
+        Print(short.MinValue+","+short.MaxValue);
+        Print(int.MinValue+","+int.MaxValue);
+        Print(long.MinValue+","+long.MaxValue);
+        Print(byte.MinValue+","+byte.MaxValue);
+        Print(ushort.MinValue+","+ushort.MaxValue);
+        Print(uint.MinValue+","+uint.MaxValue);
+        Print(ulong.MinValue+","+ulong.MaxValue);
+        Print(int.MinValue==int.MinValue && int.MaxValue==int.MaxValue);
+        Print(uint.MinValue==uint.MinValue && uint.MaxValue==uint.MaxValue);
+        Print(Reinterpret<uint>(float.MinValue));
+        Print(Reinterpret<uint>(float.MaxValue));
+        Print(Reinterpret<ulong>(double.MinValue));
+        Print(Reinterpret<ulong>(double.MaxValue));
+        Print(Name(short.MinValue)+","+Name(short.MaxValue));
+        Print(Name(short.MinValue)+","+Name(short.MaxValue));
+        Print(Name(int.MinValue)+","+Name(int.MaxValue));
+        Print(Name(long.MinValue)+","+Name(long.MaxValue));
+        Print(Name(byte.MinValue)+","+Name(byte.MaxValue));
+        Print(Name(ushort.MinValue)+","+Name(ushort.MaxValue));
+        Print(Name(uint.MinValue)+","+Name(uint.MaxValue));
+        Print(Name(ulong.MinValue)+","+Name(ulong.MaxValue));
+        Print(Name(float.MinValue)+","+Name(float.MaxValue));
+        Print(Name(double.MinValue)+","+Name(double.MaxValue));
+        Print(Name(int.MaxValue)+","+Name(uint.MaxValue));
+        Print(Byte.First+","+Byte.Next+","+Byte.Last);
+        Print(Long.First+","+Long.Last);
+        Print(Big.First+","+Big.Last);
+        Print(NearMax.Last);
+        Print(Lowest<short>());
+        Print(Highest<ulong>());
+        Limits<short> values;
+        Print(values.Low+","+values.High);
+        FloatingLimits floating;
+        Print(Reinterpret<uint>(floating.Low));
+        Print(Reinterpret<ulong>(FloatingLimits.High));
+    }
+}

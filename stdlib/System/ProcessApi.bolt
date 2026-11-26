@@ -1,0 +1,120 @@
+namespace Bolt.Runtime.ProcessApi;
+#ifdef Windows
+[Header("windows.h"), Native("SetLastError")]
+extern "C" void ClearError(uint code);
+[Header("windows.h"), Native("CreateProcessW")]
+extern "C" int Start(ushort* program, ushort* command, void* processSecurity, void* threadSecurity, int inherit, uint flags, void* environment, ushort* directory, void* startup, void* information);
+[Header("windows.h"), Native("TerminateProcess")]
+extern "C" int Kill(void* handle, uint code);
+[Header("windows.h"), Native("GetExitCodeProcess")]
+extern "C" int Status(void* handle, uint* code);
+[Header("windows.h"), Native("GetCurrentProcessId")]
+extern "C" uint Pid();
+[Header("windows.h"), Native("CreateNamedPipeW")]
+extern "C" void* NamedPipe(ushort* name, uint mode, uint pipeMode, uint instances, uint outputBytes, uint inputBytes, uint timeout, void* security);
+[Header("windows.h"), Native("InitializeProcThreadAttributeList")]
+extern "C" int InitAttributes(void* list, uint count, uint flags, ulong* size);
+[Header("windows.h"), Native("UpdateProcThreadAttribute")]
+extern "C" int SetAttribute(void* list, uint flags, ulong attribute, void* value, ulong size, void* previous, void* returned);
+[Header("windows.h"), Native("DeleteProcThreadAttributeList")]
+extern "C" void DropAttributes(void* list);
+[Header("windows.h"), Native("CreateEventW")]
+extern "C" void* NewEvent(void* security, int manual, int signaled, ushort* name);
+[Header("windows.h"), Native("CancelIoEx")]
+extern "C" int Cancel(void* handle, void* operation);
+[Header("windows.h"), Native("GetOverlappedResult")]
+extern "C" int Result(void* handle, void* operation, uint* transferred, int wait);
+[Header("windows.h"), Native("SearchPathW")]
+extern "C" uint FindProgram(ushort* path, ushort* name, ushort* extension, uint capacity, ushort* result, void* part);
+[Header("windows.h"), Native("GetEnvironmentStringsW")]
+extern "C" ushort* Environment();
+[Header("windows.h"), Native("FreeEnvironmentStringsW")]
+extern "C" int FreeEnvironment(ushort* block);
+[Header("windows.h"), Native("CompareStringOrdinal")]
+extern "C" int CompareKeys(ushort* left, int n, ushort* right, int m, int ignoreCase);
+[Header("windows.h"), Native("GetEnvironmentVariableW")]
+extern "C" uint GetVariable(ushort* name, ushort* buffer, uint capacity);
+[Header("windows.h"), Native("SetEnvironmentVariableW")]
+extern "C" int SetVariable(ushort* name, ushort* value);
+[Header("windows.h"), Native("GetActiveProcessorCount")]
+extern "C" uint Processors(ushort group);
+#else
+[Header("unistd.h"), Native("sysconf")]
+extern "C" long SystemConfig(int key);
+[Header("unistd.h"), Native("_exit")]
+extern "C" void Exit(int status);
+[Header("unistd.h"), Native("close")]
+extern "C" int Close(int fd);
+[Header("unistd.h"), Native("read")]
+extern "C" long Read(int fd, byte* data, ulong count);
+[Header("fcntl.h"), Native("fcntl")]
+extern "C" int FileControl(int fd, int action, int value);
+[Header("poll.h"), Native("poll")]
+#if Linux || Android
+extern "C" int Poll(void* fds, ulong count, int timeout);
+#else
+extern "C" int Poll(void* fds, uint count, int timeout);
+#endif
+[Header("sys/wait.h"), Native("waitpid")]
+extern "C" int Wait(int pid, int* status, int options);
+[Header("signal.h"), Native("kill")]
+extern "C" int Kill(int pid, int signal);
+[Header("signal.h"), Native("sigemptyset")]
+extern "C" int EmptySet(void* mask);
+[Header("signal.h"), Native("sigaddset")]
+extern "C" int AddSignal(void* mask, int signal);
+[Header("signal.h"), Native("sigpending")]
+extern "C" int PendingSignals(void* mask);
+[Header("signal.h"), Native("sigismember")]
+extern "C" int HasSignal(void* mask, int signal);
+[Header("signal.h"), Native("sigwait")]
+extern "C" int ConsumeSignal(void* mask, int* signal);
+[Header("pthread.h"), Native("pthread_sigmask")]
+extern "C" int SignalMask(int how, void* mask, void* old);
+[Header("spawn.h"), Native("posix_spawn_file_actions_init")]
+extern "C" int InitActions(void* actions);
+[Header("spawn.h"), Native("posix_spawn_file_actions_destroy")]
+extern "C" int DropActions(void* actions);
+[Header("spawn.h"), Native("posix_spawn_file_actions_adddup2")]
+extern "C" int Redirect(void* actions, int fd, int target);
+#ifdef Android
+[Header("bolt/detail/AndroidSpawn.h"), Native("bolt_android_spawn_chdir")]
+#else
+[Header("spawn.h"), Native("posix_spawn_file_actions_addchdir_np")]
+#endif
+extern "C" int ChildDirectory(void* actions, byte* path);
+#if FreeBSD || (Linux && BoltSpawnCloseFrom)
+[Header("spawn.h"), Native("posix_spawn_file_actions_addclosefrom_np")]
+extern "C" int CloseFrom(void* actions,int first);
+#endif
+#if MacOS || IOS
+[Header("spawn.h"), Native("posix_spawnattr_init")]
+extern "C" int InitSpawnAttributes(void* attributes);
+[Header("spawn.h"), Native("posix_spawnattr_destroy")]
+extern "C" int DropSpawnAttributes(void* attributes);
+[Header("spawn.h"), Native("posix_spawnattr_setflags")]
+extern "C" int SpawnFlags(void* attributes,short flags);
+[Header("spawn.h"), Native("posix_spawn_file_actions_addinherit_np")]
+extern "C" int InheritDescriptor(void* actions,int descriptor);
+#endif
+[Header("spawn.h"), Native("posix_spawn")]
+extern "C" int Start(int* pid, byte* path, void* actions, void* attributes, void* args, void* env);
+#if Linux || Android
+[Header("unistd.h"), Native("pipe2")]
+extern "C" int Pipe(int* ends, int flags);
+#else
+[Header("unistd.h"), Native("pipe")]
+extern "C" int Pipe(int* ends);
+#endif
+#if MacOS || IOS
+[Header("crt_externs.h"), Native("_NSGetEnviron")]
+extern "C" void* Environment();
+#else
+[Header("dlfcn.h"), Native("dlsym")]
+extern "C" byte*** FindVariable(void* library, byte* name);
+#endif
+[Header("stdlib.h"), Native("setenv")]
+extern "C" int SetVariable(byte* name, byte* value, int overwrite);
+[Header("stdlib.h"), Native("unsetenv")]
+extern "C" int RemoveVariable(byte* name);
+#endif

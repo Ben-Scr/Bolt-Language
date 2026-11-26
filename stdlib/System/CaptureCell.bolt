@@ -1,0 +1,19 @@
+namespace Bolt.Runtime;
+
+// Copies of this compiler-owned interface share their heap allocation.
+public interface ICaptureCell<T> {
+    T& Get();
+}
+
+public sealed class CaptureCell<T> : ICaptureCell<T> {
+private:
+    T value;
+public:
+    CaptureCell(T initial) : value(initial) {}
+    T& Get() { return value; }
+}
+
+public static class ClosureStorage {
+public:
+    static ICaptureCell<T> Create<T>(T initial) { return CaptureCell<T>(initial); }
+}

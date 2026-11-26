@@ -1,0 +1,258 @@
+import System
+import System.IO
+import System.Diagnostics
+import System.Threading.Tasks
+import System.Reflection
+import System.Text.Json
+import System.Collections.Generic
+import System.Memory
+import Ecs
+
+concept SameAddition<T> {
+    require (T a, T b) { a + b -> T; }
+}
+concept CrossAddition<A, B> {
+    require (A a, B b) { a + b -> A; }
+}
+concept HasLabel<T> {
+    require (T value) { value.Name -> string; value.ToString() -> string; }
+}
+concept NumericPlus<T> = Number<T> && SameAddition<T>;
+
+public struct Vec2 {
+public:
+    float X = 0;
+    float Y = 0;
+    Vec2(float x = 0, float y = 0) { X = x; Y = y; }
+    static Vec2 operator +(Vec2 a, Vec2 b) { return Vec2(a.X+b.X, a.Y+b.Y); }
+}
+public struct Velocity { public: float X = 1; }
+public struct Disabled {}
+public class OnPosition {
+public:
+    int Calls = 0;
+    void OnAdd(Registry& registry, Entity entity, Vec2& position) {
+        Calls++;
+        position.Y = 9;
+    }
+}
+[Reflect, TestMetadata("record")]
+public class Record : IStringable {
+public:
+    string Name = "default";
+    [JsonName("age")] int Age = 18;
+    [JsonIgnore] string Password = "secret";
+    ulong Large;
+    char Character = '😀';
+    List<int> Numbers;
+    string ToString() { return Name; }
+    int ChangeAge(int by = 1) { Age += by; return Age; }
+private:
+    [Reflect] int SecretNumber = 17;
+    int Hidden = 99;
+}
+public class NoReflection { public: int Number; }
+public class Guard {
+public:
+    static int Alive = 0;
+    Guard() { Alive++; }
+    ~Guard() { Alive--; }
+}
+public abstract class Shape { public: abstract int Area(); }
+public sealed class Square : Shape { public: override int Area() { return 25; } }
+public enum Permission : byte { None = 0, Read = 1, Write = 2, Execute = 4 }
+public class NativeResources {
+public:
+    FileStream File;
+    Task<int> Job;
+    Owner<Vec2> Position;
+    Random Generator;
+    Registry World;
+}
+
+public static class Program {
+public:
+    static int Checks = 0;
+    static int Finalized = 0;
+    void Check(bool value, string message = "check failed") {
+        Checks++;
+        if (!value) throw AssertionException(message);
+    }
+    T Add<T>(T... values) : Addable<T> {
+        if (values.Length == 0) throw ArgumentException("At least one value is required.");
+        T result = values[0];
+        for (int i=1; i<values.Length; i++) result += values[i];
+        return result;
+    }
+    int Sum(int... values) { int sum=0; for(value : values) sum+=value; return sum; }
+    int Offset(int n, int by=10) { return n+by; }
+    A AddCross<A,B>(A a, B b) : CrossAddition<A,B> { return a+b; }
+    T Numeric<T>(T a, T b) : NumericPlus<T> { return a+b; }
+    string Label<T>(T value) : HasLabel<T> { return value.ToString(); }
+    int CountPointers(int*... values) { return values.Length; }
+    int CountArrays(int[]... values) { return values.Length; }
+    int ExitTry() {
+        try { Guard g; return 17; }
+        finally { Finalized++; }
+    }
+    async Task<int> Compute(int value, int by=2) { await Task.Delay(1); return value*by; }
+    async Task<int> Fail() { throw InvalidOperationException("async failure"); }
+    async Task<string> ReadLater(string path) { return await File.ReadAllTextAsync(path); }
+
+    void Variadics() {
+        Check(Add<int>(1,2,3,4)==10);
+        Check(Add(5,2,3,4,5)==19);
+        Check(Add<string>("a","b","c")=="abc");
+        Check(Add<Vec2>(Vec2(1,2),Vec2(3,4)).X==4);
+        Check(Sum()==0);
+        Check(Sum(1,2,3)==6);
+        Check(Offset(5)==15 && Offset(5,20)==25);
+        Check(AddCross<int,int>(2,4)==6 && Numeric<int>(1,2)==3);
+        int n=3; Check(CountPointers(&n,null)==2);
+        int[] a={1,2}; int[] b={3}; Check(CountArrays(a,b)==2);
+        Vec2 v=Vec2(7); Check(v.X==7 && v.Y==0);
+        bool caught=false; try { Add<int>(); } catch(ArgumentException& e) { caught=true; }
+        Check(caught);
+    }
+    void ControlAndLifetimes() {
+        Check(ExitTry()==17 && Finalized==1 && Guard.Alive==0);
+        int visits=0;
+        for(int i=0;i<3;i++) { try { if(i==0)continue; if(i==2)break; visits++; } finally { Finalized++; } }
+        Check(visits==1 && Finalized==4);
+        bool caught=false;
+        try { Guard g; throw ArgumentException("explicit"); }
+        catch(ArgumentException& e) { caught=e.Message=="explicit"; }
+        finally { Finalized++; }
+        Check(caught && Guard.Alive==0 && Finalized==5);
+        caught=false;
+        try { try { throw ArgumentException("first"); } finally { throw IOException("replacement"); } }
+        catch(IOException& e) { caught=e.Message=="replacement"; }
+        Check(caught);
+        caught=false;try { int zero=0; int result=4/zero; } catch(DivideByZeroException& e) { caught=true; }Check(caught);
+        caught=false;try { int[] a={1}; Print(a[3]); } catch(IndexOutOfRangeException& e) { caught=true; }Check(caught);
+        Square square; Shape& shape=square; Check(shape.Area()==25);
+        Owner<Vec2> owner=Owner<Vec2>.Create();owner.Get().X=5;
+        Owner<Vec2> copy=owner;owner.Get().X=10;Check(copy.Get().X==5);
+        owner.Reset();Check(!owner.HasValue);
+        Vec2* released=copy.Release();Check(!copy.HasValue && released->X==5);delete released;
+        NativeResources holders; holders.Job=Task.FromResult<int>(4);Check(holders.Job.Result==4);
+    }
+    void StringsAndOperators() {
+        string s="  Ä😀x  ";Check(s.Trim().Length==3 && s.Trim().ByteLength==7);
+        Check(s.Trim()[1]=='😀');Check(s.Replace('x','y').Trim()=="Ä😀y");
+        Check("abc".Insert(1,"X")=="aXbc");Check("abc".Remove(1,1)=="ac");
+        Check("Ä😀x".Substring(1,1)=="😀");Check("Ä😀x".Contains('😀'));
+        Check("Ä😀x".IndexOf('x')==2);Check("x😀x".LastIndexOf('x')==2);
+        Check("straße".ToUpper()=="STRASSE" && "ÄÖÜ".ToLower()=="äöü");
+        Check("a".PadLeft(3,'0')=="00a" && "a".PadRight(3,'0')=="a00");
+        Check(string.Join("-", "a,b,c".Split(','))=="a-b-c");
+        Check(string.IsNullOrWhiteSpace(" \t\n") && !string.IsNullOrEmpty("x"));
+        Check(string.FromUtf8("Ä😀".ToUtf8())=="Ä😀");
+        int chars=0;for(character : "Ä😀") chars++;Check(chars==2);
+        int[] values={1,2,3};for(int& value : values)value+=2;Check(values[2]==5);
+        List<int> list;list.Add(1);list.Add(2);int total=0;for(value : list)total+=value;Check(total==3);
+        int bits=1<<4;bits|=3;Check(bits==19 && ~0==-1);
+        bits^=1;bits&=6;bits>>=1;Check(bits==1);
+        Permission p=Permission.Read|Permission.Write;p&=~Permission.Write;Check(p==Permission.Read);
+        Check((Permission.Read<<2)==Permission.Execute);
+        Check(1>0?true:false);int n=42;int* empty=null;Check(*(empty??&n)==42);
+        Check((int)0.5==0);Check(Reinterpret<float>(Reinterpret<uint>(1.0f))==1.0f);
+        Check(Converter.ToInt("123")==123 && Converter.ToBool(" true "));
+        Check(Converter.ToUInt64("18446744073709551615")==ulong.MaxValue);
+        Check(Converter.ToChar(" ")==' ' && Converter.ToChar("😀")=='😀');
+        bool caught=false;try { Converter.ToInt16("32768"); } catch(OverflowException& e){caught=true;}Check(caught);
+    }
+    void FilesAndStreams() {
+        Directory.Create("library-test");
+        File.Create("library-test/empty");Check(File.Exists("library-test/empty") && File.GetLength("library-test/empty")==0);
+        File.WriteAllText("library-test/text", "Ä😀\n");File.AppendAllText("library-test/text","last");
+        Check(File.ReadAllText("library-test/text")=="Ä😀\nlast");
+        Check(File.ReadAllLines("library-test/text").Length==2);
+        File.Copy("library-test/text","library-test/copy");File.Move("library-test/copy","library-test/moved");
+        Check(!File.Exists("library-test/copy") && File.Exists("library-test/moved"));
+        Check(Directory.GetFiles("library-test").Length==3);
+        bool caught=false;try{FileStream fail=FileStream("library-test/text",FileMode.CreateNew);}catch(IOException& e){caught=true;}Check(caught);
+        Check(File.ReadAllText("library-test/text")=="Ä😀\nlast");
+        caught=false;try{File.Move("library-test/missing","library-test/text",true);}catch(IOException& e){caught=true;}Check(caught);
+        Check(File.ReadAllText("library-test/text")=="Ä😀\nlast");
+        MemoryStream memory;
+        BinaryWriter writer=BinaryWriter(memory,true);
+        writer.Write<int>(42);writer.Write<char>('😀');writer.Write<string>("hello");writer.Flush();
+        memory.Seek(0);BinaryReader reader=BinaryReader(memory,true);
+        Check(reader.ReadInt()==42 && reader.ReadChar()=='😀' && reader.ReadString()=="hello");
+        reader.Close();writer.Close();Check(memory.CanRead);
+        MemoryStream alias=memory;caught=false;try{memory.CopyTo(alias);}catch(ArgumentException& e){caught=true;}Check(caught);
+        byte[] bytes={1,2,3,4};MemoryStream other=MemoryStream(bytes);byte[] buffer=new byte[5];
+        Check(other.Read(buffer,1,2)==2 && buffer[1]==1 && buffer[2]==2);
+        other.Seek(0);MemoryStream destination;other.CopyTo(destination);Check(destination.ToArray()[3]==4);
+        other.Close();caught=false;try{other.ReadByte();}catch(ObjectDisposedException& e){caught=true;}Check(caught);
+        StreamWriter text=StreamWriter("library-test/writer");text.WriteLine<string>("Ä😀");text.Close();
+        StreamReader input=StreamReader("library-test/writer");Check(input.ReadLine()=="Ä😀");Check(input.EndOfStream);input.Close();
+        caught=false;try{File.ReadAllText("library-test/absent");}catch(FileNotFoundException& e){caught=e.SourceLine>0;}Check(caught);
+        Directory.Delete("library-test");Check(!Directory.Exists("library-test"));
+    }
+    void TimesAndTasks() {
+        TimeSpan second=TimeSpan.FromSeconds(1);TimeSpan sum=second+second;Check(sum.TotalMilliseconds==2000);
+        Check((sum-second).Ticks==second.Ticks && (-second).TotalSeconds==-1 && second<sum);
+        DateTime date=DateTime(2024,2,29,12,30,4,123);
+        Check(date.Year==2024 && date.Month==2 && date.Day==29);
+        Check(DateTime.Parse(date.ToString()).Ticks==date.Ticks);
+        DateTime ancient=DateTime(1,1,1);Check(ancient.ToString()=="0001-01-01T00:00:00.0000000Z");
+        Check(DateTime.Parse(ancient.ToString()).Year==1);
+        Check(DateTime(9999,12,31).Year==9999);
+        Check(DateTime.Parse(date.ToLocalTime().ToString()).Ticks==date.Ticks);
+        Check(DateTime.Today.Hour==0 && DateTime.Today.Minute==0 && DateTime.Today.Second==0);
+        Check((date+second-date).Ticks==second.Ticks);
+        Check((date-second)<date);
+        Check(DateTime.FromUnixTimeSeconds(-1).ToUnixTimeSeconds()==-1);
+        Stopwatch timer;timer.Start();timer.Pause();long elapsed=timer.ElapsedTicks;Check(timer.ElapsedTicks==elapsed);timer.Unpause();timer.Pause();Check(timer.ElapsedTicks>=elapsed);timer.Reset();Check(timer.ElapsedTicks==0);
+        Random first=Random(123);Random secondRng=Random(123);Check(first.Next<int>(100)==secondRng.Next<int>(100));
+        double random=first.Next<double>(-1,1);Check(random>=-1 && random<1);
+        Task<int> work=Compute(8);Check(work.Result==16 && work.IsCompletedSuccessfully);
+        Task<int>[] tasks={Compute(2),Compute(3)};Task<int>.WhenAll(tasks).Wait();Check(tasks[0].Result==4 && tasks[1].Result==6);
+        bool caught=false;Task<int> fail=Fail();try{fail.Wait();}catch(InvalidOperationException& e){caught=true;}Check(caught && fail.IsFaulted);
+        File.WriteAllTextAsync("async-test", "async Ä😀").Wait();Check(ReadLater("async-test").Result=="async Ä😀");File.Delete("async-test");
+    }
+    void MetadataAndJson() {
+        Record record;record.Name="Ä\"Ben";record.Large=ulong.MaxValue;record.Numbers.Add(4);
+        Check(Label<Record>(record)==record.Name);
+        TypeInfo info=Reflection.GetType<Record>();Check(info.IsClass && !info.IsStruct);
+        Check(info.HasField("SecretNumber") && !info.HasField("Hidden"));
+        Check(!Reflection.IsReflected<NoReflection>());
+        Reflection.Set<Record,int>(record,"Age",20);Check(Reflection.Get<Record,int>(record,"Age")==20);
+        Check(Reflection.Invoke<int,Record,int>(record,"ChangeAge",5)==25);
+        string json=Json.Serialize<Record>(record);
+        Check(json.Contains("\"age\":25") && !json.Contains("Password"));
+        Record loaded=Json.Deserialize<Record>(json);
+        Check(loaded.Name==record.Name && loaded.Large==ulong.MaxValue && loaded.Character=='😀' && loaded.Numbers[0]==4);
+        Record utf8=Json.Deserialize<Record>(Json.SerializeBytes<Record>(record));Check(utf8.Name==record.Name);
+        Record binary=Json.DeserializeBinary<Record>(Json.SerializeBinary<Record>(record));Check(binary.Large==ulong.MaxValue);
+        Check(!Json.IsValid("{\"a\":1,\"a\":2}"));
+        bool caught=false;try{Json.Deserialize<int>("0.5");}catch(JsonException& e){caught=true;}Check(caught);
+        caught=false;try{Reflection.GetType<NoReflection>();}catch(ReflectionException& e){caught=true;}Check(caught);
+        DateTime time=DateTime.Now;Check(Json.Deserialize<DateTime>(Json.Serialize<DateTime>(time)).Ticks==time.Ticks);
+    }
+    void Entities() {
+        Registry registry;registry.Reserve(128);OnPosition handler;
+        ulong token=registry.OnAdd<Vec2>().ConnectRef<OnPosition>(handler);
+        Entity entity=registry.Create<Vec2,Velocity>();Check(handler.Calls==1);
+        Vec2& position=registry.Get<Vec2>(entity);position.X=10;Check(position.Y==9);
+        Check(registry.Has<Vec2,Velocity>(entity));
+        for(row : registry.Query<Vec2,Velocity>().Without<Disabled>())row.Get<Vec2>().X+=row.Get<Velocity>().X;
+        Check(position.X==11);
+        Entity other=registry.Create();registry.Add<Vec2>(other,3.0f,4.0f);Check(registry.Get<Vec2>(other).X==3);
+        Check(registry.Query<Vec2>().With<Velocity>().Count==1);
+        Check(registry.Query<Vec2>().WithoutEntity().Count==2);
+        Check(registry.TryGet<Disabled>(entity)==null);
+        bool caught=false;try{for(row : registry.Query<Vec2>())registry.Destroy(row.Entity);}catch(InvalidOperationException& e){caught=true;}Check(caught);
+        for(row : registry.Query<Vec2>().Stable())registry.Destroy(row.Entity);
+        Check(registry.GetEntityCount()==0 && !registry.IsValid(entity));
+        Check(registry.OnAdd<Vec2>().Disconnect(token));
+        Entity replacement=registry.Create<Vec2,Velocity>();Check(registry.Has<Vec2,Velocity>(replacement));
+        registry.Remove<Velocity>(replacement);Check(!registry.Has<Velocity>(replacement));registry.Clear();Check(registry.GetEntityCount()==0);
+    }
+    void Main() {
+        Variadics();ControlAndLifetimes();StringsAndOperators();FilesAndStreams();TimesAndTasks();MetadataAndJson();Entities();
+        Print($"Library assertions passed: {Checks}");
+    }
+}

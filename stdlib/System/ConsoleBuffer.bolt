@@ -1,0 +1,8 @@
+namespace Bolt.Runtime;
+
+// Stack storage for a complete short line or a Windows UTF-16 conversion.
+struct ConsoleBuffer {
+public:
+    ulong A, B, C, D, E, F, G, H;
+    ulong I, J, K, L, M, N, O, P;
+}

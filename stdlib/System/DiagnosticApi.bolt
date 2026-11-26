@@ -1,0 +1,36 @@
+namespace Bolt.Runtime.DiagnosticApi;
+#ifdef Windows
+[Header("windows.h"), Native("IsDebuggerPresent")] extern "C" int DebuggerPresent();
+[Header("windows.h"), Native("DebugBreak")] extern "C" void DebugBreak();
+#if (X64 || ARM64) && !BoltCppCompatibility
+[Header("windows.h"), Native("RtlCaptureContext")] extern "C" void CaptureContext(void* context);
+[Header("windows.h"), Native("RtlLookupFunctionEntry")] extern "C" void* Lookup(ulong pc, ulong* image, void* history);
+[Header("windows.h"), Native("RtlVirtualUnwind")] extern "C" void* Unwind(uint flags, ulong image, ulong pc, void* entry, void* context, void** data, ulong* frame, void* registers);
+#else
+[Header("windows.h"), Native("RtlCaptureStackBackTrace")] extern "C" ushort Capture(uint skip, uint count, void** frames, uint* hash);
+#endif
+#else
+[Header("unistd.h"), Native("write")] extern "C" long Write(int fd, byte* bytes, ulong length);
+#ifndef Web
+[Header("signal.h"), Native("raise")] extern "C" int Raise(int signal);
+#endif
+#if Linux || Android
+[Header("stdio.h"), Native("fopen")] extern "C" void* OpenStatus(byte* path, byte* mode);
+[Header("stdio.h"), Native("fgets")] extern "C" byte* ReadLine(byte* buffer, int capacity, void* file);
+[Header("stdio.h"), Native("fclose")] extern "C" int CloseStatus(void* file);
+#elif MacOS || IOS || FreeBSD
+[Header("unistd.h"), Native("getpid")] extern "C" int Pid();
+[Header("sys/sysctl.h"), Native("sysctl")] extern "C" int Sysctl(int* mib, uint count, void* info, ulong* size, void* value, ulong length);
+#endif
+#ifdef Web
+[Header("emscripten/emscripten.h"), Native("emscripten_get_callstack")] extern "C" int Callstack(int flags, byte* data, int capacity);
+#elif Android || BoltMusl
+[Header("bolt/detail/DiagnosticUnwind.h"), Native("bolt_diagnostic_backtrace")] extern "C" int Capture(void** frames, int count);
+#elif FreeBSD
+[Header("execinfo.h"), Native("backtrace")] extern "C" ulong Capture(void** frames, ulong count);
+[Header("execinfo.h"), Native("backtrace_symbols")] extern "C" void* Symbols(void** frames, ulong count);
+#else
+[Header("execinfo.h"), Native("backtrace")] extern "C" int Capture(void** frames, int count);
+[Header("execinfo.h"), Native("backtrace_symbols")] extern "C" void* Symbols(void** frames, int count);
+#endif
+#endif

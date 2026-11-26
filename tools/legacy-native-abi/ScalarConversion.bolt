@@ -1,0 +1,8 @@
+namespace Bolt.Runtime;
+
+[Native("bolt::platform::ScalarConversion")]
+public static class ScalarConversion
+{
+public:
+    bool Float<T>(const string& text, T& value, int& error);
+}

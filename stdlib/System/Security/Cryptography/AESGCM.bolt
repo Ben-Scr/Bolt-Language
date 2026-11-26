@@ -1,0 +1,150 @@
+import System
+namespace System.Security.Cryptography;
+
+public sealed class AESGCMResult
+{
+public:
+    byte[] Ciphertext;
+    byte[] Tag;
+    AESGCMResult(byte[] ciphertext, byte[] tag) { Ciphertext = ciphertext; Tag = tag; }
+}
+
+// NIST SP 800-38D AES-GCM with a 128-bit authentication tag.
+// The nonce must never be reused with the same key. A 12-byte nonce is recommended.
+public static class AESGCM
+{
+private:
+    byte[] Xor16(const byte[]& a, const byte[]& b)
+    {
+        byte[] result = new byte[16];
+        for (int i = 0; i < 16; i++) result[i] = (byte)(a[i] ^ b[i]);
+        return result;
+    }
+
+    void ShiftRightOne(byte[]& value)
+    {
+        byte carry = (byte)0;
+        for (int i = 0; i < 16; i++)
+        {
+            byte nextCarry = (byte)(value[i] & (byte)1);
+            value[i] = (byte)(((uint)value[i] >> 1) | ((uint)carry << 7));
+            carry = nextCarry;
+        }
+    }
+
+    byte[] Multiply(const byte[]& x, const byte[]& y)
+    {
+        byte[] z = new byte[16];
+        byte[] v = CryptoPrimitives.Copy(y);
+        for (int bit = 0; bit < 128; bit++)
+        {
+            int byteIndex = bit / 8;
+            int bitIndex = 7 - (bit % 8);
+            if ((((uint)x[byteIndex] >> bitIndex) & 1u) != 0u)
+                for (int i = 0; i < 16; i++) z[i] = (byte)(z[i] ^ v[i]);
+            bool lsb = (v[15] & (byte)1) != (byte)0;
+            ShiftRightOne(v);
+            if (lsb) v[0] = (byte)(v[0] ^ (byte)225);
+        }
+        return z;
+    }
+
+    byte[] Process(const byte[]& h, byte[] y, const byte[]& data)
+    {
+        for (int offset = 0; offset < data.Length; offset += 16)
+        {
+            byte[] block = new byte[16];
+            int count = data.Length - offset;
+            if (count > 16) count = 16;
+            for (int i = 0; i < count; i++) block[i] = data[offset + i];
+            y = Multiply(Xor16(y, block), h);
+        }
+        return y;
+    }
+
+    byte[] GHash(const byte[]& h, const byte[]& aad, const byte[]& ciphertext)
+    {
+        byte[] y = new byte[16];
+        y = Process(h, y, aad);
+        y = Process(h, y, ciphertext);
+        byte[] lengths = new byte[16];
+        CryptoPrimitives.WriteUInt64BE((ulong)aad.Length * 8ul, lengths, 0);
+        CryptoPrimitives.WriteUInt64BE((ulong)ciphertext.Length * 8ul, lengths, 8);
+        return Multiply(Xor16(y, lengths), h);
+    }
+
+    byte[] InitialCounter(const byte[]& h, const byte[]& nonce)
+    {
+        if (nonce.Length == 12)
+        {
+            byte[] j0 = new byte[16];
+            for (int i = 0; i < 12; i++) j0[i] = nonce[i];
+            j0[15] = (byte)1;
+            return j0;
+        }
+        return GHash(h, new byte[0], nonce);
+    }
+
+    bool Increment32(byte[]& counter)
+    {
+        uint value = CryptoPrimitives.ReadUInt32BE(counter, 12);
+        if (value == uint.MaxValue) return false;
+        value = CryptoPrimitives.Add32(value, 1u);
+        CryptoPrimitives.WriteUInt32BE(value, counter, 12);
+        return true;
+    }
+
+    byte[] CounterTransform(AES aes, const byte[]& input, const byte[]& j0)
+    {
+        byte[] counter = CryptoPrimitives.Copy(j0);
+        byte[] output = new byte[input.Length];
+        int offset = 0;
+        while (offset < input.Length)
+        {
+            if (!Increment32(counter)) throw InvalidOperationException("AES-GCM counter exhausted.");
+            byte[] stream = aes.EncryptBlock(counter);
+            int count = input.Length - offset;
+            if (count > 16) count = 16;
+            for (int i = 0; i < count; i++) output[offset + i] = (byte)(input[offset + i] ^ stream[i]);
+            offset += count;
+        }
+        return output;
+    }
+
+    byte[] Tag(AES aes, const byte[]& h, const byte[]& j0, const byte[]& aad, const byte[]& ciphertext)
+    {
+        byte[] mask = aes.EncryptBlock(j0);
+        byte[] hash = GHash(h, aad, ciphertext);
+        return Xor16(mask, hash);
+    }
+
+public:
+    AESGCMResult Encrypt(const byte[]& plaintext, const byte[]& key, const byte[]& nonce)
+    { return Encrypt(plaintext, key, nonce, new byte[0]); }
+
+    AESGCMResult Encrypt(const byte[]& plaintext, const byte[]& key, const byte[]& nonce, const byte[]& associatedData)
+    {
+        if (nonce.Length == 0) throw ArgumentException("AES-GCM nonce cannot be empty.");
+        AES aes = AES(key);
+        byte[] h = aes.EncryptBlock(new byte[16]);
+        byte[] j0 = InitialCounter(h, nonce);
+        byte[] ciphertext = CounterTransform(aes, plaintext, j0);
+        byte[] tag = Tag(aes, h, j0, associatedData, ciphertext);
+        return AESGCMResult(ciphertext, tag);
+    }
+
+    byte[] Decrypt(const byte[]& ciphertext, const byte[]& tag, const byte[]& key, const byte[]& nonce)
+    { return Decrypt(ciphertext, tag, key, nonce, new byte[0]); }
+
+    byte[] Decrypt(const byte[]& ciphertext, const byte[]& tag, const byte[]& key, const byte[]& nonce, const byte[]& associatedData)
+    {
+        if (nonce.Length == 0) throw ArgumentException("AES-GCM nonce cannot be empty.");
+        if (tag.Length != 16) throw ArgumentException("AES-GCM requires a 16-byte authentication tag.");
+        AES aes = AES(key);
+        byte[] h = aes.EncryptBlock(new byte[16]);
+        byte[] j0 = InitialCounter(h, nonce);
+        byte[] expected = Tag(aes, h, j0, associatedData, ciphertext);
+        if (!CryptoPrimitives.FixedTimeEquals(expected, tag)) throw ArgumentException("AES-GCM authentication failed.");
+        return CounterTransform(aes, ciphertext, j0);
+    }
+}

@@ -1,0 +1,2092 @@
+{
+  "schema": 1,
+  "utc": "2026-11-26T20:53:04.152339+00:00",
+  "host": {
+    "platform": "Windows-11-10.0.26300-SP0",
+    "machine": "AMD64",
+    "cpu": "AMD Ryzen 9 7900X 12-Core Processor",
+    "advertised_features": null,
+    "python": "3.13.7",
+    "cpu_affinity": [
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ]
+  },
+  "toolchains": {
+    "c": "clang version 23.1.2 (https://github.com/llvm/llvm-project 85ac560262434c9ccfc0c183ec22d4138ed647fb)\nTarget: x86_64-pc-windows-msvc\nThread model: posix\nInstalledDir: C:\\Program Files\\LLVM\\bin\nBuild config: +alloc:rpmalloc",
+    "c_sha256": "e7956e325bc32a1a96838a19a14c58a18916e710f202776c62f27c621ec79411",
+    "bolt_version": "Bolt 0.1.0 (x86_64-pc-windows-msvc)",
+    "bolt_backends": "Host: x86_64-pc-windows-msvc\nFast: available (AOT/JIT)\nLLVM: 23.1.2 (AOT/JIT)\nShared runtime ABI: core/collections, IO, memory/arenas, legacy system adapters\nProcesses, pipes, DNS and sockets: Bolt with direct platform calls\nNative threads: Bolt completion and synchronization, OS threads and atomic instructions\nC++: compatibility backend for unsupported features/FFI; requires an external C++20 compiler",
+    "bolt_sha256": "a5f0bd4b39fa5a34d3c4edefc63d497d9f49c61874003734bbf0766d3e9b4a85",
+    "bolt_sdk_sha256": {
+      "BoltCompiler.dll": "ad8dcae6d85570e3c8dcda9244e577971f7653222b4a001d61404a86e7fbe814",
+      "BoltAotRuntime.lib": "31e2aa9576a7572d4554f4d8270d710f139bba7693f26c6a1d22610753551a69"
+    },
+    "before_version": "Bolt 0.1.0 (x86_64-pc-windows-msvc)",
+    "before_backends": "Host: x86_64-pc-windows-msvc\nFast: available (AOT/JIT)\nLLVM: 23.1.2 (AOT/JIT)\nShared runtime ABI: core/collections, IO, memory/arenas, legacy system adapters\nProcesses, pipes, DNS and sockets: Bolt with direct platform calls\nNative threads: Bolt completion and synchronization, OS threads and atomic instructions\nC++: compatibility backend for unsupported features/FFI; requires an external C++20 compiler",
+    "before_sha256": "128abfb0c2c67cc979a2d9b341511d0f04daf19eb9712ed3aff8587d28693649",
+    "before_sdk_sha256": {
+      "BoltAotRuntime.lib": "31e2aa9576a7572d4554f4d8270d710f139bba7693f26c6a1d22610753551a69"
+    }
+  },
+  "metric": "whole process wall time including startup and output",
+  "environment": {
+    "BOLT_LINKER": "C:\\Program Files\\LLVM\\bin\\lld-link.exe",
+    "BOLT_LLVM_LIBRARY": "C:\\Program Files\\LLVM\\bin\\LLVM-C.dll"
+  },
+  "seed": 261127,
+  "warmup": 2,
+  "runs": 21,
+  "timeout_s": 120,
+  "build_runs": 5,
+  "build_warmup": 1,
+  "min_duration_ms": 200,
+  "min_speedup": null,
+  "workload": "regular",
+  "cases": {
+    "text-encoding": {
+      "expected_stdout": "1825623425",
+      "profiles": {
+        "release": {
+          "fixture": "text-encoding.bolt",
+          "fixture_sha256": "1cf99e2e5cc31ae4d453e1d643541caa68c9ea88aa97fa5ba2af894a96436b4e",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\performance-comparison\\after\\bin\\bolt.exe",
+            "compile",
+            "text-encoding.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "1cf99e2e5cc31ae4d453e1d643541caa68c9ea88aa97fa5ba2af894a96436b4e",
+          "executable_sha256": "076f5ad62332f3993e6d354e934fd89785da5b85c17dee8dab32698505004a72",
+          "build_ms": 345.8621,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-suite-voyxobwi/text-encoding/release/program.exe\n\n[bolt] Release compilation: 310.62 ms",
+          "runtime_sha256": {},
+          "compile_link": {
+            "n": 5,
+            "median_ms": 580.4558,
+            "p95_ms": 1085.6882,
+            "min_ms": 345.8447,
+            "max_ms": 1085.6882,
+            "raw_ms": [
+              345.8447,
+              1085.6882,
+              636.0295,
+              580.4558,
+              345.8621
+            ]
+          },
+          "n": 21,
+          "median_ms": 19.7834,
+          "p95_ms": 83.8217,
+          "min_ms": 14.4195,
+          "max_ms": 167.1797,
+          "raw_ms": [
+            18.1679,
+            19.3496,
+            17.8682,
+            14.4195,
+            18.0873,
+            19.7834,
+            18.636,
+            19.2853,
+            16.6524,
+            16.4587,
+            15.6859,
+            23.4836,
+            27.6722,
+            30.6285,
+            29.2911,
+            30.3828,
+            29.9635,
+            34.0174,
+            40.1599,
+            83.8217,
+            167.1797
+          ]
+        },
+        "before-release": {
+          "fixture": "text-encoding.bolt",
+          "fixture_sha256": "1cf99e2e5cc31ae4d453e1d643541caa68c9ea88aa97fa5ba2af894a96436b4e",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\performance-comparison\\before\\bin\\bolt.exe",
+            "compile",
+            "text-encoding.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "1cf99e2e5cc31ae4d453e1d643541caa68c9ea88aa97fa5ba2af894a96436b4e",
+          "executable_sha256": "ebff512d269a4ca198a8f34e9fa60403efe40fed0752b67832e28e0557bd1b0f",
+          "build_ms": 389.6006,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-suite-voyxobwi/text-encoding/before-release/program.exe\n\n[bolt] Release compilation: 350.83 ms",
+          "runtime_sha256": {},
+          "compile_link": {
+            "n": 5,
+            "median_ms": 428.3595,
+            "p95_ms": 518.2829,
+            "min_ms": 386.3233,
+            "max_ms": 518.2829,
+            "raw_ms": [
+              386.3233,
+              512.4457,
+              518.2829,
+              428.3595,
+              389.6006
+            ]
+          },
+          "n": 21,
+          "median_ms": 150.6082,
+          "p95_ms": 216.1259,
+          "min_ms": 92.9881,
+          "max_ms": 266.3246,
+          "raw_ms": [
+            150.6082,
+            114.4294,
+            98.153,
+            105.612,
+            105.5675,
+            92.9881,
+            179.0045,
+            150.2997,
+            113.6828,
+            97.7575,
+            107.3382,
+            138.042,
+            171.1855,
+            185.1396,
+            187.5915,
+            205.2593,
+            176.5471,
+            216.1259,
+            266.3246,
+            187.7762,
+            194.9798
+          ]
+        },
+        "c": {
+          "fixture": "text-encoding.c",
+          "fixture_sha256": "78b839caec07b47b235d12e2bbc59b9ddb5271fe74f2f45ab59673ec38dba13c",
+          "command": [
+            "C:\\Program Files\\LLVM\\bin\\clang.exe",
+            "-std=c11",
+            "-O3",
+            "-DNDEBUG",
+            "-ffp-contract=off",
+            "-fuse-ld=lld",
+            "text-encoding.c",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "78b839caec07b47b235d12e2bbc59b9ddb5271fe74f2f45ab59673ec38dba13c",
+          "executable_sha256": "34a667d34cf4274f554255b4dbf390c46b14f4e171bc9900e98716103fd2ff32",
+          "build_ms": 238.6012,
+          "build_log": "",
+          "runtime_sha256": {},
+          "compile_link": {
+            "n": 5,
+            "median_ms": 207.63,
+            "p95_ms": 1075.2039,
+            "min_ms": 158.7441,
+            "max_ms": 1075.2039,
+            "raw_ms": [
+              158.7441,
+              1075.2039,
+              207.63,
+              207.6005,
+              238.6012
+            ]
+          },
+          "n": 21,
+          "median_ms": 21.6363,
+          "p95_ms": 47.0823,
+          "min_ms": 12.0724,
+          "max_ms": 103.055,
+          "raw_ms": [
+            22.8602,
+            21.6363,
+            19.4561,
+            13.1508,
+            15.2518,
+            24.8846,
+            18.3777,
+            18.7244,
+            15.3331,
+            12.0724,
+            15.97,
+            20.9227,
+            36.2693,
+            22.3514,
+            23.2897,
+            47.0823,
+            34.2821,
+            20.2228,
+            44.9081,
+            103.055,
+            46.0443
+          ]
+        }
+      },
+      "build_order": [
+        [
+          "release",
+          "before-release",
+          "c"
+        ],
+        [
+          "release",
+          "c",
+          "before-release"
+        ],
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "release",
+          "before-release",
+          "c"
+        ],
+        [
+          "c",
+          "before-release",
+          "release"
+        ],
+        [
+          "release",
+          "before-release",
+          "c"
+        ]
+      ],
+      "measurement_order": [
+        [
+          "release",
+          "c",
+          "before-release"
+        ],
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ],
+        [
+          "release",
+          "before-release",
+          "c"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ],
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ],
+        [
+          "release",
+          "before-release",
+          "c"
+        ],
+        [
+          "c",
+          "before-release",
+          "release"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ],
+        [
+          "release",
+          "before-release",
+          "c"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ],
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "release",
+          "before-release",
+          "c"
+        ],
+        [
+          "release",
+          "c",
+          "before-release"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ],
+        [
+          "c",
+          "release",
+          "before-release"
+        ],
+        [
+          "c",
+          "before-release",
+          "release"
+        ],
+        [
+          "release",
+          "before-release",
+          "c"
+        ],
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "c",
+          "release",
+          "before-release"
+        ]
+      ],
+      "c_over_release": {
+        "speedup": 1.093659330549855,
+        "valid_duration_and_sample_count": false,
+        "bolt_over_c_median_ci95_paired_bootstrap": [
+          0.8377002037535878,
+          1.3537943178824476
+        ],
+        "p95_speedup": 0.5616958377126686
+      }
+    },
+    "string-concat": {
+      "expected_stdout": "4264897521",
+      "profiles": {
+        "before-release": {
+          "fixture": "string-concat.bolt",
+          "fixture_sha256": "bfb6f6c27c66afdb9d32df5628d99354e45dc5af59e2039236da0abeac7c9c97",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\performance-comparison\\before\\bin\\bolt.exe",
+            "compile",
+            "string-concat.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "bfb6f6c27c66afdb9d32df5628d99354e45dc5af59e2039236da0abeac7c9c97",
+          "executable_sha256": "1fc21dff8fd92fc79f35ec5ad382e24db839f299bd2ce5c10f35e3c4bf89cc7b",
+          "build_ms": 362.0614,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-suite-voyxobwi/string-concat/before-release/program.exe\n\n[bolt] Release compilation: 317.14 ms",
+          "runtime_sha256": {},
+          "compile_link": {
+            "n": 5,
+            "median_ms": 299.4606,
+            "p95_ms": 362.0614,
+            "min_ms": 259.4814,
+            "max_ms": 362.0614,
+            "raw_ms": [
+              299.4606,
+              290.3052,
+              259.4814,
+              305.4819,
+              362.0614
+            ]
+          },
+          "n": 21,
+          "median_ms": 234.816,
+          "p95_ms": 433.3609,
+          "min_ms": 217.3768,
+          "max_ms": 439.7574,
+          "raw_ms": [
+            266.388,
+            359.2906,
+            439.7574,
+            433.3609,
+            371.8451,
+            259.639,
+            229.4918,
+            220.0326,
+            229.671,
+            250.7002,
+            220.8698,
+            217.5269,
+            223.1815,
+            221.9579,
+            248.9567,
+            220.7214,
+            234.816,
+            262.2108,
+            276.2516,
+            217.3768,
+            219.1301
+          ]
+        },
+        "c": {
+          "fixture": "string-concat.c",
+          "fixture_sha256": "dc7844e608c22114bd00f5d0fafdfe4534b2d3817dcd0ec4b945ca0a72e6c259",
+          "command": [
+            "C:\\Program Files\\LLVM\\bin\\clang.exe",
+            "-std=c11",
+            "-O3",
+            "-DNDEBUG",
+            "-ffp-contract=off",
+            "-fuse-ld=lld",
+            "string-concat.c",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "dc7844e608c22114bd00f5d0fafdfe4534b2d3817dcd0ec4b945ca0a72e6c259",
+          "executable_sha256": "c541908a881266bfbb11b1312674b680b1024674cfdedae695e3ad665a39d8b0",
+          "build_ms": 229.1661,
+          "build_log": "",
+          "runtime_sha256": {},
+          "compile_link": {
+            "n": 5,
+            "median_ms": 160.9046,
+            "p95_ms": 267.8826,
+            "min_ms": 132.6607,
+            "max_ms": 267.8826,
+            "raw_ms": [
+              267.8826,
+              153.5021,
+              160.9046,
+              132.6607,
+              229.1661
+            ]
+          },
+          "n": 21,
+          "median_ms": 24.033,
+          "p95_ms": 85.174,
+          "min_ms": 16.1278,
+          "max_ms": 141.8686,
+          "raw_ms": [
+            22.5484,
+            85.174,
+            34.2106,
+            141.8686,
+            26.5824,
+            28.3438,
+            23.1174,
+            22.6582,
+            24.9106,
+            24.7757,
+            25.3171,
+            25.4179,
+            21.0076,
+            17.8246,
+            19.7695,
+            22.1195,
+            24.033,
+            21.6029,
+            31.814,
+            16.1278,
+            18.9749
+          ]
+        },
+        "release": {
+          "fixture": "string-concat.bolt",
+          "fixture_sha256": "bfb6f6c27c66afdb9d32df5628d99354e45dc5af59e2039236da0abeac7c9c97",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\performance-comparison\\after\\bin\\bolt.exe",
+            "compile",
+            "string-concat.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "bfb6f6c27c66afdb9d32df5628d99354e45dc5af59e2039236da0abeac7c9c97",
+          "executable_sha256": "512dd6b7aa7c99805f64b8d57fc42ff4ccdf6152cf05681bb2801faf45185792",
+          "build_ms": 315.8727,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-suite-voyxobwi/string-concat/release/program.exe\n\n[bolt] Release compilation: 271.76 ms",
+          "runtime_sha256": {},
+          "compile_link": {
+            "n": 5,
+            "median_ms": 261.5678,
+            "p95_ms": 357.9912,
+            "min_ms": 236.1074,
+            "max_ms": 357.9912,
+            "raw_ms": [
+              357.9912,
+              260.6225,
+              236.1074,
+              261.5678,
+              315.8727
+            ]
+          },
+          "n": 21,
+          "median_ms": 119.2768,
+          "p95_ms": 237.4249,
+          "min_ms": 108.256,
+          "max_ms": 290.0245,
+          "raw_ms": [
+            136.0632,
+            237.4249,
+            173.9752,
+            290.0245,
+            175.3687,
+            115.359,
+            119.2768,
+            115.5178,
+            119.4948,
+            119.1748,
+            129.6003,
+            109.5502,
+            111.4607,
+            108.256,
+            111.7923,
+            113.1205,
+            141.0695,
+            122.9631,
+            113.0298,
+            121.1134,
+            115.4935
+          ]
+        }
+      },
+      "build_order": [
+        [
+          "release",
+          "c",
+          "before-release"
+        ],
+        [
+          "c",
+          "release",
+          "before-release"
+        ],
+        [
+          "c",
+          "before-release",
+          "release"
+        ],
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "c",
+          "release",
+          "before-release"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ]
+      ],
+      "measurement_order": [
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ],
+        [
+          "c",
+          "release",
+          "before-release"
+        ],
+        [
+          "release",
+          "c",
+          "before-release"
+        ],
+        [
+          "release",
+          "before-release",
+          "c"
+        ],
+        [
+          "c",
+          "before-release",
+          "release"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ],
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "release",
+          "c",
+          "before-release"
+        ],
+        [
+          "c",
+          "release",
+          "before-release"
+        ],
+        [
+          "c",
+          "release",
+          "before-release"
+        ],
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "release",
+          "before-release",
+          "c"
+        ],
+        [
+          "release",
+          "c",
+          "before-release"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ],
+        [
+          "release",
+          "before-release",
+          "c"
+        ],
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "release",
+          "c",
+          "before-release"
+        ],
+        [
+          "c",
+          "before-release",
+          "release"
+        ],
+        [
+          "release",
+          "before-release",
+          "c"
+        ],
+        [
+          "release",
+          "before-release",
+          "c"
+        ]
+      ],
+      "c_over_release": {
+        "speedup": 0.20148930890164726,
+        "valid_duration_and_sample_count": false,
+        "bolt_over_c_median_ci95_paired_bootstrap": [
+          4.544742091203443,
+          5.497700832079818
+        ],
+        "p95_speedup": 0.3587408060401415
+      }
+    },
+    "memory-long-prefix": {
+      "expected_stdout": "509997311",
+      "profiles": {
+        "release": {
+          "fixture": "memory.bolt",
+          "fixture_sha256": "2ca256e2114ab152f6b9ab5040c5031c4f12b8dcc29ff01308ed29b70d6fa2f8",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\performance-comparison\\after\\bin\\bolt.exe",
+            "compile",
+            "memory-long-prefix.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "c1ec12456e44adb6b45721217244889da692e6bee1ecd085b1a10cb477767bc7",
+          "executable_sha256": "6e4bcd727f1ba83203cec31bad6c50c9e6b84c095e79ea90daa9b93ac0216c2e",
+          "build_ms": 438.6074,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-suite-voyxobwi/memory-long-prefix/release/program.exe\n\n[bolt] Release compilation: 367.06 ms",
+          "runtime_sha256": {},
+          "compile_link": {
+            "n": 5,
+            "median_ms": 438.6074,
+            "p95_ms": 580.4508,
+            "min_ms": 256.1456,
+            "max_ms": 580.4508,
+            "raw_ms": [
+              548.3024,
+              256.1456,
+              580.4508,
+              274.4005,
+              438.6074
+            ]
+          },
+          "n": 21,
+          "median_ms": 229.4108,
+          "p95_ms": 345.7621,
+          "min_ms": 221.0396,
+          "max_ms": 414.4697,
+          "raw_ms": [
+            345.7621,
+            342.6538,
+            414.4697,
+            230.0691,
+            234.559,
+            232.2011,
+            228.2917,
+            299.1389,
+            295.1546,
+            229.4108,
+            229.0728,
+            230.8319,
+            232.9132,
+            224.6465,
+            225.3162,
+            226.365,
+            226.583,
+            221.0396,
+            224.498,
+            225.2542,
+            227.102
+          ]
+        },
+        "before-release": {
+          "fixture": "memory.bolt",
+          "fixture_sha256": "2ca256e2114ab152f6b9ab5040c5031c4f12b8dcc29ff01308ed29b70d6fa2f8",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\performance-comparison\\before\\bin\\bolt.exe",
+            "compile",
+            "memory-long-prefix.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "c1ec12456e44adb6b45721217244889da692e6bee1ecd085b1a10cb477767bc7",
+          "executable_sha256": "ad0ecc98258986dffa2882e77adf3a3c101afd501824275848dbac6b01a0d1cd",
+          "build_ms": 421.9988,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-suite-voyxobwi/memory-long-prefix/before-release/program.exe\n\n[bolt] Release compilation: 369.16 ms",
+          "runtime_sha256": {},
+          "compile_link": {
+            "n": 5,
+            "median_ms": 351.5039,
+            "p95_ms": 502.0051,
+            "min_ms": 268.124,
+            "max_ms": 502.0051,
+            "raw_ms": [
+              294.7389,
+              268.124,
+              351.5039,
+              502.0051,
+              421.9988
+            ]
+          },
+          "n": 21,
+          "median_ms": 227.778,
+          "p95_ms": 381.4847,
+          "min_ms": 222.9836,
+          "max_ms": 400.8969,
+          "raw_ms": [
+            400.8969,
+            374.762,
+            381.4847,
+            232.2798,
+            233.1499,
+            228.4538,
+            239.7085,
+            225.9612,
+            316.0008,
+            303.6355,
+            227.5445,
+            231.2004,
+            226.7641,
+            227.778,
+            226.0618,
+            225.3347,
+            223.6413,
+            225.5546,
+            222.9836,
+            225.6102,
+            223.2826
+          ]
+        },
+        "c": {
+          "fixture": "memory.c",
+          "fixture_sha256": "699c1751f7b81b5f1118d14b947762892a86634f368efb4ad89f1577b0806e01",
+          "command": [
+            "C:\\Program Files\\LLVM\\bin\\clang.exe",
+            "-std=c11",
+            "-O3",
+            "-DNDEBUG",
+            "-ffp-contract=off",
+            "-fuse-ld=lld",
+            "memory-long-prefix.c",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "69d304e78f0ab2e3880e9167798acd61382890c9b544bef81434e5f714ac5c3b",
+          "executable_sha256": "55fc12e2d602c34815353f77e943864ed0a518e7d429f3d420a5436c8f6c6b4b",
+          "build_ms": 202.2258,
+          "build_log": "",
+          "runtime_sha256": {},
+          "compile_link": {
+            "n": 5,
+            "median_ms": 202.2258,
+            "p95_ms": 291.3354,
+            "min_ms": 160.1035,
+            "max_ms": 291.3354,
+            "raw_ms": [
+              244.7162,
+              160.1035,
+              162.6736,
+              291.3354,
+              202.2258
+            ]
+          },
+          "n": 21,
+          "median_ms": 404.2953,
+          "p95_ms": 576.7488,
+          "min_ms": 395.9954,
+          "max_ms": 628.4876,
+          "raw_ms": [
+            576.7488,
+            628.4876,
+            437.7296,
+            404.6081,
+            410.9006,
+            410.9791,
+            403.5984,
+            456.3488,
+            509.2325,
+            415.2384,
+            403.0725,
+            404.2953,
+            400.5296,
+            399.3986,
+            404.2682,
+            401.4788,
+            402.2368,
+            395.9954,
+            408.3656,
+            396.6263,
+            397.0486
+          ]
+        }
+      },
+      "build_order": [
+        [
+          "release",
+          "before-release",
+          "c"
+        ],
+        [
+          "release",
+          "c",
+          "before-release"
+        ],
+        [
+          "c",
+          "before-release",
+          "release"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ],
+        [
+          "release",
+          "before-release",
+          "c"
+        ],
+        [
+          "release",
+          "before-release",
+          "c"
+        ]
+      ],
+      "measurement_order": [
+        [
+          "release",
+          "before-release",
+          "c"
+        ],
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "release",
+          "before-release",
+          "c"
+        ],
+        [
+          "release",
+          "before-release",
+          "c"
+        ],
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "release",
+          "before-release",
+          "c"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ],
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ],
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ],
+        [
+          "release",
+          "before-release",
+          "c"
+        ],
+        [
+          "c",
+          "before-release",
+          "release"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ],
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ],
+        [
+          "c",
+          "release",
+          "before-release"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ]
+      ],
+      "c_over_release": {
+        "speedup": 1.762320256936465,
+        "valid_duration_and_sample_count": true,
+        "bolt_over_c_median_ci95_paired_bootstrap": [
+          0.5583121562733177,
+          0.5743353929664777
+        ],
+        "p95_speedup": 1.6680509517960471
+      }
+    },
+    "dictionary-string-long-cached": {
+      "expected_stdout": "120242307072",
+      "profiles": {
+        "c": {
+          "fixture": "dictionary-string.c",
+          "fixture_sha256": "c1e85aacb79931dee5fb4208ce9f70c75be5f0df2c9dd5a4f47fe408c93a327e",
+          "command": [
+            "C:\\Program Files\\LLVM\\bin\\clang.exe",
+            "-std=c11",
+            "-O3",
+            "-DNDEBUG",
+            "-ffp-contract=off",
+            "-fuse-ld=lld",
+            "dictionary-string-long-cached.c",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "eed3ef889f7fef5d2082f848433ea721294867ae6b0f0a21514ece6aa3117171",
+          "executable_sha256": "143daa11b8009380029437b84ae1d2289f47f9709657d6bb40624815a9ae286c",
+          "build_ms": 137.742,
+          "build_log": "",
+          "runtime_sha256": {},
+          "compile_link": {
+            "n": 5,
+            "median_ms": 172.1524,
+            "p95_ms": 194.9483,
+            "min_ms": 132.5509,
+            "max_ms": 194.9483,
+            "raw_ms": [
+              174.7596,
+              132.5509,
+              194.9483,
+              172.1524,
+              137.742
+            ]
+          },
+          "n": 21,
+          "median_ms": 265.2995,
+          "p95_ms": 295.1827,
+          "min_ms": 256.4905,
+          "max_ms": 330.5231,
+          "raw_ms": [
+            256.9217,
+            265.1825,
+            295.1827,
+            330.5231,
+            265.2995,
+            269.4941,
+            276.1616,
+            280.8422,
+            260.506,
+            262.4748,
+            263.2551,
+            282.5333,
+            276.0638,
+            268.0338,
+            259.8197,
+            271.1083,
+            259.0757,
+            256.4905,
+            271.7885,
+            257.9388,
+            256.7482
+          ]
+        },
+        "before-release": {
+          "fixture": "dictionary-string.bolt",
+          "fixture_sha256": "2be50af70359f59134bb199f511f60924dd1d422be3938679dab8916a2627c32",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\performance-comparison\\before\\bin\\bolt.exe",
+            "compile",
+            "dictionary-string-long-cached.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "6c2b2e3e2034deea68521c3dada668e6e5bf3ea902da9332ec4aa0f0b75d7fc6",
+          "executable_sha256": "81a55e22be4308d14add6baa544dff23de82ac8aae02ab22b72ecfaf95085ac9",
+          "build_ms": 592.1148,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-suite-voyxobwi/dictionary-string-long-cached/before-release/program.exe\n\n[bolt] Release compilation: 552.26 ms",
+          "runtime_sha256": {},
+          "compile_link": {
+            "n": 5,
+            "median_ms": 607.6019,
+            "p95_ms": 788.6032,
+            "min_ms": 592.1148,
+            "max_ms": 788.6032,
+            "raw_ms": [
+              600.1362,
+              607.6019,
+              788.6032,
+              638.3057,
+              592.1148
+            ]
+          },
+          "n": 21,
+          "median_ms": 161.5492,
+          "p95_ms": 183.9997,
+          "min_ms": 155.2599,
+          "max_ms": 201.0031,
+          "raw_ms": [
+            155.2599,
+            158.9399,
+            167.8456,
+            156.8376,
+            159.9112,
+            159.9655,
+            158.3354,
+            166.1238,
+            168.4682,
+            170.1182,
+            166.7315,
+            183.9997,
+            177.7628,
+            161.1542,
+            170.3862,
+            162.9457,
+            156.4642,
+            156.4947,
+            201.0031,
+            157.9229,
+            161.5492
+          ]
+        },
+        "release": {
+          "fixture": "dictionary-string.bolt",
+          "fixture_sha256": "2be50af70359f59134bb199f511f60924dd1d422be3938679dab8916a2627c32",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\performance-comparison\\after\\bin\\bolt.exe",
+            "compile",
+            "dictionary-string-long-cached.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "6c2b2e3e2034deea68521c3dada668e6e5bf3ea902da9332ec4aa0f0b75d7fc6",
+          "executable_sha256": "80545da84f205997b9469d7e8b00f6308d7d977184b43fe88d36b35254440efd",
+          "build_ms": 545.5134,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-suite-voyxobwi/dictionary-string-long-cached/release/program.exe\n\n[bolt] Release compilation: 503.29 ms",
+          "runtime_sha256": {},
+          "compile_link": {
+            "n": 5,
+            "median_ms": 564.0016,
+            "p95_ms": 594.0556,
+            "min_ms": 545.5134,
+            "max_ms": 594.0556,
+            "raw_ms": [
+              572.6136,
+              594.0556,
+              564.0016,
+              558.4125,
+              545.5134
+            ]
+          },
+          "n": 21,
+          "median_ms": 162.6839,
+          "p95_ms": 175.9257,
+          "min_ms": 157.8822,
+          "max_ms": 187.7299,
+          "raw_ms": [
+            159.9528,
+            160.7158,
+            172.5257,
+            175.9257,
+            162.8934,
+            166.6262,
+            165.1814,
+            171.8798,
+            162.6839,
+            187.7299,
+            172.7735,
+            161.0339,
+            160.968,
+            164.9801,
+            161.4088,
+            159.8953,
+            157.8822,
+            171.9369,
+            158.2283,
+            161.5896,
+            161.6771
+          ]
+        }
+      },
+      "build_order": [
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "release",
+          "before-release",
+          "c"
+        ],
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "release",
+          "before-release",
+          "c"
+        ],
+        [
+          "c",
+          "release",
+          "before-release"
+        ],
+        [
+          "c",
+          "before-release",
+          "release"
+        ]
+      ],
+      "measurement_order": [
+        [
+          "c",
+          "before-release",
+          "release"
+        ],
+        [
+          "release",
+          "before-release",
+          "c"
+        ],
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "c",
+          "release",
+          "before-release"
+        ],
+        [
+          "c",
+          "before-release",
+          "release"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ],
+        [
+          "release",
+          "c",
+          "before-release"
+        ],
+        [
+          "release",
+          "before-release",
+          "c"
+        ],
+        [
+          "release",
+          "c",
+          "before-release"
+        ],
+        [
+          "release",
+          "c",
+          "before-release"
+        ],
+        [
+          "release",
+          "c",
+          "before-release"
+        ],
+        [
+          "release",
+          "c",
+          "before-release"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ],
+        [
+          "release",
+          "c",
+          "before-release"
+        ],
+        [
+          "c",
+          "before-release",
+          "release"
+        ],
+        [
+          "release",
+          "before-release",
+          "c"
+        ],
+        [
+          "c",
+          "release",
+          "before-release"
+        ],
+        [
+          "release",
+          "c",
+          "before-release"
+        ],
+        [
+          "release",
+          "c",
+          "before-release"
+        ],
+        [
+          "c",
+          "before-release",
+          "release"
+        ]
+      ],
+      "c_over_release": {
+        "speedup": 1.630766781470078,
+        "valid_duration_and_sample_count": false,
+        "bolt_over_c_median_ci95_paired_bootstrap": [
+          0.5939836589289225,
+          0.6329457624942498
+        ],
+        "p95_speedup": 1.6778827652810249
+      }
+    },
+    "buffer-long-fused-unroll8": {
+      "expected_stdout": "4400059777024",
+      "profiles": {
+        "before-release": {
+          "fixture": "buffer-long.bolt",
+          "fixture_sha256": "b123d5547d317faed85cc6692d517505740386cbfc4a431fc631fce116992356",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\performance-comparison\\before\\bin\\bolt.exe",
+            "compile",
+            "buffer-long-fused-unroll8.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "b123d5547d317faed85cc6692d517505740386cbfc4a431fc631fce116992356",
+          "executable_sha256": "8069f5683c3987f9e6b71ae6147cc04c9d337e7c9359ea25d887bf18ec10e18f",
+          "build_ms": 232.2392,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-suite-voyxobwi/buffer-long-fused-unroll8/before-release/program.exe\n\n[bolt] Release compilation: 204.61 ms",
+          "runtime_sha256": {},
+          "compile_link": {
+            "n": 5,
+            "median_ms": 245.7211,
+            "p95_ms": 279.3536,
+            "min_ms": 232.2392,
+            "max_ms": 279.3536,
+            "raw_ms": [
+              279.3536,
+              247.7586,
+              245.7211,
+              243.7789,
+              232.2392
+            ]
+          },
+          "n": 21,
+          "median_ms": 10.7961,
+          "p95_ms": 15.8927,
+          "min_ms": 6.522,
+          "max_ms": 19.2765,
+          "raw_ms": [
+            10.5294,
+            12.5863,
+            6.522,
+            10.6131,
+            13.7453,
+            10.7961,
+            14.2051,
+            12.536,
+            13.408,
+            10.6819,
+            9.4479,
+            7.3001,
+            10.4712,
+            7.8618,
+            10.9805,
+            15.8927,
+            8.2973,
+            9.193,
+            12.6388,
+            11.0143,
+            19.2765
+          ]
+        },
+        "release": {
+          "fixture": "buffer-long.bolt",
+          "fixture_sha256": "b123d5547d317faed85cc6692d517505740386cbfc4a431fc631fce116992356",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\performance-comparison\\after\\bin\\bolt.exe",
+            "compile",
+            "buffer-long-fused-unroll8.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "b123d5547d317faed85cc6692d517505740386cbfc4a431fc631fce116992356",
+          "executable_sha256": "0396d4c02c60b7b5c3ed3518398b8faf9d10036bd73daafac53c016151d6e918",
+          "build_ms": 230.6551,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-suite-voyxobwi/buffer-long-fused-unroll8/release/program.exe\n\n[bolt] Release compilation: 196.74 ms",
+          "runtime_sha256": {},
+          "compile_link": {
+            "n": 5,
+            "median_ms": 232.5458,
+            "p95_ms": 236.0368,
+            "min_ms": 224.0792,
+            "max_ms": 236.0368,
+            "raw_ms": [
+              232.5458,
+              224.0792,
+              236.0368,
+              234.2193,
+              230.6551
+            ]
+          },
+          "n": 21,
+          "median_ms": 11.5592,
+          "p95_ms": 15.6959,
+          "min_ms": 6.104,
+          "max_ms": 20.2355,
+          "raw_ms": [
+            9.5557,
+            9.061,
+            6.104,
+            7.5698,
+            10.0636,
+            13.2587,
+            14.89,
+            11.2827,
+            13.4392,
+            9.5242,
+            10.069,
+            10.4849,
+            11.5592,
+            9.7276,
+            13.8727,
+            20.2355,
+            15.6959,
+            15.259,
+            12.1215,
+            14.5279,
+            15.5684
+          ]
+        },
+        "c": {
+          "fixture": "buffer-long-fused.c",
+          "fixture_sha256": "a85c6b71f90a1de0a7262c7bdee7757495e1f8a0d377702645ad950c424688fd",
+          "command": [
+            "C:\\Program Files\\LLVM\\bin\\clang.exe",
+            "-std=c11",
+            "-O3",
+            "-DNDEBUG",
+            "-ffp-contract=off",
+            "-fuse-ld=lld",
+            "buffer-long-fused-unroll8.c",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "ab9d86dce2abd88afa9ef297641611dddf983ee26e6fd0c266d28ae7dc3612a1",
+          "executable_sha256": "f90024932b5ddfdfe20491320900640e5acc7a834a6595d06bb480c7fd22b939",
+          "build_ms": 120.9778,
+          "build_log": "",
+          "runtime_sha256": {},
+          "compile_link": {
+            "n": 5,
+            "median_ms": 131.674,
+            "p95_ms": 140.0479,
+            "min_ms": 117.9076,
+            "max_ms": 140.0479,
+            "raw_ms": [
+              117.9076,
+              140.0479,
+              132.2458,
+              131.674,
+              120.9778
+            ]
+          },
+          "n": 21,
+          "median_ms": 33.0838,
+          "p95_ms": 35.8056,
+          "min_ms": 27.8446,
+          "max_ms": 36.2596,
+          "raw_ms": [
+            29.1296,
+            31.3757,
+            28.5761,
+            27.8446,
+            32.6929,
+            33.5472,
+            34.2051,
+            30.6228,
+            33.4698,
+            31.4145,
+            36.2596,
+            31.3977,
+            34.134,
+            30.3747,
+            33.2393,
+            33.0838,
+            33.7488,
+            35.8056,
+            31.2444,
+            33.0839,
+            33.8928
+          ]
+        }
+      },
+      "build_order": [
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "c",
+          "before-release",
+          "release"
+        ],
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "c",
+          "before-release",
+          "release"
+        ],
+        [
+          "before-release",
+          "release",
+          "c"
+        ]
+      ],
+      "measurement_order": [
+        [
+          "before-release",
+          "c",
+          "release"
+        ],
+        [
+          "c",
+          "before-release",
+          "release"
+        ],
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "c",
+          "release",
+          "before-release"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ],
+        [
+          "c",
+          "release",
+          "before-release"
+        ],
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "release",
+          "before-release",
+          "c"
+        ],
+        [
+          "c",
+          "release",
+          "before-release"
+        ],
+        [
+          "release",
+          "c",
+          "before-release"
+        ],
+        [
+          "c",
+          "release",
+          "before-release"
+        ],
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "c",
+          "before-release",
+          "release"
+        ],
+        [
+          "c",
+          "release",
+          "before-release"
+        ],
+        [
+          "c",
+          "release",
+          "before-release"
+        ],
+        [
+          "release",
+          "c",
+          "before-release"
+        ],
+        [
+          "c",
+          "release",
+          "before-release"
+        ],
+        [
+          "c",
+          "release",
+          "before-release"
+        ]
+      ],
+      "c_over_release": {
+        "speedup": 2.8621184857083537,
+        "valid_duration_and_sample_count": false,
+        "bolt_over_c_median_ci95_paired_bootstrap": [
+          0.3078221876921289,
+          0.419318762298278
+        ],
+        "p95_speedup": 2.2812071942354373
+      }
+    },
+    "queue-worklist-long-ring": {
+      "expected_stdout": "3932022988769",
+      "profiles": {
+        "before-release": {
+          "fixture": "queue-worklist.bolt",
+          "fixture_sha256": "57625251820fbd86e05f067177285862f5f832b1a0d010b3056573dc398b6292",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\performance-comparison\\before\\bin\\bolt.exe",
+            "compile",
+            "queue-worklist-long-ring.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "89a9ea20a1bd844fb949e3f3fc87a10706b767112bbfebff5e9afcf5934220a6",
+          "executable_sha256": "f6079233404611290562083a5a9c92116a0660a798c44dbd050d21c10addbe51",
+          "build_ms": 623.2763,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-suite-voyxobwi/queue-worklist-long-ring/before-release/program.exe\n\n[bolt] Release compilation: 580.20 ms",
+          "runtime_sha256": {},
+          "compile_link": {
+            "n": 5,
+            "median_ms": 665.4564,
+            "p95_ms": 708.7771,
+            "min_ms": 623.2763,
+            "max_ms": 708.7771,
+            "raw_ms": [
+              708.7771,
+              669.9601,
+              665.4564,
+              646.0642,
+              623.2763
+            ]
+          },
+          "n": 21,
+          "median_ms": 215.9448,
+          "p95_ms": 259.7726,
+          "min_ms": 199.4803,
+          "max_ms": 295.0376,
+          "raw_ms": [
+            215.4881,
+            209.4888,
+            212.1512,
+            199.4803,
+            215.9448,
+            205.8162,
+            216.8862,
+            216.1918,
+            259.7726,
+            229.1391,
+            205.4645,
+            220.3055,
+            216.395,
+            202.7132,
+            200.0177,
+            211.2068,
+            227.5766,
+            216.3408,
+            295.0376,
+            210.8649,
+            218.663
+          ]
+        },
+        "release": {
+          "fixture": "queue-worklist.bolt",
+          "fixture_sha256": "57625251820fbd86e05f067177285862f5f832b1a0d010b3056573dc398b6292",
+          "command": [
+            "C:\\Users\\benso\\source\\repos\\Bolt\\build\\performance-comparison\\after\\bin\\bolt.exe",
+            "compile",
+            "queue-worklist-long-ring.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "89a9ea20a1bd844fb949e3f3fc87a10706b767112bbfebff5e9afcf5934220a6",
+          "executable_sha256": "000b9f6834695973145dcdc62dedf841329ab86cf1f0f1327ec3a447ac958ede",
+          "build_ms": 583.1086,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-suite-voyxobwi/queue-worklist-long-ring/release/program.exe\n\n[bolt] Release compilation: 534.74 ms",
+          "runtime_sha256": {},
+          "compile_link": {
+            "n": 5,
+            "median_ms": 587.7841,
+            "p95_ms": 661.1962,
+            "min_ms": 578.1955,
+            "max_ms": 661.1962,
+            "raw_ms": [
+              587.7841,
+              630.5914,
+              578.1955,
+              661.1962,
+              583.1086
+            ]
+          },
+          "n": 21,
+          "median_ms": 212.0569,
+          "p95_ms": 228.0724,
+          "min_ms": 199.1799,
+          "max_ms": 237.3681,
+          "raw_ms": [
+            212.6691,
+            209.2203,
+            199.1799,
+            204.6485,
+            200.4118,
+            212.0569,
+            209.1275,
+            221.2611,
+            228.0724,
+            219.7718,
+            218.7583,
+            205.5314,
+            223.0397,
+            212.113,
+            200.5815,
+            222.7181,
+            203.8716,
+            204.5002,
+            217.6062,
+            205.2228,
+            237.3681
+          ]
+        },
+        "c": {
+          "fixture": "queue-worklist.c",
+          "fixture_sha256": "5c5bccb89bdad600a88ce8ee89b6e6d05da5c6095ca1e5968fd1191a7954c768",
+          "command": [
+            "C:\\Program Files\\LLVM\\bin\\clang.exe",
+            "-std=c11",
+            "-O3",
+            "-DNDEBUG",
+            "-ffp-contract=off",
+            "-fuse-ld=lld",
+            "queue-worklist-long-ring.c",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "91fe041487c5008bf14b94cad033400a62a24a9cb6a0780bbd56725fde6c13db",
+          "executable_sha256": "71fd34511ea90a4a8d6ccb0ded70eed03a48cbe1d535d3da1f77fbdf3c3a14e3",
+          "build_ms": 167.0642,
+          "build_log": "",
+          "runtime_sha256": {},
+          "compile_link": {
+            "n": 5,
+            "median_ms": 163.6614,
+            "p95_ms": 184.5677,
+            "min_ms": 152.4736,
+            "max_ms": 184.5677,
+            "raw_ms": [
+              184.5677,
+              163.6614,
+              156.9796,
+              152.4736,
+              167.0642
+            ]
+          },
+          "n": 21,
+          "median_ms": 86.7483,
+          "p95_ms": 99.4331,
+          "min_ms": 79.7993,
+          "max_ms": 105.8864,
+          "raw_ms": [
+            95.3968,
+            96.7342,
+            83.7479,
+            81.7807,
+            85.2991,
+            79.7993,
+            86.7483,
+            105.8864,
+            98.145,
+            90.062,
+            86.822,
+            85.9454,
+            86.8169,
+            84.6849,
+            82.6441,
+            89.8603,
+            82.8569,
+            86.0887,
+            94.8049,
+            99.4331,
+            83.1433
+          ]
+        }
+      },
+      "build_order": [
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ],
+        [
+          "c",
+          "release",
+          "before-release"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ],
+        [
+          "release",
+          "c",
+          "before-release"
+        ],
+        [
+          "before-release",
+          "release",
+          "c"
+        ]
+      ],
+      "measurement_order": [
+        [
+          "c",
+          "before-release",
+          "release"
+        ],
+        [
+          "c",
+          "before-release",
+          "release"
+        ],
+        [
+          "c",
+          "release",
+          "before-release"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ],
+        [
+          "c",
+          "release",
+          "before-release"
+        ],
+        [
+          "release",
+          "c",
+          "before-release"
+        ],
+        [
+          "c",
+          "before-release",
+          "release"
+        ],
+        [
+          "c",
+          "before-release",
+          "release"
+        ],
+        [
+          "release",
+          "before-release",
+          "c"
+        ],
+        [
+          "release",
+          "c",
+          "before-release"
+        ],
+        [
+          "c",
+          "release",
+          "before-release"
+        ],
+        [
+          "c",
+          "release",
+          "before-release"
+        ],
+        [
+          "before-release",
+          "release",
+          "c"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ],
+        [
+          "before-release",
+          "c",
+          "release"
+        ],
+        [
+          "release",
+          "c",
+          "before-release"
+        ],
+        [
+          "c",
+          "before-release",
+          "release"
+        ],
+        [
+          "c",
+          "release",
+          "before-release"
+        ],
+        [
+          "release",
+          "before-release",
+          "c"
+        ]
+      ],
+      "c_over_release": {
+        "speedup": 0.40908029873114243,
+        "valid_duration_and_sample_count": false,
+        "bolt_over_c_median_ci95_paired_bootstrap": [
+          2.323069663120961,
+          2.5197663127801153
+        ],
+        "p95_speedup": 0.43597164759962187
+      }
+    }
+  }
+}

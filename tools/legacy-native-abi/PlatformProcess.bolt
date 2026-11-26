@@ -1,0 +1,62 @@
+namespace Bolt.Runtime;
+#if !(BoltStandaloneCore && (Windows || Linux || MacOS || FreeBSD))
+[Native("bolt::system::EnvironmentOps")]
+public static class EnvironmentOps
+{
+public:
+    string Get(string name);
+    bool Contains(string name);
+    void Set(string name, string value);
+    void Remove(string name);
+    string CurrentDirectory();
+    void SetCurrentDirectory(string path);
+    string TemporaryDirectory();
+    int ProcessorCount();
+    string OS();
+    string Architecture();
+}
+[Native("bolt::system::PipeHandle")]
+public sealed class PipeHandle
+{
+public:
+    PipeHandle();
+    int Read(byte[]& bytes, int offset, int count, int timeout = -1);
+    int Write(const byte[]& bytes, int offset, int count, int timeout = -1);
+    void Close();
+    [NativeProperty("IsOpen")] const bool IsOpen;
+}
+[Native("bolt::system::CapturedProcess")]
+public sealed class CapturedProcess
+{
+public:
+    CapturedProcess();
+    [NativeProperty("Output")] const byte[] Output;
+    [NativeProperty("Error")] const byte[] Error;
+    [NativeProperty("ExitCode")] const int ExitCode;
+    [NativeProperty("TimedOut")] const bool TimedOut;
+}
+[Native("bolt::system::ProcessHandle")]
+public sealed class ProcessHandle
+{
+public:
+    ProcessHandle();
+    static ProcessHandle Start(string program, const string[]& arguments, string workingDirectory, bool redirect, const string[]& environment, bool inheritEnvironment);
+    bool Wait(int milliseconds = -1);
+    void Kill();
+    void Close();
+    CapturedProcess Capture(int milliseconds = 30000, int maximumBytes = 16777216);
+    [NativeProperty("IsRunning")] const bool IsRunning;
+    [NativeProperty("ExitCode")] const int ExitCode;
+    [NativeProperty("TerminationSignal")] const int TerminationSignal;
+    [NativeProperty("Id")] const long Id;
+    [NativeProperty("Input")] const PipeHandle Input;
+    [NativeProperty("Output")] const PipeHandle Output;
+    [NativeProperty("Error")] const PipeHandle Error;
+}
+[Native("bolt::library::Process")]
+public static class ProcessExit
+{
+public:
+    void Terminate(int code = 0);
+}
+#endif

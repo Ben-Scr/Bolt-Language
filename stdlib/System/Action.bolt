@@ -1,0 +1,16 @@
+namespace System;
+
+// Heterogeneous type packs specialize to ordinary typed parameters, including no parameters.
+public interface Action<T...>
+{
+    void Invoke(T... values);
+    [ReadOnly] ulong InvocationId();
+    [ReadOnly] string InvocationKey();
+    [ReadOnly] void* InvocationTarget();
+}
+
+// Public type arguments are ordered as inputs followed by the result.
+public interface Func<TResult, TArgs...>
+{
+    TResult Invoke(TArgs... values);
+}

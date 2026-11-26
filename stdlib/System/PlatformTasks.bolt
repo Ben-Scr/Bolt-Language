@@ -1,0 +1,79 @@
+import System
+namespace Bolt.Runtime;
+
+public struct TaskState<T> {
+public:
+    ThreadHandle Handle;
+    public class Notification {
+        private ThreadResource* completion;
+        private System.Action<System.Threading.Tasks.Task<T>> callback;
+    public:
+        Notification(ThreadResource* value,System.Action<System.Threading.Tasks.Task<T>> action)
+            : completion(value), callback(action) {}
+        void Run(){
+            TaskState<T> state;
+            ThreadKernel.Retain(completion);
+            state.Handle.Pointer=completion;
+            callback.Invoke(System.Threading.Tasks.Task<T>(state));
+        }
+    }
+private:
+    [ReadOnly] ThreadResource* State(){
+        if(Handle.Pointer==null)throw InvalidOperationException("The Task has not been initialized.");
+        return Handle.Pointer;
+    }
+    void CheckProducer(){if(!State()->Producer)throw InvalidOperationException("Not a pending completion source.");}
+    void Writable(){
+        CheckProducer();
+        if(AtomicOps.Add(State()->Published,0ul)!=0ul)throw InvalidOperationException("Task already completed.");
+    }
+public:
+    TaskState(){}
+    static TaskState<T> Pending(){TaskState<T> state;state.Handle=ThreadHandles.Make(ThreadResourceKind.Completion);state.Handle.Pointer->Producer=true;return state;}
+    void SetResult(T value){
+        ThreadResource* p=State();ThreadKernel.Lock(p);
+        try{
+            Writable();
+            byte* type=ExecutionMemory.Descriptor<T>();
+            byte* data=ThreadKernel.CopyValue(ExecutionMemory.Context(),type,(byte*)&value);
+            ThreadKernel.DropValue(p->ResultType,p->Result);p->Result=data;p->ResultType=type;p->HasResult=true;
+        }finally{ThreadKernel.Unlock(p);}
+    }
+    void SetFailure(System.Exception& error,bool canceled){
+        ThreadResource* p=State();ThreadKernel.Lock(p);
+        try{Writable();ThreadHandles.SaveException(p,error,canceled);}finally{ThreadKernel.Unlock(p);}
+    }
+    void Complete(){CheckProducer();ThreadKernel.Publish(State());}
+    void OnCompleted(System.Action<System.Threading.Tasks.Task<T>> callback){
+        ThreadResource* p=State();
+        Notification job(p,callback);
+        ThreadResource* capture=(ThreadResource*)ThreadCallback.Capture<Notification>(job);
+        ThreadKernel.Register(p,capture,ThreadCallback.Entry<Notification>());
+    }
+    [ReadOnly] bool IsReady(){return WaitReady(0);}
+    [ReadOnly] bool IsFaulted(){return IsReady() && State()->Failed;}
+    [ReadOnly] bool IsCanceled(){return IsReady() && State()->Canceled;}
+    [ReadOnly] bool WaitReady(int milliseconds){return ThreadHandles.Wait(State(),milliseconds);}
+    [ReadOnly] void Observe(){
+        WaitReady(-1);
+        ThreadResource* p=State();
+        if(!p->Failed)return;
+        if(p->Fault==null)throw OutOfMemoryException("Could not retain the task exception.");
+        throw *ThreadHandles.Fault(p);
+    }
+    [ReadOnly] T GetResult(){
+        Observe();
+        if(!State()->HasResult)throw InvalidOperationException("The task completed without a result.");
+        return *((T*)State()->Result);
+    }
+    static TaskState<U> Ready<U>(U value){var state=TaskState<U>.Pending();state.SetResult(value);state.Complete();state.Handle.Pointer->Producer=false;return state;}
+    static TaskState<void> Completed(){var state=TaskState<void>.Pending();state.Complete();state.Handle.Pointer->Producer=false;return state;}
+}
+public class ExceptionState {
+private:
+    ThreadHandle saved;
+public:
+    ExceptionState(){}
+    void Capture(System.Exception& error){saved=ThreadHandles.Make(ThreadResourceKind.Exception);ThreadHandles.SaveException(saved.Pointer,error,false);}
+    void Rethrow(){if(saved.Pointer==null)throw InvalidOperationException("No captured exception.");throw *ThreadHandles.Fault(saved.Pointer);}
+}

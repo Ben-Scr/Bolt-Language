@@ -1,0 +1,95 @@
+import System
+import System.Collections.Generic
+import Bolt.Runtime.IO
+namespace System.IO;
+
+// Traversal, parent creation, filtering and sort order are ordinary Bolt code.
+// Native calls enumerate one directory or perform one platform operation.
+public static class Directory
+{
+private:
+    void Sort(string[]& items)
+    {
+        int count = items.Length;
+        if (count < 2) return;
+        string[] scratch;
+        for (int width = 1; width < count;)
+        {
+            int start = 0;
+            while (start < count)
+            {
+                int middle = width > count - start ? count : start + width;
+                int end = width > count - middle ? count : middle + width;
+                // Some filesystems already enumerate names in lexical order.
+                if (middle == end || string.Compare(items[middle - 1], items[middle]) <= 0) {
+                    start = end;
+                    continue;
+                }
+                if (scratch.Length == 0) scratch = new string[count];
+                int left = start, right = middle, output = start;
+                while (left < middle || right < end)
+                {
+                    if (right >= end || (left < middle && string.Compare(items[left], items[right]) <= 0)) scratch[output++] = items[left++];
+                    else scratch[output++] = items[right++];
+                }
+                for (int i = start; i < end; i++) items[i] = scratch[i];
+                start = end;
+            }
+            if (width > count / 2) break;
+            width *= 2;
+        }
+    }
+    string[] Entries(string path, bool recursive, int kind)
+    {
+        List<string> pending, result;
+        pending.Add(path);
+        while (pending.Length > 0)
+        {
+            string current = pending[pending.Length - 1]; pending.RemoveAt(pending.Length - 1);
+            DirectoryEntry[] entries = DirectoryOps.Entries(current);
+            for (int i = 0; i < entries.Length; i++)
+            {
+                if (kind == 0 || (kind == 1 && entries[i].IsFile) || (kind == 2 && entries[i].IsDirectory)) result.Add(entries[i].Path);
+                if (recursive && entries[i].IsDirectory && !entries[i].IsLink) pending.Add(entries[i].Path);
+            }
+        }
+        string[] items = result.ToArray(); Sort(items); return items;
+    }
+public:
+    bool Exists(string path) { return DirectoryOps.IsDirectory(path); }
+    void Create(string path)
+    {
+        if (path.Length == 0) Bolt.Runtime.Failure.Argument("The path must not be empty.");
+        List<string> parents; string current = path;
+        while (!Exists(current))
+        {
+            parents.Add(current); string parent = Path.GetDirectoryName(current);
+            if (parent.Length == 0 || parent == current) break;
+            current = parent;
+        }
+        for (int i = parents.Length - 1; i >= 0; i--) DirectoryOps.CreateOne(parents[i]);
+    }
+    void Delete(string path, bool recursive = true)
+    {
+        if (!Exists(path)) Bolt.Runtime.Failure.DirectoryMissing("Directory not found: " + path);
+        if (!recursive || DirectoryOps.IsLink(path)) { DirectoryOps.RemoveOne(path); return; }
+        List<string> paths; List<bool> visited;
+        paths.Add(path); visited.Add(false);
+        while (paths.Length > 0)
+        {
+            int index = paths.Length - 1; string current = paths[index]; bool done = visited[index];
+            paths.RemoveAt(index); visited.RemoveAt(index);
+            if (done || DirectoryOps.IsLink(current) || !Exists(current)) { DirectoryOps.RemoveOne(current); continue; }
+            DirectoryEntry[] entries = DirectoryOps.Entries(current);
+            paths.Add(current); visited.Add(true);
+            for (int i = 0; i < entries.Length; i++) { paths.Add(entries[i].Path); visited.Add(false); }
+        }
+    }
+    void Move(string source, string destination) { DirectoryOps.Move(source, destination); }
+    string[] GetFiles(string path, bool recursive = false) { return Entries(path, recursive, 1); }
+    string[] GetDirectories(string path, bool recursive = false) { return Entries(path, recursive, 2); }
+    string[] GetFileSystemEntries(string path, bool recursive = false) { return Entries(path, recursive, 0); }
+    string GetCurrentDirectory() { return DirectoryOps.Current(); }
+    void SetCurrentDirectory(string path) { DirectoryOps.Current(path); }
+    string GetParent(string path) { return Path.GetDirectoryName(Path.GetFullPath(path)); }
+}

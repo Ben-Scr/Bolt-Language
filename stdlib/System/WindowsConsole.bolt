@@ -1,0 +1,248 @@
+#ifdef Windows
+import System
+namespace Bolt.Runtime;
+
+// Console I/O, UTF conversion, and temporary buffers are implemented in Bolt.
+// NativeString only borrows or constructs the existing language string storage.
+public static class WindowsConsole
+{
+private:
+    void Require(int success, const string& message)
+    {
+        if (success == 0) throw IOException(message);
+    }
+
+    byte* Allocate(void* heap, ulong bytes)
+    {
+        byte* buffer = (byte*)Bolt.Runtime.Windows.HeapAlloc(heap, 0u, bytes);
+        if (buffer == null) throw OutOfMemoryException("Cannot allocate the Windows console buffer.");
+        return buffer;
+    }
+
+    // Win32 may successfully write only part of a buffer. Keep making progress
+    // and preserve a UTF-16 surrogate pair at each ordinary chunk boundary.
+    void WriteAll(void* handle, byte* cursor, ulong remaining, bool wide)
+    {
+        while (remaining != 0ul)
+        {
+            uint amount = remaining > 32768ul ? 32768u : (uint)remaining;
+            if (wide && amount > 1u)
+            {
+                ushort last = ((ushort*)cursor)[amount - 1u];
+                if (last >= (ushort)55296 && last <= (ushort)56319) amount--;
+            }
+
+            uint written = 0u;
+            int success = 0;
+            if (wide) success = Bolt.Runtime.Windows.WriteConsoleW(handle, cursor, amount, &written, null);
+            else success = Bolt.Runtime.Windows.WriteFile(handle, cursor, amount, &written, null);
+            Require(success, "Cannot write to the Windows console output handle.");
+            if (written == 0u) throw IOException("Windows console output made no progress.");
+            if (written > amount) throw IOException("Windows console output returned an invalid byte count.");
+            remaining -= (ulong)written;
+            cursor = &cursor[(ulong)written * (wide ? 2ul : 1ul)];
+        }
+    }
+
+    void WriteText(const string& value, bool newline, uint standardHandle = 4294967285u)
+    {
+        ulong length = 0ul;
+#ifdef BoltStandaloneCore
+        byte* bytes = TypedMemory.TextData(value, length);
+#else
+        byte* bytes = NativeString.Bytes(value, length);
+#endif
+        ConsoleBuffer buffer;
+        void* handle = Bolt.Runtime.Windows.GetStdHandle(standardHandle);
+        uint mode = 0u;
+        if (Bolt.Runtime.Windows.GetConsoleMode(handle, &mode) == 0)
+        {
+            if (newline && length < (ulong)sizeof(ConsoleBuffer))
+            {
+                byte* line = (byte*)&buffer;
+                for (ulong i = 0ul; i < length; i++) line[i] = bytes[i];
+                line[length] = 10;
+                WriteAll(handle, (byte*)&buffer, length + 1ul, false);
+                return;
+            }
+            WriteAll(handle, bytes, length, false);
+            if (newline)
+            {
+                byte lf = (byte)10;
+                WriteAll(handle, &lf, 1ul, false);
+            }
+            return;
+        }
+
+        void* heap = null;
+        ushort* wide = (ushort*)&buffer;
+        try
+        {
+            ulong units = 0ul;
+            if (length != 0ul)
+            {
+                if (length > 2147483647ul)
+                    throw IOException("The Windows console string exceeds the UTF-8 conversion limit.");
+
+                // UTF-16 requires at most one unit per UTF-8 byte. Reserve a
+                // second half so every lone LF can gain a CR in place.
+                ulong capacity = length * 4ul + 4ul;
+                if (capacity > (ulong)sizeof(ConsoleBuffer)) {
+                    heap = Bolt.Runtime.Windows.GetProcessHeap();
+                    wide = (ushort*)Allocate(heap, capacity);
+                }
+                int converted = Bolt.Runtime.Windows.MultiByteToWideChar(65001u, 0u, bytes, (int)length, wide, (int)length);
+                Require(converted, "Cannot convert Windows console output to UTF-16.");
+                units = (ulong)converted;
+                ulong extra = 0ul;
+                ushort previous = (ushort)0;
+                for (ulong index = 0ul; index < units; index++)
+                {
+                    ushort character = wide[index];
+                    if (character == (ushort)10 && previous != (ushort)13) extra++;
+                    previous = character;
+                }
+
+                ulong normalized = units + extra;
+                ulong source = units;
+                ulong destination = normalized;
+                while (source != destination)
+                {
+                    source--;
+                    ushort character = wide[source];
+                    destination--;
+                    wide[destination] = character;
+                    if (character == (ushort)10 && (source == 0ul || wide[source - 1ul] != (ushort)13))
+                    {
+                        destination--;
+                        wide[destination] = (ushort)13;
+                    }
+                }
+                units = normalized;
+            }
+            if (newline)
+            {
+                wide[units++] = (ushort)13;
+                wide[units++] = (ushort)10;
+            }
+            WriteAll(handle, (byte*)wide, units, true);
+        }
+        finally
+        {
+            if (wide != (ushort*)&buffer) Bolt.Runtime.Windows.HeapFree(heap, 0u, wide);
+        }
+    }
+
+public:
+    void Write(const string& value) { WriteText(value, false); }
+    void WriteLine(const string& value) { WriteText(value, true); }
+
+    void WriteError(const string& value) { WriteText(value, false, 4294967284u); } // STD_ERROR_HANDLE (-12)
+
+    string ReadLine()
+    {
+        void* handle = Bolt.Runtime.Windows.GetStdHandle(4294967286u); // STD_INPUT_HANDLE (-10).
+        uint mode = 0u;
+        bool console = Bolt.Runtime.Windows.GetConsoleMode(handle, &mode) != 0;
+        void* heap = Bolt.Runtime.Windows.GetProcessHeap();
+        byte* buffer = null;
+        byte* utf8 = null;
+        ulong capacity = 256ul;
+        ulong length = 0ul;
+        bool endedWithLf = false;
+        try
+        {
+            buffer = Allocate(heap, capacity * 2ul);
+            while (true)
+            {
+                // Read just one unit so the next line stays in the OS handle.
+                // There is no shared read-ahead state between modules or JITs.
+                ushort unit = (ushort)0;
+                uint read = 0u;
+                int success = 0;
+                if (console) success = Bolt.Runtime.Windows.ReadConsoleW(handle, &unit, 1u, &read, null);
+                else success = Bolt.Runtime.Windows.ReadFile(handle, &unit, 1u, &read, null);
+                if (success == 0)
+                {
+                    uint error = Bolt.Runtime.Windows.GetLastError();
+                    if (error == 109u || error == 38u) break; // Broken pipe / EOF.
+                    throw IOException("Cannot read from the Windows console input handle.");
+                }
+                if (read == 0u) break;
+                if (unit == (ushort)10)
+                {
+                    endedWithLf = true;
+                    break;
+                }
+
+                if (length >= capacity)
+                {
+                    if (capacity >= 1073741824ul)
+                        throw IOException("The Windows console input line exceeds the conversion limit.");
+                    ulong nextCapacity = capacity * 2ul;
+                    byte* replacement = (byte*)Bolt.Runtime.Windows.HeapReAlloc(heap, 0u, buffer, nextCapacity * 2ul);
+                    if (replacement == null)
+                        throw OutOfMemoryException("Cannot grow the Windows console input buffer.");
+                    buffer = replacement;
+                    capacity = nextCapacity;
+                }
+                if (console) ((ushort*)buffer)[length] = unit;
+                else buffer[length] = (byte)unit;
+                length++;
+            }
+
+            // A CR before EOF is data. Only remove one immediately before LF.
+            if (endedWithLf && length != 0ul)
+            {
+                if (console)
+                {
+                    if (((ushort*)buffer)[length - 1ul] == (ushort)13) length--;
+                }
+                else if (buffer[length - 1ul] == (byte)13) length--;
+            }
+            if (length == 0ul) return "";
+            if (!console) return NativeString.FromUtf8(buffer, length);
+
+            int required = Bolt.Runtime.Windows.WideCharToMultiByte(65001u, 0u, (ushort*)buffer, (int)length, null, 0, null, null);
+            Require(required, "Cannot size the Windows console UTF-8 input buffer.");
+            utf8 = Allocate(heap, (ulong)required);
+            int converted = Bolt.Runtime.Windows.WideCharToMultiByte(65001u, 0u, (ushort*)buffer, (int)length, utf8, required, null, null);
+            Require(converted, "Cannot convert Windows console input to UTF-8.");
+            return NativeString.FromUtf8(utf8, (ulong)converted);
+        }
+        finally
+        {
+            if (utf8 != null) Bolt.Runtime.Windows.HeapFree(heap, 0u, utf8);
+            if (buffer != null) Bolt.Runtime.Windows.HeapFree(heap, 0u, buffer);
+        }
+    }
+
+    void ClearDisplay()
+    {
+        void* handle = Bolt.Runtime.Windows.GetStdHandle(4294967285u);
+        uint mode = 0u;
+        if (Bolt.Runtime.Windows.GetConsoleMode(handle, &mode) == 0) return;
+
+        void* heap = Bolt.Runtime.Windows.GetProcessHeap();
+        // CONSOLE_SCREEN_BUFFER_INFO has size, cursor, attributes, viewport,
+        // and maximum-size fields. Its first five 16-bit fields suffice here.
+        ushort* information = (ushort*)Allocate(heap, 24ul);
+        try
+        {
+            Require(Bolt.Runtime.Windows.GetConsoleScreenBufferInfo(handle, information), "Cannot inspect the Windows console screen buffer.");
+            uint cells = (uint)information[0] * (uint)information[1];
+            ushort attributes = information[4];
+            uint written = 0u;
+            Require(Bolt.Runtime.Windows.FillConsoleOutputCharacterW(handle, (ushort)32, cells, 0u, &written), "Cannot clear Windows console characters.");
+            if (written != cells) throw IOException("The Windows console screen was only partially cleared.");
+            Require(Bolt.Runtime.Windows.FillConsoleOutputAttribute(handle, attributes, cells, 0u, &written), "Cannot reset Windows console attributes.");
+            if (written != cells) throw IOException("Windows console attributes were only partially reset.");
+            Require(Bolt.Runtime.Windows.SetConsoleCursorPosition(handle, 0u), "Cannot reset the Windows console cursor.");
+        }
+        finally
+        {
+            Bolt.Runtime.Windows.HeapFree(heap, 0u, information);
+        }
+    }
+}
+#endif

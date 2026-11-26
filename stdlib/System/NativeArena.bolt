@@ -1,0 +1,111 @@
+#ifdef BoltStandaloneCore
+namespace Bolt.Runtime;
+
+struct RegionBlock {
+public:
+    RegionBlock* Next;
+    ulong Capacity, Used;
+}
+struct RegionRoot {
+public:
+    RegionRoot* Next;
+    byte* Value, Descriptor;
+}
+struct Region {
+public:
+    Region* Next;
+    RegionBlock* First, Last;
+    RegionRoot* Roots;
+    ulong Used, Capacity, Peak, Limit, Initial, Thread;
+    bool Grow, Disposed, Clearing;
+}
+
+static class NativeArena {
+private:
+    static RegionBlock* NewBlock(ulong capacity) {
+        ulong prefix=(ulong)sizeof(RegionBlock);
+        if(capacity>ulong.MaxValue-prefix)throw System.OutOfMemoryException("arena capacity exceeds address space");
+        RegionBlock* block=(RegionBlock*)StandaloneCore.Allocate(prefix+capacity);
+        if(block==null)throw System.OutOfMemoryException("Could not allocate arena block.");
+        block->Capacity=capacity;
+        return block;
+    }
+    static void Validate(Region* state) {
+        if(state==null)throw System.InvalidOperationException("uninitialized arena");
+        if(state->Thread!=ThreadKernel.Identity())throw System.InvalidOperationException("arena belongs to another thread");
+        if(state->Disposed)throw System.InvalidOperationException("arena has been disposed");
+        if(state->Clearing)throw System.InvalidOperationException("arena cleanup cannot be reentered");
+    }
+public:
+    static byte* Reserve(Region* state,ulong bytes) {
+        Validate(state);
+        if(bytes==0ul)bytes=1ul;
+        if(bytes>ulong.MaxValue-7ul)throw System.OutOfMemoryException("arena capacity exhausted");
+        RegionBlock* block=state->First;
+        ulong start=0ul;
+        while(block!=null) {
+            start=(block->Used+7ul)&(ulong.MaxValue-7ul);
+            if(start<=block->Capacity && bytes<=block->Capacity-start)break;
+            block=block->Next;
+        }
+        if(block==null){
+            ulong remaining=state->Limit-state->Capacity;
+            if(!state->Grow || bytes>remaining)throw System.OutOfMemoryException("arena capacity exhausted");
+            ulong capacity=bytes+7ul;
+            if(capacity<state->Initial)capacity=state->Initial;
+            if(capacity>remaining)capacity=remaining;
+            block=NewBlock(capacity);
+            state->Last->Next=block;state->Last=block;state->Capacity+=capacity;
+            start=0ul;
+        }
+        ulong end=start+bytes;
+        state->Used+=end-block->Used;block->Used=end;
+        if(state->Used>state->Peak)state->Peak=state->Used;
+        byte* storage=(byte*)block;
+        byte* value=&storage[(ulong)sizeof(RegionBlock)+start];
+        StandaloneCore.Zero(value,bytes);
+        return value;
+    }
+public:
+    static Region* Create(ulong initial,ulong limit,int grow) {
+        if(initial==0ul || initial>limit || (grow==0 && initial!=limit))
+            throw System.ArgumentException("invalid arena capacity");
+        Region* state=(Region*)StandaloneCore.Allocate((ulong)sizeof(Region));
+        if(state==null)throw System.OutOfMemoryException("Could not allocate arena state.");
+        try { state->First=NewBlock(initial); }
+        catch { StandaloneCore.Free((byte*)state);throw; }
+        state->Last=state->First;state->Initial=initial;state->Capacity=initial;state->Limit=limit;
+        state->Grow=grow!=0;state->Thread=ThreadKernel.Identity();
+        return state;
+    }
+    static byte* Allocate(Region* state,ulong bytes,byte* descriptor) {
+        RegionRoot* root=(RegionRoot*)StandaloneCore.Allocate((ulong)sizeof(RegionRoot));
+        if(root==null)throw System.OutOfMemoryException("Could not register arena root.");
+        try { root->Value=Reserve(state,bytes); }
+        catch { StandaloneCore.Free((byte*)root);throw; }
+        root->Descriptor=descriptor;root->Next=state->Roots;state->Roots=root;
+        return root->Value;
+    }
+    static bool Begin(Region* state,int dispose) {
+        if(state!=null && dispose!=0 && state->Disposed)return false;
+        Validate(state);state->Clearing=true;return true;
+    }
+    static void End(Region* state,int dispose) {
+        RegionBlock* block=state->First;
+        while(block!=null){
+            RegionBlock* next=block->Next;
+            if(dispose!=0)StandaloneCore.Free((byte*)block);
+            else block->Used=0ul;
+            block=next;
+        }
+        if(dispose!=0){state->First=null;state->Last=null;state->Capacity=0ul;state->Disposed=true;}
+        state->Used=0ul;state->Clearing=false;
+    }
+    static ulong Stat(Region* state,int property) {
+        if(state==null)throw System.InvalidOperationException("uninitialized arena");
+        if(property==0)return state->Used;
+        if(property==1)return state->Capacity;
+        return property==2 ? state->Peak : state->Limit;
+    }
+}
+#endif

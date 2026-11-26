@@ -1,0 +1,25 @@
+import System.Memory
+static class Program
+{
+public:
+    void Main()
+    {
+        byte[] left = new byte[16387];
+        byte[] right = new byte[16387];
+        byte* a = &left[1];
+        byte* b = &right[2];
+        ulong result = 0ul;
+        for (int step = 0; step < 250000; step++)
+        {
+            int n = 1 + (step & 16383);
+            byte value = (byte)((step ^ (int)(result & 255ul)) & 255);
+            Memory.Set(a, value, (ulong)n);
+            Memory.Copy(b, a, (ulong)n);
+            b[n - 1] = (byte)(value ^ (byte)128);
+            int sign = Memory.Compare(a, b, (ulong)n);
+            Memory.Move(&b[1], b, (ulong)n);
+            result += (ulong)b[n] + (ulong)(sign + 1);
+        }
+        Print(result);
+    }
+}

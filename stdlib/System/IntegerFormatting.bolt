@@ -1,0 +1,42 @@
+namespace Bolt.Runtime;
+
+static class DecimalDigits {
+public:
+    int Count(ulong value) {
+        int digits = 1;
+        if (value >= 10000000000000000ul) { value /= 10000000000000000ul; digits += 16; }
+        if (value >= 100000000ul) { value /= 100000000ul; digits += 8; }
+        if (value >= 10000ul) { value /= 10000ul; digits += 4; }
+        if (value >= 100ul) { value /= 100ul; digits += 2; }
+        if (value >= 10ul) digits++;
+        return digits;
+    }
+}
+
+public static class IntegerFormatting
+{
+private:
+    string Decimal(ulong magnitude, bool negative)
+    {
+        int length = DecimalDigits.Count(magnitude) + (negative ? 1 : 0);
+
+        byte[] digits = new byte[length];
+        int first = negative ? 1 : 0;
+        for (int i = length - 1; i >= first; i--) {
+            digits[i] = (byte)(48ul + magnitude % 10ul);
+            magnitude /= 10ul;
+        }
+        if (negative) digits[0] = 45;
+        return string.FromUtf8(digits);
+    }
+
+public:
+    string Signed(long value)
+    {
+        // Offset before negation so long.MinValue also has a representable magnitude.
+        if (value < 0l) return Decimal((ulong)(-(value + 1l)) + 1ul, true);
+        return Decimal((ulong)value, false);
+    }
+
+    string Unsigned(ulong value) { return Decimal(value, false); }
+}

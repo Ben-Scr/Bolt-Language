@@ -1,0 +1,64 @@
+#if Windows || Linux || MacOS || FreeBSD
+import System
+namespace Bolt.Runtime;
+
+public static class ThreadOps
+{
+public:
+    void Yield()
+    {
+#ifdef Windows
+        Bolt.Runtime.Windows.YieldThread();
+#endif
+#if Linux || MacOS || FreeBSD
+        Bolt.Runtime.Posix.YieldThread();
+#endif
+    }
+
+    void Sleep(int milliseconds)
+    {
+        if (milliseconds < 0) Failure.Range("Sleep duration must be non-negative.");
+        if (milliseconds == 0) { Yield(); return; }
+#ifdef Windows
+        Bolt.Runtime.Windows.SleepMilliseconds((uint)milliseconds);
+#endif
+#if Linux || MacOS || FreeBSD
+        // On these 64-bit targets timespec contains two consecutive signed longs.
+        // Supply a distinct remainder buffer so interrupted waits can resume.
+#ifdef Linux
+        long* storage = (long*)Bolt.Runtime.Linux.Allocate(32ul);
+#else
+        long* storage = (long*)Bolt.Runtime.MacOS.Allocate(32ul);
+#endif
+        if (storage == null) throw OutOfMemoryException("Cannot allocate the sleep interval.");
+        try
+        {
+            storage[0] = (long)(milliseconds / 1000);
+            storage[1] = (long)(milliseconds % 1000) * 1000000l;
+            long* requested = storage;
+            long* remaining = &storage[2];
+            while (Bolt.Runtime.Posix.NanoSleep(requested, remaining) != 0)
+            {
+#ifdef Linux
+                int* error = Bolt.Runtime.Linux.ErrnoLocation();
+#else
+                int* error = Bolt.Runtime.MacOS.ErrnoLocation();
+#endif
+                if (error == null || *error != 4) Failure.InvalidOperation("nanosleep failed.");
+                long* previous = requested;
+                requested = remaining;
+                remaining = previous;
+            }
+        }
+        finally
+        {
+#ifdef Linux
+            Bolt.Runtime.Linux.Free(storage);
+#else
+            Bolt.Runtime.MacOS.Free(storage);
+#endif
+        }
+#endif
+    }
+}
+#endif

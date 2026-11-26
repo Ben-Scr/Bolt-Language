@@ -1,0 +1,1 @@
+static class Program {public:int Side(){Console.WriteLine("unreachable");return 1;} void F(short a,int b){} void Main(){int n=32768; F(n,Side());}}

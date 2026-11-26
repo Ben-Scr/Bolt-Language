@@ -1,0 +1,32 @@
+import System
+import Bolt.Runtime
+import System.Text.Json.Internal
+namespace System.Text.Json;
+
+// Public API, parsing, text escaping and binary wire encoding are Bolt source.
+// The tree adapter specializes traversal for the concrete Bolt type.
+public static class Json
+{
+public:
+    string Serialize<T>(const T& obj)
+    { return string.FromUtf8(SerializeBytes<T>(obj)); }
+    byte[] SerializeBytes<T>(const T& obj)
+    { ValueTree tree = ValueTree.FromObject<T>(obj); return JsonText.Encode(tree); }
+    byte[] SerializeBinary<T>(const T& obj)
+    { ValueTree tree = ValueTree.FromObject<T>(obj); return JsonBinary.Encode(tree); }
+    T Deserialize<T>(const string& json) { byte[] bytes = json.ToUtf8(); return Deserialize<T>(bytes); }
+    T Deserialize<T>(const byte[]& utf8)
+    {
+        try { ValueTree tree = JsonText.Parse(utf8); return tree.ToObject<T>(); }
+        catch (JsonException& error) { throw; }
+        catch (Exception& error) { throw JsonException(error.Message); }
+    }
+    T DeserializeBinary<T>(const byte[]& bytes)
+    {
+        try { ValueTree tree = JsonBinary.Parse(bytes); return tree.ToObject<T>(); }
+        catch (JsonException& error) { throw; }
+        catch (Exception& error) { throw JsonException(error.Message); }
+    }
+    bool IsValid(const string& text)
+    { try { byte[] bytes = text.ToUtf8(); JsonText.Parse(bytes); return true; } catch { return false; } }
+}

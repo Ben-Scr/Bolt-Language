@@ -1,0 +1,39 @@
+import Bolt.Runtime
+namespace System;
+
+// Public formatting is Bolt code. Each supported platform then forwards the
+// UTF-8 text to a platform-specific Bolt Console implementation that calls the
+// operating-system C ABI directly; there is no native C++ Terminal layer in the
+// compiled Console path.
+public static class Console
+{
+public:
+#ifdef Windows
+    void Write<T>(const T& value) : IStringable<T> { Bolt.Runtime.WindowsConsole.Write((string)value); }
+    void WriteLine<T>(const T& value) : IStringable<T> { Bolt.Runtime.WindowsConsole.WriteLine((string)value); }
+    void WriteLine() { Bolt.Runtime.WindowsConsole.WriteLine(""); }
+    string ReadLine() { return Bolt.Runtime.WindowsConsole.ReadLine(); }
+    void Clear() { Bolt.Runtime.WindowsConsole.ClearDisplay(); }
+#endif
+#ifdef Linux
+    void Write<T>(const T& value) : IStringable<T> { Bolt.Runtime.LinuxConsole.Write((string)value); }
+    void WriteLine<T>(const T& value) : IStringable<T> { Bolt.Runtime.LinuxConsole.WriteLine((string)value); }
+    void WriteLine() { Bolt.Runtime.LinuxConsole.WriteLine(""); }
+    string ReadLine() { return Bolt.Runtime.LinuxConsole.ReadLine(); }
+    void Clear() { Bolt.Runtime.LinuxConsole.ClearDisplay(); }
+#endif
+#if Web || Android || IOS
+    void Write<T>(const T& value) : IStringable<T> { Bolt.Runtime.HostConsole.Write((string)value); }
+    void WriteLine<T>(const T& value) : IStringable<T> { Bolt.Runtime.HostConsole.WriteLine((string)value); }
+    void WriteLine() { Bolt.Runtime.HostConsole.WriteLine(""); }
+    string ReadLine() { return Bolt.Runtime.HostConsole.ReadLine(); }
+    void Clear() { Bolt.Runtime.HostConsole.ClearDisplay(); }
+#endif
+#if MacOS || FreeBSD
+    void Write<T>(const T& value) : IStringable<T> { Bolt.Runtime.MacOSConsole.Write((string)value); }
+    void WriteLine<T>(const T& value) : IStringable<T> { Bolt.Runtime.MacOSConsole.WriteLine((string)value); }
+    void WriteLine() { Bolt.Runtime.MacOSConsole.WriteLine(""); }
+    string ReadLine() { return Bolt.Runtime.MacOSConsole.ReadLine(); }
+    void Clear() { Bolt.Runtime.MacOSConsole.ClearDisplay(); }
+#endif
+}

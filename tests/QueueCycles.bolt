@@ -1,0 +1,17 @@
+import System.Collections.Generic
+static class Program { public: void Main() {
+    Queue<int> q(16);
+    for (int i = 0; i < 16; i++) q.Enqueue(i);
+    ulong checksum = 0ul;
+    for (int i = 0; i < 100000; i++) {
+        int first = q.Dequeue();
+        if (first != i) { Print("mismatch"); return; }
+        q.Enqueue(i + 16);
+        checksum += (ulong)first;
+        if (i % 1000 == 0 && q.Peek() != i + 1) { Print("peek mismatch"); return; }
+    }
+    Print(checksum); Print(q.Count); Print(q.Peek());
+    q.Clear(); Print(q.Count);
+    Queue<string> words; words.Enqueue("first"); words.Enqueue("second");
+    Print(words.Peek()); Print(words.Dequeue()); Print(words.Dequeue());
+} }

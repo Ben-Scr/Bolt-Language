@@ -1,0 +1,168 @@
+import System
+import Bolt.Runtime
+
+static class Program {
+public:
+    bool SingleEdit(int offset, byte next) {
+        string value = "abäcd";
+        string saved = value;
+        ulong hash = Values.Hash<string>(value);
+        int observed = 0;
+        try {
+            byte[] edits = value.ToUtf8();
+            edits[offset] = next;
+            value = string.FromUtf8(edits);
+            observed += (int)edits[offset] + value.Length;
+        } catch {
+            return (offset < 0 || next == (byte)255) && value == saved && Values.Hash<string>(value) == hash;
+        }
+        return value == "aZäcd" && saved == "abäcd" && observed == 95 &&
+               Values.Hash<string>(value) == Values.Hash<string>("aZäcd");
+    }
+
+    bool TrackedEdits() {
+        byte[] initial = new byte[4097];
+        string value = string.FromUtf8(initial);
+        string saved = value;
+        int high = 4096;
+        byte[] edits = value.ToUtf8();
+        edits[high] = 67;
+        int low = 3;
+        edits[low++] = 65;
+        low = 3;
+        edits[high] ^= 1;
+        value = string.FromUtf8(edits);
+        edits[low] = 99;
+        if (value.Length != 4097 || value[low] != 'A' || value[high] != 'B' ||
+            (int)saved[low] != 0) return false;
+
+        byte[] unicode = value.ToUtf8();
+        unicode[63] = 195; unicode[64] = 164;
+        value = string.FromUtf8(unicode);
+        if (value.Length != 4096 || value[63] != 'ä') return false;
+        bool rejected = false;
+        try {
+            byte[] broken = value.ToUtf8();
+            broken[64] = 255;
+            value = string.FromUtf8(broken);
+        } catch { rejected = true; }
+        if (!rejected || value[63] != 'ä') return false;
+
+        // A raw pointer write outside the explicit index must reach the string.
+        byte[] escaped = value.ToUtf8();
+        byte* writer = &escaped[100];
+        escaped[0] = 88;
+        *writer = 89;
+        value = string.FromUtf8(escaped);
+        if (value[0] != 'X' || value[99] != 'Y') return false;
+
+        // Same-size reassignment invalidates the snapshot's origin.
+        byte[] stale = value.ToUtf8();
+        value = string.FromUtf8(initial);
+        stale[1] = 90;
+        value = string.FromUtf8(stale);
+        if (value[1] != 'Z' || value[63] != 'ä') return false;
+
+        bool invalidated = false;
+        try {
+            for (char ch : value) {
+                byte[] untouched = value.ToUtf8();
+                value = string.FromUtf8(untouched);
+            }
+        } catch { invalidated = true; }
+        if (!invalidated) return false;
+        bool outside = false;
+        try {
+            byte[] bounds = value.ToUtf8();
+            bounds[high + 1] = 65;
+            value = string.FromUtf8(bounds);
+        } catch { outside = true; }
+        if (!outside || value[63] != 'ä') return false;
+
+        // A pre-existing native string pointer can invalidate untouched bytes.
+        ulong length = 0ul;
+        byte* raw = NativeString.Bytes(value, length);
+        raw[64] = 255;
+        try {
+            byte[] exposed = value.ToUtf8();
+            exposed[0] = 65;
+            value = string.FromUtf8(exposed);
+        } catch { return value[0] == 'X'; }
+        return false;
+    }
+
+    bool LargeReplacement(int n) {
+        byte[] edits = new byte[n];
+        edits[63] = 195; edits[64] = 164;
+        string value = string.FromUtf8(edits);
+        edits[n - 1] = 65;
+        value = string.FromUtf8(edits);
+        string saved = value;
+        byte[] earlier = value.ToUtf8();
+        edits[0] = 66; edits[n - 1] = 67;
+        value = string.FromUtf8(edits);
+        if (value.Length != n - 1 || value[0] != 'B' || value[n - 2] != 'C' ||
+            earlier[0] != 0 || earlier[n - 1] != 65 || saved[n - 2] != 'A') return false;
+        edits[64] = 255;
+        bool invalid = false;
+        try { value = string.FromUtf8(edits); } catch { invalid = true; }
+        if (!invalid || value[63] != 'ä') return false;
+        edits[64] = 164;
+        bool observed = false;
+        try { for (char ch : value) value = string.FromUtf8(edits); } catch { observed = true; }
+        // A valid equal-byte-length replacement can have a different scalar count.
+        edits[63] = 120; edits[64] = 121;
+        value = string.FromUtf8(edits);
+        return observed && value.Length == n && value[64] == 'y' && saved[63] == 'ä';
+    }
+
+    void Main() {
+        string value = "Aä😀";
+        string changed = "Bö🌍";
+        for (int i = 0; i < 6; ++i) { value += value; changed += changed; }
+        string copy = value;
+        byte[] replacement = changed.ToUtf8();
+        ulong before = Values.Hash<string>(value);
+        ulong checksum = 0ul;
+        for (int i = 0; i < 192; ++i) checksum += (ulong)value[i];
+        value = string.FromUtf8(replacement);
+        bool ok = checksum != 0ul && value == changed && value.Length == 192 &&
+                  value[2] == '🌍' && copy[2] == '😀' &&
+                  Values.Hash<string>(value) == Values.Hash<string>(changed) &&
+                  Values.Hash<string>(copy) == before;
+        replacement[1] = 255;
+        bool invalid = false;
+        try { value = string.FromUtf8(replacement); } catch (Exception e) { invalid = true; }
+        ok = ok && invalid && value == changed;
+        replacement = copy.ToUtf8();
+        bool changedDuringIteration = false;
+        try {
+            for (char rune : value) value = string.FromUtf8(replacement);
+        } catch (Exception e) { changedDuringIteration = true; }
+        ok = ok && changedDuringIteration && value == copy;
+        // Cross a vector boundary and leave a scalar tail. ASCII edits keep
+        // the count, while a valid replacement of equal byte size can change it.
+        byte[] edits = new byte[67];
+        for (int i = 0; i < edits.Length; i++) edits[i] = 97;
+        edits[15] = 195; edits[16] = 164;
+        value = string.FromUtf8(edits);
+        edits[0] = 0; edits[65] = 90;
+        value = string.FromUtf8(edits);
+        ok = ok && value.Length == 66 && (int)value[0] == 0 && value[15] == 'ä';
+        edits[15] = 65; edits[16] = 66;
+        value = string.FromUtf8(edits);
+        ok = ok && value.Length == 67;
+        edits[66] = 255;
+        invalid = false;
+        try { value = string.FromUtf8(edits); } catch (Exception e) { invalid = true; }
+        ok = ok && invalid && value.Length == 67 && value[66] == 'a';
+        byte[] smaller = "xy".ToUtf8();
+        value = string.FromUtf8(smaller);
+        ok = ok && value == "xy" && copy[2] == '😀';
+        byte[] empty = new byte[0];
+        value = string.FromUtf8(empty);
+        Print(ok && value.Length == 0 && value.ByteLength == 0 &&
+              LargeReplacement(4095) && LargeReplacement(4096) && LargeReplacement(4097) && TrackedEdits() &&
+              SingleEdit(1, (byte)90) && SingleEdit(3, (byte)255) && SingleEdit(-1, (byte)90));
+    }
+}

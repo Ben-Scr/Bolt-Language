@@ -1,0 +1,386 @@
+{
+  "case": "terrain",
+  "utc": "2026-11-21T00:05:39.868325+00:00",
+  "rounds": 36,
+  "warmups": 4,
+  "seed": 73491,
+  "reason": "Additional release-only control after all three medians rose sharply in the 12-round repeat.",
+  "fixture": {
+    "input_bytes": 4194304,
+    "input_sha256": "5f2c02dc55b1109434c72d7ee904e6c518d1d95aac8e46f3a460e8980a6aa6dd",
+    "output_sha256": [
+      "b02d0072a17dbb8cba47938e6b1c1b74b5d9735d53667d592fe0d1d4f89d7d10",
+      "b938cb2eed0ea27f2d76b5285f21ef2848f4648d1943c6a38eb003d4ff63d549"
+    ]
+  },
+  "flags": {
+    "bolt_debug": [
+      "--debug",
+      "--backend",
+      "fast",
+      "--require-native"
+    ],
+    "bolt_release": [
+      "--release",
+      "--backend",
+      "llvm",
+      "--require-native"
+    ],
+    "csc": [
+      "-nologo",
+      "-nostdlib+",
+      "-target:exe",
+      "-optimize-",
+      "-debug:portable"
+    ],
+    "msvc": "/O2 /DNDEBUG /std:c11",
+    "clang_c": "-O3 -DNDEBUG -std=c11"
+  },
+  "source_hashes": {
+    "fixture_io.h": "52248eca61b0b28755e22efd2987eef34ca12b6a96a8cd86c24e99466d31ceca",
+    "fixtures.py": "55a409e745ef941fb9adb91b0be0749676de5993e230c1d7879eb4836299b74b",
+    "inventory/main.c": "d5705b71b3150626a901e56a4c9f04f33117f41ccc754bd2eb3d54ccdc434993",
+    "inventory/Program.bolt": "8ed2b64eb86d12074b9abab5cd24b392126237df412a7c4883886fc46f188366",
+    "inventory/Program.cs": "42658485f9d327728f7b4936d75772c6e00a3850c9634ceb44e01b4c14ce171b",
+    "navigation/main.c": "92aa00c61b033d8b250203891f5aee7dd1105dd86f2ffb0683e32a2fd5b37cd0",
+    "navigation/Program.bolt": "77fd8834d38b7a57c0fa288cc92e89eb028e000b5158bf58552f8812ca29fe2e",
+    "navigation/Program.cs": "96f4d6358e2e06bf34ec2e02730747c9cb23043411629bef33fbc4d0d29206bc",
+    "phases.py": "c112586b1c5e3a21e724fe3c7ab4ddd0d81f2d2fdc25a6a12a016331df3a8edb",
+    "run.py": "717432dbda86ff81a58f6f681bae0f9310440d74e0499772a1ba64c7b71f91f0",
+    "terrain/main.c": "6c7310d27dbdb041cdb7ec5c6a3f7ae2edfbdfe415f85a8d453a506d86aeee04",
+    "terrain/Program.bolt": "53148fb75e398aad68c488a7f806cc1d0f38d269cbc79cc7646cf7710c8c2d2f",
+    "terrain/Program.cs": "bcc77f2ff63f0a3fd30e7c336b95ac25376d9443aa255a6a826968b17aa50ab5",
+    "v1.json": "f084cd09241c252ac5ab5a8ce737c447d3b4dcc3cb61a8c28706621a5ef35eb1",
+    "WarmHost.cs": "27390c6ff5b62e7c1f3faa7200edc71ebafad9e8dfbeb4e07fa48bc9483c6d0e"
+  },
+  "tool_hashes": {
+    "bolt.exe": "ce38ed7b4eaacdd8ee70e1962e865a815556a98b17570e8cad75282cb4bf9d94",
+    "BoltCompiler.dll": "103ef02a6a0ce116e5e9f79795e70b47d4cefdcd6ed8645a76405e9f7cc4f086",
+    "BoltRuntime.dll": "1904a3651b5d92a8ffc72bf9293046ce6531daf9aae22b3ba633ae0439d2df52",
+    "csc.dll": "f9ea6e4b51f4ac07b9005fddf3e5a0022d9d60cf95a1c404809de63ba6d0eb3b",
+    "cl.EXE": "b0a1818ebae6da7f18230a84e76ce839212584ac4c2ab55b97a0d5268085da57",
+    "clang.exe": "e7956e325bc32a1a96838a19a14c58a18916e710f202776c62f27c621ec79411"
+  },
+  "static_runtime_sha256": "725c973993e4355aeaf5ffa0d1121660c19189e707fa02f1ef57428b93a12c7b",
+  "release": {
+    "order": [
+      [
+        "bolt",
+        "clang",
+        "msvc"
+      ],
+      [
+        "msvc",
+        "bolt",
+        "clang"
+      ],
+      [
+        "clang",
+        "msvc",
+        "bolt"
+      ],
+      [
+        "msvc",
+        "clang",
+        "bolt"
+      ],
+      [
+        "clang",
+        "bolt",
+        "msvc"
+      ],
+      [
+        "bolt",
+        "msvc",
+        "clang"
+      ],
+      [
+        "msvc",
+        "bolt",
+        "clang"
+      ],
+      [
+        "bolt",
+        "clang",
+        "msvc"
+      ],
+      [
+        "clang",
+        "msvc",
+        "bolt"
+      ],
+      [
+        "bolt",
+        "msvc",
+        "clang"
+      ],
+      [
+        "clang",
+        "bolt",
+        "msvc"
+      ],
+      [
+        "msvc",
+        "clang",
+        "bolt"
+      ],
+      [
+        "bolt",
+        "clang",
+        "msvc"
+      ],
+      [
+        "clang",
+        "msvc",
+        "bolt"
+      ],
+      [
+        "msvc",
+        "bolt",
+        "clang"
+      ],
+      [
+        "clang",
+        "bolt",
+        "msvc"
+      ],
+      [
+        "bolt",
+        "msvc",
+        "clang"
+      ],
+      [
+        "msvc",
+        "clang",
+        "bolt"
+      ],
+      [
+        "clang",
+        "bolt",
+        "msvc"
+      ],
+      [
+        "msvc",
+        "clang",
+        "bolt"
+      ],
+      [
+        "bolt",
+        "msvc",
+        "clang"
+      ],
+      [
+        "clang",
+        "bolt",
+        "msvc"
+      ],
+      [
+        "bolt",
+        "msvc",
+        "clang"
+      ],
+      [
+        "msvc",
+        "clang",
+        "bolt"
+      ],
+      [
+        "msvc",
+        "clang",
+        "bolt"
+      ],
+      [
+        "bolt",
+        "msvc",
+        "clang"
+      ],
+      [
+        "clang",
+        "bolt",
+        "msvc"
+      ],
+      [
+        "clang",
+        "bolt",
+        "msvc"
+      ],
+      [
+        "msvc",
+        "clang",
+        "bolt"
+      ],
+      [
+        "bolt",
+        "msvc",
+        "clang"
+      ],
+      [
+        "bolt",
+        "clang",
+        "msvc"
+      ],
+      [
+        "clang",
+        "msvc",
+        "bolt"
+      ],
+      [
+        "msvc",
+        "bolt",
+        "clang"
+      ],
+      [
+        "clang",
+        "msvc",
+        "bolt"
+      ],
+      [
+        "bolt",
+        "clang",
+        "msvc"
+      ],
+      [
+        "msvc",
+        "bolt",
+        "clang"
+      ]
+    ],
+    "timings": {
+      "bolt": {
+        "n": 36,
+        "median_ms": 16.1643,
+        "p95_ms": 21.5405,
+        "min_ms": 14.6636,
+        "max_ms": 22.3541,
+        "raw_ms": [
+          16.5501,
+          22.3541,
+          16.2843,
+          17.1148,
+          18.6196,
+          17.2434,
+          18.6636,
+          17.4399,
+          19.359,
+          18.1468,
+          18.5141,
+          16.2588,
+          15.9085,
+          15.1927,
+          15.8966,
+          15.8403,
+          15.2098,
+          15.4235,
+          15.0185,
+          15.5916,
+          15.7569,
+          14.6636,
+          16.3484,
+          16.9823,
+          17.6292,
+          15.6301,
+          15.5096,
+          16.8252,
+          15.0446,
+          16.0698,
+          15.5991,
+          16.8476,
+          15.89,
+          15.2423,
+          15.2643,
+          21.5405
+        ]
+      },
+      "msvc": {
+        "n": 36,
+        "median_ms": 19.9403,
+        "p95_ms": 24.9822,
+        "min_ms": 18.2138,
+        "max_ms": 25.7236,
+        "raw_ms": [
+          20.4955,
+          21.2675,
+          20.4755,
+          19.5456,
+          21.0598,
+          21.4777,
+          20.8927,
+          22.1523,
+          21.5163,
+          22.9977,
+          22.7687,
+          20.9829,
+          24.9822,
+          18.7715,
+          18.7424,
+          18.6043,
+          18.3263,
+          18.728,
+          21.1832,
+          19.0363,
+          18.9429,
+          18.2138,
+          19.2338,
+          22.2934,
+          25.7236,
+          19.9876,
+          18.8656,
+          18.4674,
+          20.6745,
+          19.7352,
+          20.8412,
+          19.4085,
+          18.7856,
+          19.8931,
+          18.574,
+          19.2719
+        ]
+      },
+      "clang": {
+        "n": 36,
+        "median_ms": 20.0535,
+        "p95_ms": 22.9258,
+        "min_ms": 18.8901,
+        "max_ms": 24.3331,
+        "raw_ms": [
+          21.3424,
+          20.3676,
+          22.9258,
+          20.9698,
+          22.5724,
+          21.6119,
+          20.8075,
+          22.8623,
+          21.1037,
+          24.3331,
+          20.1853,
+          21.2545,
+          19.1695,
+          19.227,
+          19.2851,
+          18.9846,
+          19.5558,
+          19.1803,
+          19.6354,
+          19.1458,
+          18.8901,
+          19.0549,
+          19.4895,
+          22.0584,
+          22.754,
+          21.3999,
+          21.0818,
+          19.2547,
+          19.3358,
+          19.9217,
+          19.7696,
+          19.3832,
+          19.3487,
+          19.2161,
+          20.3152,
+          20.7611
+        ]
+      }
+    }
+  }
+}

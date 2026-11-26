@@ -1,0 +1,5 @@
+import System.Collections.Generic
+
+static class Program { public: void Main() {
+Queue<int> q; int out=9; Console.WriteLine(q.TryDequeue(out)); Console.WriteLine(out); q.Enqueue(1); q.Enqueue(2); Console.WriteLine(q.Peek()); Console.WriteLine(q.TryDequeue(out)); Console.WriteLine(out); Console.WriteLine(q.Dequeue()); Console.WriteLine(q.Count);
+} }

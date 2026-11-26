@@ -1,0 +1,17 @@
+import Console
+
+class Filters {
+public:
+    int Count<T>() { return 1; }
+    int Count<T, U>() { return 2; }
+}
+
+class Scene : Filters {
+public:
+    int Match() { return Count<int>() + Count<int, float>(); }
+}
+
+static class Program {
+public:
+    void Main() { Scene scene; Console.WriteLine(scene.Match()); }
+}

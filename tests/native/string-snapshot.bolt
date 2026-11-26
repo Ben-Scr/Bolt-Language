@@ -1,0 +1,53 @@
+import System
+
+class Formatter : IStringable {
+public:
+    string ToString() { Program.Source = "changed"; return "!"; }
+}
+
+public static class Program {
+public:
+    static string Source = "";
+    string Change(string& s) { s = "replacement"; return "first"; }
+
+    string Replacement(string& s) { s = "gone"; return "bright"; }
+
+    int Main() {
+        string text = "first text";
+        if (!text.Contains(Change(text)) || text != "replacement") return 1;
+        text = "first";
+        if ("first text".Replace(text, Replacement(text)) != "bright text") return 2;
+        text = "before";
+        if (text + Change(text) != "beforefirst" || text != "replacement") return 3;
+        text = "before";
+        text += Change(text);
+        if (text != "beforefirst") return 4;
+
+        Formatter format;
+        Source = "before";
+        if (Source + format != "before!" || Source != "changed") return 5;
+        Source = "before";
+        Source += format;
+        if (Source != "before!") return 9;
+        text = "ab\0xy";
+        text += text;
+        if (text != "ab\0xyab\0xy") return 6;
+        string empty;
+        if (empty + text != text || text + empty != text) return 7;
+
+        bool invalidated = false;
+        try {
+            for (char item : text) { text += ""; }
+        } catch (InvalidOperationException error) { invalidated = true; }
+        if (!invalidated) return 8;
+        // Exercise ASCII-block searches starting in different byte lanes,
+        // non-ASCII scalar offsets and overlapping candidate matches.
+        string searched = "01234567😀abcdefg-key-key";
+        if (searched.IndexOf("key", 8) != 17 || searched.LastIndexOf("key") != 21) return 10;
+        if (searched.IndexOf("", 9) != 9 || searched.LastIndexOf("") != 24) return 11;
+        if ("aaaaaaaaa".LastIndexOf("aa") != 7 || "aaaaaaaaa".Replace("aa", "X") != "XXXXa") return 12;
+        if ("1234567\0😀\0".Replace("\0", "ß") != "1234567ß😀ß") return 13;
+        if ("x😀x😀".Replace("x😀", "") != "" || searched.Replace("absent", "") != searched) return 14;
+        return 0;
+    }
+}

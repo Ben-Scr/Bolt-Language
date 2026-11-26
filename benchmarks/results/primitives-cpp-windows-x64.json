@@ -1,0 +1,5445 @@
+{
+  "host": {
+    "platform": "Windows-11-10.0.26300-SP0",
+    "machine": "AMD64",
+    "cpu": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+    "advertised_features": null,
+    "python": "3.13.7",
+    "cpu_affinity": null
+  },
+  "utc": "2026-11-21T11:17:15.975288+00:00",
+  "iterations": 524288,
+  "seed": 731,
+  "warmup": 2,
+  "runs": 11,
+  "portable_array_inputs": false,
+  "flags": {
+    "cpp": [
+      "--release",
+      "--backend",
+      "cpp"
+    ]
+  },
+  "stopwatch_tick_ns": 100,
+  "compilers": {
+    "after": "2f7e396fc81ec24a3ab8542d7c2d99f3cc5f04387f789f4ebf86382205c1e813"
+  },
+  "programs": {
+    "0/cpp-after": {
+      "source_sha256": "e3b18b8437b8a709a633d0d3d3fc8466fb4851f478ce0fc4a48fb96302fbfea9",
+      "binary_sha256": "2c2dda7380856a377fccb6f6b5abf57773832248608ab3420f9bd8443adc490a",
+      "bytes": 302592
+    },
+    "16/cpp-after": {
+      "source_sha256": "33dfcd4fc1c8b4c3f453b2d2079ebdb30f35acce9e24f9c6f66863ae4b067fa2",
+      "binary_sha256": "d8d51fbc7047f6b9d31a02aad5597cb468a6f4d36fb8897737eb6de55337cb1d",
+      "bytes": 303104
+    },
+    "32/cpp-after": {
+      "source_sha256": "f367559a73848d65bbf06aea7278810fdbbee83afabb1b1ede706ca2c05a974d",
+      "binary_sha256": "8b910f9200a3caeb128328ae588442a55e25f75ea1ef150649946657b7f7cc23",
+      "bytes": 302080
+    },
+    "48/cpp-after": {
+      "source_sha256": "8c8a4866cdea66a8a2e600623dc25676195d0c08be9ecac20f786bb537ba9341",
+      "binary_sha256": "d136d21529b443fcc338f8fe770b083245a40daaf152b2cdff127f7b69b9d9fc",
+      "bytes": 301056
+    },
+    "64/cpp-after": {
+      "source_sha256": "dba570f4979290894f3622a42834336a3264650f0f40e29249b031aef97d1c2c",
+      "binary_sha256": "4d2a08039d2496e93f50804f53d763971be0b3423f11fdc5d9eb5de84d18494a",
+      "bytes": 301056
+    },
+    "80/cpp-after": {
+      "source_sha256": "4c3c1a4845389f602096f509a3f8275bd1a27679c1dd72b6459fe346c3baeb2f",
+      "binary_sha256": "2321becb188ab366ea3de1bdfbffdfc56f1850a637202b87ffbe8f8d6eb652c6",
+      "bytes": 302592
+    },
+    "96/cpp-after": {
+      "source_sha256": "bf87f16b51202902163a848fd8f323352b61d0bca96728585406c10c1a067f81",
+      "binary_sha256": "2dcafbe0984ed57ef5f340891ccb8033a375f3b17df3264ba90697982fddcc06",
+      "bytes": 301056
+    },
+    "112/cpp-after": {
+      "source_sha256": "0237c1c436ac32fa76b473993a3ad7879affed83f1933cac2b9cc93bf755ba4f",
+      "binary_sha256": "ecc07e910d2cc12dba353a3ec9b02b4544d03c0768c4c3f432bbc343d8352427",
+      "bytes": 302080
+    },
+    "128/cpp-after": {
+      "source_sha256": "0609e557e4d84397aa1ac8929aff3b30af0f9ca1a876e75178bb831a872db80d",
+      "binary_sha256": "f690e99b448650e7031db20e8f382498243e3456173221846ebbeca62d4358fa",
+      "bytes": 302080
+    },
+    "144/cpp-after": {
+      "source_sha256": "c41d38fcc9bd02ac1ea54cd67ea434aa6fb9c19d766505b5c2098ab4fd0e3a14",
+      "binary_sha256": "86ba8b54ccc8591e3704858411e64a1b825bf0480820b170bdffc6f469339994",
+      "bytes": 302592
+    },
+    "160/cpp-after": {
+      "source_sha256": "b069618ae9194d91cee84b0cfbe15e4b95f783740f210fb26e8f6be9802a9132",
+      "binary_sha256": "b472f8720724a3c4f7a74882b865a0d8cf2f263a8af128fea0ced5d1291bbdac",
+      "bytes": 303104
+    },
+    "176/cpp-after": {
+      "source_sha256": "86b5d08c8d612ee6d2f1d798934c58b2b6f0478fc9ef88160006aecc5cb0cf55",
+      "binary_sha256": "c27603cfe9627b7e9b74ebb19b4057216957c8cbb42f871555c30d096fce74af",
+      "bytes": 302592
+    },
+    "192/cpp-after": {
+      "source_sha256": "47c535afc74b3100040e17a0b613049ff47ee1b01ccc42fbf8e0464dc88e47da",
+      "binary_sha256": "419afeac66cf0440b3ca122bba54c4a21e8631c0f6277a02e3e1d99949f0afd3",
+      "bytes": 308736
+    },
+    "208/cpp-after": {
+      "source_sha256": "ad2fca38329d723adff6725dc43fe5c3caeabce26250a583a84e65a8434d22ee",
+      "binary_sha256": "180e01822fb5ce6b1a1ebef793155db16c958215e519093fc1509490fabf08b7",
+      "bytes": 311296
+    },
+    "224/cpp-after": {
+      "source_sha256": "c3abd3c2dc63aa07dfbaaa41b4b3b942233b1b4654343debf9b191114c614b68",
+      "binary_sha256": "813c34ef9c5bb1784fbd2066adf680b24ed0730ff44a67336fafc5ded14d9074",
+      "bytes": 288256
+    },
+    "240/cpp-after": {
+      "source_sha256": "cbdb871a3289d1e9be63e1cce8cd6f406ff7401dcb27e6c8c79c20ddf96d4d4f",
+      "binary_sha256": "d7d984d8df800ab38e427a37ce1ec01d2e8bef1b403cacba7b1314cc77852681",
+      "bytes": 270848
+    }
+  },
+  "cases": {
+    "byte.add": {
+      "expected": 20620288,
+      "ticks": {
+        "cpp-after": [
+          42615,
+          42570,
+          42428,
+          42827,
+          42762,
+          42542,
+          42865,
+          44235,
+          42592,
+          43296,
+          43200
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.1562
+      }
+    },
+    "byte.sub": {
+      "expected": 20036608,
+      "ticks": {
+        "cpp-after": [
+          42455,
+          42110,
+          42399,
+          42869,
+          42752,
+          42911,
+          42465,
+          42364,
+          41799,
+          42033,
+          42042
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.087
+      }
+    },
+    "byte.mul": {
+      "expected": 138297856,
+      "ticks": {
+        "cpp-after": [
+          40323,
+          40338,
+          40592,
+          40634,
+          40537,
+          40413,
+          40424,
+          40365,
+          40536,
+          40540,
+          40597
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.7316
+      }
+    },
+    "byte.div": {
+      "expected": 3106304,
+      "ticks": {
+        "cpp-after": [
+          49280,
+          50061,
+          49979,
+          49326,
+          49340,
+          49317,
+          49400,
+          51351,
+          49331,
+          49597,
+          49604
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.4223
+      }
+    },
+    "byte.eq": {
+      "expected": 5632,
+      "ticks": {
+        "cpp-after": [
+          39175,
+          39273,
+          39614,
+          39741,
+          39842,
+          39267,
+          39173,
+          39186,
+          39381,
+          39585,
+          39623
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.5113
+      }
+    },
+    "byte.ne": {
+      "expected": 518656,
+      "ticks": {
+        "cpp-after": [
+          41226,
+          41285,
+          41393,
+          41140,
+          41154,
+          41101,
+          41137,
+          41143,
+          41475,
+          41337,
+          41467
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.8632
+      }
+    },
+    "byte.lt": {
+      "expected": 74752,
+      "ticks": {
+        "cpp-after": [
+          44496,
+          44523,
+          46177,
+          44463,
+          44378,
+          44366,
+          45132,
+          44469,
+          45452,
+          46278,
+          46498
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.4921
+      }
+    },
+    "byte.le": {
+      "expected": 80384,
+      "ticks": {
+        "cpp-after": [
+          45062,
+          44872,
+          45334,
+          45207,
+          45013,
+          45439,
+          45359,
+          60764,
+          45208,
+          45349,
+          45474
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.6468
+      }
+    },
+    "byte.gt": {
+      "expected": 443904,
+      "ticks": {
+        "cpp-after": [
+          43557,
+          43832,
+          43461,
+          43485,
+          43673,
+          43654,
+          43579,
+          64413,
+          43563,
+          64000,
+          43942
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.3263
+      }
+    },
+    "byte.ge": {
+      "expected": 449536,
+      "ticks": {
+        "cpp-after": [
+          44902,
+          44801,
+          44828,
+          44776,
+          44764,
+          44806,
+          44806,
+          61036,
+          45152,
+          68616,
+          45079
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.5503
+      }
+    },
+    "byte.rem": {
+      "expected": 2007552,
+      "ticks": {
+        "cpp-after": [
+          50723,
+          50543,
+          50591,
+          50600,
+          50487,
+          50537,
+          50592,
+          50939,
+          50685,
+          71992,
+          50854
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.6512
+      }
+    },
+    "byte.and": {
+      "expected": 2238976,
+      "ticks": {
+        "cpp-after": [
+          46840,
+          46832,
+          46739,
+          46579,
+          46819,
+          46697,
+          46611,
+          46852,
+          46789,
+          47134,
+          46942
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.93
+      }
+    },
+    "byte.or": {
+      "expected": 18381312,
+      "ticks": {
+        "cpp-after": [
+          39864,
+          39868,
+          39832,
+          39749,
+          39913,
+          39795,
+          39760,
+          40367,
+          40376,
+          40396,
+          40012
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.6042
+      }
+    },
+    "byte.xor": {
+      "expected": 16142336,
+      "ticks": {
+        "cpp-after": [
+          44495,
+          44125,
+          44216,
+          44272,
+          45530,
+          44144,
+          44121,
+          45589,
+          44358,
+          53943,
+          44584
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.4606
+      }
+    },
+    "byte.not_low_byte": {
+      "expected": 117559296,
+      "ticks": {
+        "cpp-after": [
+          42734,
+          42433,
+          42649,
+          42671,
+          42634,
+          42705,
+          42632,
+          42733,
+          42775,
+          60007,
+          42881
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.1453
+      }
+    },
+    "byte.shl": {
+      "expected": 490509312,
+      "ticks": {
+        "cpp-after": [
+          60825,
+          61117,
+          60876,
+          60724,
+          60859,
+          60652,
+          60555,
+          60940,
+          71466,
+          92347,
+          61194
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 11.6112
+      }
+    },
+    "byte.shr": {
+      "expected": 4074496,
+      "ticks": {
+        "cpp-after": [
+          64322,
+          64325,
+          64036,
+          64733,
+          64165,
+          64555,
+          64566,
+          64573,
+          64171,
+          64282,
+          64328
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 12.269
+      }
+    },
+    "byte.to_byte": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          35552,
+          35494,
+          35498,
+          35353,
+          35241,
+          35999,
+          35542,
+          35399,
+          35453,
+          35341,
+          35363
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.7621
+      }
+    },
+    "byte.to_short": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          36125,
+          36211,
+          36295,
+          36210,
+          36047,
+          36388,
+          36228,
+          36355,
+          36128,
+          36252,
+          36095
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.9067
+      }
+    },
+    "byte.to_ushort": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          35013,
+          35113,
+          34924,
+          34970,
+          35198,
+          35231,
+          35114,
+          35008,
+          35142,
+          35235,
+          35121
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.6975
+      }
+    },
+    "byte.to_int": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          34419,
+          34385,
+          34435,
+          34420,
+          34478,
+          35819,
+          34431,
+          34446,
+          34418,
+          34647,
+          34431
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.5672
+      }
+    },
+    "byte.to_uint": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          35324,
+          35237,
+          35189,
+          35195,
+          35177,
+          35227,
+          35353,
+          35173,
+          35201,
+          35332,
+          35306
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.719
+      }
+    },
+    "byte.to_long": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          36105,
+          37540,
+          36194,
+          36106,
+          36110,
+          36188,
+          36101,
+          36107,
+          36156,
+          36238,
+          36101
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.8874
+      }
+    },
+    "byte.to_ulong": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          35085,
+          35844,
+          35086,
+          35826,
+          35110,
+          37012,
+          34988,
+          35123,
+          35219,
+          35173,
+          36651
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.7087
+      }
+    },
+    "byte.to_float": {
+      "expected": 4714923563205787648,
+      "ticks": {
+        "cpp-after": [
+          35326,
+          35363,
+          35313,
+          35307,
+          37157,
+          35300,
+          35376,
+          36974,
+          35403,
+          35584,
+          35358
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.745
+      }
+    },
+    "byte.to_double": {
+      "expected": 4714923563205787648,
+      "ticks": {
+        "cpp-after": [
+          36896,
+          36811,
+          36915,
+          36726,
+          36758,
+          36867,
+          36895,
+          36743,
+          36761,
+          36779,
+          37029
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.0211
+      }
+    },
+    "byte.to_char": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          34282,
+          34314,
+          34221,
+          34210,
+          34280,
+          34249,
+          34258,
+          34238,
+          34262,
+          34392,
+          34257
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.5342
+      }
+    },
+    "short.add": {
+      "expected": 3843072,
+      "ticks": {
+        "cpp-after": [
+          49895,
+          50197,
+          49921,
+          50108,
+          50161,
+          49947,
+          49999,
+          50079,
+          50455,
+          50158,
+          50020
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.5518
+      }
+    },
+    "short.sub": {
+      "expected": -5129216,
+      "ticks": {
+        "cpp-after": [
+          50729,
+          50830,
+          50758,
+          50746,
+          50868,
+          50905,
+          50759,
+          51329,
+          50767,
+          50959,
+          50812
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.6916
+      }
+    },
+    "short.mul": {
+      "expected": -5258752,
+      "ticks": {
+        "cpp-after": [
+          51894,
+          51992,
+          51670,
+          51725,
+          51706,
+          51722,
+          51831,
+          52057,
+          51853,
+          51768,
+          52020
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.886
+      }
+    },
+    "short.div": {
+      "expected": -172032,
+      "ticks": {
+        "cpp-after": [
+          62634,
+          63621,
+          62318,
+          64025,
+          62559,
+          62442,
+          63387,
+          62585,
+          62500,
+          63581,
+          62386
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 11.9371
+      }
+    },
+    "short.eq": {
+      "expected": 8704,
+      "ticks": {
+        "cpp-after": [
+          39598,
+          39545,
+          39465,
+          39443,
+          39509,
+          39679,
+          39512,
+          39625,
+          39457,
+          39661,
+          39385
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.5363
+      }
+    },
+    "short.ne": {
+      "expected": 515584,
+      "ticks": {
+        "cpp-after": [
+          42202,
+          42005,
+          42027,
+          42076,
+          41926,
+          42134,
+          42139,
+          42036,
+          42142,
+          42342,
+          42196
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.0364
+      }
+    },
+    "short.lt": {
+      "expected": 339456,
+      "ticks": {
+        "cpp-after": [
+          47893,
+          48165,
+          47890,
+          47934,
+          47950,
+          47825,
+          47447,
+          48472,
+          48282,
+          48280,
+          48056
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.1457
+      }
+    },
+    "short.le": {
+      "expected": 348160,
+      "ticks": {
+        "cpp-after": [
+          50432,
+          50913,
+          50989,
+          50430,
+          50474,
+          50546,
+          50459,
+          50736,
+          50568,
+          50512,
+          50515
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.635
+      }
+    },
+    "short.gt": {
+      "expected": 176128,
+      "ticks": {
+        "cpp-after": [
+          47261,
+          47191,
+          46910,
+          48371,
+          46900,
+          46951,
+          47070,
+          46988,
+          46971,
+          46783,
+          46845
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.959
+      }
+    },
+    "short.ge": {
+      "expected": 184832,
+      "ticks": {
+        "cpp-after": [
+          49764,
+          50183,
+          49846,
+          49796,
+          49873,
+          49766,
+          49640,
+          49540,
+          49515,
+          49673,
+          49596
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.4917
+      }
+    },
+    "short.neg": {
+      "expected": 643072,
+      "ticks": {
+        "cpp-after": [
+          44352,
+          44208,
+          44390,
+          44272,
+          44215,
+          44264,
+          44145,
+          46984,
+          44125,
+          44028,
+          44167
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.4333
+      }
+    },
+    "short.rem": {
+      "expected": -96768,
+      "ticks": {
+        "cpp-after": [
+          62827,
+          61609,
+          62473,
+          61583,
+          61456,
+          61060,
+          62208,
+          60463,
+          62591,
+          61347,
+          62089
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 11.751
+      }
+    },
+    "short.and": {
+      "expected": 2238976,
+      "ticks": {
+        "cpp-after": [
+          49254,
+          49550,
+          49220,
+          49419,
+          49305,
+          49210,
+          49190,
+          49109,
+          49157,
+          49236,
+          49235
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.3908
+      }
+    },
+    "short.or": {
+      "expected": 1604096,
+      "ticks": {
+        "cpp-after": [
+          51238,
+          51094,
+          51168,
+          51169,
+          50974,
+          51690,
+          51090,
+          51086,
+          50875,
+          51014,
+          51017
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.7446
+      }
+    },
+    "short.xor": {
+      "expected": -634880,
+      "ticks": {
+        "cpp-after": [
+          51824,
+          51802,
+          51763,
+          51963,
+          51796,
+          51571,
+          51751,
+          51683,
+          51700,
+          51762,
+          51577
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.8728
+      }
+    },
+    "short.not_low_byte": {
+      "expected": 64868352,
+      "ticks": {
+        "cpp-after": [
+          46783,
+          46907,
+          46714,
+          46870,
+          46896,
+          46845,
+          46811,
+          46735,
+          46837,
+          46746,
+          46927
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.9334
+      }
+    },
+    "short.shl": {
+      "expected": -19721216,
+      "ticks": {
+        "cpp-after": [
+          73367,
+          73405,
+          74748,
+          73754,
+          73347,
+          73713,
+          75633,
+          74537,
+          73354,
+          73339,
+          73308
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 14.0009
+      }
+    },
+    "short.shr": {
+      "expected": -318976,
+      "ticks": {
+        "cpp-after": [
+          79631,
+          80701,
+          79898,
+          79339,
+          79415,
+          78837,
+          81497,
+          79046,
+          79755,
+          79300,
+          79520
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 15.1672
+      }
+    },
+    "short.to_byte": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          34784,
+          34755,
+          35063,
+          34775,
+          34861,
+          34711,
+          34707,
+          35194,
+          34704,
+          34708,
+          34695
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.629
+      }
+    },
+    "short.to_short": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          34399,
+          34416,
+          34516,
+          34366,
+          34358,
+          34530,
+          34362,
+          34404,
+          34411,
+          34344,
+          34441
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.562
+      }
+    },
+    "short.to_ushort": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          35189,
+          35102,
+          35157,
+          35463,
+          35106,
+          35119,
+          35110,
+          35103,
+          35202,
+          35121,
+          35099
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.6984
+      }
+    },
+    "short.to_int": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          34107,
+          34128,
+          34691,
+          34188,
+          34145,
+          34105,
+          34178,
+          34283,
+          37229,
+          34229,
+          34203
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.5208
+      }
+    },
+    "short.to_uint": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          35505,
+          35395,
+          36392,
+          35377,
+          35960,
+          35466,
+          35375,
+          35741,
+          36274,
+          35529,
+          36241
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.7766
+      }
+    },
+    "short.to_long": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          34305,
+          35010,
+          34301,
+          34266,
+          34356,
+          34189,
+          34234,
+          34312,
+          34488,
+          34593,
+          34396
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.5445
+      }
+    },
+    "short.to_ulong": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          34582,
+          34753,
+          34940,
+          34828,
+          34718,
+          34712,
+          34777,
+          34749,
+          34927,
+          34811,
+          35677
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.6332
+      }
+    },
+    "short.to_float": {
+      "expected": 4714923563205787648,
+      "ticks": {
+        "cpp-after": [
+          35378,
+          35370,
+          35349,
+          35305,
+          35527,
+          35367,
+          35373,
+          35456,
+          35437,
+          35580,
+          35274
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.7469
+      }
+    },
+    "short.to_double": {
+      "expected": 4714923563205787648,
+      "ticks": {
+        "cpp-after": [
+          35833,
+          35723,
+          35871,
+          35689,
+          35715,
+          35697,
+          35670,
+          35817,
+          35673,
+          36293,
+          35695
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.8121
+      }
+    },
+    "short.to_char": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          35219,
+          35205,
+          35140,
+          35364,
+          35198,
+          35387,
+          35265,
+          35355,
+          35253,
+          35354,
+          35247
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.724
+      }
+    },
+    "ushort.add": {
+      "expected": 20620288,
+      "ticks": {
+        "cpp-after": [
+          39723,
+          39929,
+          39714,
+          39761,
+          39819,
+          39907,
+          39720,
+          39895,
+          39924,
+          39905,
+          39883
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.6071
+      }
+    },
+    "ushort.sub": {
+      "expected": 20036608,
+      "ticks": {
+        "cpp-after": [
+          42805,
+          42410,
+          43405,
+          42707,
+          42686,
+          42639,
+          42985,
+          42473,
+          43390,
+          43886,
+          42859
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.1644
+      }
+    },
+    "ushort.mul": {
+      "expected": 138297856,
+      "ticks": {
+        "cpp-after": [
+          42428,
+          42343,
+          42244,
+          42367,
+          42291,
+          42404,
+          42330,
+          42551,
+          42315,
+          42375,
+          42709
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.0809
+      }
+    },
+    "ushort.div": {
+      "expected": 3106304,
+      "ticks": {
+        "cpp-after": [
+          49981,
+          49980,
+          49871,
+          50252,
+          50119,
+          50082,
+          50033,
+          50008,
+          49963,
+          50011,
+          50319
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.5388
+      }
+    },
+    "ushort.eq": {
+      "expected": 5632,
+      "ticks": {
+        "cpp-after": [
+          40161,
+          40072,
+          40105,
+          39997,
+          40097,
+          40121,
+          40248,
+          40111,
+          40283,
+          40148,
+          40381
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.6525
+      }
+    },
+    "ushort.ne": {
+      "expected": 518656,
+      "ticks": {
+        "cpp-after": [
+          39994,
+          39934,
+          40270,
+          39918,
+          39980,
+          40028,
+          40042,
+          39997,
+          40019,
+          40216,
+          40085
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.633
+      }
+    },
+    "ushort.lt": {
+      "expected": 74752,
+      "ticks": {
+        "cpp-after": [
+          43867,
+          43852,
+          43895,
+          43861,
+          43875,
+          44106,
+          44071,
+          49029,
+          44016,
+          44068,
+          44125
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.3954
+      }
+    },
+    "ushort.le": {
+      "expected": 80384,
+      "ticks": {
+        "cpp-after": [
+          44011,
+          43997,
+          43997,
+          45626,
+          44089,
+          44011,
+          44020,
+          44023,
+          44159,
+          44019,
+          44441
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.3961
+      }
+    },
+    "ushort.gt": {
+      "expected": 443904,
+      "ticks": {
+        "cpp-after": [
+          45590,
+          44457,
+          44535,
+          45544,
+          44875,
+          44376,
+          45707,
+          44556,
+          44490,
+          44416,
+          45975
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.4984
+      }
+    },
+    "ushort.ge": {
+      "expected": 449536,
+      "ticks": {
+        "cpp-after": [
+          42920,
+          42787,
+          43062,
+          42722,
+          42783,
+          42880,
+          42781,
+          42693,
+          42675,
+          42765,
+          43161
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.1602
+      }
+    },
+    "ushort.rem": {
+      "expected": 2007552,
+      "ticks": {
+        "cpp-after": [
+          52898,
+          52079,
+          52315,
+          51854,
+          52957,
+          52590,
+          52143,
+          52145,
+          52566,
+          52273,
+          52553
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.9783
+      }
+    },
+    "ushort.and": {
+      "expected": 2238976,
+      "ticks": {
+        "cpp-after": [
+          49698,
+          49835,
+          49908,
+          47422,
+          47501,
+          49956,
+          48276,
+          47468,
+          48464,
+          48007,
+          49736
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.2438
+      }
+    },
+    "ushort.or": {
+      "expected": 18381312,
+      "ticks": {
+        "cpp-after": [
+          39591,
+          39722,
+          39654,
+          39743,
+          39672,
+          39542,
+          39631,
+          39557,
+          39561,
+          39555,
+          39672
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.559
+      }
+    },
+    "ushort.xor": {
+      "expected": 16142336,
+      "ticks": {
+        "cpp-after": [
+          41136,
+          41114,
+          41118,
+          41125,
+          41223,
+          41112,
+          41106,
+          41117,
+          41106,
+          41119,
+          40969
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.8424
+      }
+    },
+    "ushort.not_low_byte": {
+      "expected": 117559296,
+      "ticks": {
+        "cpp-after": [
+          43792,
+          43764,
+          43766,
+          43711,
+          43756,
+          43809,
+          43883,
+          43752,
+          43703,
+          43723,
+          43753
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.3458
+      }
+    },
+    "ushort.shl": {
+      "expected": 490509312,
+      "ticks": {
+        "cpp-after": [
+          63453,
+          63828,
+          63720,
+          63787,
+          64580,
+          63576,
+          63818,
+          63417,
+          64265,
+          63928,
+          63957
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 12.1723
+      }
+    },
+    "ushort.shr": {
+      "expected": 4074496,
+      "ticks": {
+        "cpp-after": [
+          73305,
+          73212,
+          73203,
+          73167,
+          73631,
+          73406,
+          73667,
+          73177,
+          73166,
+          73494,
+          73142
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 13.9641
+      }
+    },
+    "ushort.to_byte": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          34539,
+          34792,
+          34613,
+          34580,
+          34849,
+          34721,
+          36406,
+          34585,
+          34539,
+          34497,
+          34506
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.5966
+      }
+    },
+    "ushort.to_short": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          34506,
+          34756,
+          34554,
+          34522,
+          34704,
+          34831,
+          34496,
+          34508,
+          34540,
+          34528,
+          34733
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.588
+      }
+    },
+    "ushort.to_ushort": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          35489,
+          34469,
+          34486,
+          34572,
+          34655,
+          34736,
+          34461,
+          34482,
+          34628,
+          34492,
+          34421
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.5788
+      }
+    },
+    "ushort.to_int": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          34564,
+          34570,
+          34578,
+          34498,
+          34871,
+          34744,
+          34553,
+          34431,
+          34564,
+          34503,
+          34545
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.5926
+      }
+    },
+    "ushort.to_uint": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          37093,
+          37055,
+          36934,
+          37080,
+          37182,
+          37217,
+          36975,
+          37235,
+          37017,
+          37015,
+          37004
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.0677
+      }
+    },
+    "ushort.to_long": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          34948,
+          35137,
+          34947,
+          34915,
+          34923,
+          35068,
+          34922,
+          34931,
+          35012,
+          35060,
+          34923
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.6656
+      }
+    },
+    "ushort.to_ulong": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          34276,
+          34078,
+          35648,
+          35362,
+          34300,
+          34189,
+          34064,
+          34228,
+          34074,
+          34136,
+          34127
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.521
+      }
+    },
+    "ushort.to_float": {
+      "expected": 4714923563205787648,
+      "ticks": {
+        "cpp-after": [
+          35317,
+          35285,
+          35305,
+          35289,
+          35252,
+          35348,
+          35360,
+          35359,
+          35354,
+          35203,
+          35210
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.7339
+      }
+    },
+    "ushort.to_double": {
+      "expected": 4714923563205787648,
+      "ticks": {
+        "cpp-after": [
+          34504,
+          34818,
+          34399,
+          34387,
+          34294,
+          34383,
+          34355,
+          34466,
+          34431,
+          34383,
+          34420
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.5611
+      }
+    },
+    "ushort.to_char": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          41794,
+          36514,
+          35965,
+          36217,
+          36089,
+          35964,
+          36384,
+          36941,
+          36317,
+          36691,
+          36123
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.9269
+      }
+    },
+    "int.add": {
+      "expected": 3843072,
+      "ticks": {
+        "cpp-after": [
+          51609,
+          51668,
+          51332,
+          51500,
+          51282,
+          51524,
+          51675,
+          51468,
+          51376,
+          51499,
+          51465
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.8227
+      }
+    },
+    "int.sub": {
+      "expected": -5129216,
+      "ticks": {
+        "cpp-after": [
+          48780,
+          49114,
+          48774,
+          48810,
+          48689,
+          49044,
+          48571,
+          48637,
+          48729,
+          48602,
+          48586
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.2943
+      }
+    },
+    "int.mul": {
+      "expected": -5258752,
+      "ticks": {
+        "cpp-after": [
+          52028,
+          51943,
+          51995,
+          52068,
+          52119,
+          51959,
+          51956,
+          51993,
+          52055,
+          52011,
+          51976
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.9173
+      }
+    },
+    "int.div": {
+      "expected": -172032,
+      "ticks": {
+        "cpp-after": [
+          60389,
+          60218,
+          60433,
+          60328,
+          60734,
+          60281,
+          60369,
+          60347,
+          60251,
+          60471,
+          60106
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 11.5103
+      }
+    },
+    "int.eq": {
+      "expected": 8704,
+      "ticks": {
+        "cpp-after": [
+          42729,
+          42040,
+          41736,
+          42036,
+          42209,
+          42048,
+          42896,
+          42779,
+          42079,
+          42668,
+          41904
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.0259
+      }
+    },
+    "int.ne": {
+      "expected": 515584,
+      "ticks": {
+        "cpp-after": [
+          39871,
+          39682,
+          39769,
+          39755,
+          40313,
+          39746,
+          39724,
+          39936,
+          39756,
+          39607,
+          39876
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.5829
+      }
+    },
+    "int.lt": {
+      "expected": 339456,
+      "ticks": {
+        "cpp-after": [
+          46615,
+          46676,
+          46512,
+          46766,
+          46924,
+          46566,
+          46896,
+          46502,
+          46588,
+          46634,
+          46650
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.8947
+      }
+    },
+    "int.le": {
+      "expected": 348160,
+      "ticks": {
+        "cpp-after": [
+          47760,
+          47678,
+          47850,
+          47829,
+          47942,
+          47818,
+          47695,
+          47708,
+          47704,
+          47944,
+          47668
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.1095
+      }
+    },
+    "int.gt": {
+      "expected": 176128,
+      "ticks": {
+        "cpp-after": [
+          47864,
+          47938,
+          47856,
+          47831,
+          47880,
+          47876,
+          47882,
+          48022,
+          48073,
+          47888,
+          47953
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.1328
+      }
+    },
+    "int.ge": {
+      "expected": 184832,
+      "ticks": {
+        "cpp-after": [
+          47153,
+          47113,
+          47124,
+          47149,
+          47450,
+          47087,
+          47050,
+          47058,
+          47038,
+          47025,
+          47104
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.9844
+      }
+    },
+    "int.neg": {
+      "expected": 643072,
+      "ticks": {
+        "cpp-after": [
+          45511,
+          45563,
+          45581,
+          45720,
+          45747,
+          45552,
+          45918,
+          45709,
+          45476,
+          45717,
+          45559
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.6939
+      }
+    },
+    "int.rem": {
+      "expected": -96768,
+      "ticks": {
+        "cpp-after": [
+          60912,
+          59584,
+          59498,
+          60895,
+          60682,
+          59598,
+          59380,
+          59588,
+          60853,
+          59235,
+          60051
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 11.3674
+      }
+    },
+    "int.and": {
+      "expected": 2238976,
+      "ticks": {
+        "cpp-after": [
+          46901,
+          46833,
+          46854,
+          46833,
+          48200,
+          46932,
+          46728,
+          47079,
+          46842,
+          46714,
+          55155
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.9367
+      }
+    },
+    "int.or": {
+      "expected": 1604096,
+      "ticks": {
+        "cpp-after": [
+          50395,
+          49930,
+          50119,
+          50006,
+          50232,
+          49930,
+          50105,
+          49926,
+          49928,
+          50111,
+          49922
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.5379
+      }
+    },
+    "int.xor": {
+      "expected": -634880,
+      "ticks": {
+        "cpp-after": [
+          54480,
+          47983,
+          48182,
+          47888,
+          47858,
+          47703,
+          47761,
+          47891,
+          48112,
+          47948,
+          47970
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.1454
+      }
+    },
+    "int.not_low_byte": {
+      "expected": 64868352,
+      "ticks": {
+        "cpp-after": [
+          47266,
+          47155,
+          47559,
+          47299,
+          46975,
+          47107,
+          47007,
+          47387,
+          47417,
+          47022,
+          46940
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.9941
+      }
+    },
+    "int.shl": {
+      "expected": -19721216,
+      "ticks": {
+        "cpp-after": [
+          74705,
+          75015,
+          74752,
+          74337,
+          74582,
+          74218,
+          74371,
+          74400,
+          74539,
+          74487,
+          74290
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 14.2073
+      }
+    },
+    "int.shr": {
+      "expected": -318976,
+      "ticks": {
+        "cpp-after": [
+          81764,
+          81086,
+          80679,
+          80649,
+          81375,
+          80887,
+          80708,
+          80762,
+          81052,
+          80800,
+          80966
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 15.428
+      }
+    },
+    "int.to_byte": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          34120,
+          34823,
+          34092,
+          34075,
+          34199,
+          34057,
+          34123,
+          34191,
+          34010,
+          34008,
+          34054
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.5025
+      }
+    },
+    "int.to_short": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          35253,
+          35618,
+          35744,
+          35598,
+          35967,
+          36960,
+          35862,
+          36441,
+          36517,
+          35864,
+          35506
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.8401
+      }
+    },
+    "int.to_ushort": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          33829,
+          33692,
+          33640,
+          33833,
+          33789,
+          33689,
+          33668,
+          33625,
+          33936,
+          33795,
+          33697
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.4272
+      }
+    },
+    "int.to_int": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          35140,
+          34940,
+          34960,
+          34963,
+          35070,
+          35004,
+          35003,
+          35000,
+          35245,
+          34948,
+          34960
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.6757
+      }
+    },
+    "int.to_uint": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          34270,
+          34252,
+          34106,
+          34135,
+          34134,
+          34213,
+          34079,
+          34106,
+          34290,
+          34078,
+          34062
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.5105
+      }
+    },
+    "int.to_long": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          35408,
+          35282,
+          35429,
+          35232,
+          35231,
+          35232,
+          35239,
+          35346,
+          35378,
+          35242,
+          35229
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.7219
+      }
+    },
+    "int.to_ulong": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          35001,
+          34859,
+          34858,
+          34906,
+          34842,
+          34812,
+          34819,
+          34883,
+          35581,
+          34985,
+          34862
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.6494
+      }
+    },
+    "int.to_float": {
+      "expected": 4714923563205787648,
+      "ticks": {
+        "cpp-after": [
+          35624,
+          35143,
+          35138,
+          35132,
+          35250,
+          35178,
+          35159,
+          35177,
+          35334,
+          35140,
+          35300
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.7095
+      }
+    },
+    "int.to_double": {
+      "expected": 4714923563205787648,
+      "ticks": {
+        "cpp-after": [
+          36148,
+          35683,
+          35678,
+          35705,
+          35713,
+          35765,
+          35682,
+          35690,
+          35860,
+          35681,
+          35678
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.8073
+      }
+    },
+    "int.to_char": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          34025,
+          34136,
+          33885,
+          33865,
+          33849,
+          33870,
+          33871,
+          33867,
+          34039,
+          33814,
+          33860
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.4602
+      }
+    },
+    "uint.add": {
+      "expected": 20620288,
+      "ticks": {
+        "cpp-after": [
+          45110,
+          45150,
+          45114,
+          45075,
+          45052,
+          44839,
+          45910,
+          46063,
+          45295,
+          46161,
+          45022
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.6048
+      }
+    },
+    "uint.sub": {
+      "expected": 20036608,
+      "ticks": {
+        "cpp-after": [
+          43594,
+          43491,
+          43489,
+          43361,
+          43497,
+          43405,
+          43456,
+          43474,
+          43432,
+          43376,
+          43519
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.292
+      }
+    },
+    "uint.mul": {
+      "expected": 138297856,
+      "ticks": {
+        "cpp-after": [
+          44984,
+          44709,
+          44737,
+          44948,
+          44832,
+          44851,
+          44865,
+          45013,
+          46050,
+          45319,
+          44964
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.5732
+      }
+    },
+    "uint.div": {
+      "expected": 3106304,
+      "ticks": {
+        "cpp-after": [
+          48293,
+          48368,
+          48461,
+          49042,
+          48525,
+          48843,
+          48578,
+          48407,
+          48661,
+          48957,
+          48335
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.2554
+      }
+    },
+    "uint.eq": {
+      "expected": 5632,
+      "ticks": {
+        "cpp-after": [
+          39851,
+          39865,
+          39854,
+          39885,
+          39857,
+          39787,
+          40134,
+          39809,
+          39755,
+          40036,
+          40188
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.6021
+      }
+    },
+    "uint.ne": {
+      "expected": 518656,
+      "ticks": {
+        "cpp-after": [
+          40855,
+          41245,
+          40843,
+          40900,
+          40848,
+          40859,
+          40853,
+          40850,
+          41058,
+          40846,
+          40874
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.7925
+      }
+    },
+    "uint.lt": {
+      "expected": 74752,
+      "ticks": {
+        "cpp-after": [
+          42498,
+          42299,
+          42259,
+          42226,
+          42339,
+          42320,
+          42377,
+          42295,
+          42225,
+          42141,
+          42344
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.0679
+      }
+    },
+    "uint.le": {
+      "expected": 80384,
+      "ticks": {
+        "cpp-after": [
+          44348,
+          44202,
+          44225,
+          44181,
+          44303,
+          44205,
+          44159,
+          44168,
+          44174,
+          44264,
+          44189
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.4309
+      }
+    },
+    "uint.gt": {
+      "expected": 443904,
+      "ticks": {
+        "cpp-after": [
+          43652,
+          44539,
+          43735,
+          44419,
+          43653,
+          43659,
+          44514,
+          44537,
+          43636,
+          44237,
+          43764
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.3473
+      }
+    },
+    "uint.ge": {
+      "expected": 449536,
+      "ticks": {
+        "cpp-after": [
+          44176,
+          43982,
+          43926,
+          43893,
+          44602,
+          43936,
+          44148,
+          44124,
+          44459,
+          43883,
+          43949
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.3889
+      }
+    },
+    "uint.rem": {
+      "expected": 2007552,
+      "ticks": {
+        "cpp-after": [
+          48642,
+          48835,
+          50022,
+          48782,
+          48809,
+          48776,
+          48722,
+          48684,
+          48749,
+          48747,
+          48697
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.2981
+      }
+    },
+    "uint.and": {
+      "expected": 2238976,
+      "ticks": {
+        "cpp-after": [
+          45656,
+          45597,
+          49792,
+          45671,
+          45699,
+          45668,
+          45618,
+          45587,
+          45635,
+          45597,
+          45647
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.7065
+      }
+    },
+    "uint.or": {
+      "expected": 18381312,
+      "ticks": {
+        "cpp-after": [
+          39221,
+          39305,
+          39190,
+          39458,
+          39200,
+          39219,
+          39183,
+          39189,
+          39336,
+          39169,
+          39308
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.4804
+      }
+    },
+    "uint.xor": {
+      "expected": 16142336,
+      "ticks": {
+        "cpp-after": [
+          39533,
+          39518,
+          39511,
+          39892,
+          39498,
+          39508,
+          39492,
+          39519,
+          39485,
+          39499,
+          39543
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.5361
+      }
+    },
+    "uint.not_low_byte": {
+      "expected": 117559296,
+      "ticks": {
+        "cpp-after": [
+          41530,
+          41416,
+          41489,
+          41768,
+          41533,
+          41497,
+          41456,
+          41514,
+          41445,
+          41517,
+          41525
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.9182
+      }
+    },
+    "uint.shl": {
+      "expected": 490509312,
+      "ticks": {
+        "cpp-after": [
+          61800,
+          63282,
+          61860,
+          62438,
+          61826,
+          61717,
+          62810,
+          61736,
+          61701,
+          62203,
+          61932
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 11.7989
+      }
+    },
+    "uint.shr": {
+      "expected": 4074496,
+      "ticks": {
+        "cpp-after": [
+          73662,
+          73646,
+          73834,
+          74506,
+          74679,
+          74416,
+          73290,
+          75063,
+          74929,
+          73651,
+          73740
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 14.0827
+      }
+    },
+    "uint.to_byte": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          33846,
+          34056,
+          33927,
+          34134,
+          33848,
+          33860,
+          33879,
+          33824,
+          33834,
+          33842,
+          33845
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.456
+      }
+    },
+    "uint.to_short": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          35605,
+          35566,
+          36626,
+          35629,
+          35500,
+          35592,
+          36062,
+          35624,
+          35647,
+          36978,
+          36733
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.7957
+      }
+    },
+    "uint.to_ushort": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          33843,
+          34680,
+          33837,
+          33967,
+          33848,
+          33838,
+          33869,
+          34003,
+          33948,
+          33842,
+          34023
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.46
+      }
+    },
+    "uint.to_int": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          35732,
+          35904,
+          35790,
+          35747,
+          35754,
+          35823,
+          35797,
+          35723,
+          35803,
+          35775,
+          35620
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.8235
+      }
+    },
+    "uint.to_uint": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          34737,
+          34799,
+          34976,
+          34606,
+          34783,
+          34957,
+          34713,
+          34670,
+          34734,
+          34760,
+          34837
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.6299
+      }
+    },
+    "uint.to_long": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          33215,
+          33252,
+          33462,
+          33596,
+          33279,
+          33463,
+          33264,
+          33345,
+          33259,
+          33500,
+          33327
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.3566
+      }
+    },
+    "uint.to_ulong": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          33989,
+          34062,
+          33964,
+          34042,
+          33949,
+          34054,
+          33956,
+          33955,
+          33960,
+          33960,
+          34094
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.4781
+      }
+    },
+    "uint.to_float": {
+      "expected": 4714923563205787648,
+      "ticks": {
+        "cpp-after": [
+          36353,
+          36222,
+          36223,
+          36230,
+          36213,
+          36292,
+          36344,
+          36402,
+          36231,
+          36230,
+          36234
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.9105
+      }
+    },
+    "uint.to_double": {
+      "expected": 4714923563205787648,
+      "ticks": {
+        "cpp-after": [
+          35574,
+          35534,
+          35510,
+          35507,
+          35606,
+          35677,
+          35569,
+          35637,
+          35693,
+          35505,
+          35491
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.7842
+      }
+    },
+    "uint.to_char": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          34487,
+          34357,
+          33855,
+          34589,
+          34728,
+          34681,
+          35603,
+          34665,
+          33810,
+          33933,
+          33814
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.5779
+      }
+    },
+    "long.add": {
+      "expected": 3843072,
+      "ticks": {
+        "cpp-after": [
+          53632,
+          53743,
+          53789,
+          53699,
+          53631,
+          53822,
+          53631,
+          53748,
+          53681,
+          53710,
+          55939
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 10.2444
+      }
+    },
+    "long.sub": {
+      "expected": -5129216,
+      "ticks": {
+        "cpp-after": [
+          50705,
+          50475,
+          50493,
+          50427,
+          50567,
+          50514,
+          50500,
+          50641,
+          50622,
+          50488,
+          50612
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.6348
+      }
+    },
+    "long.mul": {
+      "expected": -5258752,
+      "ticks": {
+        "cpp-after": [
+          59251,
+          59605,
+          59113,
+          59209,
+          59298,
+          59217,
+          59382,
+          59045,
+          59107,
+          59046,
+          59631
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 11.2947
+      }
+    },
+    "long.div": {
+      "expected": -172032,
+      "ticks": {
+        "cpp-after": [
+          61737,
+          61656,
+          62222,
+          61634,
+          61481,
+          61743,
+          61769,
+          61919,
+          61748,
+          61553,
+          62174
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 11.7765
+      }
+    },
+    "long.eq": {
+      "expected": 8704,
+      "ticks": {
+        "cpp-after": [
+          41017,
+          41164,
+          40950,
+          40932,
+          41160,
+          40942,
+          40953,
+          41004,
+          41017,
+          40957,
+          41122
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.8209
+      }
+    },
+    "long.ne": {
+      "expected": 515584,
+      "ticks": {
+        "cpp-after": [
+          41008,
+          41080,
+          41024,
+          42156,
+          41051,
+          41327,
+          41058,
+          42230,
+          41073,
+          41023,
+          41105
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.8341
+      }
+    },
+    "long.lt": {
+      "expected": 339456,
+      "ticks": {
+        "cpp-after": [
+          48525,
+          47734,
+          48457,
+          47520,
+          48684,
+          47607,
+          48101,
+          47509,
+          48619,
+          48698,
+          48480
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.2424
+      }
+    },
+    "long.le": {
+      "expected": 348160,
+      "ticks": {
+        "cpp-after": [
+          45605,
+          45083,
+          45051,
+          45117,
+          45056,
+          45336,
+          44979,
+          45209,
+          45154,
+          45316,
+          45061
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.6054
+      }
+    },
+    "long.gt": {
+      "expected": 176128,
+      "ticks": {
+        "cpp-after": [
+          46760,
+          46841,
+          47494,
+          46963,
+          47238,
+          47191,
+          47023,
+          46756,
+          46727,
+          46777,
+          46885
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.9426
+      }
+    },
+    "long.ge": {
+      "expected": 184832,
+      "ticks": {
+        "cpp-after": [
+          48259,
+          48266,
+          48250,
+          48505,
+          48288,
+          48420,
+          48328,
+          48395,
+          48266,
+          48200,
+          48241
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.206
+      }
+    },
+    "long.neg": {
+      "expected": 643072,
+      "ticks": {
+        "cpp-after": [
+          45688,
+          45553,
+          45420,
+          45731,
+          45654,
+          45773,
+          45544,
+          45596,
+          45581,
+          45585,
+          45481
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.6946
+      }
+    },
+    "long.rem": {
+      "expected": -96768,
+      "ticks": {
+        "cpp-after": [
+          66464,
+          66355,
+          66541,
+          66296,
+          66709,
+          66441,
+          66412,
+          66359,
+          66357,
+          66339,
+          66340
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 12.657
+      }
+    },
+    "long.and": {
+      "expected": 2238976,
+      "ticks": {
+        "cpp-after": [
+          45689,
+          46406,
+          45649,
+          45585,
+          46122,
+          45725,
+          46358,
+          45534,
+          45468,
+          45746,
+          45720
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.7204
+      }
+    },
+    "long.or": {
+      "expected": 1604096,
+      "ticks": {
+        "cpp-after": [
+          48393,
+          48456,
+          48297,
+          48282,
+          48633,
+          48360,
+          48402,
+          48296,
+          48236,
+          48492,
+          48327
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.2239
+      }
+    },
+    "long.xor": {
+      "expected": -634880,
+      "ticks": {
+        "cpp-after": [
+          49377,
+          49242,
+          49847,
+          49063,
+          49278,
+          49313,
+          49597,
+          49198,
+          49013,
+          49199,
+          49133
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.3922
+      }
+    },
+    "long.not_low_byte": {
+      "expected": 64868352,
+      "ticks": {
+        "cpp-after": [
+          51128,
+          51233,
+          51002,
+          51022,
+          51180,
+          50982,
+          50979,
+          51152,
+          51048,
+          51171,
+          51094
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.7454
+      }
+    },
+    "long.shl": {
+      "expected": -19721216,
+      "ticks": {
+        "cpp-after": [
+          75824,
+          75862,
+          75759,
+          75796,
+          77568,
+          75980,
+          76056,
+          75712,
+          75561,
+          75748,
+          75766
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 14.4569
+      }
+    },
+    "long.shr": {
+      "expected": -318976,
+      "ticks": {
+        "cpp-after": [
+          79228,
+          79129,
+          79646,
+          79624,
+          79562,
+          79349,
+          78996,
+          78948,
+          79372,
+          79136,
+          79318
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 15.1287
+      }
+    },
+    "long.to_byte": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          39106,
+          38308,
+          39060,
+          39646,
+          38186,
+          38005,
+          37972,
+          39173,
+          38897,
+          38926,
+          37967
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.419
+      }
+    },
+    "long.to_short": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          33897,
+          33995,
+          34118,
+          33866,
+          34069,
+          33908,
+          33919,
+          33983,
+          33879,
+          33826,
+          33893
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.4674
+      }
+    },
+    "long.to_ushort": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          33732,
+          33615,
+          33596,
+          33613,
+          34200,
+          33605,
+          33696,
+          33780,
+          33606,
+          33617,
+          33608
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.4116
+      }
+    },
+    "long.to_int": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          34199,
+          34106,
+          34100,
+          34153,
+          34268,
+          34097,
+          34116,
+          34087,
+          34474,
+          34085,
+          34093
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.5052
+      }
+    },
+    "long.to_uint": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          39357,
+          39291,
+          39380,
+          38991,
+          39105,
+          38969,
+          39002,
+          39012,
+          38967,
+          38966,
+          38988
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.439
+      }
+    },
+    "long.to_long": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          35119,
+          34868,
+          34857,
+          34676,
+          34858,
+          34977,
+          34647,
+          34883,
+          36238,
+          34872,
+          34873
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.6513
+      }
+    },
+    "long.to_ulong": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          33939,
+          34322,
+          34526,
+          34679,
+          34273,
+          34382,
+          34743,
+          34281,
+          34353,
+          34008,
+          34131
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.5464
+      }
+    },
+    "long.to_float": {
+      "expected": 4714923563205787648,
+      "ticks": {
+        "cpp-after": [
+          36173,
+          36009,
+          36267,
+          36153,
+          35974,
+          35927,
+          36114,
+          36034,
+          42666,
+          36125,
+          36157
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.8903
+      }
+    },
+    "long.to_double": {
+      "expected": 4714923563205787648,
+      "ticks": {
+        "cpp-after": [
+          34460,
+          34466,
+          34728,
+          34854,
+          34867,
+          34590,
+          34739,
+          34515,
+          34395,
+          34464,
+          34466
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.5832
+      }
+    },
+    "long.to_char": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          36074,
+          36186,
+          36073,
+          36075,
+          36013,
+          36179,
+          35977,
+          36313,
+          36175,
+          36038,
+          36202
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.8808
+      }
+    },
+    "ulong.add": {
+      "expected": 20620288,
+      "ticks": {
+        "cpp-after": [
+          45192,
+          45117,
+          44864,
+          44855,
+          44896,
+          44994,
+          44941,
+          45660,
+          45589,
+          44964,
+          44936
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.5762
+      }
+    },
+    "ulong.sub": {
+      "expected": 20036608,
+      "ticks": {
+        "cpp-after": [
+          46939,
+          46937,
+          47043,
+          47087,
+          46912,
+          46911,
+          46901,
+          46917,
+          47094,
+          47146,
+          47139
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.9529
+      }
+    },
+    "ulong.mul": {
+      "expected": 138297856,
+      "ticks": {
+        "cpp-after": [
+          45796,
+          46758,
+          46463,
+          44965,
+          45106,
+          44984,
+          44951,
+          46765,
+          45369,
+          45362,
+          45945
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.6535
+      }
+    },
+    "ulong.div": {
+      "expected": 3106304,
+      "ticks": {
+        "cpp-after": [
+          51634,
+          50767,
+          50852,
+          53120,
+          51089,
+          52551,
+          52459,
+          50766,
+          50827,
+          50854,
+          50888
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.7061
+      }
+    },
+    "ulong.eq": {
+      "expected": 5632,
+      "ticks": {
+        "cpp-after": [
+          39446,
+          39479,
+          39703,
+          39443,
+          39497,
+          39299,
+          39314,
+          51339,
+          40540,
+          39333,
+          39626
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.53
+      }
+    },
+    "ulong.ne": {
+      "expected": 518656,
+      "ticks": {
+        "cpp-after": [
+          40341,
+          40266,
+          40252,
+          40343,
+          40577,
+          40182,
+          40307,
+          40080,
+          40561,
+          41532,
+          46156
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.6944
+      }
+    },
+    "ulong.lt": {
+      "expected": 74752,
+      "ticks": {
+        "cpp-after": [
+          45335,
+          45231,
+          45116,
+          45251,
+          45400,
+          45710,
+          45129,
+          45258,
+          45088,
+          45092,
+          50236
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.6309
+      }
+    },
+    "ulong.le": {
+      "expected": 80384,
+      "ticks": {
+        "cpp-after": [
+          43001,
+          43143,
+          43079,
+          43068,
+          43135,
+          42974,
+          43256,
+          43464,
+          43127,
+          43088,
+          48379
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.2258
+      }
+    },
+    "ulong.gt": {
+      "expected": 443904,
+      "ticks": {
+        "cpp-after": [
+          45412,
+          45395,
+          45661,
+          45493,
+          45411,
+          45360,
+          45346,
+          45370,
+          45630,
+          45555,
+          47474
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.6617
+      }
+    },
+    "ulong.ge": {
+      "expected": 449536,
+      "ticks": {
+        "cpp-after": [
+          44431,
+          43420,
+          43539,
+          43443,
+          43792,
+          43426,
+          43440,
+          43448,
+          44448,
+          43510,
+          47563
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.2989
+      }
+    },
+    "ulong.rem": {
+      "expected": 2007552,
+      "ticks": {
+        "cpp-after": [
+          52459,
+          52332,
+          52824,
+          52818,
+          53627,
+          53078,
+          52716,
+          52296,
+          52287,
+          52448,
+          53171
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 10.0548
+      }
+    },
+    "ulong.and": {
+      "expected": 2238976,
+      "ticks": {
+        "cpp-after": [
+          48743,
+          48628,
+          48740,
+          47689,
+          47430,
+          48651,
+          47473,
+          48081,
+          47642,
+          47565,
+          47572
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.096
+      }
+    },
+    "ulong.or": {
+      "expected": 18381312,
+      "ticks": {
+        "cpp-after": [
+          40199,
+          40308,
+          39760,
+          40361,
+          40201,
+          39971,
+          40299,
+          40263,
+          40307,
+          40451,
+          39554
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.6796
+      }
+    },
+    "ulong.xor": {
+      "expected": 16142336,
+      "ticks": {
+        "cpp-after": [
+          41184,
+          41142,
+          40965,
+          41233,
+          41244,
+          41387,
+          41169,
+          41390,
+          41115,
+          40970,
+          41206
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.8552
+      }
+    },
+    "ulong.not_low_byte": {
+      "expected": 117559296,
+      "ticks": {
+        "cpp-after": [
+          41630,
+          41770,
+          41780,
+          41547,
+          41657,
+          41713,
+          41597,
+          41674,
+          41658,
+          41731,
+          41864
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.9487
+      }
+    },
+    "ulong.shl": {
+      "expected": 490509312,
+      "ticks": {
+        "cpp-after": [
+          62400,
+          62361,
+          62929,
+          62396,
+          62423,
+          62488,
+          62558,
+          62593,
+          62345,
+          62430,
+          62333
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 11.9062
+      }
+    },
+    "ulong.shr": {
+      "expected": 4074496,
+      "ticks": {
+        "cpp-after": [
+          73435,
+          73285,
+          73384,
+          73697,
+          73329,
+          73325,
+          73316,
+          73537,
+          73407,
+          73485,
+          73523
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 14.0013
+      }
+    },
+    "ulong.to_byte": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          36347,
+          36149,
+          36311,
+          37417,
+          36252,
+          36200,
+          37196,
+          37669,
+          36174,
+          37325,
+          37214
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.9326
+      }
+    },
+    "ulong.to_short": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          33812,
+          33820,
+          33819,
+          33835,
+          33845,
+          33954,
+          33907,
+          33808,
+          33866,
+          33998,
+          33795
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.4535
+      }
+    },
+    "ulong.to_ushort": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          33546,
+          33459,
+          33480,
+          33520,
+          33545,
+          33536,
+          33628,
+          33583,
+          33516,
+          33792,
+          33570
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.3982
+      }
+    },
+    "ulong.to_int": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          33705,
+          33724,
+          33702,
+          33846,
+          33802,
+          33940,
+          33971,
+          33672,
+          33679,
+          33710,
+          33707
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.4297
+      }
+    },
+    "ulong.to_uint": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          33511,
+          33595,
+          33551,
+          33519,
+          33533,
+          33551,
+          33748,
+          33544,
+          33569,
+          33520,
+          33700
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.3993
+      }
+    },
+    "ulong.to_long": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          33439,
+          33475,
+          33476,
+          33513,
+          34223,
+          33473,
+          33616,
+          33451,
+          33504,
+          33472,
+          33490
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.385
+      }
+    },
+    "ulong.to_ulong": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          34021,
+          33999,
+          33995,
+          33998,
+          35354,
+          33997,
+          34311,
+          35002,
+          33994,
+          34131,
+          34000
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.485
+      }
+    },
+    "ulong.to_float": {
+      "expected": 4714923563205787648,
+      "ticks": {
+        "cpp-after": [
+          36209,
+          36173,
+          36056,
+          36094,
+          36059,
+          36105,
+          36160,
+          36037,
+          36047,
+          36097,
+          36095
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.8846
+      }
+    },
+    "ulong.to_double": {
+      "expected": 4714923563205787648,
+      "ticks": {
+        "cpp-after": [
+          35129,
+          35123,
+          35139,
+          35157,
+          35132,
+          35123,
+          35263,
+          35329,
+          35116,
+          35122,
+          35194
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.7009
+      }
+    },
+    "ulong.to_char": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          34377,
+          33757,
+          34357,
+          34031,
+          34608,
+          34426,
+          34071,
+          34016,
+          34497,
+          34032,
+          34050
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.4985
+      }
+    },
+    "float.add": {
+      "expected": 4698633198928658432,
+      "ticks": {
+        "cpp-after": [
+          46993,
+          46887,
+          48183,
+          46919,
+          47166,
+          48221,
+          46964,
+          47104,
+          46945,
+          46924,
+          46695
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.9577
+      }
+    },
+    "float.sub": {
+      "expected": 13926329615015477248,
+      "ticks": {
+        "cpp-after": [
+          45728,
+          45586,
+          45661,
+          45588,
+          45538,
+          45368,
+          45396,
+          45476,
+          45475,
+          45876,
+          45293
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.6857
+      }
+    },
+    "float.mul": {
+      "expected": 13918211920667607040,
+      "ticks": {
+        "cpp-after": [
+          45893,
+          45751,
+          46121,
+          45879,
+          45947,
+          46189,
+          45980,
+          45810,
+          46085,
+          46057,
+          45650
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.7637
+      }
+    },
+    "float.div": {
+      "expected": 13914376824109924352,
+      "ticks": {
+        "cpp-after": [
+          46502,
+          46680,
+          46968,
+          46644,
+          46727,
+          46580,
+          46394,
+          46365,
+          46487,
+          46313,
+          46613
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.8844
+      }
+    },
+    "float.eq": {
+      "expected": 8704,
+      "ticks": {
+        "cpp-after": [
+          40462,
+          40452,
+          40750,
+          40470,
+          40458,
+          40436,
+          40493,
+          40478,
+          40519,
+          40460,
+          40432
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.7175
+      }
+    },
+    "float.ne": {
+      "expected": 515584,
+      "ticks": {
+        "cpp-after": [
+          40432,
+          40412,
+          40797,
+          40455,
+          40451,
+          40480,
+          40568,
+          40509,
+          40447,
+          40569,
+          40455
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.7162
+      }
+    },
+    "float.lt": {
+      "expected": 302592,
+      "ticks": {
+        "cpp-after": [
+          54509,
+          54928,
+          53802,
+          54624,
+          54660,
+          53193,
+          53137,
+          54508,
+          53078,
+          54274,
+          54818
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 10.3966
+      }
+    },
+    "float.le": {
+      "expected": 311296,
+      "ticks": {
+        "cpp-after": [
+          53426,
+          53142,
+          53504,
+          53183,
+          53345,
+          53099,
+          54873,
+          53293,
+          54626,
+          53211,
+          53028
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 10.1648
+      }
+    },
+    "float.gt": {
+      "expected": 212992,
+      "ticks": {
+        "cpp-after": [
+          52708,
+          52757,
+          53048,
+          53091,
+          52739,
+          52966,
+          52890,
+          53064,
+          52715,
+          52839,
+          52916
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 10.088
+      }
+    },
+    "float.ge": {
+      "expected": 221696,
+      "ticks": {
+        "cpp-after": [
+          52713,
+          53005,
+          52943,
+          52739,
+          52742,
+          52988,
+          53016,
+          52645,
+          53101,
+          52926,
+          52826
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 10.0948
+      }
+    },
+    "float.neg": {
+      "expected": 4693771158510632960,
+      "ticks": {
+        "cpp-after": [
+          35242,
+          35020,
+          35212,
+          35067,
+          35022,
+          35019,
+          35000,
+          35107,
+          35048,
+          34997,
+          35039
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.6832
+      }
+    },
+    "float.to_byte": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          50564,
+          50532,
+          50665,
+          50612,
+          50529,
+          50585,
+          50558,
+          50536,
+          50519,
+          50517,
+          50783
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.6432
+      }
+    },
+    "float.to_short": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          46677,
+          46683,
+          46744,
+          46683,
+          46600,
+          46742,
+          46660,
+          46582,
+          46689,
+          46646,
+          46671
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.9029
+      }
+    },
+    "float.to_ushort": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          51521,
+          51325,
+          51359,
+          51094,
+          51082,
+          51497,
+          51137,
+          51119,
+          51095,
+          51071,
+          51092
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.7502
+      }
+    },
+    "float.to_int": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          49556,
+          49638,
+          49514,
+          51566,
+          49499,
+          49722,
+          49504,
+          62926,
+          49480,
+          49624,
+          49583
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.4572
+      }
+    },
+    "float.to_uint": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          51653,
+          51686,
+          51495,
+          51510,
+          51463,
+          51458,
+          51798,
+          51494,
+          51501,
+          51484,
+          51720
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.823
+      }
+    },
+    "float.to_long": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          49550,
+          47814,
+          47436,
+          47666,
+          47683,
+          48854,
+          47864,
+          47585,
+          47246,
+          48542,
+          47405
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.0948
+      }
+    },
+    "float.to_ulong": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          51033,
+          50925,
+          51110,
+          51306,
+          51252,
+          51431,
+          51464,
+          51421,
+          51606,
+          51299,
+          51557
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.7858
+      }
+    },
+    "float.to_float": {
+      "expected": 4715064300694142976,
+      "ticks": {
+        "cpp-after": [
+          34638,
+          34594,
+          34642,
+          34855,
+          34830,
+          34741,
+          34751,
+          34770,
+          34964,
+          34696,
+          34735
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.6263
+      }
+    },
+    "float.to_double": {
+      "expected": 4715064300694142976,
+      "ticks": {
+        "cpp-after": [
+          34544,
+          34689,
+          34554,
+          34462,
+          34577,
+          34580,
+          34506,
+          34591,
+          34593,
+          35784,
+          34587
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.5956
+      }
+    },
+    "double.add": {
+      "expected": 4698633198928658432,
+      "ticks": {
+        "cpp-after": [
+          48855,
+          49259,
+          48705,
+          48868,
+          48694,
+          48693,
+          48727,
+          48592,
+          48907,
+          48508,
+          48452
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.2897
+      }
+    },
+    "double.sub": {
+      "expected": 13926329615015477248,
+      "ticks": {
+        "cpp-after": [
+          44263,
+          44183,
+          44194,
+          44359,
+          44175,
+          44271,
+          44216,
+          44151,
+          44270,
+          44116,
+          44131
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.4293
+      }
+    },
+    "double.mul": {
+      "expected": 13918211920667607040,
+      "ticks": {
+        "cpp-after": [
+          44295,
+          44266,
+          45565,
+          45842,
+          46386,
+          44165,
+          45155,
+          44918,
+          44792,
+          45682,
+          44255
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.5674
+      }
+    },
+    "double.div": {
+      "expected": 13914376824109924352,
+      "ticks": {
+        "cpp-after": [
+          45724,
+          47071,
+          45208,
+          45103,
+          45401,
+          45542,
+          45185,
+          45068,
+          45136,
+          45271,
+          50861
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.6348
+      }
+    },
+    "double.eq": {
+      "expected": 8704,
+      "ticks": {
+        "cpp-after": [
+          44424,
+          44460,
+          44379,
+          44687,
+          44365,
+          44372,
+          44826,
+          44478,
+          44466,
+          44267,
+          44298
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.4732
+      }
+    },
+    "double.ne": {
+      "expected": 515584,
+      "ticks": {
+        "cpp-after": [
+          41233,
+          41295,
+          41302,
+          41262,
+          41391,
+          41464,
+          41287,
+          41268,
+          41241,
+          41242,
+          41282
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.8739
+      }
+    },
+    "double.lt": {
+      "expected": 302592,
+      "ticks": {
+        "cpp-after": [
+          52173,
+          52298,
+          52473,
+          52323,
+          52088,
+          51992,
+          52015,
+          52041,
+          52064,
+          52027,
+          53160
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.935
+      }
+    },
+    "double.le": {
+      "expected": 311296,
+      "ticks": {
+        "cpp-after": [
+          52845,
+          52795,
+          52773,
+          52832,
+          52764,
+          52783,
+          52750,
+          52697,
+          53061,
+          52678,
+          55657
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 10.0676
+      }
+    },
+    "double.gt": {
+      "expected": 212992,
+      "ticks": {
+        "cpp-after": [
+          52375,
+          52394,
+          52704,
+          52863,
+          52355,
+          53155,
+          52531,
+          52386,
+          52310,
+          52350,
+          52239
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.9918
+      }
+    },
+    "double.ge": {
+      "expected": 221696,
+      "ticks": {
+        "cpp-after": [
+          52156,
+          51725,
+          52479,
+          52848,
+          51785,
+          53741,
+          52351,
+          52178,
+          51395,
+          51724,
+          51752
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.948
+      }
+    },
+    "double.neg": {
+      "expected": 4693771158510632960,
+      "ticks": {
+        "cpp-after": [
+          34327,
+          34205,
+          34191,
+          34215,
+          34195,
+          34606,
+          34202,
+          34194,
+          34183,
+          34295,
+          34249
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.5241
+      }
+    },
+    "double.to_byte": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          50424,
+          50493,
+          50555,
+          50461,
+          50457,
+          51357,
+          50382,
+          50309,
+          50366,
+          50354,
+          50307
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.6176
+      }
+    },
+    "double.to_short": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          50464,
+          50544,
+          50168,
+          51430,
+          51414,
+          50626,
+          50336,
+          50521,
+          51362,
+          50719,
+          51440
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.6561
+      }
+    },
+    "double.to_ushort": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          51155,
+          50913,
+          51124,
+          50761,
+          50983,
+          50771,
+          51406,
+          50669,
+          51152,
+          50672,
+          51186
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.7242
+      }
+    },
+    "double.to_int": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          48822,
+          48515,
+          48827,
+          48428,
+          48617,
+          48729,
+          48931,
+          48526,
+          48548,
+          48542,
+          48726
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.273
+      }
+    },
+    "double.to_uint": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          50227,
+          50363,
+          50341,
+          50351,
+          50298,
+          50351,
+          50734,
+          50207,
+          50223,
+          50763,
+          50313
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.6018
+      }
+    },
+    "double.to_long": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          51243,
+          51250,
+          51264,
+          51247,
+          51219,
+          51221,
+          51521,
+          51265,
+          51243,
+          51344,
+          51268
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.7752
+      }
+    },
+    "double.to_ulong": {
+      "expected": 16134144,
+      "ticks": {
+        "cpp-after": [
+          50779,
+          50779,
+          50741,
+          50275,
+          50255,
+          50529,
+          50797,
+          50368,
+          50288,
+          50301,
+          50275
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.6069
+      }
+    },
+    "double.to_float": {
+      "expected": 4715064300694142976,
+      "ticks": {
+        "cpp-after": [
+          34897,
+          34879,
+          34901,
+          35179,
+          35332,
+          34904,
+          36572,
+          34907,
+          35209,
+          36348,
+          35305
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.7099
+      }
+    },
+    "double.to_double": {
+      "expected": 4715064300694142976,
+      "ticks": {
+        "cpp-after": [
+          34098,
+          34177,
+          34089,
+          34114,
+          34125,
+          34143,
+          34630,
+          34147,
+          34120,
+          34107,
+          34188
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.5088
+      }
+    },
+    "int.logical_and": {
+      "expected": 121344,
+      "ticks": {
+        "cpp-after": [
+          56106,
+          56128,
+          56173,
+          56256,
+          56129,
+          56698,
+          56446,
+          56228,
+          56184,
+          56178,
+          56040
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 10.7151
+      }
+    },
+    "int.logical_or": {
+      "expected": 386048,
+      "ticks": {
+        "cpp-after": [
+          56146,
+          56066,
+          56154,
+          55999,
+          56073,
+          56004,
+          56342,
+          58920,
+          56099,
+          56080,
+          56068
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 10.6964
+      }
+    },
+    "int.logical_not": {
+      "expected": 281088,
+      "ticks": {
+        "cpp-after": [
+          49919,
+          50031,
+          49858,
+          50201,
+          49883,
+          49809,
+          49992,
+          49919,
+          50085,
+          49861,
+          49855
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 9.5213
+      }
+    },
+    "int.select": {
+      "expected": 6563328,
+      "ticks": {
+        "cpp-after": [
+          39462,
+          39511,
+          39474,
+          39513,
+          39491,
+          39532,
+          39547,
+          39525,
+          39531,
+          39535,
+          39630
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.5388
+      }
+    },
+    "loop.for": {
+      "expected": 17093799936,
+      "ticks": {
+        "cpp-after": [
+          9161,
+          9148,
+          9133,
+          9158,
+          9148,
+          9158,
+          9134,
+          9133,
+          9134,
+          9133,
+          9134
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 1.7422
+      }
+    },
+    "loop.while": {
+      "expected": 17093799936,
+      "ticks": {
+        "cpp-after": [
+          9202,
+          9133,
+          9153,
+          9163,
+          9133,
+          9132,
+          9157,
+          9208,
+          9148,
+          9156,
+          9157
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 1.7464
+      }
+    },
+    "loop.prefix_inc": {
+      "expected": 17093799936,
+      "ticks": {
+        "cpp-after": [
+          16371,
+          16346,
+          16654,
+          16264,
+          16333,
+          16385,
+          16353,
+          16380,
+          16357,
+          16369,
+          16342
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 3.1199
+      }
+    },
+    "loop.postfix_inc": {
+      "expected": 17093799936,
+      "ticks": {
+        "cpp-after": [
+          14600,
+          15356,
+          14404,
+          14423,
+          14481,
+          14423,
+          14516,
+          14455,
+          14482,
+          14548,
+          14440
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 2.762
+      }
+    },
+    "loop.prefix_dec": {
+      "expected": 17093799936,
+      "ticks": {
+        "cpp-after": [
+          15190,
+          16073,
+          16615,
+          15998,
+          16075,
+          15110,
+          15106,
+          15012,
+          15061,
+          16111,
+          15061
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 2.8973
+      }
+    },
+    "loop.postfix_dec": {
+      "expected": 17093799936,
+      "ticks": {
+        "cpp-after": [
+          15257,
+          15223,
+          15787,
+          15267,
+          15236,
+          15226,
+          15179,
+          15189,
+          15213,
+          15179,
+          15119
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 2.9036
+      }
+    },
+    "loop.foreach": {
+      "expected": 17093799936,
+      "ticks": {
+        "cpp-after": [
+          35384,
+          35152,
+          35281,
+          35346,
+          35301,
+          35199,
+          35234,
+          35494,
+          35284,
+          35129,
+          35563
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.7299
+      }
+    },
+    "loop.local_copy": {
+      "expected": 17093799936,
+      "ticks": {
+        "cpp-after": [
+          15101,
+          15107,
+          16234,
+          15214,
+          15153,
+          15125,
+          15147,
+          15171,
+          15175,
+          15080,
+          15191
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 2.8902
+      }
+    },
+    "loop.pointer_read": {
+      "expected": 17093799936,
+      "ticks": {
+        "cpp-after": [
+          11053,
+          11053,
+          11960,
+          11206,
+          11215,
+          11207,
+          11168,
+          11135,
+          11158,
+          11126,
+          11052
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 2.1282
+      }
+    },
+    "access.array_write_read": {
+      "expected": 136945543307,
+      "ticks": {
+        "cpp-after": [
+          34495,
+          34023,
+          35547,
+          34264,
+          34263,
+          34281,
+          34330,
+          34398,
+          34254,
+          34229,
+          34272
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.5369
+      }
+    },
+    "access.pointer_write_read": {
+      "expected": 136945543307,
+      "ticks": {
+        "cpp-after": [
+          43253,
+          44387,
+          46730,
+          43165,
+          43511,
+          43165,
+          43974,
+          43287,
+          44516,
+          43408,
+          44109
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 8.2991
+      }
+    },
+    "copy.struct_8B": {
+      "expected": 68549969,
+      "ticks": {
+        "cpp-after": [
+          58820,
+          59090,
+          58796,
+          58973,
+          58798,
+          58814,
+          58884,
+          58901,
+          59072,
+          58951,
+          58983
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 11.2345
+      }
+    },
+    "copy.struct_48B": {
+      "expected": 411329089,
+      "ticks": {
+        "cpp-after": [
+          61785,
+          61918,
+          61767,
+          61882,
+          61655,
+          61740,
+          61716,
+          62283,
+          61783,
+          61796,
+          61719
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 11.7842
+      }
+    },
+    "bool.eq": {
+      "expected": 252928,
+      "ticks": {
+        "cpp-after": [
+          34222,
+          33796,
+          33978,
+          33836,
+          33757,
+          34922,
+          35069,
+          34135,
+          33858,
+          34035,
+          34811
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.4917
+      }
+    },
+    "bool.ne": {
+      "expected": 271360,
+      "ticks": {
+        "cpp-after": [
+          33555,
+          33891,
+          33632,
+          33688,
+          33539,
+          33459,
+          33552,
+          33602,
+          33641,
+          33483,
+          33614
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.4091
+      }
+    },
+    "char.eq": {
+      "expected": 4096,
+      "ticks": {
+        "cpp-after": [
+          32117,
+          32063,
+          32003,
+          32202,
+          31983,
+          32018,
+          32059,
+          31996,
+          31981,
+          32025,
+          31999
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.1069
+      }
+    },
+    "char.ne": {
+      "expected": 520192,
+      "ticks": {
+        "cpp-after": [
+          32699,
+          32489,
+          32503,
+          32509,
+          32464,
+          32493,
+          32515,
+          32561,
+          32578,
+          32507,
+          37837
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 6.2006
+      }
+    },
+    "double.to_ulong_full_range": {
+      "expected": 17093799936,
+      "ticks": {
+        "cpp-after": [
+          38909,
+          38900,
+          39400,
+          38885,
+          39013,
+          38894,
+          38951,
+          39523,
+          38972,
+          38851,
+          40792
+        ]
+      },
+      "median_ns_per_iteration": {
+        "cpp-after": 7.4293
+      }
+    }
+  }
+}

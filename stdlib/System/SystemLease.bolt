@@ -1,0 +1,153 @@
+import System
+namespace Bolt.Runtime;
+
+// Only unmanaged fields live in shared storage. The standalone type descriptor
+// retains this state on value copies and releases it during unwinding as well.
+enum ResourceKind { Pipe, Child, Socket }
+struct SystemState {
+public:
+    ulong References;
+    LockStorage Gate;
+    ResourceKind Kind;
+    long Descriptor, Id;
+    bool Open, Readable, Done, Datagram, IPv6;
+    int Status, Signal, ReceiveTimeout, SendTimeout;
+}
+#ifndef BoltStandaloneCore
+struct SystemOwner {
+public:
+    SystemState* state;
+    ~SystemOwner() { SystemLifetime.Release(state); }
+}
+#endif
+class SystemLease {
+#ifndef BoltStandaloneCore
+    ICaptureCell<SystemOwner>? owner;
+#endif
+public:
+    SystemState* State;
+    void Initialize(ResourceKind kind) {
+#ifndef BoltStandaloneCore
+        ICaptureCell<SystemOwner> next = ClosureStorage.Create<SystemOwner>(SystemOwner());
+#endif
+        SystemState* fresh = (SystemState*)ThreadKernel.Allocate((ulong)sizeof(SystemState));
+        if (fresh == null) throw OutOfMemoryException("Cannot allocate native handle state.");
+        if(!ThreadKernel.InitGate(&fresh->Gate)){
+            ThreadKernel.Free((byte*)fresh);
+            throw OutOfMemoryException("Cannot initialize native handle lock.");
+        }
+        fresh->References = 1ul;
+        fresh->Kind = kind;
+        fresh->ReceiveTimeout = -1;
+        fresh->SendTimeout = -1;
+#ifdef BoltStandaloneCore
+        SystemLifetime.Release(State);
+#else
+        next.Get().state = fresh;
+        owner = next;
+#endif
+        State = fresh;
+    }
+}
+static class SystemLifetime {
+public:
+    // Cleanup is also called while an exception is pending. Use only raw,
+    // allocation-free OS operations here; a child must never become a zombie.
+#ifdef Windows
+    void CloseSystemSocket(long descriptor) {
+        Bolt.Runtime.NetApi.CloseSocket(descriptor);
+        Bolt.Runtime.NetApi.WSACleanup();
+    }
+#endif
+    void Close(SystemState* state) {
+        if(state==null || !state->Open)return;
+        state->Open=false;
+        if(state->Kind==ResourceKind.Child) {
+#ifdef Windows
+            void* process=*((void**)&state->Descriptor);
+            if(!state->Done && Bolt.Runtime.StandaloneWindows.WaitFileJob(process,0u)==258u) {
+                Bolt.Runtime.ProcessApi.Kill(process,137u);
+                Bolt.Runtime.StandaloneWindows.WaitFileJob(process,uint.MaxValue);
+            }
+            Bolt.Runtime.StandaloneWindows.Close(process);
+#else
+            if(!state->Done) {
+                int status=0, pid=(int)state->Id, waited=0;
+                waited=Bolt.Runtime.ProcessApi.Wait(pid,&status,1);
+                while(waited<0 && SystemCalls.Error()==4)waited=Bolt.Runtime.ProcessApi.Wait(pid,&status,1);
+                if(waited==0) {
+                    Bolt.Runtime.ProcessApi.Kill(pid,9);
+                    waited=Bolt.Runtime.ProcessApi.Wait(pid,&status,0);
+                    while(waited<0 && SystemCalls.Error()==4)waited=Bolt.Runtime.ProcessApi.Wait(pid,&status,0);
+                }
+            }
+#endif
+        } else {
+#ifdef Windows
+            if(state->Kind==ResourceKind.Socket)CloseSystemSocket(state->Descriptor);
+            else Bolt.Runtime.StandaloneWindows.Close(*((void**)&state->Descriptor));
+#else
+            Bolt.Runtime.ProcessApi.Close((int)state->Descriptor);
+#endif
+        }
+    }
+    void Release(SystemState* state) {
+        if(state==null)return;
+        if(AtomicOps.Add(state->References,ulong.MaxValue)!=1ul)return;
+        Close(state);
+#ifndef Windows
+        Bolt.Runtime.Threading.MutexDestroy(&state->Gate);
+#endif
+        ThreadKernel.Free((byte*)state);
+    }
+}
+static class SystemCalls {
+public:
+#ifdef Windows
+    string FromWide(ushort* wide,int units) {
+        if(units==0)return "";
+        int n=Bolt.Runtime.Windows.WideCharToMultiByte(65001u,128u,wide,units,null,0,null,null);
+        if(n<=0)throw FormatException("Invalid UTF-16 text.");
+        byte[] bytes=new byte[n];
+        if(Bolt.Runtime.Windows.WideCharToMultiByte(65001u,128u,wide,units,&bytes[0],n,null,null)!=n)
+            throw FormatException("Cannot convert UTF-16 text.");
+        return NativeString.FromUtf8(&bytes[0],(ulong)(units==-1 ? n-1 : n));
+    }
+#endif
+    ulong CLength(byte* p) { ulong n=0ul; if(p==null)return n; while(p[n]!=0)n++; return n; }
+    void Bytes(byte* dest,byte* source,ulong count) {
+        for(ulong i=0ul;i<count;i++)dest[i]=source[i];
+    }
+    void Lock(SystemState* s) {
+        Bolt.Runtime.Threading.MutexLock(&s->Gate);
+    }
+    void Unlock(SystemState* s) { Bolt.Runtime.Threading.MutexUnlock(&s->Gate); }
+    long Now() { return Clock.MonotonicTicks() / 10000l; }
+    long Deadline(int timeout) {
+        if (timeout < -1) throw ArgumentOutOfRangeException("Invalid timeout.");
+        return timeout < 0 ? -1l : Now() + timeout;
+    }
+    int Remaining(long deadline) {
+        if (deadline < 0l) return -1;
+        long left = deadline - Now();
+        return left <= 0l ? 0 : (int)left;
+    }
+    int Error() {
+#ifdef Windows
+        return (int)Bolt.Runtime.Windows.GetLastError();
+#elif Android || IOS || Web
+        return *Bolt.Runtime.Threading.Errno();
+#elif Linux
+        return *Bolt.Runtime.Linux.ErrnoLocation();
+#else
+        return *Bolt.Runtime.MacOS.ErrnoLocation();
+#endif
+    }
+    void CheckText(const string& text) {
+        if (text.Contains('\0')) throw ArgumentException("Native text contains an embedded NUL.");
+    }
+    void CheckRange(int length, int offset, int count) {
+        if (offset < 0 || offset > length || count < 0 || count > length-offset)
+            throw ArgumentOutOfRangeException("Invalid buffer range.");
+    }
+}

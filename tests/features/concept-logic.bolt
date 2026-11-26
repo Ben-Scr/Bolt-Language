@@ -1,0 +1,5 @@
+
+concept NotInteger<T> = Equatable<T> && !Integer<T>; T Echo<T>(T x):NotInteger{return x;}
+static class Program { public: void Main() {
+Console.WriteLine(Echo<string>("ok"));
+} }

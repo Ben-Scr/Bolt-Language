@@ -1,0 +1,15 @@
+import System.Collections.Generic
+static class Program {
+public:
+    void Main() {
+        List<int> items;
+        items.Reserve(256);
+        int sum = 0;
+        for (int pass = 0; pass < 8192; pass++) {
+            items.Clear();
+            for (int i = 0; i < 256; i++) items.Add((i ^ pass) & 255);
+            for (int i = 0; i < items.Count; i++) sum += items[i];
+        }
+        Print(sum);
+    }
+}

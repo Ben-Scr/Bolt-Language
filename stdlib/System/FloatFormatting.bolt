@@ -1,0 +1,110 @@
+import System
+namespace Bolt.Runtime;
+
+public static class FloatFormatting {
+private:
+    // The exact binary64 expansion has at most 767 decimal digits (86 limbs).
+    void Multiply(uint[]& limbs, int& used, ulong factor) {
+        ulong carry = 0ul;
+        for (int i = 0; i < used; i++) {
+            ulong n = (ulong)limbs[i] * factor + carry;
+            limbs[i] = (uint)(n % 1000000000ul);
+            carry = n / 1000000000ul;
+        }
+        while (carry != 0ul) {
+            limbs[used++] = (uint)(carry % 1000000000ul);
+            carry /= 1000000000ul;
+        }
+    }
+
+    // For a negative binary power, m * 2^-n = (m * 5^n) * 10^-n.
+    // Chunking these products keeps the intermediate exact in ulong.
+    string RoundedDigits(ulong m, int power, int precision, int& decimalExponent) {
+        while (power < 0 && (m & 1ul) == 0ul) { m >>= 1; power++; }
+        uint[] limbs = new uint[86];
+        int used = 0;
+        while (m != 0ul) { limbs[used++] = (uint)(m % 1000000000ul); m /= 1000000000ul; }
+        int scale = power < 0 ? -power : 0;
+        while (power <= -13) { Multiply(limbs, used, 1220703125ul); power += 13; }
+        while (power >= 30) { Multiply(limbs, used, 1073741824ul); power -= 30; }
+        ulong factor = 1ul;
+        while (power < 0) { factor *= 5ul; power++; }
+        if (factor != 1ul || power > 0) Multiply(limbs, used, factor << power);
+
+        int limb = used - 1;
+        int length = 9 * limb + 1;
+        uint place = 1u;
+        while (limbs[limb] / place >= 10u) { place *= 10u; length++; }
+        decimalExponent = length - scale - 1;
+        int keep = precision < length ? precision : length;
+        byte[] digits = new byte[keep];
+        for (int i = 0; i < keep; i++) {
+            digits[i] = (byte)(48u + limbs[limb] / place % 10u);
+            if (place == 1u) { limb--; place = 100000000u; }
+            else place /= 10u;
+        }
+        if (limb >= 0) {
+            uint next = limbs[limb] / place % 10u;
+            bool up = next > 5u;
+            if (next == 5u) {
+                up = (digits[keep-1] & 1) != 0 || limbs[limb] % place != 0u;
+                while (!up && limb > 0) { limb--; up = limbs[limb] != 0u; }
+            }
+            for (int i = keep-1; up && i >= 0; i--) {
+                if (digits[i] == 57) digits[i] = 48;
+                else { digits[i]++; up = false; }
+            }
+            if (up) { digits[0] = 49; decimalExponent++; }
+        }
+        while (keep > 1 && digits[keep-1] == 48) keep--;
+        return string.FromUtf8(digits).Substring(0, keep);
+    }
+
+    string Exponent(int exponent) {
+        int n = exponent < 0 ? -exponent : exponent;
+        int length = n >= 100 ? 5 : 4;
+        byte[] suffix = new byte[length];
+        suffix[0] = 101; suffix[1] = exponent < 0 ? (byte)45 : (byte)43;
+        for (int i = length-1; i >= 2; i--) { suffix[i] = (byte)(48 + n % 10); n /= 10; }
+        return string.FromUtf8(suffix);
+    }
+
+    string FromBits(ulong bits, int fractionBits, int exponentBits, int precision) {
+        ulong hidden = 1ul << fractionBits;
+        ulong fraction = bits & (hidden - 1ul);
+        int maxExponent = (1 << exponentBits) - 1;
+        int exponent = (int)((bits >> fractionBits) & (ulong)maxExponent);
+        bool negative = (bits >> (fractionBits + exponentBits)) != 0ul;
+        string sign = negative ? "-" : "";
+        if (exponent == maxExponent) {
+            if (fraction == 0ul) return sign + "inf";
+#ifdef Windows
+            // Windows prints the indefinite quiet NaN specially. Its float
+            // insertion widens to double, quieting any signaling float NaN.
+            if (negative && fraction == (hidden >> 1)) return "-nan(ind)";
+            if (fractionBits == 52 && fraction < (hidden >> 1)) return sign + "nan(snan)";
+#endif
+            return sign + "nan";
+        }
+        if (exponent == 0 && fraction == 0ul) return sign + "0";
+        if (precision < 1) throw ArgumentOutOfRangeException("Precision must be positive.");
+        ulong mantissa = exponent == 0 ? fraction : hidden + fraction;
+        int power = (exponent == 0 ? 1 : exponent) - maxExponent / 2 - fractionBits;
+        int order = 0;
+        string digits = RoundedDigits(mantissa, power, precision, order);
+        if (order < -4 || order >= precision) {
+            string result = digits.Substring(0,1);
+            if (digits.Length > 1) result += "." + digits.Substring(1);
+            return sign + result + Exponent(order);
+        }
+        if (order < 0) return sign + "0." + "000".Substring(0,-order-1) + digits;
+        int point = order + 1;
+        if (point < digits.Length) return sign + digits.Substring(0,point) + "." + digits.Substring(point);
+        return sign + digits.PadRight(point, '0');
+    }
+
+public:
+    string Single(float value) { return FromBits((ulong)Reinterpret<uint>(value), 23, 8, 6); }
+    string Double(double value) { return Format(value, 15); }
+    string Format(double value, int precision) { return FromBits(Reinterpret<ulong>(value), 52, 11, precision); }
+}

@@ -1,0 +1,48 @@
+import System.Collections.Generic
+
+class Report
+{
+public:
+    string Title;
+    List<string> Rows;
+    Report(string title) { Title = title; }
+}
+
+static class Program
+{
+public:
+    Report BuildReport()
+    {
+        Arena temporary = Arena.Fixed(1024 * 1024);
+        Report* report = new(temporary) Report("Example report");
+        for (int i = 0; i < 5; ++i)
+            report->Rows.Add($"Row {i}");
+
+        Report saved = *report;
+        return saved;
+        // temporary is disposed; saved's title and rows remain owned copies.
+    }
+
+    int* Square(Arena& destination, int value)
+    {
+        return new(destination) int(value * value);
+    }
+
+    void Main()
+    {
+        Report result = BuildReport();
+        Print($"{result.Title}: {result.Rows.Count} rows");
+        Print(result.Rows[4]);
+
+        Arena work = Arena.Growable(1024, 65536);
+        for (int i = 1; i <= 3; ++i)
+        {
+            int* square = Square(work, i);
+            Print(*square);
+            work.Reset();
+        }
+        Print($"Backing retained for reuse: {work.CapacityBytes} bytes");
+        Print($"Occupied after reset: {work.UsedBytes} bytes");
+        work.Dispose();
+    }
+}

@@ -1,0 +1,114 @@
+import Type
+namespace Bolt.Runtime;
+
+public static class NumericParsing
+{
+private:
+    bool White(byte c) { return c == 32 || (c >= 9 && c <= 13); }
+
+    bool FloatingBits(const string& text, bool single, ulong& bits, int& error)
+    {
+        byte[] bytes = text.ToUtf8();
+        int begin = 0, end = 0;
+        Bounds(bytes, begin, end);
+        bool plus = begin < end && bytes[begin] == 43;
+        if (plus) begin++;
+        bool negative = begin < end && bytes[begin] == 45;
+        if (negative) begin++;
+        error = DecimalParsing.ParseMagnitude(bytes, begin, end, single, bits);
+        if (error != 0) return false;
+        // Converter historically checks the range of the signed suffix of "+-"
+        // before reporting the extra sign. Such input always fails.
+        if (plus && negative) { error = 1; return false; }
+        if (negative) bits |= single ? 2147483648ul : 9223372036854775808ul;
+        return true;
+    }
+
+public:
+    bool TryValue(const string& text, bool& value, int& error)
+    {
+        byte[] bytes = text.ToUtf8(); int begin = 0, end = 0; NumericParsing.Bounds(bytes, begin, end); error = 1;
+        if (end - begin == 4 && (bytes[begin] | 32) == 116 && (bytes[begin+1] | 32) == 114 && (bytes[begin+2] | 32) == 117 && (bytes[begin+3] | 32) == 101)
+        { value = true; error = 0; return true; }
+        if (end - begin == 5 && (bytes[begin] | 32) == 102 && (bytes[begin+1] | 32) == 97 && (bytes[begin+2] | 32) == 108 && (bytes[begin+3] | 32) == 115 && (bytes[begin+4] | 32) == 101)
+        { value = false; error = 0; return true; }
+        return false;
+    }
+    bool TryValue(const string& text, char& value, int& error)
+    { error = 1; if (text.Length != 1) return false; value = text[0]; error = 0; return true; }
+    bool TryValue(const string& text, string& value, int& error) { value = text; error = 0; return true; }
+    bool TryValue<T>(const string& text, T& value, int& error) : Number<T>
+    { return NumericParsing.TryNumber(text, value, error); }
+
+    bool TryNumber(const string& text, float& result, int& error)
+    {
+        ulong bits = 0ul;
+        if (!FloatingBits(text, true, bits, error)) return false;
+        result = Reinterpret<float>((uint)bits);
+        return true;
+    }
+
+    bool TryNumber(const string& text, double& result, int& error)
+    {
+        ulong bits = 0ul;
+        if (!FloatingBits(text, false, bits, error)) return false;
+        result = Reinterpret<double>(bits);
+        return true;
+    }
+
+    bool TryNumber<T>(const string& text, T& result, int& error) : Integer<T>
+    {
+        return TryInteger<T>(text, result, error);
+    }
+
+    void Bounds(const byte[]& bytes, int& begin, int& end)
+    {
+        begin = 0;
+        end = bytes.Length;
+        while (begin < end && White(bytes[begin])) begin++;
+        while (end > begin && White(bytes[end - 1])) end--;
+    }
+
+    bool TryInteger<T>(const string& text, T& result, int& error) : Integer<T>
+    {
+        byte[] bytes = text.ToUtf8();
+        int begin = 0, end = 0;
+        Bounds(bytes, begin, end);
+        error = 1;
+        if (begin == end) return false;
+        bool negative = bytes[begin] == 45;
+        if (negative || bytes[begin] == 43) begin++;
+        if (begin == end) return false;
+
+        ulong limit = (ulong)T.MaxValue;
+        bool overflow = negative && Type.IsUnsigned<T>();
+        if (negative && !overflow) limit++;
+        ulong cutoff = limit / 10ul, lastDigit = limit % 10ul, number = 0ul;
+        for (int i = begin; i < end; i++)
+        {
+            if (bytes[i] < 48 || bytes[i] > 57) return false;
+            ulong digit = (ulong)(bytes[i] - 48);
+            if (number > cutoff || (number == cutoff && digit > lastDigit)) overflow = true;
+            if (!overflow) number = number * 10ul + digit;
+        }
+        if (overflow) { error = 2; return false; }
+        if (negative && number != 0ul) result = (T)(-(long)(number - 1ul) - 1l);
+        else result = (T)number;
+        error = 0;
+        return true;
+    }
+
+    // A value parameter snapshots the input before evaluating the output reference.
+    bool TryParse<T>(string text, T& value) : Number<T>
+    {
+        int error = 0;
+        return TryNumber(text, value, error);
+    }
+    T Parse<T>(string text) : Number<T>
+    {
+        T result = default;
+        int error = 0;
+        if (!TryNumber(text, result, error)) throw System.SystemException("invalid or out-of-range numeric text");
+        return result;
+    }
+}

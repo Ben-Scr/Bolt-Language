@@ -1,0 +1,118 @@
+import System.Collections.Generic
+
+public interface IText {
+    string ToString();
+    explicit string() { return ToString(); }
+    int Twice() { return 2; }
+}
+public interface IExtended : IText { int Twice() { return 8; } }
+public interface INumber { implicit int(); }
+public interface IDefaultNumber { int Get(); implicit int(){ return Get(); } }
+public class Number : IText, INumber {
+public:
+    int Value;
+    Number(int value){Value=value;}
+    implicit int(){ return Value; }
+    explicit double(){return (double)Value + 0.5;}
+    string ToString(){return "n="+Value;}
+}
+public struct Ratio {
+public:
+    float Value;
+    Ratio(float value){Value=value;}
+    float(){return Value;}
+}
+public class DefaultNumber : IDefaultNumber, IExtended {
+public:
+    int Get(){return 12;}
+    string ToString(){return "default";}
+}
+public class Generic<T> {
+public:
+    T Value;
+    Generic(T value){Value=value;}
+    implicit T(){return Value;}
+}
+public class Hub {
+public:
+    event Action<int> Changed;
+    event Action Done;
+    event Action<int,string> Message;
+    static event Action<int> Global;
+    void Raise(int n){Changed.Invoke(n);}
+    void Finish(){Done();}
+    void Send(int n,string text){Message.Invoke(n,text);}
+    static void GlobalRaise(int n){Global(n);}
+}
+public class GenericHub<T> {
+public:
+    event Action<T> Changed;
+    void Raise(T value){Changed(value);}
+}
+public class Listener {
+public:
+    int Total=0;
+    string Text="";
+    Hub* HubPointer = null;
+    void Handle(int value){Total+=value;}
+    void Handle(string text){Text=text;}
+    void VoidHandle(){Total++;}
+    void Two(int number,string text){Total+=number;Text=text;}
+    void GenericHandle<T>(T value){Text=(string)value;}
+    void Modify(int value){Total+=value;HubPointer->Changed -= Modify;HubPointer->Changed += VoidInt;}
+    void VoidInt(int value){Total+=100+value;}
+}
+public static class Program {
+private:
+    int checks=0;
+    int staticTotal=0;
+    int evaluates=0;
+    void Static(int value){staticTotal+=value;}
+    Number Once(){evaluates++;return Number(23);}
+    int Accept(int value){return value;}
+    int Return(Number value){return value;}
+    int Overload(int value){return 1;}
+    int Overload(Number value){return 2;}
+    void Check(bool condition,string what){checks++;if(!condition)Print("FAIL:"+what);}
+    void Apply(Action<int> callback,int value){callback.Invoke(value);}
+public:
+    void Main(){
+        Number n=Number(7);
+        int x=n;Check(x==7,"implicit assignment");
+        Check(Accept(n)==7,"implicit argument");Check(Return(n)==7,"implicit return");
+        Check((double)n==7.5,"explicit cast target");Check((string)n=="n=7","default conversion body");
+        Check(Overload(n)==2,"exact overload beats conversion");
+        int once=Once();Check(once==23 && evaluates==1,"single evaluation");
+        double wide=n;Check(wide==7.0,"implicit user plus standard conversion");
+        Check(n.Twice()==2,"default interface method");
+        IText& text=n;Check((string)text=="n=7","conversion through interface reference");
+        INumber& asNumber=n;int y=asNumber;Check(y==7,"implicit interface contract");
+        DefaultNumber defaultNumber;int z=defaultNumber;Check(z==12,"implicit interface default");
+        Check(defaultNumber.Twice()==8,"most specific default wins");
+        Check((string)defaultNumber=="default","inherited conversion default");
+        Ratio ratio=Ratio(1.25f);Check((float)ratio==1.25f,"no keyword means explicit");
+        Generic<int> generic=Generic<int>(10);int g=generic;Check(g==10,"generic target substitution");
+        Hub hub;Listener listener;
+        hub.Raise(9);hub.Finish();Check(listener.Total==0,"empty events");
+        hub.Changed += listener.Handle;hub.Changed += listener.Handle;hub.Changed -= listener.Handle;
+        hub.Raise(3);Check(listener.Total==3,"last duplicate unsubscribe");
+        hub.Changed -= Static;hub.Raise(1);Check(listener.Total==4,"unmatched unsubscribe no-op");
+        hub.Changed -= listener.Handle;hub.Raise(8);Check(listener.Total==4,"removed handler");
+        hub.Done += listener.VoidHandle;hub.Finish();Check(listener.Total==5,"zero argument event");
+        hub.Message += listener.Two;hub.Send(4,"bolt");Check(listener.Total==9 && listener.Text=="bolt","multi argument event");
+        Hub.Global += Static;Hub.GlobalRaise(7);Check(staticTotal==7,"static event private static handler");Hub.Global -= Static;
+        Listener second;hub.Changed+=listener.Handle;hub.Changed+=second.Handle;hub.Changed-=listener.Handle;
+        hub.Raise(2);Check(listener.Total==9 && second.Total==2,"receiver identity");
+        hub.Changed-=second.Handle;
+        Hub copied=hub;copied.Changed+=second.Handle;copied.Raise(5);hub.Raise(2);Check(second.Total==7,"event value copy");
+        listener.HubPointer=&hub;hub.Changed+=listener.Modify;hub.Raise(1);Check(listener.Total==10,"snapshot remove/add first raise");
+        hub.Raise(2);Check(listener.Total==112,"snapshot next raise");hub.Changed-=listener.VoidInt;
+        Action<int> callback=second.Handle;Apply(callback,3);Check(second.Total==10,"delegate argument Invoke");
+        callback(4);Check(second.Total==14,"delegate direct call");
+        Action<int> callback2=second.GenericHandle<int>;callback2(42);Check(second.Text=="42","generic method group");
+        GenericHub<int> genericHub;genericHub.Changed+=second.Handle;genericHub.Raise(5);Check(second.Total==19,"generic event field");
+        Action<int> staticCallback=Static;Apply(staticCallback,8);Check(staticTotal==15,"standalone private static callback");
+        Check((string)(IStringable)42=="42","primitive default conversion");
+        Print("CHECKS="+checks);
+    }
+}

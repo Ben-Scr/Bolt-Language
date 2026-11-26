@@ -1,0 +1,45 @@
+import System
+
+static class Program {
+public:
+    int Reset(ulong& sum) { sum = 18446744073709551615ul; return 1; }
+
+    int Main() {
+        ulong safe = 7ul;
+        for (int i = 0; i < 10; i++) {
+            safe += (ulong)(uint)i;
+            safe += (ulong)(byte)2;
+        }
+        if (safe != 72ul) return 1;
+
+        bool failed = false;
+        ulong last = 0ul;
+        try {
+            ulong high = 18446744073709551613ul;
+            for (int i = 0; i < 8; i++) {
+                last = high;
+                high += (ulong)(uint)1;
+            }
+        } catch (Exception e) { failed = true; }
+        if (!failed || last != 18446744073709551615ul) return 2;
+
+        failed = false;
+        try {
+            ulong counter = 0ul;
+            for (int i = 0; i < 4; i++) counter += (ulong)(uint)(i - 1);
+        } catch (Exception e) { failed = true; }
+        if (!failed) return 3;
+
+        failed = false;
+        int updated = 0;
+        try {
+            ulong escaped = 0ul;
+            for (int i = 0; i < 1; i++) {
+                updated = Reset(escaped);
+                escaped += (ulong)(uint)updated;
+            }
+        } catch (Exception e) { failed = true; }
+        if (!failed || updated != 1) return 4;
+        return 0;
+    }
+}

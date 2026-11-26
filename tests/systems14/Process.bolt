@@ -1,0 +1,28 @@
+import System
+import System.IO
+import System.Diagnostics
+static class Program { public:
+ static int checks=0;
+ void Check(bool value){Assert.That(value);checks++;}
+ void Main(string[] args){
+  string child=args[0];
+  string traceNewline=Environment.OS=="Windows"?"\r\n":"\n";
+  Environment.SetVariable("BOLT_SYSTEMS_TEST","parent");Check(Environment.HasVariable("BOLT_SYSTEMS_TEST"));Check(Environment.GetVariable("BOLT_SYSTEMS_TEST")=="parent");
+  Process process=Process.Start(child,["echo","spaces ä😀 ; $notAShell"],"",true,["BOLT_SYSTEMS_TEST=child"],true);
+  Check(process.Id>0l);ProcessOutput output=process.Capture(10000,1000000);Check(!output.TimedOut&&output.ExitCode==7);
+  // Print uses the child's stdout mode. Windows text-mode CRT output uses
+  // CRLF, while a standalone child writes LF directly to its pipe.
+  string newline=Environment.OS=="Windows" && output.StandardOutput.EndsWith("\r\n")?"\r\n":"\n";
+  Check(output.StandardOutput=="spaces ä😀 ; $notAShell"+newline+"child"+newline);Check(output.StandardError=="child-error"+traceNewline);Check(process.Wait(0));Check(!process.IsRunning);Check(process.ExitCode==7);
+  Check(Environment.GetVariable("BOLT_SYSTEMS_TEST")=="parent");Environment.RemoveVariable("BOLT_SYSTEMS_TEST");Check(!Environment.HasVariable("BOLT_SYSTEMS_TEST"));
+  Process flood=Process.Start(child,["flood"],"",true);ProcessOutput large=flood.Capture(10000,500000);Check(large.OutputBytes.Length==180000&&large.ErrorBytes.Length==180000+traceNewline.ByteLength&&large.ExitCode==0);
+  Process input=Process.Start(child,["input"],"",true);input.StandardInput.WriteText("input Ä\n");input.StandardInput.Close();ProcessOutput echoed=input.Capture(10000);Check(echoed.StandardOutput=="input Ä"+newline);
+  Process timed=Process.Start(child,["wait"],"",true);Check(!timed.Wait(0));ProcessOutput timeout=timed.Capture(20);Check(timeout.TimedOut&&!timed.IsRunning);
+  Process killed=Process.Start(child,["wait"]);killed.Kill();Check(killed.Wait(5000)&&!killed.IsRunning);
+  bool failed=false;try{Process missing=Process.Start("bolt-missing-file-14",new string[0]);}catch(Exception& e){failed=true;}Check(failed);
+  failed=false;try{Process bad=Process.Start(child,["echo","x"],"bolt-missing-directory-14");}catch(Exception& e){failed=true;}Check(failed);
+  failed=false;Process bounded=Process.Start(child,["flood"],"",true);try{bounded.Capture(10000,100);}catch(Exception& e){failed=true;}Check(failed&&!bounded.IsRunning);
+  Check(Environment.ProcessorCount>0);Check(Environment.CurrentDirectory.Length>0);Check(Environment.TemporaryDirectory.Length>0);Check(Environment.OS.Length>0);
+  Print("PROCESS14:"+checks);
+ }
+}

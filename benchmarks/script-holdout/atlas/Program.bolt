@@ -1,0 +1,31 @@
+import System.IO
+
+public static class Program {
+public:
+    void Main() {
+        byte[] data = File.ReadAllBytes("input.bin");
+        int length = data.Length;
+        int pixels = data[0] + data[1] * 256 + data[2] * 65536;
+        byte[] rgba = new byte[pixels * 4];
+        int pos = 3 + 256 * 3;
+        int outPos = 0;
+        int transparent = 7;
+        while (pos < length) {
+            int packet = data[pos++];
+            int count = (packet & 127) + 1;
+            int repeated = 0;
+            if (packet >= 128) repeated = data[pos++];
+            for (int i = 0; i < count; i++) {
+                int color = repeated;
+                if (packet < 128) color = data[pos++];
+                int palette = 3 + color * 3;
+                rgba[outPos++] = data[palette];
+                rgba[outPos++] = data[palette + 1];
+                rgba[outPos++] = data[palette + 2];
+                if (color == transparent) rgba[outPos++] = (byte)0;
+                else rgba[outPos++] = (byte)255;
+            }
+        }
+        File.WriteAllBytes("result.bin", rgba);
+    }
+}

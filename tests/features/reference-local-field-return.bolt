@@ -1,0 +1,2 @@
+class Cell{public:int X;} int& Bad(){Cell c;return c.X;}
+static class Program{public:void Main(){}}

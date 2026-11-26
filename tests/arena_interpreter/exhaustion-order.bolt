@@ -1,0 +1,9 @@
+class Item { public: Item(int value) { Print("constructor"); } }
+static class Program {
+public:
+    int Argument() { Print("argument"); return 7; }
+    void Main() {
+        Arena arena = Arena.Fixed(1);
+        Item* pointer = new(arena) Item(Argument());
+    }
+}

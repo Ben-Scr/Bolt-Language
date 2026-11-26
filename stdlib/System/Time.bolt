@@ -1,0 +1,244 @@
+import Math
+import Bolt.Runtime
+namespace System;
+
+[SerializeValue("ToJsonValue", "FromJsonValue")]
+public sealed class TimeSpan : IStringable
+{
+private:
+    long ticks = 0l;
+    static TimeSpan Scaled(double value, double scale)
+    {
+        if (!(value >= -double.MaxValue && value <= double.MaxValue)) Bolt.Runtime.Failure.Argument("Duration must be finite.");
+        // Double input rounds away from zero at the nearest 100 ns tick.
+        double result = value * scale;
+        if (!(result >= -9223372036854775808.0 && result < 9223372036854775808.0)) Bolt.Runtime.Failure.Overflow("Duration is outside the supported range.");
+        long whole = (long)result;
+        double fraction = result - (double)whole;
+        return TimeSpan(whole + (fraction >= 0.5 ? 1l : (fraction <= -0.5 ? -1l : 0l)));
+    }
+public:
+    TimeSpan() {}
+    TimeSpan(long value) : ticks(value) {}
+    TimeSpan(int hours, int minutes, int seconds)
+        : ticks(((long)hours * 3600l + (long)minutes * 60l + (long)seconds) * 10000000l) {}
+    TimeSpan(int days, int hours, int minutes, int seconds, int milliseconds = 0)
+        : ticks(((long)days * 86400l + (long)hours * 3600l + (long)minutes * 60l + (long)seconds) * 10000000l + (long)milliseconds * 10000l) {}
+    long Ticks => ticks;
+    int Days => (int)(ticks / 864000000000l);
+    int Hours => (int)((ticks / 36000000000l) % 24l);
+    int Minutes => (int)((ticks / 600000000l) % 60l);
+    int Seconds => (int)((ticks / 10000000l) % 60l);
+    int Milliseconds => (int)((ticks / 10000l) % 1000l);
+    double TotalDays => (double)ticks / 864000000000.0;
+    double TotalHours => (double)ticks / 36000000000.0;
+    double TotalMinutes => (double)ticks / 600000000.0;
+    double TotalSeconds => (double)ticks / 10000000.0;
+    double TotalMilliseconds => (double)ticks / 10000.0;
+    double TotalMicroseconds => (double)ticks / 10.0;
+    static TimeSpan Zero => TimeSpan();
+    static TimeSpan FromTicks(long value) { return TimeSpan(value); }
+    static TimeSpan FromDays(double value) { return Scaled(value, 864000000000.0); }
+    static TimeSpan FromHours(double value) { return Scaled(value, 36000000000.0); }
+    static TimeSpan FromMinutes(double value) { return Scaled(value, 600000000.0); }
+    static TimeSpan FromSeconds(double value) { return Scaled(value, 10000000.0); }
+    static TimeSpan FromMilliseconds(double value) { return Scaled(value, 10000.0); }
+    static TimeSpan FromMicroseconds(double value) { return Scaled(value, 10.0); }
+    [ReadOnly] TimeSpan Add(TimeSpan other) { return TimeSpan(ticks + other.ticks); }
+    [ReadOnly] TimeSpan Subtract(TimeSpan other) { return TimeSpan(ticks - other.ticks); }
+    [ReadOnly] TimeSpan Negate() { return TimeSpan(-ticks); }
+    [ReadOnly] TimeSpan Duration() { return ticks < 0l ? Negate() : this; }
+    static TimeSpan operator +(TimeSpan a, TimeSpan b) { return a.Add(b); }
+    static TimeSpan operator -(TimeSpan a, TimeSpan b) { return a.Subtract(b); }
+    static TimeSpan operator -(TimeSpan a) { return a.Negate(); }
+    static bool operator ==(const TimeSpan& a, const TimeSpan& b) { return a.ticks == b.ticks; }
+    static bool operator <(TimeSpan a, TimeSpan b) { return a.ticks < b.ticks; }
+    static bool operator >(TimeSpan a, TimeSpan b) { return a.ticks > b.ticks; }
+    static bool operator <=(TimeSpan a, TimeSpan b) { return a.ticks <= b.ticks; }
+    static bool operator >=(TimeSpan a, TimeSpan b) { return a.ticks >= b.ticks; }
+    [ReadOnly] ulong GetHashCode() { return Reinterpret<ulong>(ticks); }
+    [ReadOnly] string ToString()
+    {
+        ulong magnitude = ticks < 0l ? Bolt.Runtime.Bits.Add64(~Reinterpret<ulong>(ticks), 1ul) : (ulong)ticks;
+        ulong days = magnitude / 864000000000ul;
+        string prefix = ticks < 0l ? "-" : "";
+        if (days != 0ul) prefix += (string)days + ".";
+        return prefix + ((string)((magnitude / 36000000000ul) % 24ul)).PadLeft(2, '0') + ":" +
+            ((string)((magnitude / 600000000ul) % 60ul)).PadLeft(2, '0') + ":" +
+            ((string)((magnitude / 10000000ul) % 60ul)).PadLeft(2, '0') + "." +
+            ((string)(magnitude % 10000000ul)).PadLeft(7, '0');
+    }
+    [ReadOnly] long ToJsonValue() { return ticks; }
+    static TimeSpan FromJsonValue(long value) { return TimeSpan(value); }
+}
+
+public struct CalendarParts
+{
+public:
+    int Year, Month, Day;
+    CalendarParts(int year, int month, int day) : Year(year), Month(month), Day(day) {}
+}
+public static class CalendarMath
+{
+public:
+    long FloorDiv(long value, long divisor) { long result = value / divisor; return value % divisor < 0l ? result - 1l : result; }
+    bool Leap(int year) { return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0); }
+    int DaysInMonth(int year, int month)
+    {
+        if (month < 1 || month > 12) Bolt.Runtime.Failure.Range("Month must be 1 through 12.");
+        if (month == 2) return Leap(year) ? 29 : 28;
+        return month == 4 || month == 6 || month == 9 || month == 11 ? 30 : 31;
+    }
+    long BeforeYear(int year) { long y = (long)year - 1l; return y * 365l + y / 4l - y / 100l + y / 400l; }
+    long DayNumber(int year, int month, int day)
+    {
+        if (year < 1 || year > 9999 || day < 1 || day > DaysInMonth(year, month)) Bolt.Runtime.Failure.Range("Invalid Gregorian date.");
+        int offset = (367 * month - 362) / 12;
+        if (month > 2) offset += Leap(year) ? -1 : -2;
+        return BeforeYear(year) + (long)offset + (long)day - 1l - 719162l;
+    }
+    CalendarParts Parts(long ticks)
+    {
+        long total = FloorDiv(ticks, 864000000000l) + 719162l;
+        if (total < 0l || total > 3652058l) Bolt.Runtime.Failure.Range("Date is outside years 1 through 9999.");
+        int y400 = (int)(total / 146097l); total %= 146097l;
+        int y100 = (int)(total / 36524l); if (y100 == 4) y100 = 3; total -= (long)y100 * 36524l;
+        int y4 = (int)(total / 1461l); total %= 1461l;
+        int y1 = (int)(total / 365l); if (y1 == 4) y1 = 3; total -= (long)y1 * 365l;
+        int year = y400 * 400 + y100 * 100 + y4 * 4 + y1 + 1, month = 1;
+        while (total >= (long)DaysInMonth(year, month)) { total -= (long)DaysInMonth(year, month); month++; }
+        return CalendarParts(year, month, (int)total + 1);
+    }
+    long Ticks(int year, int month, int day, int hour, int minute, int second, int ms)
+    {
+        if (hour < 0 || hour > 23 || minute < 0 || minute > 59 || second < 0 || second > 59 || ms < 0 || ms > 999)
+            Bolt.Runtime.Failure.Range("Invalid clock time.");
+        return DayNumber(year, month, day) * 864000000000l + ((long)hour * 3600l + (long)minute * 60l + (long)second) * 10000000l + (long)ms * 10000l;
+    }
+    int Digits(const string& text, int start, int count)
+    {
+        if (start < 0 || count < 0 || start > text.Length || count > text.Length - start) Bolt.Runtime.Failure.Format("Incomplete ISO date.");
+        int result = 0;
+        for (int i = 0; i < count; i++) { int digit = (int)text[start + i] - (int)'0'; if (digit < 0 || digit > 9) Bolt.Runtime.Failure.Format("Expected ISO date digits."); result = result * 10 + digit; }
+        return result;
+    }
+    string Pad(long value, int width) { return ((string)value).PadLeft(width, '0'); }
+}
+
+[SerializeValue("ToJsonValue", "FromJsonValue")]
+public sealed class DateTime : IStringable
+{
+private:
+    long ticks = 0l;
+    bool local = false;
+    static long Checked(long value)
+    { if (value < -621355968000000000l || value > 2534023007999999999l) Bolt.Runtime.Failure.Range("DateTime supports years 1 through 9999."); return value; }
+    DateTime(long value, bool localView) : ticks(Checked(value)), local(localView) {}
+#ifdef Windows
+    static long PlatformUtcNowTicks() { return Bolt.Runtime.WindowsDateTime.UtcNowTicks(); }
+    static long PlatformOffsetSeconds(long value) { return Bolt.Runtime.WindowsDateTime.OffsetSeconds(value); }
+    static long PlatformLocalMidnightTicks(long value) { return Bolt.Runtime.WindowsDateTime.LocalMidnightTicks(value); }
+#endif
+#ifdef Linux
+    static long PlatformUtcNowTicks() { return Bolt.Runtime.LinuxDateTime.UtcNowTicks(); }
+    static long PlatformOffsetSeconds(long value) { return Bolt.Runtime.LinuxDateTime.OffsetSeconds(value); }
+    static long PlatformLocalMidnightTicks(long value) { return Bolt.Runtime.LinuxDateTime.LocalMidnightTicks(value); }
+#endif
+#if Web || Android || IOS
+    static long PlatformUtcNowTicks() { return Bolt.Runtime.HostDateTime.UtcNowTicks(); }
+    static long PlatformOffsetSeconds(long value) { return Bolt.Runtime.HostDateTime.OffsetSeconds(value); }
+    static long PlatformLocalMidnightTicks(long value) { return Bolt.Runtime.HostDateTime.LocalMidnightTicks(value); }
+#endif
+#if MacOS || FreeBSD
+    static long PlatformUtcNowTicks() { return Bolt.Runtime.MacOSDateTime.UtcNowTicks(); }
+    static long PlatformOffsetSeconds(long value) { return Bolt.Runtime.MacOSDateTime.OffsetSeconds(value); }
+    static long PlatformLocalMidnightTicks(long value) { return Bolt.Runtime.MacOSDateTime.LocalMidnightTicks(value); }
+#endif
+    long DisplayTicks => local ? ticks + PlatformOffsetSeconds(ticks) * 10000000l : ticks;
+    long DayTicks { get { long value = DisplayTicks % 864000000000l; return value < 0l ? value + 864000000000l : value; } }
+public:
+    DateTime() {}
+    DateTime(long value) : ticks(Checked(value)) {}
+    DateTime(int year, int month, int day, int hour = 0, int minute = 0, int second = 0, int millisecond = 0)
+        : ticks(CalendarMath.Ticks(year, month, day, hour, minute, second, millisecond)) {}
+    static DateTime UtcNow => DateTime(PlatformUtcNowTicks());
+    static DateTime Now => DateTime(PlatformUtcNowTicks(), true);
+    static DateTime Today => DateTime(PlatformLocalMidnightTicks(PlatformUtcNowTicks()), true);
+    static DateTime UnixEpoch => DateTime();
+    long Ticks => ticks;
+    bool IsUtc => !local;
+    int Year => CalendarMath.Parts(DisplayTicks).Year;
+    int Month => CalendarMath.Parts(DisplayTicks).Month;
+    int Day => CalendarMath.Parts(DisplayTicks).Day;
+    int Hour => (int)(DayTicks / 36000000000l);
+    int Minute => (int)((DayTicks / 600000000l) % 60l);
+    int Second => (int)((DayTicks / 10000000l) % 60l);
+    int Millisecond => (int)((DayTicks / 10000l) % 1000l);
+    int DayOfWeek => (int)((CalendarMath.FloorDiv(DisplayTicks, 864000000000l) + 4l) % 7l + 7l) % 7;
+    int DayOfYear => (int)(CalendarMath.FloorDiv(DisplayTicks, 864000000000l) - CalendarMath.DayNumber(Year, 1, 1)) + 1;
+    static DateTime FromUnixTimeSeconds(long seconds) { return DateTime(seconds * 10000000l); }
+    static DateTime FromUnixTimeMilliseconds(long milliseconds) { return DateTime(milliseconds * 10000l); }
+    [ReadOnly] long ToUnixTimeSeconds() { return CalendarMath.FloorDiv(ticks, 10000000l); }
+    [ReadOnly] long ToUnixTimeMilliseconds() { return CalendarMath.FloorDiv(ticks, 10000l); }
+    [ReadOnly] DateTime ToUniversalTime() { return DateTime(ticks); }
+    [ReadOnly] DateTime ToLocalTime() { return DateTime(ticks, true); }
+    [ReadOnly] DateTime Add(TimeSpan value) { return DateTime(ticks + value.Ticks, local); }
+    [ReadOnly] TimeSpan Subtract(DateTime value) { return TimeSpan(ticks - value.ticks); }
+    [ReadOnly] DateTime AddDays(double value) { return Add(TimeSpan.FromDays(value)); }
+    [ReadOnly] DateTime AddHours(double value) { return Add(TimeSpan.FromHours(value)); }
+    [ReadOnly] DateTime AddMinutes(double value) { return Add(TimeSpan.FromMinutes(value)); }
+    [ReadOnly] DateTime AddSeconds(double value) { return Add(TimeSpan.FromSeconds(value)); }
+    [ReadOnly] DateTime AddMilliseconds(double value) { return Add(TimeSpan.FromMilliseconds(value)); }
+    static DateTime operator +(DateTime a, TimeSpan b) { return a.Add(b); }
+    static DateTime operator -(DateTime a, TimeSpan b) { return a.Add(b.Negate()); }
+    static TimeSpan operator -(DateTime a, DateTime b) { return a.Subtract(b); }
+    static bool operator ==(const DateTime& a, const DateTime& b) { return a.ticks == b.ticks; }
+    static bool operator <(DateTime a, DateTime b) { return a.ticks < b.ticks; }
+    static bool operator >(DateTime a, DateTime b) { return a.ticks > b.ticks; }
+    static bool operator <=(DateTime a, DateTime b) { return a.ticks <= b.ticks; }
+    static bool operator >=(DateTime a, DateTime b) { return a.ticks >= b.ticks; }
+    [ReadOnly] ulong GetHashCode() { return Reinterpret<ulong>(ticks); }
+    [ReadOnly] string ToString()
+    {
+        long display = DisplayTicks; CalendarParts date = CalendarMath.Parts(display);
+        long within = display % 864000000000l; if (within < 0l) within += 864000000000l;
+        string result = CalendarMath.Pad(date.Year, 4) + "-" + CalendarMath.Pad(date.Month, 2) + "-" + CalendarMath.Pad(date.Day, 2) + "T" +
+            CalendarMath.Pad(within / 36000000000l, 2) + ":" + CalendarMath.Pad((within / 600000000l) % 60l, 2) + ":" + CalendarMath.Pad((within / 10000000l) % 60l, 2) + "." + CalendarMath.Pad(within % 10000000l, 7);
+        if (!local) return result + "Z";
+        long offset = PlatformOffsetSeconds(ticks), magnitude = offset < 0l ? -offset : offset;
+        result += (offset < 0l ? "-" : "+") + CalendarMath.Pad(magnitude / 3600l, 2) + ":" + CalendarMath.Pad((magnitude / 60l) % 60l, 2);
+        if (magnitude % 60l != 0l) result += ":" + CalendarMath.Pad(magnitude % 60l, 2);
+        return result;
+    }
+    static DateTime Parse(string text)
+    {
+        int length = text.Length;
+        if (length < 20 || length > 40 || text[4] != '-' || text[7] != '-' || text[10] != 'T' || text[13] != ':' || text[16] != ':') Bolt.Runtime.Failure.Format("Expected an ISO date with a UTC suffix or numeric offset.");
+        long value = CalendarMath.Ticks(CalendarMath.Digits(text, 0, 4), CalendarMath.Digits(text, 5, 2), CalendarMath.Digits(text, 8, 2), CalendarMath.Digits(text, 11, 2), CalendarMath.Digits(text, 14, 2), CalendarMath.Digits(text, 17, 2), 0);
+        int at = 19;
+        if (text[at] == '.')
+        {
+            at++; int digits = 0, fraction = 0;
+            while (at < length && text[at] >= '0' && text[at] <= '9')
+            { if (digits == 7) Bolt.Runtime.Failure.Format("At most seven fractional digits are supported."); fraction = fraction * 10 + CalendarMath.Digits(text, at, 1); at++; digits++; }
+            if (digits == 0) Bolt.Runtime.Failure.Format("Fractional digits are missing.");
+            while (digits < 7) { fraction *= 10; digits++; } value += (long)fraction;
+        }
+        if (at < length && text[at] == 'Z') { at++; }
+        else
+        {
+            if (at >= length || (text[at] != '+' && text[at] != '-')) Bolt.Runtime.Failure.Format("ISO timezone is missing.");
+            bool negative = text[at] == '-'; at++;
+            if (at + 5 > length || text[at + 2] != ':') Bolt.Runtime.Failure.Format("Invalid ISO timezone offset.");
+            int hours = CalendarMath.Digits(text, at, 2), minutes = CalendarMath.Digits(text, at + 3, 2), seconds = 0; at += 5;
+            if (at < length && text[at] == ':') { seconds = CalendarMath.Digits(text, at + 1, 2); at += 3; }
+            if (hours > 23 || minutes > 59 || seconds > 59) Bolt.Runtime.Failure.Format("Invalid timezone offset.");
+            long offset = ((long)hours * 3600l + (long)minutes * 60l + (long)seconds) * 10000000l;
+            value = negative ? value + offset : value - offset;
+        }
+        if (at != length) Bolt.Runtime.Failure.Format("Unexpected characters after ISO date.");
+        return DateTime(value);
+    }
+    [ReadOnly] string ToJsonValue() { return ToUniversalTime().ToString(); }
+    static DateTime FromJsonValue(string value) { return Parse(value); }
+}

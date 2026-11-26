@@ -1,0 +1,6 @@
+
+class Parent:IStringable {public: string ToString(){return "parent";} }
+class Child:Parent {public: override string ToString(){return "child";} }
+static class Program {public: void Main(){
+Child c; Parent& p=c; IStringable& text=c; Print(text.ToString()); IStringable boxed=p; Print(boxed); Print(p);
+}}

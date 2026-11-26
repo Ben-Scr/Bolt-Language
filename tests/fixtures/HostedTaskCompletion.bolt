@@ -1,0 +1,28 @@
+import System
+import System.Threading
+import System.Threading.Tasks
+public static class Program {
+public:
+    int Main() {
+        var pending = Task<int>.CreatePending();
+        var alias = pending;
+        Semaphore notified = Semaphore(0, 1);
+        pending.OnCompleted((Task<int> done) => {
+            if (done.Result == 42) notified.Release();
+        });
+        pending.SetResult(42);
+        if (alias.IsCompleted) return 1;
+        pending.Complete();
+        if (alias.Result != 42 || !notified.Wait(3000)) return 2;
+        CancellationTokenSource stop;
+        var delay = Task.Delay(60000, stop.Token);
+        stop.Cancel();
+        try { delay.Wait(); return 3; }
+        catch (OperationCanceledException& canceled) {}
+        if (!delay.IsCanceled || delay.IsFaulted) return 4;
+        var empty = Task<int>.CreatePending();
+        empty.Complete();
+        try { empty.GetResult(); } catch (InvalidOperationException& error) { return 0; }
+        return 5;
+    }
+}

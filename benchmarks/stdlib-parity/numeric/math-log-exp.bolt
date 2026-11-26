@@ -1,0 +1,13 @@
+import Math
+
+static class Program {
+public:
+    void Main() {
+        double sum = 0.0;
+        for (int i = 1; i <= 4000000; i++) {
+            double x = (double)i * (1.0 / 1048576.0);
+            sum += Math.Log(1.0 + x) + Math.Exp(-x);
+        }
+        Print((long)(sum * 1000.0));
+    }
+}

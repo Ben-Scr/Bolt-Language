@@ -1,0 +1,38 @@
+import System
+
+public abstract class Shape {
+public:
+    [ReadOnly] abstract ulong GetHashCode();
+    abstract int Value { get; }
+    abstract int Scale(int n);
+    int Score(int n) { return Value + Scale(n); }
+}
+public abstract class OffsetShape : Shape {
+public:
+    int Offset;
+    OffsetShape(int offset) { Offset=offset; }
+    [ReadOnly] override ulong GetHashCode() { return (ulong)Offset; }
+    override int Value => Offset;
+}
+public class First : OffsetShape {
+public:
+    First() : base(3) {}
+    override int Scale(int n) { return n*2; }
+}
+public class Inherited : First {}
+public class Second : OffsetShape {
+public:
+    Second() : base(7) {}
+    override int Scale(int n) { return n*3; }
+}
+static class Program {
+    static int Score(Shape& value) { return value.Score(4); }
+public:
+    void Main() {
+        Inherited first;
+        Shape* second=new Second();
+        if(Score(first)!=11 || Score(*second)!=19 || second->GetHashCode()!=7ul) throw Exception("abstract dispatch");
+        delete second;
+        Print("abstract dispatch OK");
+    }
+}

@@ -1,0 +1,16 @@
+import System.Collections.Generic
+class Broken {
+public:
+    string Text;
+    List<string> Items;
+    Broken(int denominator) {
+        Text = "initialized before failure";
+        Items.Add(Text);
+        Print("before failure");
+        int value = 10 / denominator;
+    }
+}
+static class Program {public:void Main(){
+    Arena work = Arena.Fixed(65536);
+    Broken* broken = new(work) Broken(0);
+}}

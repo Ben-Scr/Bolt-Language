@@ -1,0 +1,337 @@
+#if BoltStandaloneCore && (Windows || MacOS || FreeBSD || (Linux && (X64 || ARM64 || RISCV64)))
+import System
+import Bolt.Runtime
+import Bolt.Runtime.IO
+namespace System.IO;
+
+public abstract class Stream
+{
+protected:
+    StreamHandle resource;
+    void Bind(Stream& source) { resource = source.resource; }
+    void OpenMemory(int capacity)
+    {
+        if (capacity < 0) throw ArgumentOutOfRangeException("Negative capacity.");
+        resource.Initialize();
+        resource.State->Readable = true;
+        resource.State->Writable = true;
+        Reserve(capacity);
+    }
+    void OpenFile(string path, FileMode mode, FileAccess access)
+    {
+        int m = (int)mode, a = (int)access;
+        if (m < 1 || m > 6 || a < 1 || a > 3) throw ArgumentException("Invalid file mode or access.");
+        if (a == 1 && (m == 1 || m == 2 || m == 5 || m == 6)) throw ArgumentException("This file mode requires write access.");
+        resource.Initialize();
+        StreamState* s = resource.State;
+        s->Readable = a != 2;
+        s->Writable = a != 1;
+        s->Append = m == 6;
+#ifdef Windows
+        byte[] name = WindowsPath.Wide(path);
+        uint rights = s->Readable ? 2147483648u : 0u;
+        if (s->Writable) rights |= 1073741824u;
+        uint creation = m == 6 ? 4u : (uint)m;
+        s->Handle = Bolt.Runtime.StandaloneWindows.OpenFile((ushort*)&name[0], rights, 3u, null, creation, 128u, null);
+        if (*((long*)&s->Handle) == -1l) WindowsPath.Fail(Bolt.Runtime.Windows.GetLastError(), "Open", path);
+#elif MacOS || FreeBSD
+        s->Descriptor = BsdStreamFile.Open(path, mode, access);
+#else
+        byte[] name = LinuxPath.Name(path);
+        int flags = 524288 | (a == 3 ? 2 : (a == 2 ? 1 : 0));
+        if (m == 1 || m == 2 || m == 4 || m == 6) flags |= 64;
+        if (m == 1) flags |= 128;
+        if (m == 2 || m == 5) flags |= 512;
+        if (m == 6) flags |= 1024;
+        s->Descriptor = Bolt.Runtime.LinuxFile.OpenAt(-100, &name[0], flags, 438u);
+        if (s->Descriptor < 0) LinuxPath.Fail(path, LinuxPath.Error());
+#endif
+        s->File = true;
+        if (s->Append) s->Cursor = FileSeek(0l, 2);
+    }
+    byte[] Snapshot()
+    {
+        StreamState* s = resource.State;
+        byte[] result = new byte[(int)s->Size];
+        if (s->Size > 0l) MemoryOps.Copy(&result[0], s->Data, (ulong)s->Size);
+        return result;
+    }
+private:
+    void RequireOpen()
+    {
+        if (resource.State == null || resource.State->Closed) throw ObjectDisposedException("The stream is closed.");
+    }
+    void Reserve(long size)
+    {
+        StreamState* s = resource.State;
+        if (size <= s->Capacity) return;
+        if (size > int.MaxValue) throw IOException("Memory stream exceeds the array size limit.");
+        long capacity = s->Capacity * 2l;
+        if (capacity < size || capacity > int.MaxValue) capacity = size;
+        byte* data = StandaloneCore.Allocate((ulong)capacity);
+        if (data == null) throw OutOfMemoryException("Cannot grow memory stream.");
+        MemoryOps.Copy(data, s->Data, (ulong)s->Size);
+        StandaloneCore.Free(s->Data);
+        s->Data = data;
+        s->Capacity = capacity;
+    }
+    int Count(int length, int offset, int count)
+    {
+        if (offset < 0 || offset > length) throw ArgumentOutOfRangeException("Invalid offset.");
+        if (count == -1) return length - offset;
+        if (count < 0 || count > length - offset) throw ArgumentOutOfRangeException("Invalid count.");
+        return count;
+    }
+    long FileSeek(long offset, int origin)
+    {
+#ifdef Windows
+        long pos = 0l;
+        if (Bolt.Runtime.StandaloneWindows.PositionFile(resource.State->Handle, offset, &pos, (uint)origin) == 0)
+            throw IOException("Cannot seek file stream.");
+#else
+        long pos = Bolt.Runtime.StandalonePosix.Seek(resource.State->Descriptor, offset, origin);
+        if (pos < 0l) throw IOException("Cannot seek file stream.");
+#endif
+        return pos;
+    }
+    long FileLength()
+    {
+#ifdef Windows
+        long length = 0l;
+        if (Bolt.Runtime.StandaloneWindows.FileSize(resource.State->Handle, (Bolt.Runtime.Windows.LargeInteger*)&length) == 0)
+            throw IOException("Cannot read file length.");
+        return length;
+#elif MacOS || FreeBSD
+        return BsdStreamFile.Length(resource.State->Descriptor);
+#else
+        ulong[] status = new ulong[32];
+        if (Bolt.Runtime.LinuxFile.Status(resource.State->Descriptor, &status[0]) != 0) throw IOException("Cannot read file length.");
+        return ((long*)&status[0])[6];
+#endif
+    }
+#ifndef Windows
+    int FileError()
+    {
+#ifdef Linux
+        return LinuxPath.Error();
+#else
+        return *Bolt.Runtime.MacOS.ErrnoLocation();
+#endif
+    }
+#endif
+    int ReadRaw(byte* buffer, int count)
+    {
+        RequireOpen();
+        StreamState* s = resource.State;
+        if (!s->Readable) throw NotSupportedException("The stream is not readable.");
+        if (count == 0) return 0;
+        if (!s->File) {
+            if (s->Cursor >= s->Size) return 0;
+            if (count > s->Size - s->Cursor) count = (int)(s->Size - s->Cursor);
+            MemoryOps.Copy(buffer, &s->Data[s->Cursor], (ulong)count);
+        } else {
+#ifdef Windows
+            uint received = 0u;
+            if (Bolt.Runtime.Windows.ReadFile(s->Handle, buffer, (uint)count, &received, null) == 0)
+                throw IOException("File read failed.");
+            count = (int)received;
+#else
+            while (true) {
+                long received = Bolt.Runtime.ProcessApi.Read(s->Descriptor, buffer, (ulong)count);
+                if (received >= 0l) { count = (int)received; break; }
+                if (FileError() != 4) throw IOException("File read failed.");
+            }
+#endif
+        }
+        s->Cursor += count;
+        return count;
+    }
+protected:
+    void WriteRaw(const byte* buffer, int count)
+    {
+        RequireOpen();
+        StreamState* s = resource.State;
+        if (!s->Writable) throw NotSupportedException("The stream is not writable.");
+        if (count == 0) return;
+        if (!s->File) {
+            if (s->Cursor > int.MaxValue - count) throw IOException("Memory stream exceeds the array size limit.");
+            Reserve(s->Cursor + count);
+            MemoryOps.Copy(&s->Data[s->Cursor], buffer, (ulong)count);
+            s->Cursor += count;
+            if (s->Cursor > s->Size) s->Size = s->Cursor;
+            return;
+        }
+#ifdef Windows
+        // An all-ones OVERLAPPED file offset appends each write atomically,
+        // while GENERIC_WRITE also permits SetEndOfFile on an append stream.
+        ulong[] appendOffset;
+        void* operation = null;
+        if (s->Append) {
+            appendOffset = new ulong[4];
+            appendOffset[2] = ulong.MaxValue;
+            operation = &appendOffset[0];
+        }
+#endif
+        int offset = 0;
+        while (offset < count) {
+#ifdef Windows
+            uint n = 0u;
+            if (Bolt.Runtime.StandaloneWindows.WriteBytes(s->Handle, buffer[offset], (uint)(count - offset), &n, operation) == 0)
+                throw IOException("File write failed.");
+#else
+            long n = Bolt.Runtime.StandalonePosix.WriteBytes(s->Descriptor, buffer[offset], (ulong)(count - offset));
+            if (n < 0l) {
+                if (FileError() == 4) continue;
+                throw IOException("File write failed.");
+            }
+#endif
+            if (n == 0) throw IOException("Write made no progress.");
+            offset += (int)n;
+            s->Cursor += (int)n;
+        }
+        if (s->Append) s->Cursor = FileSeek(0l, 1);
+    }
+public:
+    bool CanRead => resource.State != null && !resource.State->Closed && resource.State->Readable;
+    bool CanWrite => resource.State != null && !resource.State->Closed && resource.State->Writable;
+    bool CanSeek => resource.State != null && !resource.State->Closed;
+    long Length { get { RequireOpen(); return resource.State->File ? FileLength() : resource.State->Size; } }
+    long Position { get { RequireOpen(); return resource.State->Cursor; } }
+    int Read(byte[]& buffer, int offset = 0, int count = -1)
+    {
+        count = Count(buffer.Length, offset, count);
+        return ReadRaw(count == 0 ? null : &buffer[offset], count);
+    }
+    int ReadByte() { byte value = 0; return ReadRaw(&value, 1) == 0 ? -1 : (int)value; }
+    byte[] ReadAllBytes()
+    {
+        RequireOpen();
+        StreamState* s = resource.State;
+        if (!s->Readable) throw NotSupportedException("The stream is not readable.");
+        if (!s->File) {
+            int remaining = s->Cursor < s->Size ? (int)(s->Size - s->Cursor) : 0;
+            byte[] result = new byte[remaining];
+            if (remaining > 0) {
+                MemoryOps.Copy(&result[0], &s->Data[s->Cursor], (ulong)remaining);
+                s->Cursor = s->Size;
+            }
+            return result;
+        }
+        Bolt.Runtime.Buffer<byte> data;
+        byte[] chunk = new byte[8192];
+        while (true) {
+            int count = Read(chunk);
+            if (count == 0) break;
+            if (data.Length > int.MaxValue - count) throw IOException("Stream exceeds the byte-array length limit.");
+            data.AppendRange(chunk, 0, count);
+        }
+        return data.ToArray();
+    }
+    void Write(const byte[]& buffer, int offset = 0, int count = -1)
+    {
+        count = Count(buffer.Length, offset, count);
+        WriteRaw(count == 0 ? null : TypedMemory.ArrayData(buffer, offset), count);
+    }
+    void WriteByte(byte value) { WriteRaw(&value, 1); }
+    long Seek(long offset, SeekOrigin origin = SeekOrigin.Begin)
+    {
+        RequireOpen();
+        if ((int)origin < 0 || (int)origin > 2) throw ArgumentException("Invalid seek origin.");
+        long pos = (origin == SeekOrigin.Begin ? 0l : (origin == SeekOrigin.Current ? Position : Length)) + offset;
+        if (pos < 0l) throw ArgumentOutOfRangeException("Negative stream position.");
+        resource.State->Cursor = resource.State->File ? FileSeek(pos, 0) : pos;
+        return resource.State->Cursor;
+    }
+    void SetLength(long length)
+    {
+        if (length < 0l) throw ArgumentOutOfRangeException("Negative stream length.");
+        RequireOpen();
+        StreamState* s = resource.State;
+        if (!s->Writable) throw NotSupportedException("The stream is not writable.");
+        if (s->File) {
+#ifdef Windows
+            long old = Position;
+            FileSeek(length, 0);
+            if (Bolt.Runtime.StandaloneWindows.TruncateFile(s->Handle) == 0) {
+                FileSeek(old, 0); throw IOException("Cannot resize file.");
+            }
+#elif MacOS || FreeBSD
+            if (Bolt.Runtime.BsdStreamApi.Truncate(s->Descriptor, length) != 0) throw IOException("Cannot resize file.");
+#else
+            if (Bolt.Runtime.LinuxFile.Truncate(s->Descriptor, length) != 0) throw IOException("Cannot resize file.");
+#endif
+            s->Cursor = FileSeek(s->Cursor < length ? s->Cursor : length, 0);
+        } else {
+            if (length > int.MaxValue) throw ArgumentOutOfRangeException("Memory stream is too large.");
+            Reserve(length);
+            if (length < s->Size) MemoryOps.Set(&s->Data[length], (byte)0, (ulong)(s->Size - length));
+            s->Size = length;
+            if (s->Cursor > length) s->Cursor = length;
+        }
+    }
+    void CopyTo(Stream& destination, int bufferSize = 81920)
+    {
+        if (bufferSize <= 0) throw ArgumentOutOfRangeException("Invalid copy buffer size.");
+        if (resource.State == destination.resource.State) throw ArgumentException("Cannot copy a stream into itself.");
+        byte[] chunk = new byte[bufferSize];
+        while (true) {
+            int n = Read(chunk);
+            if (n == 0) break;
+            destination.Write(chunk, 0, n);
+        }
+    }
+    void Flush() { RequireOpen(); } // File writes go directly to the OS.
+    void Close()
+    {
+        StreamState* s = resource.State;
+        if (s == null || s->Closed) return;
+        s->Closed = true;
+        if (s->File) {
+#ifdef Windows
+            if (Bolt.Runtime.StandaloneWindows.Close(s->Handle) == 0) throw IOException("Cannot close file.");
+#else
+            if (Bolt.Runtime.ProcessApi.Close(s->Descriptor) != 0) throw IOException("Cannot close file.");
+#endif
+        }
+    }
+    void Dispose() { Close(); }
+}
+
+public sealed class MemoryStream : Stream
+{
+public:
+    MemoryStream() { OpenMemory(0); }
+    MemoryStream(int capacity) { OpenMemory(capacity); }
+    MemoryStream(const byte[]& bytes) { OpenMemory(bytes.Length); Write(bytes); Seek(0l); }
+    byte[] ToArray() { return Snapshot(); }
+}
+public sealed class FileStream : Stream
+{
+public:
+    FileStream() {}
+    FileStream(string path, FileMode mode = FileMode.Open, FileAccess access = FileAccess.ReadWrite) { OpenFile(path, mode, access); }
+}
+class StreamView : Stream
+{
+public:
+    void WriteText(const string& text) {
+        ulong size = 0ul;
+        const byte* data = TypedMemory.TextData(text, size);
+        WriteRaw(data, (int)size);
+    }
+    StreamView() {}
+    StreamView(Stream& source) { Bind(source); }
+    StreamView(StreamHandle& lease) {
+        if (lease.State == null || lease.State->Closed) throw ObjectDisposedException("The writer is closed.");
+        resource.State = lease.State->Parent;
+        Bolt.Runtime.AtomicOps.Add(resource.State->References,1ul);
+    }
+    void BindLease(Stream& source, StreamHandle& lease, bool leaveOpen) {
+        Bind(source);
+        lease.Initialize();
+        lease.State->Parent = resource.State;
+        if (resource.State != null) Bolt.Runtime.AtomicOps.Add(resource.State->References,1ul);
+        lease.State->OwnsParent = !leaveOpen;
+    }
+}
+#endif

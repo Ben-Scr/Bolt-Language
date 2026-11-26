@@ -1,0 +1,247 @@
+import System
+namespace Bolt.Runtime;
+
+public static class DiagnosticOps
+{
+private:
+    static ulong outputGate;
+
+#if Windows && (X64 || ARM64) && !BoltCppCompatibility
+    // Lookup also sees the function tables registered for dynamically compiled Bolt methods.
+    int WindowsStack(ulong* frames, int capacity)
+    {
+        // HeapAlloc returns 16-byte aligned storage on Win64. Both SDK CONTEXT layouts fit.
+        void* heap = Bolt.Runtime.Windows.GetProcessHeap();
+        byte* memory = (byte*)Bolt.Runtime.Windows.HeapAlloc(heap, 0u, 2048ul);
+        if (memory == null) throw OutOfMemoryException("Cannot allocate a Windows thread context.");
+        try
+        {
+            ulong* registers = (ulong*)memory;
+#ifdef ARM64
+            int pcIndex = 33; // CONTEXT.Pc
+#else
+            int pcIndex = 31; // CONTEXT.Rip
+#endif
+            Bolt.Runtime.DiagnosticApi.CaptureContext(memory);
+            int count = 0;
+            while (count < capacity)
+            {
+                ulong pc = registers[pcIndex];
+                if (pc == 0ul) break;
+                ulong image = 0ul;
+                void* entry = Bolt.Runtime.DiagnosticApi.Lookup(pc, &image, null);
+                if (entry == null) break;
+                void* data = null;
+                ulong frame = 0ul;
+                Bolt.Runtime.DiagnosticApi.Unwind(0u, image, pc, entry, memory, &data, &frame, null);
+                if (registers[pcIndex] == 0ul) break;
+                frames[count++] = registers[pcIndex];
+            }
+            return count;
+        }
+        finally { Bolt.Runtime.Windows.HeapFree(heap, 0u, memory); }
+    }
+#endif
+#if Linux || Android
+    bool TracedByKernel()
+    {
+        byte[] path = "/proc/self/status\0".ToUtf8();
+        byte[] mode = "r\0".ToUtf8();
+        void* file = Bolt.Runtime.DiagnosticApi.OpenStatus(&path[0], &mode[0]);
+        if (file == null) return false;
+        try
+        {
+            byte[] line = new byte[256];
+            string field = "TracerPid:";
+            ulong length = 0ul;
+            byte* prefix = NativeString.Bytes(field, length);
+            bool start = true;
+            while (Bolt.Runtime.DiagnosticApi.ReadLine(&line[0], line.Length, file) != null)
+            {
+                int i = 0;
+                if (start)
+                {
+                    while (i < (int)length && line[i] == prefix[i]) i++;
+                    if (i == (int)length)
+                    {
+                        while (line[i] == (byte)32 || line[i] == (byte)9) i++;
+                        while (line[i] >= (byte)48 && line[i] <= (byte)57)
+                        {
+                            if (line[i] != (byte)48) return true;
+                            i++;
+                        }
+                        return false;
+                    }
+                }
+                while (line[i] != (byte)0) i++;
+                start = i > 0 && line[i-1] == (byte)10;
+            }
+            return false;
+        }
+        finally { Bolt.Runtime.DiagnosticApi.CloseStatus(file); }
+    }
+#endif
+public:
+    void Fail(const string& message) { throw AssertionException(message); }
+
+    void WriteError(const string& text)
+    {
+#ifdef Windows
+        string line = text + "\r\n";
+#else
+        string line = text + "\n";
+#endif
+        while (AtomicOps.Cas(outputGate, 0ul, 1ul) != 0ul) Bolt.Runtime.Threading.RegistryYield();
+        try
+        {
+#ifdef Windows
+            try { WindowsConsole.WriteError(line); }
+            catch (IOException& error) { return; } // A closed stderr is a best-effort trace sink.
+#else
+            ulong length = 0ul;
+            byte* bytes = NativeString.Bytes(line, length);
+            ulong offset = 0ul;
+            while (offset < length)
+            {
+                ulong amount = length - offset;
+                if (amount > 1073741824ul) amount = 1073741824ul;
+                long written = Bolt.Runtime.DiagnosticApi.Write(2, &bytes[offset], amount);
+                if (written < 0l)
+                {
+#ifdef Linux
+                    int error = *Bolt.Runtime.Linux.ErrnoLocation();
+#elif MacOS || FreeBSD
+                    int error = *Bolt.Runtime.MacOS.ErrnoLocation();
+#else
+                    int error = *Bolt.Runtime.Threading.Errno();
+#endif
+#ifdef Web
+                    if (error == 27) continue; // WASI EINTR
+#else
+                    if (error == 4) continue; // POSIX EINTR on supported targets
+#endif
+                }
+                if (written <= 0l) return;
+                offset += (ulong)written;
+            }
+#endif
+        }
+        finally { AtomicOps.Cas(outputGate, 1ul, 0ul); }
+    }
+
+    bool IsAttached()
+    {
+#ifdef Windows
+        return Bolt.Runtime.DiagnosticApi.DebuggerPresent() != 0;
+#elif Linux || Android
+        return TracedByKernel();
+#elif FreeBSD || MacOS || IOS
+        int[] mib = new int[4];
+        mib[0] = 1; mib[1] = 14; mib[2] = 1; // CTL_KERN, KERN_PROC, KERN_PROC_PID
+        mib[3] = Bolt.Runtime.DiagnosticApi.Pid();
+        ulong size = 0ul;
+        if (Bolt.Runtime.DiagnosticApi.Sysctl(&mib[0], 4u, null, &size, null, 0ul) != 0) return false;
+        // Flag offsets in kinfo_proc are part of the target's process-info ABI.
+#ifdef FreeBSD
+        int offset = 368; // ki_flag, LP64
+#elif ARM32 || X86
+        int offset = 16; // kp_proc.p_flag, ILP32
+#else
+        int offset = 32; // kp_proc.p_flag, LP64
+#endif
+        if (size < (ulong)(offset+4) || size > 1048576ul) return false;
+        ulong[] info = new ulong[(int)((size+7ul)/8ul)];
+        if (Bolt.Runtime.DiagnosticApi.Sysctl(&mib[0], 4u, &info[0], &size, null, 0ul) != 0) return false;
+        return size >= (ulong)(offset+4) && (((uint*)&info[0])[offset/4] & 2048u) != 0u;
+#else
+        return false;
+#endif
+    }
+
+    bool Break()
+    {
+#ifdef Web
+        return false;
+#else
+        if (!IsAttached()) return false;
+#ifdef Windows
+        Bolt.Runtime.DiagnosticApi.DebugBreak();
+        return true;
+#else
+        return Bolt.Runtime.DiagnosticApi.Raise(5) == 0; // SIGTRAP
+#endif
+#endif
+    }
+
+    string[] Stack(int skip = 0, int maximum = 64)
+    {
+        if (skip < 0 || skip > 128 || maximum < 0 || maximum > 128)
+            throw ArgumentOutOfRangeException("Stack frame limits must be 0..128.");
+        if (maximum == 0) return new string[0];
+#ifdef Web
+        int size = Bolt.Runtime.DiagnosticApi.Callstack(16, null, 0); // EM_LOG_JS_STACK
+        if (size <= 1) return new string[0];
+        byte[] buffer = new byte[size];
+        Bolt.Runtime.DiagnosticApi.Callstack(16, &buffer[0], size);
+        int used = 0;
+        while (used < size && buffer[used] != (byte)0) used++;
+        string stack = NativeString.FromUtf8(&buffer[0], (ulong)used);
+        string[] lines = stack.Split('\n', true);
+        int first = skip + 1;
+        int count = lines.Length - first;
+        if (count <= 0) return new string[0];
+        if (count > maximum) count = maximum;
+        string[] result = new string[count];
+        for (int i = 0; i < count; i++) result[i] = lines[first+i];
+        return result;
+#else
+        int first = skip + 1;
+        int capacity = first + maximum;
+        ulong[] storage = new ulong[capacity];
+        void** frames = (void**)&storage[0];
+#if Windows && (X64 || ARM64) && !BoltCppCompatibility
+        int count = WindowsStack(&storage[0], capacity);
+#elif Windows
+        int count = (int)Bolt.Runtime.DiagnosticApi.Capture(0u, (uint)capacity, frames, null);
+#elif FreeBSD
+        int count = (int)Bolt.Runtime.DiagnosticApi.Capture(frames, (ulong)capacity);
+#else
+        int count = Bolt.Runtime.DiagnosticApi.Capture(frames, capacity);
+#endif
+        // A platform unwinder can stop at the return PC in a JIT code segment.
+        // Preserve that real address when it is the only available frame.
+        if (count == 1) first = skip;
+        if (count <= first) return new string[0];
+        int length = count - first;
+        string[] result = new string[length];
+#if !(Windows || Android || BoltMusl)
+#ifdef FreeBSD
+        byte** names = (byte**)Bolt.Runtime.DiagnosticApi.Symbols(&frames[first], (ulong)length);
+#else
+        byte** names = (byte**)Bolt.Runtime.DiagnosticApi.Symbols(&frames[first], length);
+#endif
+        try
+        {
+#endif
+            for (int i = 0; i < length; i++)
+            {
+#if !(Windows || Android || BoltMusl)
+                if (names != null && names[i] != null)
+                {
+                    byte* name = names[i];
+                    ulong bytes = 0ul;
+                    while (name[bytes] != (byte)0) bytes++;
+                    result[i] = NativeString.FromUtf8(name, bytes);
+                    continue;
+                }
+#endif
+                result[i] = "native frame " + (string)frames[first+i];
+            }
+#if !(Windows || Android || BoltMusl)
+        }
+        finally { Bolt.Runtime.Threading.Free((byte*)names); }
+#endif
+        return result;
+#endif
+    }
+}

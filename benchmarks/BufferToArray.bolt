@@ -1,0 +1,21 @@
+import Bolt.Runtime
+import System.Diagnostics
+
+public static class Program {
+public:
+    void Main() {
+        Buffer<int> values;
+        values.Reserve(131072);
+        for (int i = 0; i < 131072; i++) values.Add(i);
+        int sum = 0;
+        Stopwatch timer = Stopwatch.StartNew();
+        for (int i = 0; i < 256; i++) {
+            values[131071] = i;
+            int[] copy = values.ToArray();
+            sum += copy[131071];
+        }
+        timer.Stop();
+        Print(sum);
+        Print(timer.ElapsedTicks);
+    }
+}

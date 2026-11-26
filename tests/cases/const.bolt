@@ -1,0 +1,1 @@
+static class Program { public: void Main() { const int x=1;x++; } }

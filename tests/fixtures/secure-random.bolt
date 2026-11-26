@@ -1,0 +1,46 @@
+import System
+import Random
+import System.Security.Cryptography
+public static class Program {
+public:
+    int Main() {
+        if (Random.Next<int>(1) != 0) return 4;
+        Random.Seed(0ul);
+        System.Random owned = System.Random(0ul);
+        if (System.SharedRandom.Next<ulong>(ulong.MaxValue) != 16294208416658607535ul) return 5;
+        if (owned.Next<ulong>(ulong.MaxValue) != 16294208416658607535ul) return 6;
+        if (Random.Next<ulong>(ulong.MaxValue) != owned.Next<ulong>(ulong.MaxValue)) return 7;
+        System.SharedRandom.Seed(ulong.MaxValue);
+        owned.Seed(ulong.MaxValue);
+        try { Random.Next<int>(0); return 8; } catch (ArgumentOutOfRangeException& e) {}
+        if (Random.Next<long>(long.MinValue, long.MaxValue) != owned.Next<long>(long.MinValue, long.MaxValue)) return 9;
+        // This bound rejects the first draw from seed 3.
+        owned.Seed(3ul);
+        if (owned.Next<ulong>(9223372036854775809ul) != 3694763184872335752ul ||
+            owned.State != 4354685564936845357ul) return 11;
+        // The first state transition wraps exactly to zero. The following
+        // shared draw must reuse that state without fetching fresh entropy.
+        Random.Seed(7046029254386353131ul);
+        if (Random.Next<ulong>(1024ul) != 0ul ||
+            Random.Next<ulong>(ulong.MaxValue) != 16294208416658607535ul) return 12;
+        try { RandomNumberGenerator.GetBytes(-1); return 10; } catch (ArgumentOutOfRangeException& e) {}
+        byte[] empty = RandomNumberGenerator.GetBytes(0);
+        RandomNumberGenerator.Fill(empty);
+        byte first = RandomNumberGenerator.GetByte();
+#ifdef Web
+        byte[] large = RandomNumberGenerator.GetBytes(65537);
+        RandomNumberGenerator.Fill(large);
+#endif
+        ulong seed = RandomNumberGenerator.GetUInt64();
+        System.Random generator;
+        if (generator.State == seed && System.Random().State == seed) return 3;
+        byte[] result = RandomNumberGenerator.GetBytes(513);
+        int nonzero = 0;
+        for(int i=0;i<result.Length;i++) if(result[i]!=(byte)0) nonzero++;
+        if(empty.Length!=0 || result.Length!=513 || nonzero<1)return 1;
+        byte[] zeros = new byte[513];
+        RandomNumberGenerator.Fill(zeros);
+        for(int i=0;i<zeros.Length;i++) if(zeros[i]!=result[i])return 0;
+        return 2;
+    }
+}

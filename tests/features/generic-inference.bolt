@@ -1,0 +1,5 @@
+
+T Add<T>(T a,T b): Addable {return a+b;}
+static class Program { public: void Main() {
+Console.WriteLine(Add(3,4)); Console.WriteLine(Add("a","b"));
+} }

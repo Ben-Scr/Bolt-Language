@@ -1,0 +1,157 @@
+namespace Bolt.Runtime;
+
+// Binary64 midpoints have at most 768 significant decimal digits.
+// Keep 800, plus a sticky bit for any discarded nonzero digit. At the smallest
+// decimal order the denominator is at most 10^1123, which fits in 120 limbs.
+public static class DecimalParsing {
+private:
+    void Scale(uint[]& a, int& used, uint multiplier, uint digit) {
+        ulong carry = digit;
+        for (int i = 0; i < used; i++) {
+            ulong v = (ulong)a[i] * multiplier + carry;
+            a[i] = (uint)(v & 4294967295ul); carry = v >> 32;
+        }
+        if (carry != 0ul) a[used++] = (uint)carry;
+    }
+    int Compare(const uint[]& a, int n, const uint[]& b, int m) {
+        if (n != m) return n < m ? -1 : 1;
+        for (int i = n-1; i >= 0; i--) if (a[i] != b[i]) return a[i] < b[i] ? -1 : 1;
+        return 0;
+    }
+    void Subtract(uint[]& a, int& n, const uint[]& b, int m) {
+        ulong borrow = 0ul;
+        for (int i = 0; i < n; i++) {
+            ulong sub = (i < m ? (ulong)b[i] : 0ul) + borrow;
+            ulong limb = a[i]; borrow = limb < sub ? 1ul : 0ul;
+            a[i] = (uint)((limb + 4294967296ul - sub) & 4294967295ul);
+        }
+        while (n > 0 && a[n-1] == 0u) n--;
+    }
+    int BitLength(const uint[]& value, int length) {
+        int bits = (length - 1) * 32;
+        uint high = value[length - 1];
+        while (high != 0u) { high >>= 1; bits++; }
+        return bits;
+    }
+    void Shift(uint[]& value, int& length, int bits) {
+        while (bits >= 30) { Scale(value, length, 1073741824u, 0u); bits -= 30; }
+        if (bits > 0) Scale(value, length, 1u << bits, 0u);
+    }
+public:
+    // The caller consumes the leading sign and owns its whitespace policy.
+    bool TryMagnitude(const byte[]& data, int begin, int end, bool single, ulong& bits) {
+        return ParseMagnitude(data, begin, end, single, bits) == 0;
+    }
+    // Return 0 on success, 1 for invalid syntax, or 2 for a range error.
+    int ParseMagnitude(const byte[]& data, int begin, int end, bool single, ulong& bits) {
+        int kept = 0, significant = 0, first = begin, last = begin, p = begin;
+        long scale = 0l;
+        bool fraction = false, seenDigit = false, sticky = false;
+        while (p < end && data[p] != 101 && data[p] != 69) {
+            int c = data[p++];
+            if (c == 46 && !fraction) { fraction = true; continue; }
+            if (c < 48 || c > 57) return 1;
+            seenDigit = true;
+            if (fraction) scale--;
+            if (kept == 0 && c == 48) continue;
+            if (kept < 800) {
+                if (kept == 0) first = p - 1;
+                kept++;
+                if (c != 48) { last = p; significant = kept; }
+            }
+            else { scale++; if (c != 48) sticky = true; }
+        }
+        if (!seenDigit) return 1;
+        if (p < end) {
+            p++;
+            bool minus = p < end && data[p] == 45;
+            if (p < end && (minus || data[p] == 43)) p++;
+            if (p == end) return 1;
+            long exponent = 0l;
+            while (p < end) {
+                int digit = (int)data[p++] - 48;
+                if (digit < 0 || digit > 9) return 1;
+                if (exponent < 10000000000l) exponent = exponent*10l + digit;
+            }
+            scale += minus ? -exponent : exponent;
+        }
+        if (kept == 0) { bits = 0ul; return 0; }
+        long order = scale + kept;
+        if (order > (single ? 39 : 309) || order < (single ? -45 : -323)) return 2;
+        // Omit trailing zeros from the exact prefix and accumulate nine digits per limb pass.
+        scale += kept - significant;
+        // When both the coefficient and the power of ten are exactly representable,
+        // one operation in the target precision gives the correctly rounded result.
+        int exactDigits = single ? 7 : 15;
+        int exactPower = single ? 10 : 22;
+        if (!sticky && significant <= exactDigits && scale >= -exactPower && scale <= exactPower) {
+            ulong coefficient = 0ul;
+            for (int i = first; i < last; i++)
+                if (data[i] != 46) coefficient = coefficient * 10ul + (ulong)(data[i] - 48);
+            int exponent = (int)(scale < 0l ? -scale : scale);
+            double factor = 1.0, power = 10.0;
+            while (exponent != 0) {
+                if ((exponent & 1) != 0) factor *= power;
+                exponent >>= 1;
+                if (exponent != 0) power *= power;
+            }
+            if (single) {
+                float value = (float)coefficient, multiplier = (float)factor;
+                bits = (ulong)Reinterpret<uint>(scale < 0l ? value / multiplier : value * multiplier);
+            } else {
+                double value = (double)coefficient;
+                bits = Reinterpret<ulong>(scale < 0l ? value / factor : value * factor);
+            }
+            return 0;
+        }
+        uint[] a = new uint[120], b = new uint[120];
+        int n = 0, m = 1;
+        uint group = 0u, factor = 1u;
+        for (int i = first; i < last; i++) {
+            if (data[i] == 46) continue;
+            group = group * 10u + (uint)(data[i] - 48);
+            factor *= 10u;
+            if (factor == 1000000000u) {
+                Scale(a,n,factor,group);
+                group = 0u; factor = 1u;
+            }
+        }
+        if (factor != 1u) Scale(a,n,factor,group);
+        b[0] = 1u;
+        while (scale >= 9l) { Scale(a,n,1000000000u,0u); scale -= 9l; }
+        while (scale <= -9l) { Scale(b,m,1000000000u,0u); scale += 9l; }
+        while (scale > 0l) { Scale(a,n,10u,0u); scale--; }
+        while (scale < 0l) { Scale(b,m,10u,0u); scale++; }
+
+        // Normalize a/b into [1,2), then extract exactly the target's bits.
+        int power = BitLength(a,n) - BitLength(b,m);
+        if (power > 0) Shift(b,m,power);
+        if (power < 0) Shift(a,n,-power);
+        if (Compare(a,n,b,m) < 0) { Scale(a,n,2u,0u); power--; }
+
+        int fractionBits = single ? 23 : 52;
+        int bias = single ? 127 : 1023;
+        int minNormal = 1 - bias;
+        int count = fractionBits + 1;
+        if (power < minNormal) count -= minNormal - power;
+        if (count < 0 || power > bias) return 2;
+        ulong significand = 0ul;
+        for (int i = 0; i < count; i++) {
+            significand <<= 1;
+            if (Compare(a,n,b,m) >= 0) { significand++; Subtract(a,n,b,m); }
+            if (n == 0) {
+                significand <<= count - i - 1;
+                break;
+            }
+            Scale(a,n,2u,0u);
+        }
+        int halfway = Compare(a,n,b,m);
+        if (halfway > 0 || (halfway == 0 && (sticky || (significand & 1ul) != 0ul))) significand++;
+        if (significand == 0ul) return 2;
+        ulong encoded = significand;
+        if (power >= minNormal) encoded += (ulong)(power - minNormal) << fractionBits;
+        if (encoded >= ((ulong)(2*bias + 1) << fractionBits)) return 2;
+        bits = encoded;
+        return 0;
+    }
+}

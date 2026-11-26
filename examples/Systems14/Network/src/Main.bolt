@@ -1,0 +1,18 @@
+import System.Net
+import System.Net.Sockets
+import System.Diagnostics
+public static class Program {
+public:
+ void Main(){
+  Socket receiver=Socket.Udp(); receiver.Bind(IPEndPoint(IPAddress.Loopback,0));
+  receiver.SetTimeouts(2000,2000);
+  Socket sender=Socket.Udp(); sender.SetTimeouts(2000,2000);
+  byte[] message="Hello Bolt".ToUtf8();
+  sender.SendTo(message,receiver.LocalEndpoint);
+  byte[] data=new byte[64];IPEndPoint source;bool truncated;
+  int received=receiver.ReceiveFrom(data,source,truncated);
+  Assert.That(!truncated&&received==message.Length);
+  Print($"Received {received} bytes from {source}");
+  receiver.Close();sender.Close();
+ }
+}

@@ -1,0 +1,11 @@
+public static class Program
+{
+public:
+    int Main(string[] args)
+    {
+        int position = 2;
+        for (int frame = 0; frame < 6; frame++)
+            position += frame;
+        return position + args.Length;
+    }
+}

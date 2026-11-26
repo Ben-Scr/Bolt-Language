@@ -1,0 +1,15 @@
+import System.Collections.Generic
+static class Program {
+public:
+    void Main() {
+        List<int> values;
+        values.Reserve(8192);
+        for (int i = 0; i < 8192; i++) values.Add((i * 9751) & 8191);
+        long sum = 0L;
+        for (int i = 0; i < 4096; i++) {
+            int needle = (i * 977) & 16383;
+            sum += values.IndexOf(needle);
+        }
+        Print(sum);
+    }
+}

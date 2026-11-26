@@ -1,0 +1,31 @@
+import System.Collections.Generic
+
+void Echo<T>(T value):IStringable { Print(value.ToString()); }
+IStringable Save(IStringable value) { return value; }
+
+static class Program {
+public:
+ void Main() {
+  List<int> list; list.Add(4);
+  HashSet<string> set; set.Add("z"); set.Add("a");
+  Queue<bool> queue; queue.Enqueue(true);
+  Dictionary<string,int> map; map.Add("x",5);
+  Echo(list); Echo(set); Echo(queue); Echo(map);
+
+  IStringable boxed=(IStringable)list;
+  IStringable& reference=boxed;
+  IStringable* pointer=&boxed;
+  list.Add(9);
+  Print(boxed.ToString());
+  Print(reference.ToString());
+  Print(pointer->ToString());
+  Print($"saved={boxed}");
+  boxed=set;
+  Print(reference.ToString());
+  Print(pointer->ToString());
+  boxed=queue; Print(boxed);
+  boxed=Save(map); map["x"]=8; Print(boxed);
+  Print((string)reference);
+  Print(list);
+ }
+}

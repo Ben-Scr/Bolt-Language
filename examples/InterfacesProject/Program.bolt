@@ -1,0 +1,33 @@
+import Examples.Geometry
+
+static class Program
+{
+public:
+    T Add<T>(T a, T b) : Addable
+    {
+        return a + b;
+    }
+
+    void Main()
+    {
+        Vector2 a = Vector2(10, 5);
+        Vector2 b = Vector2(2, 3);
+        Vector2 sum = Add<Vector2>(a, b);
+        Print($"Sum: {sum}");
+
+        // Reference dispatch changes the original value, with no interface box.
+        IMovable& movement = a;
+        movement.Move(1, 2);
+        Console.WriteLine(a);
+
+        // An interface value owns an independent copy of its concrete value.
+        IStringable saved = a;
+        a.X = 99;
+        Print($"Saved: {saved}; current: {a}");
+
+        int truncated = (int)0.5;
+        uint bits = Reinterpret<uint>(1.0f);
+        float restored = Reinterpret<float>(bits);
+        Print($"Cast: {truncated}; bits: {bits}; restored: {restored}");
+    }
+}

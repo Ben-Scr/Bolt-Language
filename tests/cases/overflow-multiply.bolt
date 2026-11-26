@@ -1,0 +1,1 @@
+static class Program { public: void Main() { long n=9223372036854775807;n*=2; } }

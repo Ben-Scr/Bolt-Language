@@ -1,0 +1,5 @@
+import System.Collections.Generic
+class Key {public:int Id; Key(int id){Id=id;} }
+static class Program { public: void Main() {
+Dictionary<Key,string> d; d.Add(Key(1),"one"); Console.WriteLine(d[Key(1)]);
+} }

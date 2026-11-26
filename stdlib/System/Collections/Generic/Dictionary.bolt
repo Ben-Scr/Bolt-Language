@@ -1,0 +1,62 @@
+import Bolt.Runtime
+namespace System.Collections.Generic;
+
+[StringableElements]
+[SerializeMap("Length", "EntryAt", "Add")]
+public sealed class Dictionary<TKey, TValue> : IStringable
+{
+private:
+    HashTable<TKey, TValue> table;
+public:
+    Dictionary(int capacity = 0) { table.Reserve(capacity); }
+    int Length => table.Length;
+    int Count => table.Length;
+    int Capacity => table.Capacity;
+    TValue this[TKey key]
+    {
+        get { return table.Get(key); }
+        set { table.Put(key, value, true); }
+    }
+    // Explicit mutable borrow, invalidated by structural changes/reallocation.
+    TValue& GetRef(const TKey& key) { return table.Get(key); }
+    void Add(TKey key, TValue value)
+    { if (!table.Put(key, value, false)) Bolt.Runtime.Failure.Argument("duplicate dictionary key."); }
+    void Set(TKey key, TValue value) { table.Put(key, value, true); }
+    [ReadOnly] bool ContainsKey(const TKey& key) { return table.ContainsKey(key); }
+    [ReadOnly] bool TryGetValue(const TKey& key, TValue& value) { return table.TryGetValue(key, value); }
+    bool Remove(const TKey& key) { return table.Remove(key); }
+    void Clear() { table.Clear(); }
+    void Reserve(int capacity) { table.Reserve(capacity); }
+    [ReadOnly] KeyValuePair<TKey, TValue> EntryAt(int index) { return table.EntryAt(index); }
+    TKey[] Keys
+    {
+        get {
+            Bolt.Runtime.Buffer<TKey> result; result.Reserve(table.Length);
+            for (int i = 0; i < table.Length; i++) result.Add(table.KeyAt(i));
+            return result.ToArray();
+        }
+    }
+    TValue[] Values
+    {
+        get {
+            Bolt.Runtime.Buffer<TValue> result; result.Reserve(table.Length);
+            for (int i = 0; i < table.Length; i++) result.Add(table.ValueAt(i));
+            return result.ToArray();
+        }
+    }
+    HashEnumerator<TKey, TValue> GetEnumerator() { return table.GetEnumerator(); }
+    static bool operator ==(const Dictionary<TKey, TValue>& a, const Dictionary<TKey, TValue>& b)
+    { return a.table.SameEntries(b.table, true); }
+    [ReadOnly] ulong GetHashCode() { return table.ContentHash(true); }
+    [SnapshotReceiver]
+    string ToString() : IStringable<TKey>, IStringable<TValue>
+    {
+        // A snapshot makes user-defined ToString callbacks safe against mutation.
+        Bolt.Runtime.Buffer<KeyValuePair<TKey, TValue>> snapshot;
+        for (int i = 0; i < table.Length; i++) snapshot.Add(table.EntryAt(i));
+        string[] pieces = new string[snapshot.Length];
+        for (int i = 0; i < snapshot.Length; i++)
+            pieces[i] = Bolt.Runtime.Values.Format<TKey>(snapshot[i].Key) + ": " + Bolt.Runtime.Values.Format<TValue>(snapshot[i].Value);
+        return CollectionFormatting.Braces(pieces);
+    }
+}

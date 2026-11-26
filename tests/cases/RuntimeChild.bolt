@@ -1,0 +1,1 @@
+static class Program { public: int Main() { Console.WriteLine("from file"); return 7; } }

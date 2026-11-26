@@ -1,0 +1,119 @@
+import Bolt.Runtime
+namespace System;
+public static class Environment
+{
+public:
+    string GetVariable(string name) { return EnvironmentOps.Get(name); }
+    bool HasVariable(string name) { return EnvironmentOps.Contains(name); }
+    void SetVariable(string name, string value) { EnvironmentOps.Set(name, value); }
+    void RemoveVariable(string name) { EnvironmentOps.Remove(name); }
+#ifdef Windows
+private:
+    string ReadDirectory(bool temporary) {
+        uint capacity=260u;
+        while(capacity<=2147483647u){
+            ushort[] wide=new ushort[(int)capacity];
+            uint n=temporary ? Bolt.Runtime.StandaloneWindows.TempPath(capacity,&wide[0]) : Bolt.Runtime.StandaloneWindows.CurrentDirectory(capacity,&wide[0]);
+            if(n==0u)throw IOException("Cannot read the directory path.");
+            if(n>=capacity){capacity=n+1u;continue;}
+            return SystemCalls.FromWide(&wide[0],(int)n).Replace('\\','/');
+        }
+        throw IOException("Directory path is too long.");
+    }
+#endif
+public:
+    string CurrentDirectory {
+        get {
+#ifdef Windows
+            return ReadDirectory(false);
+#else
+#ifdef Web
+            int rangeError=68; // WASI ERANGE
+#else
+            int rangeError=34;
+#endif
+            int capacity=256;
+            while(true){
+                byte[] buffer=new byte[capacity];
+                if(Bolt.Runtime.StandalonePosix.WorkingDirectory(&buffer[0],(ulong)capacity)!=null)
+                    return NativeString.FromUtf8(&buffer[0],SystemCalls.CLength(&buffer[0]));
+                if(SystemCalls.Error()!=rangeError || capacity>int.MaxValue/2)break;
+                capacity*=2;
+            }
+            throw IOException("Cannot read the current directory.");
+#endif
+        }
+        set {
+            if(value.Contains('\0'))throw ArgumentException("Directory path contains NUL.");
+#ifdef Windows
+            byte[] wide=System.Text.UTF16LEEncoding.GetBytes(value+"\0");
+            if(Bolt.Runtime.StandaloneWindows.SetDirectory((ushort*)&wide[0])==0)throw IOException("Cannot set the current directory.");
+#else
+            byte[] path=(value+"\0").ToUtf8();
+            if(Bolt.Runtime.StandalonePosix.SetDirectory(&path[0])!=0)throw IOException("Cannot set the current directory.");
+#endif
+        }
+    }
+    string TemporaryDirectory {
+        get {
+#ifdef Windows
+            return ReadDirectory(true);
+#else
+            string[] keys=["TMPDIR","TMP","TEMP","TEMPDIR"];
+            string path="/tmp";
+            EnvironmentOps.LockVariables();
+            try {
+                for(int i=0;i<keys.Length;i++){
+                    byte[] key=(keys[i]+"\0").ToUtf8();
+                    byte* value=Bolt.Runtime.StandalonePosix.Variable(&key[0]);
+                    if(value!=null){path=NativeString.FromUtf8(value,SystemCalls.CLength(value));break;}
+                }
+            } finally { EnvironmentOps.UnlockVariables(); }
+            byte[] directory=(path+"/.\0").ToUtf8();
+            if(path.Length==0 || Bolt.Runtime.StandalonePosix.Access(&directory[0],0)!=0)throw IOException("Temporary directory is unavailable.");
+            return path;
+#endif
+        }
+    }
+    int ProcessorCount => EnvironmentOps.ProcessorCount();
+    string OS
+    {
+        get
+        {
+#ifdef Windows
+            return "Windows";
+#elif Linux
+            return "Linux";
+#elif MacOS
+            return "MacOS";
+#elif FreeBSD
+            return "FreeBSD";
+#elif Android
+            return "Android";
+#elif IOS
+            return "IOS";
+#elif Web
+            return "Web";
+#endif
+        }
+    }
+    string Architecture
+    {
+        get
+        {
+#ifdef X64
+            return "X64";
+#elif ARM64
+            return "ARM64";
+#elif RISCV64
+            return "RISCV64";
+#elif WASM64
+            return "WASM64";
+#elif X86
+            return "X86";
+#elif ARM32
+            return "ARM32";
+#endif
+        }
+    }
+}

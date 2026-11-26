@@ -1,0 +1,12 @@
+import System
+import System.Diagnostics
+public static class Program {
+public:
+ void Main(string[] args){
+  if(args.Length!=1)throw ArgumentException("Pass the absolute path of the Child example executable.");
+  Process child=Process.Start(args[0],["Hello with spaces","Grüße"],"",true,["BOLT_EXAMPLE=yes"]);
+  ProcessOutput result=child.Capture(10000,65536);
+  Assert.That(!result.TimedOut&&result.ExitCode==7);
+  Print(result.StandardOutput);
+ }
+}

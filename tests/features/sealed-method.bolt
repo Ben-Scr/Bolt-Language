@@ -1,0 +1,5 @@
+
+class Base {public:sealed void Test(){}} class Child:Base {public:void Test(){}}
+static class Program { public: void Main() {
+
+} }

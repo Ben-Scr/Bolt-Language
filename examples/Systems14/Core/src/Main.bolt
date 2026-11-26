@@ -1,0 +1,19 @@
+import System
+import System.Memory
+import System.Diagnostics
+public class CleanupExample {public: ~CleanupExample(){Print("scope cleaned");}}
+public static class Program {
+public:
+ void Main() {
+  Allocator allocator(4096l);
+  MemoryBlock bytes = allocator.Allocate(64ul, 32ul);
+  Memory.Set(bytes.Data, (byte)0, bytes.Length);
+  bytes.Write(0ul, (byte)42);
+  Assert.Equal((byte)42, bytes.Read(0ul));
+  allocator.Free(bytes);
+  try { CleanupExample value; throw ArgumentException("example error"); }
+  catch (ArgumentException& error) { Print(error.Message); }
+  finally { Print("finally executed"); }
+  Assert.Equal(0ul, allocator.LiveBytes);
+ }
+}

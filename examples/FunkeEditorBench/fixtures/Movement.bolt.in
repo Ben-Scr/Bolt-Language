@@ -1,0 +1,16 @@
+extern "C" ulong EntityCount(ulong a, ulong b);
+extern "C" ulong DeltaMicros(ulong a, ulong b);
+extern "C" ulong MoveRight(ulong entity, ulong distance);
+
+public static class Program {
+public:
+    int Main() {
+        ulong count = EntityCount(0ul, 0ul);
+        ulong elapsed = DeltaMicros(0ul, 0ul);
+        for (ulong entity = 0ul; entity < count; entity++) {
+            ulong step = MovementRules.Step(SPEEDul, elapsed, entity);
+            MoveRight(entity, step);
+        }
+        return 0;
+    }
+}

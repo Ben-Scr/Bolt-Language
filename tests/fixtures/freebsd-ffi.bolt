@@ -1,0 +1,13 @@
+import System
+
+[Header("unistd.h"), Native("getpid")]
+extern "C" int CurrentProcess();
+
+public static class Program {
+public:
+    int Main() {
+        if (CurrentProcess() <= 0) return 1;
+        Console.WriteLine("FreeBSD C ABI");
+        return 0;
+    }
+}

@@ -1,0 +1,2 @@
+class Item {public: virtual T Echo<T>(T value){return value;}}
+static class Program {public:void Main(){}}

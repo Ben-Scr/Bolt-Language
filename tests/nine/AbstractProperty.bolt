@@ -1,0 +1,12 @@
+public abstract class Base {
+public:
+    abstract int Size { get; }
+}
+public class Rectangle : Base {
+public:
+    override int Size => 12;
+}
+public static class Program {
+public:
+    void Main() { Rectangle rectangle; Base& reference = rectangle; Print(reference.Size); }
+}

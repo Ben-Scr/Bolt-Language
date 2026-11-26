@@ -1,0 +1,30 @@
+import System.Threading
+import Math
+
+#ifdef Windows
+extern "C" uint GetCurrentProcessId();
+#else
+[Header("unistd.h"), Native("getpid")]
+extern "C" int GetProcessId();
+#endif
+
+static class Program
+{
+private:
+    static bool queried;
+    static int status = 27;
+    void MarkQueried() { queried = true; }
+public:
+    int Main()
+    {
+        Thread.Yield();
+        if (queried) return 2;
+        MarkQueried();
+        if (Math.Min(status, 28) != 27 || Math.Max<long>(status, 29l) != 29l) return 3;
+#ifdef Windows
+        return queried && GetCurrentProcessId() != 0u ? status : 1;
+#else
+        return queried && GetProcessId() > 0 ? status : 1;
+#endif
+    }
+}

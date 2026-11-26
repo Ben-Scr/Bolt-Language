@@ -1,0 +1,154 @@
+import System
+import System.IO
+import System.Net
+import System.Net.Sockets
+import System.Threading
+
+static class Program {
+    static void Check(bool ok,string message) { if(!ok)throw Exception(message); }
+
+    static Pipe ObserveAbandonedChild(string executable) {
+        Process lastOwner=Process.Start(executable,["sleep"],"",true);
+        return lastOwner.StandardOutput;
+    }
+    static void Processes(string executable) {
+        string argument="Grüße 😀 \"quoted\" \\";
+        Process p=Process.Start(executable,["child",argument,""],Environment.CurrentDirectory,true,
+                                ["BOLT_CHILD_VALUE=before","BOLT_CHILD_VALUE=after"],false);
+        Process alias=p;
+        Pipe input=p.StandardInput, other=input;
+        input.WriteText("pipe payload\n");
+        other.Close();
+        Check(!input.IsOpen && alias.Id==p.Id,"shared process and pipe");
+        ProcessOutput result=p.Capture(10000,200000);
+        Check(!result.TimedOut && result.ExitCode==37 && alias.Wait(0) && alias.ExitCode==37,"child status");
+        Check(result.StandardOutput==argument+"|after|pipe payload","arguments, environment and stdin");
+        Check(result.ErrorBytes.Length==131072 && result.ErrorBytes[0]==0 && result.ErrorBytes[131071]==255,"binary stderr");
+        p.Close();alias.Close();
+        Check(alias.Wait(0) && alias.ExitCode==37,"cached status after close");
+
+        Process unstarted;unstarted.Close();
+        try { unstarted.Wait(0);throw Exception("unstarted process"); }catch(InvalidOperationException& e){}
+        Process manual=Process.Start(executable,["manual"],"",true);
+        byte[] request=[(byte)90,(byte)65,(byte)66,(byte)10,(byte)90];
+        int sent=0;
+        while(sent<3){
+            int n=manual.StandardInput.Write(request,1+sent,3-sent,3000);
+            Check(n>0,"pipe range write progress");
+            sent+=n;
+        }
+        manual.StandardInput.Close();
+        Check(manual.StandardOutput.ReadAllText(2)=="AB","pipe ReadAllText");
+        byte[] errors=manual.StandardError.ReadAllBytes(3);
+        Check(errors.Length==3 && errors[0]==0 && errors[2]==2 && manual.Wait(3000) && manual.ExitCode==23 && manual.TerminationSignal==0,"EOF and Terminate");
+        manual.Close();
+        Process unredirected=Process.Start(executable,["sleep"]);
+        Check(unredirected.IsRunning && !unredirected.Wait(0) && !unredirected.StandardInput.IsOpen,"nonredirected child");
+        unredirected.Kill();unredirected.Kill();
+#ifdef Windows
+        Check(unredirected.ExitCode==137 && unredirected.TerminationSignal==0,"terminated Win32 child");
+#else
+        Check(unredirected.ExitCode==137 && unredirected.TerminationSignal==9,"terminated POSIX child");
+#endif
+        unredirected.Close();
+        Pipe unopened;unopened.Close();
+        try { unopened.Read(request);throw Exception("read closed pipe"); }catch(ObjectDisposedException& e){}
+        try { unopened.Write(request,2,4);throw Exception("invalid pipe range"); }catch(ArgumentOutOfRangeException& e){}
+
+        Pipe observer=ObserveAbandonedChild(executable);
+        Check(observer.Read(request,0,1,3000)==0,"last process owner reaps child");
+        observer.Close();
+
+        Process sleeper=Process.Start(executable,["sleep"],"",true);
+        byte[] one=new byte[1];
+        Check(sleeper.StandardOutput.Read(one,0,1,0)==-1,"pipe timeout");
+        ProcessOutput timeout=sleeper.Capture(15);
+        Check(timeout.TimedOut && timeout.OutputBytes.Length==0 && timeout.StandardError=="" && !sleeper.IsRunning,"capture deadline and reap");
+        Process limited=Process.Start(executable,["flood"],"",true);
+        try { limited.Capture(10000,12);throw Exception("byte limit ignored"); }
+        catch(IOException& e){Check(!limited.IsRunning,"failed capture cleanup");}
+    }
+
+    static IPEndPoint ReleasedEndpoint() {
+        Socket lastOwner=Socket.Udp();
+        lastOwner.Bind(IPEndPoint(IPAddress.Loopback,0));
+        return lastOwner.LocalEndpoint;
+    }
+    static void Network() {
+        IPAddress[] addresses=Dns.Resolve("localhost");
+        Check(addresses.Length>0,"localhost resolution");
+        Check(IPAddress.Parse("fe80::1%7").ToString()=="fe80::1%7","IPv6 scope");
+        IPAddress v4("127.0.0.1"),v6;
+        Check(!v4.IsIPv6 && IPAddress.Any.ToString()=="0.0.0.0" && IPAddress.IPv6Any.ToString()=="::","address constants");
+        Check(IPAddress.TryParse("::1",v6) && v6.IsIPv6 && !IPAddress.TryParse("::1%4294967296",v6),"TryParse and scope overflow");
+        IPEndPoint ep(IPAddress.IPv6Loopback,65535);
+        Check(ep.Address.IsIPv6 && ep.Port==65535 && ep.ToString()=="[::1]:65535","IPv6 endpoint");
+        Socket unopened;unopened.Close();Check(!unopened.IsOpen,"default socket");
+        try { unopened.Listen();throw Exception("listen on closed socket"); }catch(ObjectDisposedException& e){}
+        Socket reused(false,true);
+        reused.Bind(ReleasedEndpoint());
+        reused.Close();
+        Socket server(false);
+        server.SetTimeouts(3000,3000);server.Bind(IPEndPoint(IPAddress.Loopback,0));server.Listen();
+        Socket client=Socket.Tcp();client.SetTimeouts(3000,3000);client.Connect(server.LocalEndpoint);
+        Socket peer=server.Accept();
+        Check(peer.RemoteEndpoint.Port==client.LocalEndpoint.Port,"accepted peer");
+        byte[] packet=[(byte)0,(byte)255,(byte)3];
+        Check(client.Send(packet,1,1)==1,"TCP send slice");
+        byte[] slice=new byte[3];
+        Check(peer.Receive(slice,1,1)==1 && slice[0]==0 && slice[1]==255 && slice[2]==0,"TCP receive slice");
+        client.SendAll(packet);client.Shutdown(false,true);
+        byte[] received=new byte[3];
+        Check(peer.ReceiveExactly(received) && received[1]==255 && peer.Receive(received)==0,"TCP and EOF");
+        Check(!peer.ReceiveExactly(received),"short TCP stream");
+        peer.Close();server.Close();client.Close();
+
+        Socket a=Socket.Udp(),b=Socket.Udp();a.SetTimeouts(3000,3000);b.SetTimeouts(3000,3000);
+        a.Bind(IPEndPoint(IPAddress.Loopback,0));b.Bind(IPEndPoint(IPAddress.Loopback,0));
+        Check(a.SendTo(packet,b.LocalEndpoint)==3,"send datagram");
+        IPEndPoint sender;bool cut=false;byte[] small=new byte[2];
+        Check(b.ReceiveFrom(small,sender,cut)==2 && cut && small[1]==255 && sender.Port==a.LocalEndpoint.Port,"truncate datagram");
+        a.SendTo(small,b.LocalEndpoint);
+        Check(b.ReceiveFrom(small,sender,cut)==small.Length && !cut,"exact-fit datagram");
+        byte[] empty=new byte[0];
+        a.SendTo(packet,b.LocalEndpoint);
+        Check(b.ReceiveFrom(empty,sender,cut)==0 && cut,"truncate to zero bytes");
+        a.SendTo(empty,b.LocalEndpoint);
+        Check(b.ReceiveFrom(empty,sender,cut)==0 && !cut,"empty datagram");
+        b.SetTimeouts(0);
+        try { b.ReceiveFrom(small,sender,cut);throw Exception("missing would-block"); }catch(SocketWouldBlockException& e){}
+        Socket alias=b;b.Close();Check(!alias.IsOpen,"socket close through alias");a.Close();
+    }
+
+    static void Flood(int count=131072) {
+        byte[] data=new byte[count];
+        for(int i=0;i<data.Length;i++)data[i]=(byte)(i&255);
+        int at=0;
+        while(at<data.Length){
+#ifdef Windows
+            uint n=0u;
+            if(Bolt.Runtime.Windows.WriteFile(Bolt.Runtime.Windows.GetStdHandle(4294967284u),&data[at],(uint)(data.Length-at),&n,null)==0 || n==0u)
+                throw IOException("stderr write");
+            at+=(int)n;
+#else
+            long n=Bolt.Runtime.StandalonePosix.WriteBytes(2,data[at],(ulong)(data.Length-at));
+            if(n<=0l)throw IOException("stderr write");
+            at+=(int)n;
+#endif
+        }
+    }
+public:
+    static int Main(string[] args) {
+        if(args.Length==0)return 1;
+        if(args[0]=="sleep"){Thread.Sleep(30000);return 2;}
+        if(args[0]=="manual"){Flood(3);Console.Write(Console.ReadLine());Process.Terminate(23);return 4;}
+        if(args[0]=="flood"){Flood();return 0;}
+        if(args[0]=="child"){
+            if(args.Length!=3 || args[2]!="")return 3;
+            Flood();
+            Console.Write(args[1]+"|"+Environment.GetVariable("BOLT_CHILD_VALUE")+"|"+Console.ReadLine());
+            return 37;
+        }
+        Processes(args[0]);Network();return 0;
+    }
+}

@@ -1,0 +1,18 @@
+namespace Bolt.Runtime.Tls;
+
+#ifdef Windows
+[Header("windows.h"), Native("TlsAlloc")] extern "C" uint Allocate();
+[Header("windows.h"), Native("TlsFree")] extern "C" int Release(uint key);
+[Header("windows.h"), Native("TlsGetValue")] extern "C" void* Get(uint key);
+[Header("windows.h"), Native("TlsSetValue")] extern "C" int Set(uint key, void* value);
+#elif MacOS || IOS
+[Header("pthread.h"), Native("pthread_key_create")] extern "C" int Allocate(ulong* key, void* destructor);
+[Header("pthread.h"), Native("pthread_key_delete")] extern "C" int Release(ulong key);
+[Header("pthread.h"), Native("pthread_getspecific")] extern "C" void* Get(ulong key);
+[Header("pthread.h"), Native("pthread_setspecific")] extern "C" int Set(ulong key, void* value);
+#else
+[Header("pthread.h"), Native("pthread_key_create")] extern "C" int Allocate(uint* key, void* destructor);
+[Header("pthread.h"), Native("pthread_key_delete")] extern "C" int Release(uint key);
+[Header("pthread.h"), Native("pthread_getspecific")] extern "C" void* Get(uint key);
+[Header("pthread.h"), Native("pthread_setspecific")] extern "C" int Set(uint key, void* value);
+#endif

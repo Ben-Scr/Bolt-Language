@@ -1,0 +1,126 @@
+import System
+namespace Bolt.Runtime;
+
+#ifdef Windows
+struct PipeOperation {
+public:
+    ulong Internal, InternalHigh, Offset;
+    void* Event;
+}
+#endif
+public sealed class PipeHandle {
+    SystemLease lease;
+    long Fd => lease.State->Descriptor;
+    int Transfer(byte* buffer,const byte& first,int count,int timeout,bool read) {
+        long end=SystemCalls.Deadline(timeout);
+        if(lease.State==null)throw ObjectDisposedException("Pipe was not redirected.");
+        SystemCalls.Lock(lease.State);
+        try {
+            if(!IsOpen)throw ObjectDisposedException("Pipe is closed.");
+            if(read!=lease.State->Readable)throw InvalidOperationException("Wrong pipe access direction.");
+            if(count==0)return 0;
+#ifdef Windows
+            void* handle=*((void**)&lease.State->Descriptor);
+            // OVERLAPPED contains two pointer-sized status words, offset and event.
+            PipeOperation operation;
+            void* eventHandle=Bolt.Runtime.ProcessApi.NewEvent(null,1,0,null);
+            if(eventHandle==null)throw IOException("Cannot create pipe event.");
+            operation.Event=eventHandle;
+            try {
+                uint n=0u;
+                int ok=read ? Bolt.Runtime.Windows.ReadFile(handle,buffer,(uint)count,&n,&operation) :
+                              Bolt.Runtime.StandaloneWindows.WriteBytes(handle,first,(uint)count,&n,&operation);
+                if(ok!=0)return (int)n;
+                uint error=Bolt.Runtime.Windows.GetLastError();
+                if(read && (error==109u || error==233u))return 0;
+                if(error!=997u)throw IOException("Pipe transfer failed: "+(string)error);
+                uint wait=Bolt.Runtime.StandaloneWindows.WaitFileJob(eventHandle,timeout<0?uint.MaxValue:(uint)timeout);
+                if(wait!=0u){
+                    Bolt.Runtime.ProcessApi.Cancel(handle,&operation);
+                    ok=Bolt.Runtime.ProcessApi.Result(handle,&operation,&n,1);
+                    error=ok!=0?0u:Bolt.Runtime.Windows.GetLastError();
+                    if(wait!=258u)throw IOException("Cannot wait for pipe transfer.");
+                    if(ok!=0)return (int)n;
+                    if(error==995u)return n==0u ? -1 : (int)n;
+                } else {
+                    ok=Bolt.Runtime.ProcessApi.Result(handle,&operation,&n,0);
+                    if(ok!=0)return (int)n;
+                    error=Bolt.Runtime.Windows.GetLastError();
+                }
+                if(read && (error==109u || error==233u))return 0;
+                throw IOException("Pipe completion failed: "+(string)error);
+            } finally { Bolt.Runtime.StandaloneWindows.Close(eventHandle); }
+#else
+            while(true){
+                ulong pollfd=0ul;*((int*)&pollfd)=(int)Fd;((short*)&pollfd)[2]=(short)(read?1:4);
+                int ready=Bolt.Runtime.ProcessApi.Poll(&pollfd,1,SystemCalls.Remaining(end));
+                if(ready==0)return -1;
+                int error=0;
+                if(ready>0){
+                    long n;
+                    if(read){n=Bolt.Runtime.ProcessApi.Read((int)Fd,buffer,(ulong)count);error=SystemCalls.Error();}
+                    else n=WriteProtected((int)Fd,first,count,error);
+                    if(n>=0l)return (int)n;
+                } else error=SystemCalls.Error();
+#if Linux || Android
+                int again=11;
+#else
+                int again=35;
+#endif
+                if(error!=4 && error!=again)throw IOException("Pipe transfer failed: "+(string)error);
+                if(end>=0l && SystemCalls.Remaining(end)==0)return -1;
+            }
+#endif
+        } finally { SystemCalls.Unlock(lease.State); }
+        return 0;
+    }
+#ifndef Windows
+    // Block SIGPIPE on this thread for this write. Preserve a signal that was
+    // already pending and restore the caller's mask on every path.
+    static long WriteProtected(int fd,const byte& first,int count,int& error) {
+        ulong[] mask=new ulong[16], old=new ulong[16], pending=new ulong[16];
+        Bolt.Runtime.ProcessApi.EmptySet(&mask[0]);Bolt.Runtime.ProcessApi.AddSignal(&mask[0],13);
+#if Linux || Android
+        int block=0, restore=2;
+#else
+        int block=1, restore=3;
+#endif
+        if(Bolt.Runtime.ProcessApi.SignalMask(block,&mask[0],&old[0])!=0)throw IOException("Cannot mask SIGPIPE.");
+        try {
+            Bolt.Runtime.ProcessApi.PendingSignals(&pending[0]);
+            bool prior=Bolt.Runtime.ProcessApi.HasSignal(&pending[0],13)==1;
+            long n=Bolt.Runtime.StandalonePosix.WriteBytes(fd,first,(ulong)count);
+            error=SystemCalls.Error();
+            if(n<0l && error==32 && !prior){
+                Bolt.Runtime.ProcessApi.PendingSignals(&pending[0]);
+                if(Bolt.Runtime.ProcessApi.HasSignal(&pending[0],13)==1){
+                    int signal=0;Bolt.Runtime.ProcessApi.ConsumeSignal(&mask[0],&signal);
+                }
+            }
+            return n;
+        } finally { Bolt.Runtime.ProcessApi.SignalMask(restore,&old[0],null); }
+    }
+#endif
+public:
+    PipeHandle() {}
+    void Initialize(bool readable) { lease.Initialize(ResourceKind.Pipe);lease.State->Readable=readable; }
+    void Attach(long fd) { lease.State->Descriptor=fd;lease.State->Open=true; }
+    bool IsOpen => lease.State!=null && lease.State->Open;
+    void Close() {
+        if(lease.State==null)return;
+        SystemCalls.Lock(lease.State);
+        SystemLifetime.Close(lease.State);
+        SystemCalls.Unlock(lease.State);
+    }
+    int Read(byte[]& bytes,int offset,int count,int timeout=-1) {
+        SystemCalls.CheckRange(bytes.Length,offset,count);
+        byte dummy=0;
+        return Transfer(count==0?null:&bytes[offset],dummy,count,timeout,true);
+    }
+    int Write(const byte[]& bytes,int offset,int count,int timeout=-1) {
+        SystemCalls.CheckRange(bytes.Length,offset,count);
+        byte dummy=0;
+        if(count==0)return Transfer(null,dummy,0,timeout,false);
+        return Transfer(null,bytes[offset],count,timeout,false);
+    }
+}

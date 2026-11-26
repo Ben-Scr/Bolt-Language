@@ -1,0 +1,134 @@
+#ifdef Linux
+import System
+namespace Bolt.Runtime;
+
+// DateTime's Linux platform boundary is source-authored Bolt. It talks to
+// libc/POSIX directly through LinuxApi.bolt; compiled DateTime code does not
+// call the C++ Clock/TimeZone runtime bridge.
+public static class LinuxDateTime
+{
+private:
+    byte* Allocate(ulong bytes)
+    {
+        byte* memory = (byte*)Bolt.Runtime.Linux.Allocate(bytes);
+        if (memory == null) throw OutOfMemoryException("Cannot allocate the Linux DateTime platform buffer.");
+        return memory;
+    }
+
+    ulong ReadU64(byte* memory, ulong offset)
+    {
+        ulong value = 0ul;
+        for (int index = 0; index < 8; index++)
+            value |= ((ulong)memory[offset + (ulong)index]) << (index * 8);
+        return value;
+    }
+
+    uint ReadU32(byte* memory, ulong offset)
+    {
+        uint value = 0u;
+        for (int index = 0; index < 4; index++)
+            value |= ((uint)memory[offset + (ulong)index]) << (index * 8);
+        return value;
+    }
+
+    int ReadI32(byte* memory, ulong offset) { return Reinterpret<int>(ReadU32(memory, offset)); }
+    long ReadI64(byte* memory, ulong offset) { return Reinterpret<long>(ReadU64(memory, offset)); }
+
+    void WriteI32(byte* memory, ulong offset, int value)
+    {
+        uint bits = Reinterpret<uint>(value);
+        for (int index = 0; index < 4; index++)
+            memory[offset + (ulong)index] = (byte)((bits >> (index * 8)) & 255u);
+    }
+
+    long FloorSeconds(long ticks)
+    {
+        long seconds = ticks / 10000000l;
+        return ticks % 10000000l < 0l ? seconds - 1l : seconds;
+    }
+
+    void LocalTime(long seconds, byte* calendar)
+    {
+        Bolt.Runtime.Linux.TimeValue stamp = (Bolt.Runtime.Linux.TimeValue)seconds;
+        if (Bolt.Runtime.Linux.LocalTime(&stamp, (Bolt.Runtime.Linux.CalendarTime*)calendar) == null)
+            Bolt.Runtime.Failure.Range("Local DateTime is outside the Linux timezone range.");
+    }
+
+public:
+    long UtcNowTicks() { return ClockTicks(0); }
+    long MonotonicTicks() { return ClockTicks(1); }
+private:
+    long ClockTicks(int clockId)
+    {
+        // Linux x86-64/ARM64 timespec is two 64-bit signed fields:
+        // tv_sec followed by tv_nsec. Read its object representation as bytes
+        // so the portable C++ backend does not rely on type-punning aliases.
+        byte* value = Allocate(16ul);
+        try
+        {
+            if (Bolt.Runtime.Linux.ClockGetTime(clockId, (Bolt.Runtime.Linux.TimeSpec*)value) != 0)
+                Bolt.Runtime.Failure.InvalidOperation("Linux clock_gettime failed.");
+            long seconds = ReadI64(value, 0ul);
+            long nanoseconds = ReadI64(value, 8ul);
+            if (nanoseconds < 0l || nanoseconds >= 1000000000l)
+                Bolt.Runtime.Failure.InvalidOperation("Linux clock_gettime returned an invalid nanosecond value.");
+            return seconds * 10000000l + nanoseconds / 100l;
+        }
+        finally
+        {
+            Bolt.Runtime.Linux.Free(value);
+        }
+    }
+
+public:
+    long OffsetSeconds(long utcTicks)
+    {
+        // On supported 64-bit glibc targets struct tm starts with nine 32-bit
+        // fields; tm_gmtoff is the 64-bit field at byte offset 40.
+        byte* calendar = Allocate(64ul);
+        try
+        {
+            LocalTime(FloorSeconds(utcTicks), calendar);
+            return ReadI64(calendar, 40ul);
+        }
+        finally
+        {
+            Bolt.Runtime.Linux.Free(calendar);
+        }
+    }
+
+    long LocalMidnightTicks(long utcTicks)
+    {
+        byte* calendar = Allocate(64ul);
+        byte* checked = Allocate(64ul);
+        try
+        {
+            LocalTime(FloorSeconds(utcTicks), calendar);
+
+            // struct tm: sec=0, min=4, hour=8, mday=12, mon=16,
+            // year=20, wday=24, yday=28, isdst=32.
+            WriteI32(calendar, 0ul, 0);
+            WriteI32(calendar, 4ul, 0);
+            WriteI32(calendar, 8ul, 0);
+            WriteI32(calendar, 32ul, -1); // Let libc determine DST.
+
+            long result = Bolt.Runtime.Linux.MakeTime((Bolt.Runtime.Linux.CalendarTime*)calendar);
+            LocalTime(result, checked);
+
+            // mktime may legally return -1, so validate by round-tripping the
+            // normalized local calendar date instead of treating -1 as failure.
+            if (ReadI32(checked, 20ul) != ReadI32(calendar, 20ul) ||
+                ReadI32(checked, 16ul) != ReadI32(calendar, 16ul) ||
+                ReadI32(checked, 12ul) != ReadI32(calendar, 12ul))
+                Bolt.Runtime.Failure.Range("Local midnight is outside the Linux timezone range.");
+
+            return result * 10000000l;
+        }
+        finally
+        {
+            Bolt.Runtime.Linux.Free(checked);
+            Bolt.Runtime.Linux.Free(calendar);
+        }
+    }
+}
+#endif

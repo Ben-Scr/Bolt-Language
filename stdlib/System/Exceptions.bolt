@@ -1,0 +1,244 @@
+namespace System;
+
+[Native("bolt::library::Exception")]
+public class Exception
+{
+public:
+    Exception(string message = "");
+    [ReadOnly] virtual string ToString();
+    [NativeProperty("Message")] const string Message;
+    [NativeProperty("StackTrace")] const string StackTrace;
+    [NativeProperty("SourceFile")] const string SourceFile;
+    [NativeProperty("SourceLine")] const int SourceLine;
+    [NativeProperty("SourceColumn")] const int SourceColumn;
+
+}
+
+[Native("bolt::library::SystemException")]
+public class SystemException : Exception
+{
+public:
+    SystemException(string message = "");
+
+}
+
+[Native("bolt::library::ArgumentException")]
+public class ArgumentException : SystemException
+{
+public:
+    ArgumentException(string message = "");
+
+}
+
+[Native("bolt::library::ArgumentNullException")]
+public class ArgumentNullException : ArgumentException
+{
+public:
+    ArgumentNullException(string message = "");
+
+}
+
+[Native("bolt::library::ArgumentOutOfRangeException")]
+public class ArgumentOutOfRangeException : ArgumentException
+{
+public:
+    ArgumentOutOfRangeException(string message = "");
+
+}
+
+[Native("bolt::library::InvalidOperationException")]
+public class InvalidOperationException : SystemException
+{
+public:
+    InvalidOperationException(string message = "");
+
+}
+
+[Native("bolt::library::NotSupportedException")]
+public class NotSupportedException : SystemException
+{
+public:
+    NotSupportedException(string message = "");
+
+}
+
+[Native("bolt::library::NotImplementedException")]
+public class NotImplementedException : SystemException
+{
+public:
+    NotImplementedException(string message = "");
+
+}
+
+[Native("bolt::library::ObjectDisposedException")]
+public class ObjectDisposedException : InvalidOperationException
+{
+public:
+    ObjectDisposedException(string message = "");
+
+}
+
+[Native("bolt::library::NullReferenceException")]
+public class NullReferenceException : SystemException
+{
+public:
+    NullReferenceException(string message = "");
+
+}
+
+[Native("bolt::library::IndexOutOfRangeException")]
+public class IndexOutOfRangeException : SystemException
+{
+public:
+    IndexOutOfRangeException(string message = "");
+
+}
+
+[Native("bolt::library::KeyNotFoundException")]
+public class KeyNotFoundException : SystemException
+{
+public:
+    KeyNotFoundException(string message = "");
+
+}
+
+[Native("bolt::library::InvalidCastException")]
+public class InvalidCastException : SystemException
+{
+public:
+    InvalidCastException(string message = "");
+
+}
+
+[Native("bolt::library::FormatException")]
+public class FormatException : SystemException
+{
+public:
+    FormatException(string message = "");
+
+}
+
+[Native("bolt::library::ArithmeticException")]
+public class ArithmeticException : SystemException
+{
+public:
+    ArithmeticException(string message = "");
+
+}
+
+[Native("bolt::library::OverflowException")]
+public class OverflowException : ArithmeticException
+{
+public:
+    OverflowException(string message = "");
+
+}
+
+[Native("bolt::library::DivideByZeroException")]
+public class DivideByZeroException : ArithmeticException
+{
+public:
+    DivideByZeroException(string message = "");
+
+}
+
+[Native("bolt::library::IOException")]
+public class IOException : SystemException
+{
+public:
+    IOException(string message = "");
+
+}
+
+[Native("bolt::library::FileNotFoundException")]
+public class FileNotFoundException : IOException
+{
+public:
+    FileNotFoundException(string message = "");
+
+}
+
+[Native("bolt::library::DirectoryNotFoundException")]
+public class DirectoryNotFoundException : IOException
+{
+public:
+    DirectoryNotFoundException(string message = "");
+
+}
+
+[Native("bolt::library::EndOfStreamException")]
+public class EndOfStreamException : IOException
+{
+public:
+    EndOfStreamException(string message = "");
+
+}
+
+[Native("bolt::library::UnauthorizedAccessException")]
+public class UnauthorizedAccessException : SystemException
+{
+public:
+    UnauthorizedAccessException(string message = "");
+
+}
+
+[Native("bolt::library::TimeoutException")]
+public class TimeoutException : SystemException
+{
+public:
+    TimeoutException(string message = "");
+
+}
+
+[Native("bolt::library::OperationCanceledException")]
+public class OperationCanceledException : SystemException
+{
+public:
+    OperationCanceledException(string message = "");
+
+}
+
+[Native("bolt::library::JsonException")]
+public class JsonException : FormatException
+{
+public:
+    JsonException(string message = "");
+
+}
+
+[Native("bolt::library::ReflectionException")]
+public class ReflectionException : SystemException
+{
+public:
+    ReflectionException(string message = "");
+
+}
+
+[Native("bolt::library::OutOfMemoryException")]
+public class OutOfMemoryException : SystemException
+{
+public:
+    OutOfMemoryException(string message = "");
+
+}
+
+[Native("bolt::library::AssertionException")]
+public class AssertionException : SystemException
+{
+public:
+    AssertionException(string message = "");
+
+}
+
+[Native("bolt::library::SocketException")]
+public class SocketException : IOException
+{
+public:
+    SocketException(string message = "");
+}
+[Native("bolt::library::SocketWouldBlockException")]
+public class SocketWouldBlockException : SocketException
+{
+public:
+    SocketWouldBlockException(string message = "");
+}

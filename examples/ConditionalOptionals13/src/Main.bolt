@@ -1,0 +1,38 @@
+public class ExampleAttribute : System.Attribute {}
+[Example]
+public class Player {
+public:
+    int Score;
+    Player(int score) { Score = score; }
+    void AddPoint() { Score++; }
+}
+public static class Program {
+public:
+    Player? Find(bool present) {
+        if (present) return Player(10);
+        return null;
+    }
+    void Main() {
+#if Windows
+        Print("Windows");
+#elif Linux
+        Print("Linux");
+#elif MacOS
+        Print("macOS");
+#endif
+#if Debug
+        Print("Debug");
+#else
+        Print("Release");
+#endif
+#ifdef EXAMPLE
+        Player? player = Find(true);
+        if (player != null) {
+            player.AddPoint();
+            Print(player.Score);
+        }
+        int? optional = null;
+        Print(optional ?? 42);
+#endif
+    }
+}

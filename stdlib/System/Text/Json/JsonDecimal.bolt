@@ -1,0 +1,14 @@
+import Bolt.Runtime
+import System
+namespace System.Text.Json.Internal;
+
+public static class JsonDecimal {
+public:
+    double Parse(const byte[]& data, int offset, int end, bool negative) {
+        ulong bits = 0ul;
+        if (!DecimalParsing.TryMagnitude(data, negative ? offset + 1 : offset, end, false, bits))
+            throw JsonException("Invalid or out-of-range JSON number.");
+        if (negative) bits |= 9223372036854775808ul;
+        return Reinterpret<double>(bits);
+    }
+}

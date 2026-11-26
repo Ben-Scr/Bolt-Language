@@ -1,0 +1,46 @@
+import Bolt.Runtime
+namespace System.Memory;
+
+// Byte operations do not construct/copy/move nontrivial language objects.
+public static class Memory
+{
+public:
+    void Copy(byte* destination, const byte* source, ulong byteCount) { MemoryOps.Copy(destination, source, byteCount); }
+    void Move(byte* destination, const byte* source, ulong byteCount) { MemoryOps.Move(destination, source, byteCount); }
+    void Set(byte* destination, byte value, ulong byteCount) { MemoryOps.Set(destination, value, byteCount); }
+    int Compare(const byte* a, const byte* b, ulong byteCount) { return MemoryOps.Compare(a, b, byteCount); }
+    bool IsAligned(const byte* pointer, ulong alignment) { return MemoryOps.IsAligned(pointer, alignment); }
+    ulong AlignUp(ulong size, ulong alignment)
+    {
+        if (alignment == 0ul || (alignment & (alignment - 1ul)) != 0ul)
+            Bolt.Runtime.Failure.Argument("Alignment must be a nonzero power of two.");
+        return ((size + alignment - 1ul) / alignment) * alignment;
+    }
+    ulong ByteCount(long count, ulong elementSize)
+    {
+        if (count < 0l) Bolt.Runtime.Failure.Range("Element count cannot be negative.");
+        return (ulong)count * elementSize;
+    }
+}
+
+// An optional typed owner using Bolt's existing checked, deep-copy array storage.
+// Copy means an independent value; raw borrows never extend lifetime.
+public sealed class SafePointer<T>
+{
+private:
+    T[] storage;
+public:
+    SafePointer() {}
+    SafePointer(const T& value) { storage = [value]; }
+    static SafePointer<T> Create() { SafePointer<T> result; result.storage = new T[1]; return result; }
+    bool HasValue => storage.Length != 0;
+    T& Get() { if (!HasValue) Bolt.Runtime.Failure.InvalidOperation("SafePointer is empty."); return storage[0]; }
+    T* Borrow() { if (!HasValue) return null; return &storage[0]; }
+    void Reset() { storage = new T[0]; }
+}
+public static class SafePointers
+{
+public:
+    SafePointer<T> NewSafe<T>() { return SafePointer<T>.Create(); }
+    SafePointer<T> NewSafe<T>(const T& value) { return SafePointer<T>(value); }
+}

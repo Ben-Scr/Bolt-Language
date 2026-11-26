@@ -1,0 +1,5 @@
+
+class Base {public:Base(){Speak();} void Speak(){Console.WriteLine("base");}} class Derived:Base {public:Derived(){Speak();} void Speak(){Console.WriteLine("derived");}}
+static class Program { public: void Main() {
+Derived x;
+} }

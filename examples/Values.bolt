@@ -1,0 +1,27 @@
+import Console
+
+public class Vec2 {
+public:
+    float X;
+    float Y;
+    void Move(float x, float y) { X += x; Y += y; }
+}
+
+static class Program {
+public:
+    void Main() {
+        Vec2 a;
+        a.X = 5;
+        a.Y = 10;
+        Vec2 b = a; // Deep value copy, not a shared reference.
+        b.Move(100, 200);
+        Console.WriteLine("a: " + a.X + ", " + a.Y);
+        Console.WriteLine("b: " + b.X + ", " + b.Y);
+        const int limit = 4;
+        for (int i = 0; i < limit; ++i) {
+            if (i == 0) Console.WriteLine("zero");
+            elif (i == 1) Console.WriteLine("one");
+            else Console.WriteLine("other");
+        }
+    }
+}

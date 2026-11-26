@@ -1,0 +1,5 @@
+
+enum E:short {Zero=0}
+static class Program {public: void Main(){
+E e=Reinterpret<E>((ushort)65535);Print((int)e);Print(Reinterpret<ushort>(e));
+}}

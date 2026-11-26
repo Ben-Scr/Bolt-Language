@@ -1,0 +1,1 @@
+static class Program { public: void Main(){float n=Reinterpret<float>(2143289345u);Print(Reinterpret<uint>(n));Print(n!=n);Print(n==n);} }

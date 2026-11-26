@@ -1,0 +1,59 @@
+import System
+import Bolt.Runtime
+
+public static class Program {
+public:
+    int Next(int& calls) { calls++; return calls; }
+
+    int Shorten(int& limit) { --limit; return limit; }
+
+    int Main() {
+        Buffer<int> values;
+        int end = 21;
+        for (int i = -11; i < end; ++i) values.Add(i * 3);
+        if (values.Count != 32) return 1;
+        for (int i = 0; i < values.Count; i++)
+            if (values[i] != (i - 11) * 3) return 2;
+        int capacity = values.Capacity;
+        for (int i = 2; i < 2; i++) values.Add(i);
+        if (values.Count != 32 || values.Capacity != capacity) return 3;
+        for (int i = 2147483645; i < 2147483647; i++) values.Add(i);
+        if (values[33] != 2147483646) return 4;
+
+        values.Clear();
+        values.Reserve(32);
+        bool failed = false;
+        try {
+            for (int i = 0; i < 20; i++) values.Add(24 / (i - 6));
+        } catch (Exception error) { failed = true; }
+        if (!failed || values.Count != 6 || values[0] != -4 || values[5] != -24) return 5;
+        failed = false;
+        try {
+            for (int i = 0; i < 9; i++) values.Add(2147483645 + i);
+        } catch (Exception error) { failed = true; }
+        if (!failed || values.Count != 9 || values[8] != 2147483647) return 6;
+
+        failed = false;
+        try {
+            for (int value : values) {
+                for (int i = 0; i < 5; ++i) values.Add(i);
+            }
+        } catch (Exception error) { failed = true; }
+        if (!failed || values.Count != 14) return 7;
+        int calls = 0;
+        for (int i = 0; i < 11; i++) values.Add(Next(calls));
+        if (calls != 11 || values.Count != 25 || values[24] != 11) return 8;
+        int bound = 10;
+        for (int i = 0; i < bound; i++) values.Add(Shorten(bound));
+        if (bound != 5 || values.Count != 30 || values[29] != 5) return 9;
+
+        Buffer<int> low;
+        for (int i = int.MinValue; i < -2147483645; i++) low.Add(i);
+        if (low.Count != 3 || low[0] != int.MinValue || low[2] != -2147483646) return 10;
+        // A reference may be changed during the loop by an externally visible call.
+        int& boundRef = bound;
+        for (int i = 0; i < boundRef; i++) low.Add(Shorten(bound));
+        if (bound != 2 || low.Count != 6) return 11;
+        return 0;
+    }
+}

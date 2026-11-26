@@ -1,0 +1,3 @@
+static class Program { public: void Main() {
+string code="class Point:IStringable{public:int X;Point(int x){X=x;}string ToString(){return $\"Point({X})\";}static Point operator +(Point a,Point b){return Point(a.X+b.X);}}static class Program{public:void Main(){Point a=Point(3);Point b=Point(4);IStringable t=a+b;Print(t);Print((int)0.5);Print(Reinterpret<uint>(1.0f));}}"; Runtime.ExecuteProgram(code); Runtime.ExecuteProgramJit(code);
+}}

@@ -1,0 +1,142 @@
+import System
+import System.Reflection
+import System.Text.Json
+import System.Collections.Generic
+
+namespace MetadataTest;
+[Reflect] private struct PrivateValue { public: int Id = 12; }
+[Reflect] public class Holder { private: [Reflect] PrivateValue member; }
+[Reflect] public interface ICounter { int Read(); }
+public struct Counter : ICounter { public: int Read() { return 14; } }
+[Reflect] public class Base {
+private:
+    [Reflect] [JsonName("x")] int hidden = 4;
+public:
+    const int Fixed = 5;
+    int Number;
+    virtual int ReadNumber() { return Number; }
+}
+[Reflect] public class Entry : Base {
+private:
+    int observed = 0;
+public:
+    int Changed { get { observed++; return observed; } }
+    int Calls => observed;
+    override int ReadNumber() { return Number+1; }
+    [JsonIgnore] int Secret = 8;
+    string Label { get; set; }
+    static string Select(int n) { return (string)n; }
+    string Select(string s) { return s; }
+    void Bump(int& n) { n++; }
+    int& Borrow() { return Number; }
+}
+[Reflect] public struct Duplicate {
+    public: [JsonName("same")] int A;
+    [JsonName("same")] int B;
+}
+[Reflect] public class Ambiguous {
+public:
+    int Call(int n) { return 1; }
+    int Call(int& n) { return 2; }
+}
+public enum Code : ushort { High = 60000 }
+public static class Program {
+private:
+    void Check(bool ok, string name) { if (!ok) throw Exception(name); }
+public:
+    void Main() {
+        Holder holder;
+        PrivateValue member = Reflection.Get<Holder,PrivateValue>(holder,"member");
+        Check(Json.Serialize<PrivateValue>(member) == "{\"Id\":12}", "same-file private argument");
+        PrivateValue[] privateArray = Json.Deserialize<PrivateValue[]>("[{\"Id\":21}]");
+        Check(privateArray[0].Id == 21, "private array elements");
+        Holder restoredHolder = Json.Deserialize<Holder>(Json.Serialize<Holder>(holder));
+        Check(Reflection.Get<Holder,PrivateValue>(restoredHolder,"member").Id == 12, "private member type");
+        Entry e;
+        Check(Reflection.IsReflected<Entry>() && !Reflection.IsReflected<int>(), "type opt-in");
+        TypeInfo info = Reflection.GetType<Entry>();
+        Check(info.IsClass && !info.IsStruct && info.Namespace == "MetadataTest" &&
+              info.Name == "MetadataTest.Entry" && info.ToString() == info.Name && (string)info == info.Name, "type identity");
+        Check(info.Attributes[0] == "Reflect" && ("type=" + info) == "type=MetadataTest.Entry", "type attributes");
+        Check(info.HasField("hidden") && !info.HasProperty("hidden") && !info.HasField("Label"), "member kinds");
+        FieldInfo field = info.GetField("hidden");
+        Check(field.Name == "hidden" && field.TypeName == "int" && !field.IsReadOnly && !field.IsProperty &&
+              field.Attributes[1] == "JsonName(x)" && field.ToString() == "int hidden" && (string)field == field.ToString(), "field metadata");
+        Check(info.GetField("Fixed").IsReadOnly && info.HasProperty("Label") && info.GetProperty("Changed").IsReadOnly &&
+              info.GetFields().Length == 4 && info.GetProperties().Length == 3, "inherited metadata");
+        bool found = false;
+        for (MethodInfo m : info.GetMethods()) {
+            if (m.Name == "Select" && m.IsStatic) {
+                Check(m.ReturnType == "string" && m.ParameterTypes[0] == "int" &&
+                      m.ToString() == "string Select(int)" && (string)m == m.ToString() && m.Attributes.Length == 0, "method metadata");
+                found = true;
+            }
+        }
+        Check(found && info.HasMethod("Select") && !info.HasMethod("get_Label"), "method enumeration");
+        Reflection.Set<Entry,int>(e,"hidden",9);
+        Check(Reflection.Get<Entry,int>(e,"hidden") == 9, "private inherited field");
+        Reflection.Set<Entry,string>(e,"Label","named");
+        Check(Reflection.Get<Entry,int>(e,"Changed") == 1 && e.Calls == 0, "snapshot getter");
+        int& alias = Reflection.Invoke<int&,Entry>(e,"Borrow"); alias = 31;
+        Reflection.Invoke<void,Entry,int&>(e,"Bump",alias);
+        Check(e.Number == 32 && Reflection.Invoke<string,Entry,int>(e,"Select",5) == "5" &&
+              Reflection.Invoke<string,Entry,string>(e,"Select","s") == "s", "dynamic call");
+        Base& baseValue = e;
+        Check(Reflection.Invoke<int,Base>(baseValue,"ReadNumber") == 33, "virtual dispatch");
+        ICounter counter = Counter();
+        Check(Reflection.Invoke<int,ICounter>(counter,"Read") == 14, "interface dispatch");
+        int errors = 0;
+        try { info.GetField("Label"); } catch (ReflectionException& ex) { errors++; }
+        try { info.GetProperty("hidden"); } catch (ReflectionException& ex) { errors++; }
+        try { Reflection.Get<Entry,string>(e,"hidden"); } catch (InvalidCastException& ex) { errors++; }
+        try { Reflection.Set<Entry,string>(e,"Fixed","bad"); } catch (InvalidOperationException& ex) { errors++; }
+        try { Reflection.Invoke<double,Entry>(e,"Borrow"); } catch (ReflectionException& ex) { errors++; }
+        try { Reflection.GetType<int>(); } catch (ReflectionException& ex) { errors++; }
+        try { TypeInfo empty; string name = empty.Name; } catch (ReflectionException& ex) { errors++; }
+        Ambiguous overload; int argument = 1;
+        try { Reflection.Invoke<int,Ambiguous,int>(overload,"Call",argument); } catch (ReflectionException& ex) { errors++; }
+        Check(errors == 8, "reflection errors");
+
+        Bolt.Runtime.ValueTree tree;
+        Bolt.Runtime.ValueTree other = tree;
+        other.SetRoot(other.Signed(14l));
+        Check(tree.Integer(tree.Root()) == 14l, "shared tree storage");
+        string json = Json.Serialize<Entry>(e);
+        Check(json == "{\"Calls\":0,\"Changed\":1,\"Fixed\":5,\"Label\":\"named\",\"Number\":32,\"x\":9}" && e.Calls == 0, "reflected wire names");
+        Entry copy = Json.Deserialize<Entry>("{\"x\":19,\"extra\":false,\"Changed\":90,\"Label\":\"ok\"}");
+        Check(Reflection.Get<Entry,int>(copy,"hidden") == 19 && copy.Calls == 0 && copy.Secret == 8 && copy.Label == "ok", "reflected restore");
+        try { Json.Deserialize<Entry>(json); } catch (JsonException& ex) { errors++; }
+        try { Json.Deserialize<byte>("256"); } catch (JsonException& ex) { errors++; }
+        try { Json.Deserialize<ulong>("18446744073709551616.0"); } catch (JsonException& ex) { errors++; }
+        try { Json.Deserialize<Duplicate>("{}"); } catch (JsonException& ex) { errors++; }
+        try { Duplicate d; Json.Serialize<Duplicate>(d); } catch (JsonException& ex) { errors++; }
+        Check(errors == 13, "typed JSON errors");
+        int? absent = null, some = 37;
+        Check(Json.Serialize<int?>(absent) == "null" && Json.Serialize<int?>(some) == "37" &&
+              Json.Deserialize<int?>("null") == null && Json.Deserialize<int?>("37").Value == 37, "nullable");
+        Check(Json.Deserialize<Code>(Json.Serialize<Code>(Code.High)) == Code.High, "enum");
+        Check(Json.Deserialize<char>(Json.Serialize<char>('😀')) == '😀', "Unicode scalar");
+        Check(Json.Deserialize<int>("12.0") == 12 && Json.Deserialize<double>("5e-324") > 0.0, "exact decimal conversions");
+        Check(!Json.IsValid("2e-324") && !Json.IsValid("1.8e308"), "range errors");
+        string midpoint = "1.00000000000000011102230246251565404236316680908203125";
+        Check(Json.Deserialize<double>(midpoint) == 1.0, "round ties to even");
+        for (int i=0; i<800; i++) midpoint += "0";
+        Check(Json.Deserialize<double>(midpoint+"1") == 1.0000000000000002, "sticky decimal tail");
+        byte[] valid = Json.SerializeBinary<string>("Ä😀");
+        for (int n=0; n<valid.Length; n++) {
+            byte[] prefix = new byte[n];
+            for (int i=0; i<n; i++) prefix[i] = valid[i];
+            bool rejected = false;
+            try { Json.DeserializeBinary<string>(prefix); } catch (JsonException& ex) { rejected = true; }
+            Check(rejected, "truncated binary");
+        }
+        byte[] invalid = [(byte)195,(byte)40];
+        string malformed = Bolt.Runtime.NativeString.FromUtf8(&invalid[0],2ul);
+        bool badText = false;
+        try { Json.SerializeBytes<string>(malformed); } catch (JsonException& ex) { badText = true; }
+        Check(badText, "malformed UTF-8 on serialization");
+        List<int> numbers; numbers.Add(9); numbers.Add(4);
+        List<int> restored = Json.DeserializeBinary<List<int>>(Json.SerializeBinary<List<int>>(numbers));
+        Check(restored[1] == 4, "sequence");
+    }
+}

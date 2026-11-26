@@ -1,0 +1,185 @@
+[
+  {
+    "name": "scalar-math",
+    "file": "tests/native/scalar-math.bolt",
+    "stdout": ""
+  },
+  {
+    "name": "string-snapshot",
+    "file": "tests/native/string-snapshot.bolt",
+    "stdout": ""
+  },
+  {
+    "name": "text-encoding",
+    "file": "tests/native/text-encoding.bolt",
+    "stdout": ""
+  },
+  {
+    "name": "numeric-parsing",
+    "file": "tests/native/numeric-parsing.bolt",
+    "stdout": "-128\n32767\n-2147483648\n-9223372036854775808\n255\n65535\n4294967295\n18446744073709551615\n125\n-0.5\n42\ntrue\n41\ninvalid\nfalse\n41\ntrue\n23\n"
+  },
+  {
+    "name": "numeric-parsing-invalid",
+    "file": "tests/native/numeric-parsing-invalid.bolt",
+    "stdout": "",
+    "error": "numeric text"
+  },
+  {
+    "name": "runtime-free-numeric-parsing",
+    "file": "tests/native/runtime-free-numeric-parsing.bolt",
+    "stdout": ""
+  },
+  {
+    "name": "runtime-free-float-formatting",
+    "file": "tests/native/runtime-free-float-formatting.bolt",
+    "stdout": ""
+  },
+  {
+    "name": "runtime-free-integer-formatting",
+    "file": "tests/native/runtime-free-integer-formatting.bolt",
+    "stdout": ""
+  },
+  {
+    "name": "runtime-free-bool-char-formatting",
+    "file": "tests/native/runtime-free-bool-char-formatting.bolt",
+    "stdout": ""
+  },
+  {
+    "name": "hello",
+    "file": "examples/Hello.bolt",
+    "stdin": "Bolt input\n",
+    "stdout": "Hello World!\nYou typed: Bolt input\n"
+  },
+  {
+    "name": "requested-syntax",
+    "file": "examples/Program.bolt",
+    "stdout": "5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n5, 10\n"
+  },
+  {
+    "name": "values",
+    "file": "examples/Values.bolt",
+    "stdout": "a: 5, 10\nb: 105, 210\nzero\none\nother\nother\n"
+  },
+  {
+    "name": "runtime",
+    "file": "examples/Runtime.bolt",
+    "stdout": "This outer program can be compiled to a native executable.\n15\nRuntime program returned: 42\n"
+  },
+  {
+    "name": "types",
+    "file": "examples/Types.bolt",
+    "stdout": "Fixed-width numbers\n2147483647, -32768, 32767, -9223372036854775808\n255, 65535, 4294967295, 18446744073709551615\n1.5, 2.75, false\n"
+  },
+  {
+    "name": "imports",
+    "file": "examples/Imports.bolt",
+    "stdout": "25\n"
+  },
+  {
+    "name": "semantics",
+    "file": "tests/cases/Semantics.bolt",
+    "stdout": "5,6,33,3\n7\n7\n8\n4,5,9\n55\n4\n1\n23\n8\n8\n7\n10\n6\ntrue\n4\n-1\n0\n-2\ntrue\nflag=true\n15,20\na\u0000b\n"
+  },
+  {
+    "name": "runtime-file",
+    "file": "tests/cases/RuntimeFile.bolt",
+    "stdout": "from file\nchild=7\n"
+  },
+  {
+    "name": "division-zero",
+    "file": "tests/cases/division-zero.bolt",
+    "error": "division by zero",
+    "stdout": ""
+  },
+  {
+    "name": "overflow-add",
+    "file": "tests/cases/overflow-add.bolt",
+    "error": "overflow",
+    "stdout": ""
+  },
+  {
+    "name": "overflow-multiply",
+    "file": "tests/cases/overflow-multiply.bolt",
+    "error": "overflow",
+    "stdout": ""
+  },
+  {
+    "name": "overflow-divide",
+    "file": "tests/cases/overflow-divide.bolt",
+    "error": "overflow",
+    "stdout": ""
+  },
+  {
+    "name": "overflow-negate",
+    "file": "tests/cases/overflow-negate.bolt",
+    "error": "overflow",
+    "stdout": ""
+  },
+  {
+    "name": "unsigned-underflow",
+    "file": "tests/cases/unsigned-underflow.bolt",
+    "error": "underflow",
+    "stdout": ""
+  },
+  {
+    "name": "narrowing",
+    "file": "tests/cases/narrowing.bolt",
+    "error": "out of range",
+    "stdout": ""
+  },
+  {
+    "name": "float-to-ulong",
+    "file": "tests/cases/float-to-ulong.bolt",
+    "error": "out of range",
+    "stdout": ""
+  },
+  {
+    "name": "float-overflow",
+    "file": "tests/cases/float-overflow.bolt",
+    "error": "overflow",
+    "stdout": ""
+  },
+  {
+    "name": "static-initializer",
+    "file": "tests/cases/static-initializer.bolt",
+    "error": "division by zero",
+    "stdout": ""
+  },
+  {
+    "name": "argument-conversion-order",
+    "file": "tests/cases/argument-conversion-order.bolt",
+    "error": "out of range",
+    "stdout": ""
+  },
+  {
+    "name": "runtime-isolation",
+    "file": "tests/cases/runtime-isolation.bolt",
+    "error": "unknown identifier",
+    "stdout": ""
+  },
+  {
+    "name": "runtime-budget",
+    "file": "tests/cases/runtime-budget.bolt",
+    "error": "budget",
+    "stdout": ""
+  },
+  {
+    "name": "private",
+    "file": "tests/cases/private.bolt",
+    "error": "private",
+    "phase": "compile"
+  },
+  {
+    "name": "const",
+    "file": "tests/cases/const.bolt",
+    "error": "const",
+    "phase": "compile"
+  },
+  {
+    "name": "cycle-layout",
+    "file": "tests/cases/cycle-layout.bolt",
+    "error": "recursive by-value",
+    "phase": "compile"
+  }
+]

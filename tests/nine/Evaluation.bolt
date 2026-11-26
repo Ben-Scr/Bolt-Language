@@ -1,0 +1,37 @@
+public class Store {
+private:
+    int number = 2;
+    int[] data = new int[2];
+    int* pointer;
+public:
+    int Number { get { return number; } set { number = value > 5 ? 5 : value; } }
+    int this[int index] { get { return data[index]; } set { data[index] = value; } }
+    int* Pointer { get { return pointer; } set { pointer = value; } }
+    int& Reference { get { return number; } }
+}
+public static class Program {
+public:
+    static Store store;
+    static int receivers, indices, rhs, integer = 17;
+    Store& Receiver() { receivers++; return store; }
+    int Index() { indices++; return 1; }
+    int RHS() { rhs++; return 7; }
+    int* PointerRHS() { rhs++; return &integer; }
+    void Main() {
+        int result = Receiver().Number += RHS();
+        Print($"{result}:{store.Number}:{receivers}:{indices}:{rhs}");
+        receivers = 0; indices = 0; rhs = 0;
+        result = Receiver()[Index()] += RHS();
+        Print($"{result}:{store[1]}:{receivers}:{indices}:{rhs}");
+        receivers = 0; indices = 0; rhs = 0;
+        result = Receiver()[Index()]++;
+        Print($"{result}:{store[1]}:{receivers}:{indices}:{rhs}");
+        receivers = 0; indices = 0; rhs = 0;
+        Receiver().Pointer ??= PointerRHS();
+        Receiver().Pointer ??= PointerRHS();
+        Print($"{*store.Pointer}:{receivers}:{rhs}");
+        int& reference = store.Reference;
+        reference = 4;
+        Print(store.Number);
+    }
+}

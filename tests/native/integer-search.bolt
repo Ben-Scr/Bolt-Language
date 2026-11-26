@@ -1,0 +1,93 @@
+import System.Collections.Generic
+static class Program {
+public:
+    int Find(const int[]& values, int wanted) {
+        for (int i = 0; i < values.Length; i++)
+            if (values[i] == wanted) return i;
+        return -1;
+    }
+    int FindWord(const ushort[]& values, ushort wanted) {
+        for (int i = 0; i < values.Length; ++i)
+            if (wanted == values[i]) { return i; }
+        return -1;
+    }
+    int FindByte(const byte[]& values, byte wanted) {
+        for (int i = 0; i < values.Length; i++)
+            if (values[i] == wanted) return i;
+        return -1;
+    }
+    int SameIndex(const int[]& v) {
+        for (int i = 0; i < v.Length; i++)
+            if (v[i] == i) return i;
+        return -1;
+    }
+    int Other(const int[]& bound, const int[]& source, int wanted) {
+        for (int i = 0; i < bound.Length; i++)
+            if (source[i] == wanted) return i;
+        return -1;
+    }
+    int ThroughFinally(const int[]& v, int wanted, int& exits) {
+        try {
+            for (int i = 0; i < v.Length; i++)
+                if (v[i] == wanted) return i;
+        } finally { exits++; }
+        return -1;
+    }
+    void Main() {
+        bool ok = true;
+        for (int n = 0; n <= 140; n++) {
+            int[] ints = new int[n];
+            ushort[] words = new ushort[n];
+            byte[] bytes = new byte[n];
+            for (int i = 0; i < n; ++i) {
+                ints[i] = -(i % 11) - 1;
+                words[i] = (ushort)(65535 - i % 13);
+                bytes[i] = (byte)(255 - i % 7);
+            }
+            for (int k = 0; k < 16; k++) {
+                int a = k < n && k < 11 ? k : -1;
+                int w = k < n && k < 13 ? k : -1;
+                int b = k < n && k < 7 ? k : -1;
+                ok = ok && Find(ints, -k - 1) == a && FindWord(words, (ushort)(65535-k)) == w;
+                ok = ok && FindByte(bytes, (byte)(255-k)) == b;
+            }
+            if (n > 0) {
+                int last = n - 1;
+                ints[last] = 42;
+                words[last] = 42;
+                bytes[last] = 42;
+                ok = ok && Find(ints,42) == last && FindWord(words,(ushort)42) == last;
+                ok = ok && FindByte(bytes,(byte)42) == last;
+                if (last >= 8) {
+                    ints[last-8] = 42;
+                    words[last-8] = 42;
+                    bytes[last-8] = 42;
+                    ok = ok && Find(ints,42) == last-8 && FindWord(words,(ushort)42) == last-8;
+                    ok = ok && FindByte(bytes,(byte)42) == last-8;
+                }
+            }
+        }
+        int[] values = new int[21];
+        values[0] = -1; values[8] = 8;
+        int[] shortBound = new int[5];
+        int exits = 0;
+        ok = ok && SameIndex(values) == 8 && Other(shortBound, values, 8) == -1;
+        ok = ok && ThroughFinally(values, 8, exits) == 8 && ThroughFinally(values, 33, exits) == -1 && exits == 2;
+        List<long> wide;
+        wide.Add(4294967297L); wide.Add(1L); wide.Add(4294967297L);
+        ok = ok && wide.IndexOf(1L) == 1 && wide.IndexOf(4294967297L) == 0;
+        List<ulong> ids;
+        for (int i = 0; i < 257; i++)
+            ids.Add(((ulong)(i % 17) << 32) | (ulong)(i % 13));
+        for (int i = 0; i < 257; i++)
+            ok = ok && ids.IndexOf(((ulong)(i % 17) << 32) | (ulong)(i % 13)) == i % 221;
+        ok = ok && ids.IndexOf((ulong)17 << 32) == -1 && ids.IndexOf((ulong)13) == -1;
+#ifdef BoltStandaloneCore
+        byte[] packed = new byte[9];
+        for (int i = 1; i < 9; i++) packed[i] = (byte)33;
+        ids.Add(2387225703656530209ul);
+        ok = ok && ids.IndexOf(*((ulong*)&packed[1])) == 257;
+#endif
+        Print(ok);
+    }
+}

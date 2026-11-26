@@ -1,0 +1,18 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Bolt mit Quellzeilen bauen",
+      "type": "process",
+      "command": "bolt",
+      "args": [
+        "build", "${workspaceFolder}",
+        "--debug", "--debug-info", "--backend", "fast", "--require-native",
+        "-o", "${workspaceFolder}/bin/Debug/BoltDebug"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": "$bolt",
+      "group": "build"
+    }
+  ]
+}

@@ -1,0 +1,201 @@
+#if Windows && BoltStandaloneCore
+import System
+import System.IO
+import System.Collections.Generic
+namespace Bolt.Runtime.IO;
+
+static class WindowsPath
+{
+public:
+    byte[] Wide(const string& path)
+    {
+        ulong length = 0ul;
+        const byte* data = Bolt.Runtime.TypedMemory.TextData(path, length);
+        if (length == 0ul) throw ArgumentException("The path must not be empty.");
+        for (ulong i = 0ul; i < length; i++) {
+            if (data[i] == 0) throw ArgumentException("The path contains a NUL character.");
+        }
+        // A UTF-8 byte produces at most one UTF-16 unit. Size common paths
+        // directly and reserve one zero-initialized unit for the terminator.
+        int bytes = (int)length;
+        int units = bytes;
+        if (units >= int.MaxValue / 2) {
+            units = Bolt.Runtime.Windows.MultiByteToWideChar(65001u, 8u, (byte*)data, bytes, null, 0);
+            if (units == 0) throw FormatException("Invalid UTF-8 path.");
+        }
+        byte[] wide = new byte[(units + 1) * 2];
+        if (Bolt.Runtime.Windows.MultiByteToWideChar(65001u, 8u, (byte*)data, bytes, (ushort*)&wide[0], units) == 0)
+            throw FormatException("Invalid UTF-8 path.");
+        return wide;
+    }
+    void Fail(uint code, string operation, const string& path)
+    {
+        string message = operation + " '" + path + "': OS error " + (string)code;
+        if (code == 2u || code == 3u) throw FileNotFoundException(message);
+        if (code == 5u || code == 32u) throw UnauthorizedAccessException(message);
+        throw IOException(message);
+    }
+    // GetFileAttributesW describes a reparse point itself. For existence and
+    // type checks, open its target, including directories, with zero access.
+    uint TargetAttributes(ushort* name, uint attributes, uint& error)
+    {
+        if (attributes == uint.MaxValue || (attributes & 1024u) == 0u) return attributes;
+        void* handle = Bolt.Runtime.StandaloneWindows.OpenFile(name, 0u, 7u, null, 3u, 33554432u, null);
+        if (*((long*)&handle) == -1l) {
+            error = Bolt.Runtime.Windows.GetLastError();
+            return uint.MaxValue;
+        }
+        try {
+            // FILE_ATTRIBUTE_TAG_INFO holds two DWORDs.
+            ulong info = 0ul;
+            if (Bolt.Runtime.StandaloneWindows.FileType(handle) != 1u) return 64u;
+            if (Bolt.Runtime.StandaloneWindows.FileInformation(handle, 9, &info, 8u) == 0) {
+                error = Bolt.Runtime.Windows.GetLastError();
+                return uint.MaxValue;
+            }
+            return *((uint*)&info);
+        } finally { Bolt.Runtime.StandaloneWindows.Close(handle); }
+    }
+    bool Exists(const string& path, bool directory)
+    {
+        if (path == "") return false;
+        byte[] wide = Wide(path);
+        ushort* name = (ushort*)&wide[0];
+        uint error = 0u;
+        uint attributes = TargetAttributes(name, Bolt.Runtime.StandaloneWindows.Attributes(name), error);
+        return attributes != uint.MaxValue && (attributes & 64u) == 0u && ((attributes & 16u) != 0u) == directory;
+    }
+}
+
+public static class FileOps
+{
+public:
+    bool Exists(string path) { return WindowsPath.Exists(path, false); }
+    void Delete(string path)
+    {
+        byte[] wide = WindowsPath.Wide(path);
+        ushort* name = (ushort*)&wide[0];
+        uint attributes = Bolt.Runtime.StandaloneWindows.Attributes(name);
+        if (attributes != uint.MaxValue && (attributes & 16u) != 0u) {
+            uint error = 0u;
+            if (WindowsPath.TargetAttributes(name, attributes, error) != uint.MaxValue)
+                throw IOException("Use Directory.Delete for a directory.");
+            if (error != 2u && error != 3u) WindowsPath.Fail(error, "Inspect", path);
+            if (Bolt.Runtime.StandaloneWindows.RemoveDirectory(name) != 0) return;
+        } else if (Bolt.Runtime.StandaloneWindows.DeleteFile(name) != 0) return;
+        uint code = Bolt.Runtime.Windows.GetLastError();
+        if (code != 2u && code != 3u) WindowsPath.Fail(code, "Delete", path);
+    }
+    void Copy(string source, string destination, bool overwrite)
+    {
+        byte[] from = WindowsPath.Wide(source), to = WindowsPath.Wide(destination);
+        if (Bolt.Runtime.StandaloneWindows.CopyFile((ushort*)&from[0], (ushort*)&to[0], overwrite ? 0 : 1) == 0)
+            WindowsPath.Fail(Bolt.Runtime.Windows.GetLastError(), "Copy", source);
+    }
+    void Move(string source, string destination, bool overwrite)
+    {
+        byte[] from = WindowsPath.Wide(source), to = WindowsPath.Wide(destination);
+        ushort* name = (ushort*)&from[0];
+        uint attributes = Bolt.Runtime.StandaloneWindows.Attributes(name);
+        if (attributes == uint.MaxValue) WindowsPath.Fail(Bolt.Runtime.Windows.GetLastError(), "Move", source);
+        uint error = 0u;
+        attributes = WindowsPath.TargetAttributes(name, attributes, error);
+        if (error != 0u) WindowsPath.Fail(error, "Move", source);
+        if (attributes == uint.MaxValue || (attributes & 80u) != 0u)
+            throw FileNotFoundException("The source file does not exist or is not a regular file.");
+        if (Bolt.Runtime.StandaloneWindows.MoveFile(name, (ushort*)&to[0], overwrite ? 1u : 0u) == 0)
+            WindowsPath.Fail(Bolt.Runtime.Windows.GetLastError(), "Move", source);
+    }
+}
+
+public static class DirectoryOps
+{
+public:
+    bool IsDirectory(string path) { return WindowsPath.Exists(path, true); }
+    bool IsLink(string path)
+    {
+        byte[] wide = WindowsPath.Wide(path);
+        uint attributes = Bolt.Runtime.StandaloneWindows.Attributes((ushort*)&wide[0]);
+        if (attributes == uint.MaxValue) WindowsPath.Fail(Bolt.Runtime.Windows.GetLastError(), "Inspect entry", path);
+        return (attributes & 1024u) != 0u;
+    }
+    void CreateOne(string path)
+    {
+        byte[] wide = WindowsPath.Wide(path);
+        if (Bolt.Runtime.StandaloneWindows.MakeDirectory((ushort*)&wide[0], null) != 0) return;
+        uint code = Bolt.Runtime.Windows.GetLastError();
+        if (code == 183u && IsDirectory(path)) return;
+        WindowsPath.Fail(code, "Create directory", path);
+    }
+    void RemoveOne(string path)
+    {
+        byte[] wide = WindowsPath.Wide(path);
+        ushort* name = (ushort*)&wide[0];
+        uint attributes = Bolt.Runtime.StandaloneWindows.Attributes(name);
+        if (attributes == uint.MaxValue) WindowsPath.Fail(Bolt.Runtime.Windows.GetLastError(), "Inspect entry", path);
+        int success = (attributes & 16u) != 0u ? Bolt.Runtime.StandaloneWindows.RemoveDirectory(name) : Bolt.Runtime.StandaloneWindows.DeleteFile(name);
+        if (success == 0) WindowsPath.Fail(Bolt.Runtime.Windows.GetLastError(), "Remove entry", path);
+    }
+    void Move(string source, string destination)
+    {
+        if (!IsDirectory(source)) throw DirectoryNotFoundException("Source directory not found.");
+        byte[] from = WindowsPath.Wide(source), to = WindowsPath.Wide(destination);
+        if (Bolt.Runtime.StandaloneWindows.MoveFile((ushort*)&from[0], (ushort*)&to[0], 0u) == 0)
+            WindowsPath.Fail(Bolt.Runtime.Windows.GetLastError(), "Move directory", source);
+    }
+    string Current() { return Environment.CurrentDirectory; }
+    void Current(string path)
+    {
+        byte[] name = WindowsPath.Wide(path);
+        if (Bolt.Runtime.StandaloneWindows.SetDirectory((ushort*)&name[0]) == 0)
+            WindowsPath.Fail(Bolt.Runtime.Windows.GetLastError(), "Change directory", path);
+    }
+    DirectoryEntry[] Entries(string path)
+    {
+        byte[] wideRoot = WindowsPath.Wide(path);
+        ushort* root = (ushort*)&wideRoot[0];
+        uint attributes = Bolt.Runtime.StandaloneWindows.Attributes(root);
+        if (attributes == uint.MaxValue) WindowsPath.Fail(Bolt.Runtime.Windows.GetLastError(), "List directory", path);
+        uint targetError = 0u;
+        attributes = WindowsPath.TargetAttributes(root, attributes, targetError);
+        if (targetError != 0u) WindowsPath.Fail(targetError, "List directory", path);
+        if ((attributes & 16u) == 0u) throw DirectoryNotFoundException("Not a directory: " + path);
+        byte[] pattern = WindowsPath.Wide(Path.Combine(path, "*"));
+        // WIN32_FIND_DATAW is 592 bytes; cFileName starts at byte 44.
+        uint[] data = new uint[148];
+        List<DirectoryEntry> entries;
+        void* search = Bolt.Runtime.StandaloneWindows.FindFirst((ushort*)&pattern[0], &data[0]);
+        if (*((long*)&search) == -1l) {
+            uint code = Bolt.Runtime.Windows.GetLastError();
+            if (code == 2u) return entries.ToArray();
+            WindowsPath.Fail(code, "List directory", path);
+        }
+        try {
+            while (true) {
+                string name = Bolt.Runtime.SystemCalls.FromWide((ushort*)&data[11], -1);
+                if (name != "." && name != "..") {
+                    DirectoryEntry entry;
+                    entry.Path = Path.Combine(path, name);
+                    attributes = data[0];
+                    entry.IsLink = (attributes & 1024u) != 0u;
+                    if (entry.IsLink) {
+                        byte[] wide = WindowsPath.Wide(entry.Path);
+                        uint error = 0u;
+                        attributes = WindowsPath.TargetAttributes((ushort*)&wide[0], attributes, error);
+                        if (error != 0u && error != 2u && error != 3u) WindowsPath.Fail(error, "List directory", entry.Path);
+                    }
+                    entry.IsDirectory = attributes != uint.MaxValue && (attributes & 16u) != 0u;
+                    entry.IsFile = attributes != uint.MaxValue && (attributes & 80u) == 0u;
+                    entries.Add(entry);
+                }
+                if (Bolt.Runtime.StandaloneWindows.FindNext(search, &data[0]) == 0) {
+                    uint code = Bolt.Runtime.Windows.GetLastError();
+                    if (code != 18u) WindowsPath.Fail(code, "List directory", path);
+                    break;
+                }
+            }
+        } finally { Bolt.Runtime.StandaloneWindows.EndSearch(search); }
+        return entries.ToArray();
+    }
+}
+#endif

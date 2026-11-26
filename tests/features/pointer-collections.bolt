@@ -1,0 +1,17 @@
+import System.Collections.Generic
+static class Program {public:void Main(){
+ int x=1;
+ const int*[] a={&x};
+ *a[0]=5;
+ Console.WriteLine(x);
+ List<int> l;
+ const List<int>* p=&l;
+ p->Add(9);
+ Console.WriteLine(p->Count);
+ Console.WriteLine(l[0]);
+ int[] values={1,2};
+ int[]* arrayPointer=&values;
+ Console.WriteLine(arrayPointer->Length);
+ string text="abc"; string* textPointer=&text;
+ Console.WriteLine(textPointer->Length);
+}}

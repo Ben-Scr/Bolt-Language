@@ -1,0 +1,73 @@
+import System
+import System.Collections.Generic
+import System.Text
+namespace Bolt.Runtime;
+
+static class ProcessEnvironment {
+public:
+    string Key(const string& entry) {
+        // Inherited Windows entries such as =C:=... name per-drive directories.
+        int split=entry.IndexOf('=',entry.StartsWith("=")?1:0);
+        return split<0?"":entry.Substring(0,split);
+    }
+    int Compare(string left,string right) {
+#ifdef Windows
+        byte[] a=UTF16LEEncoding.GetBytes(left+"\0"), b=UTF16LEEncoding.GetBytes(right+"\0");
+        int order=Bolt.Runtime.ProcessApi.CompareKeys((ushort*)&a[0],-1,(ushort*)&b[0],-1,1);
+        if(order==0)throw IOException("Cannot compare environment names.");
+        return order-2;
+#else
+        return left==right ? 0 : 1;
+#endif
+    }
+    string[] Build(const string[]& overrides,bool inherit) {
+        List<string> entries;
+        if(inherit){
+#ifdef Windows
+            ushort* block=Bolt.Runtime.ProcessApi.Environment();
+            if(block==null)throw IOException("Cannot read process environment.");
+            try {
+                ushort* p=block;
+                while(*p!=0){int n=0;while(p[n]!=0)n++;entries.Add(SystemCalls.FromWide(p,n));p=&p[n+1];}
+            } finally { Bolt.Runtime.ProcessApi.FreeEnvironment(block); }
+#else
+#if MacOS || IOS
+            byte*** address=(byte***)Bolt.Runtime.ProcessApi.Environment();
+#else
+            byte[] symbol="environ\0".ToUtf8();
+#ifdef FreeBSD
+            long defaultScope = -2l;
+            byte*** address=Bolt.Runtime.ProcessApi.FindVariable(*((void**)&defaultScope),&symbol[0]);
+#else
+            byte*** address=Bolt.Runtime.ProcessApi.FindVariable(null,&symbol[0]);
+#endif
+#endif
+            if(address==null)throw IOException("Cannot read process environment.");
+            EnvironmentOps.LockVariables();
+            try {
+                byte** env=*address;
+                if(env!=null)for(int i=0;env[i]!=null;i++)entries.Add(NativeString.FromUtf8(env[i],SystemCalls.CLength(env[i])));
+            } finally { EnvironmentOps.UnlockVariables(); }
+#endif
+        }
+        for(int i=0;i<overrides.Length;i++){
+            string entry=overrides[i];SystemCalls.CheckText(entry);
+            int split=entry.IndexOf('=');
+            if(split<=0)throw ArgumentException("Environment overrides must be NAME=VALUE.");
+            string name=entry.Substring(0,split);
+            int j=0;
+            for(;j<entries.Length;j++)if(Compare(name,Key(entries[j]))==0){entries[j]=entry;break;}
+            if(j==entries.Length)entries.Add(entry);
+        }
+        string[] result=entries.ToArray();
+#ifdef Windows
+        // CreateProcess expects a Unicode block sorted by case-insensitive name.
+        for(int i=1;i<result.Length;i++){
+            string entry=result[i], name=Key(entry);int j=i;
+            while(j>0 && Compare(Key(result[j-1]),name)>0){result[j]=result[j-1];j--;}
+            result[j]=entry;
+        }
+#endif
+        return result;
+    }
+}

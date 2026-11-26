@@ -1,0 +1,70 @@
+import System
+import System.IO
+import System.Threading
+import System.Threading.Tasks
+
+public class Counter
+{
+public:
+    int Value;
+    async Task<int> Add(int value) { Value += value; await Task.Delay(1); return Value; }
+}
+public static class Program
+{
+private:
+    int passed = 0;
+    void Check(bool yes, string name) { if (!yes) throw Exception("Check failed: " + name); passed++; }
+    async Task<int> Work(int value) { await Task.Delay(1); return value * 2; }
+    async Task<void> Fault() { await Task.Delay(1); throw FileNotFoundException("first failure"); }
+    async Task<void> FinishLater() { await Task.Delay(8); File.WriteAllText("all-completed.txt", "yes"); }
+    async Task<void> Forward() { Task<void> operation = Task.Delay(1); return await operation; }
+public:
+    async Task<int> WaitForSignal(Semaphore gate, int result)
+    {
+        if (!gate.Wait(5000)) throw Exception("Async caller did not resume");
+        return result;
+    }
+    async Task<void> Main()
+    {
+        Semaphore gate = Semaphore(0, 1);
+        Task<int> pending = WaitForSignal(gate, 17);
+        Check(!pending.Wait(0), "worker runs independently of caller");
+        gate.Release();
+        Check(await pending == 17, "await observes released worker");
+        Task<int> answer = Work(21); Check(await answer == 42, "await result");
+        Check(answer.IsCompleted && answer.IsCompletedSuccessfully && !answer.IsFaulted, "completion properties");
+        Task<int> alias = answer; Check(alias.GetResult() == 42 && alias.Result == 42, "shared completed result");
+        Check(answer.Wait(0), "ready wait");
+        Check(Task.FromResult<string>("ready").GetResult() == "ready", "generic FromResult");
+        Task<void> completed = Task.CompletedTask; completed.Wait();
+        Check(completed.IsCompletedSuccessfully, "CompletedTask");
+        await Forward();
+        await Task.Delay(TimeSpan.FromMilliseconds(1.25));
+        Task<int>[] values = [Work(1), Work(2), Work(3)]; await Task<int>.WhenAll(values);
+        Check(values[0].Result + values[1].Result + values[2].Result == 12, "WhenAll values");
+        Task<void>[] empty = []; await Task<void>.WhenAll(empty); passed++;
+        Task<void>[] operations = [Fault(), FinishLater()];
+        bool caught = false;
+        try { await Task<void>.WhenAll(operations); }
+        catch (FileNotFoundException& error) { caught = error.Message == "first failure"; }
+        Check(caught && File.Exists("all-completed.txt"), "WhenAll waits then preserves dynamic fault");
+        File.Delete("all-completed.txt");
+        Check(operations[0].IsFaulted, "fault property");
+        bool range = false;
+        try { Thread.Sleep(-1); } catch (ArgumentOutOfRangeException& error) { range = true; }
+        Check(range, "Sleep argument"); range = false;
+        try { Task.Delay(-1); } catch (ArgumentOutOfRangeException& error) { range = true; }
+        Check(range, "Delay argument"); range = false;
+        try { completed.Wait(-2); } catch (ArgumentOutOfRangeException& error) { range = true; }
+        Check(range, "Wait argument");
+        Task<int> unset; bool invalid = false;
+        try { unset.GetResult(); } catch (InvalidOperationException& error) { invalid = true; }
+        Check(invalid, "unset task");
+        Counter counter; counter.Value = 5;
+        Check(await counter.Add(2) == 7 && counter.Value == 5, "async receiver snapshot");
+        await File.WriteAllTextAsync("async-file.txt", "hello");
+        Check(await File.ReadAllTextAsync("async-file.txt") == "hello", "source file tasks");
+        File.Delete("async-file.txt");
+        Print("Async11 checks: " + passed);
+    }
+}

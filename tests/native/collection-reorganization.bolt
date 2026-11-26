@@ -1,0 +1,33 @@
+import System.Collections.Generic
+static class Program {
+public:
+    void Main() {
+        List<int> numbers;
+        numbers.Reserve(3);
+        numbers.Add(11);
+        numbers.Add(22);
+        numbers.Add(33);
+        numbers.Insert(0, numbers[2]);
+        numbers.Insert(numbers.Count, numbers[1]);
+        numbers.RemoveAt(2);
+        numbers.RemoveAt(numbers.Count - 1);
+        bool ok = numbers.Count == 3 && numbers[0] == 33 && numbers[1] == 11 && numbers[2] == 33;
+        List<string> words;
+        words.Add("duplicate me");
+        words.Insert(0, words[0]);
+        words.RemoveAt(1);
+        ok = ok && words.Count == 1 && words[0] == "duplicate me";
+
+        Dictionary<string,string> names;
+        string key = "a key longer than the small string buffer";
+        string original = key;
+        names.Add(key, "replacement");
+        string saved = names[key];
+        ok = ok && names.ContainsKey(key) && names.TryGetValue(key, key);
+        ok = ok && key == saved && key == "replacement" && names[original] == saved;
+        HashSet<string> known;
+        ok = ok && known.Add(original) && !known.Add(original);
+        ok = ok && known.Contains(original) && known.Remove(original) && !known.Contains(original);
+        Print(ok);
+    }
+}

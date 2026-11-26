@@ -1,0 +1,5 @@
+import Math
+
+static class Program { public: void Main() {
+Console.WriteLine(Math.Abs<int>(-9)); Console.WriteLine(Math.Min<int>(2,3)); Console.WriteLine(Math.Max<int>(2,3)); Console.WriteLine(Math.Clamp<int>(9,1,4)); Console.WriteLine(Math.Round<double>(2.5)); Console.WriteLine(Math.Floor<double>(-2.1)); Console.WriteLine(Math.Ceiling<double>(2.1)); Console.WriteLine(Math.Sqrt<double>(9)); Console.WriteLine(Math.Pow<double>(2,3)); Console.WriteLine(Math.Log2<double>(8)); Console.WriteLine(Math.Sin<float>(0)); Console.WriteLine(Math.Pi>3 && Math.E>2);
+} }

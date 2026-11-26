@@ -1,0 +1,139 @@
+import System.Collections.Generic
+
+public class Item : IStringable {
+public:
+    static int Constructions = 0;
+    int X;
+    string Name;
+    Item(int x) { Constructions++; X = x; Name = "item"; }
+    void Increment() { X++; }
+    [ReadOnly] int ReadX() { return X; }
+    [ReadOnly] string ToString() { return Name + ":" + X; }
+}
+public struct Pair13 { public: int X, Y; }
+public class Box13<T> { public: T Value; }
+public class Holder13 {
+public:
+    int Calls = 0;
+    int? Number { get; set; }
+    int? GetNumber() { Calls++; return Number; }
+}
+public class Node13 {
+public:
+    string Name;
+    List<Node13?> Children;
+    int Value;
+    Node13(string name, int value) { Name = name; Value = value; }
+}
+public static class Program {
+private:
+    static int checked = 0, errors = 0, calls = 0;
+public:
+    void Check(bool ok, string name) {
+        checked++;
+        if (!ok) { errors++; Print("FAIL " + name); }
+    }
+    string AsText(IStringable value) { return value.ToString(); }
+    int ReadDefault(int? n = null) { return n ?? 91; }
+    int Fallback() { calls++; return 8; }
+    int? Find(bool has) { if (has) return 42; return null; }
+    T? Wrap<T>(T value) { return value; }
+    void Change(int?& value) { value = 123; }
+    int Guard(int? x) { if (x == null) return -1; return x + 1; }
+    int Both(int? a, int? b) { if (a != null && b != null) return a + b; return -1; }
+    int Either(int? a) { if (a == null || a < 0) return -1; return a; }
+    int Main() {
+        int? a;
+        Check(!a.HasValue && a == null && null == a, "empty local");
+        int before = calls;
+        Check((a ?? Fallback()) == 8 && calls == before + 1, "lazy missing coalesce");
+        a = 5;
+        before = calls;
+        Check(a.HasValue && a != null && null != a && a.Value == 5, "engaged scalar");
+        Check((a ?? Fallback()) == 5 && calls == before, "lazy present coalesce");
+        a ??= Fallback(); Check(a.Value == 5 && calls == before, "coalesce assignment present");
+        a = null; a ??= Fallback(); Check(a.Value == 8 && calls == before + 1, "coalesce assignment empty");
+        int? b = a; b.Value = 19; Check(a.Value == 8 && b.Value == 19, "scalar copy");
+        a = default; Check(!a.HasValue, "default assignment");
+        Check((a ?? default) == 0, "coalesce default payload");
+        a = Find(true); Check(a.Value == 42 && Find(false) == null, "optional return");
+        int? c = Wrap<int>(7); Check(c.Value == 7, "generic optional return");
+        Check(Guard(c)==8 && Guard(null)==-1 && Both(a,c)==49, "guard and conjunction");
+        Check(Either(null)==-1 && Either(-2)==-1 && Either(3)==3, "disjunction and guard");
+        if (!(c == null)) { int number = c; Check(number == 7, "negated guard extraction"); }
+        else { Check(false,"negated guard else"); }
+        c = null;
+        if(c==null){Check(true,"null branch");} else {Check(c==7,"else narrowing");}
+        int? d = null;
+        int?& borrowed = d; Change(borrowed);
+        Check(d.Value == 123, "optional reference mutation");
+        int?* address = &d; address->Value = 15;
+        Check(address->HasValue && d.Value == 15, "pointer to optional");
+        int* nil = null;
+        int*? emptyPtr = null, storedNullPtr = nil;
+        Check(!emptyPtr.HasValue && storedNullPtr.HasValue && storedNullPtr.Value == null, "empty vs stored null pointer");
+        int?[] numbers = new int?[3];
+        numbers[0] = 11; numbers[1] = null;
+        Check(numbers.Length == 3 && numbers[0].Value == 11 && !numbers[1].HasValue && !numbers[2].HasValue, "optional array elements");
+        int[]? optionalArray = null;
+        Check(!optionalArray.HasValue, "empty optional array");
+        optionalArray = new int[2]; optionalArray.Value[0] = 6;
+        int[]? copiedArray = optionalArray; copiedArray.Value[0] = 33;
+        Check(optionalArray.Value[0] == 6 && copiedArray.Value[0] == 33, "array payload deep copy");
+        Pair13? pair = Pair13(); pair.Value.X = 4; pair.Value.Y = 5;
+        Pair13? pairCopy = pair; pairCopy.Value.X = 22;
+        Check(pair.Value.X == 4 && pairCopy.Value.X == 22, "struct payload copy");
+        int constructions = Item.Constructions;
+        Item? item;
+        Check(Item.Constructions == constructions && !item.HasValue, "empty optional never default constructs payload");
+        item = Item(7); Check(Item.Constructions == constructions+1, "engaging constructor exactly once");
+        if (item != null) { item.Increment(); Check(item.X == 8, "guarded class mutation"); }
+        Item? other = item; other.Value.X = 60;
+        Check(item.Value.X == 8 && other.Value.X == 60, "class deep copy");
+        Check((string)item == "item:8" && (string)other == "item:60", "optional stringable formatting");
+        item = null; Check((string)item == "null", "empty formatting");
+        Holder13 h; Check(!h.Number.HasValue,"optional auto property default");
+        h.Number = 5; h.Number ??= Fallback();
+        Check(h.Number.Value == 5, "optional property read/write");
+        Check((h.GetNumber() ?? 0) == 5 && h.Calls==1, "coalesce receiver evaluated once");
+        const int? immutable = 2; Check(immutable.Value==2, "const optional read");
+        const Item? constItem = Item(3); Check(constItem.Value.ReadX()==3, "const object getter");
+        double? fp = (double?)2.5; int? integer = (int?)fp;
+        Check(integer.Value==2 && ((int)fp)==2, "optional numeric conversions");
+        double? missing = null; int? missingInt = (int?)missing;
+        Check(!missingInt.HasValue,"empty optional conversion");
+        bool? flag = true; if(flag != null) Check(flag, "optional bool guarded");
+        char? character = 'ä'; Check(character.Value == 'ä' && (string)character == "ä", "optional char");
+        string? name = "Hallo"; if(name != null) Check(name.Length==5, "optional string guarded member");
+        Check((true ? null : 5)==null && (false ? null : 5).Value==5, "ternary optional inference");
+        Box13<int?> box; Check(!box.Value.HasValue,"generic field optional default"); box.Value=3;
+        Check(box.Value.Value==3,"generic field optional value");
+        List<int?> list; list.Add(null);list.Add(4);list.Add(5);
+        Check(list.Length==3 && list[1].Value==4 && !list[0].HasValue,"source List optional");
+        list[1] = null; Check(!list[1].HasValue,"source List optional reset");
+        HashSet<int?> set; set.Add(null);set.Add(5);set.Add(5);set.Add(9);
+        Check(set.Length==3&&set.Contains(null)&&set.Contains(5),"HashSet optional hash equality");
+        Dictionary<string,int?> dict; dict.Add("empty",null);dict.Add("value",6);
+        Check(!dict["empty"].HasValue&&dict["value"].Value==6,"Dictionary optional values");
+        Queue<Item?> queue; queue.Enqueue(null);queue.Enqueue(other);
+        Check(!queue.Dequeue().HasValue&&queue.Dequeue().Value.X==60,"Queue optional class");
+        List<Item?> items; items.Add(null);items.Add(Item(9));
+        for(int n=0;n<40;n++) items.Add(Item(n));
+        Check(items[1].Value.X==9&&items[41].Value.X==39,"optional object buffer relocation");
+        List<Item?> itemsCopy=items;itemsCopy[1].Value.X=88;
+        Check(items[1].Value.X==9&&itemsCopy[1].Value.X==88,"source collection copy ownership");
+        Node13 root=Node13("root",1);root.Children.Add(Node13("child",2));root.Children.Add(null);
+        Node13 copy=root;copy.Children[0].Value.Value=33;
+        Check(root.Children[0].Value.Name=="child"&&root.Children[0].Value.Value==2&&copy.Children[0].Value.Value==33&&!root.Children[1].HasValue,"recursive optional container layout");
+        int?* heap = new int?; Check(!heap->HasValue,"heap optional empty");
+        *heap=7; Check(heap->Value==7,"heap optional fill");delete heap;
+        Check(AsText((int?)4)=="4" && AsText((int?)null)=="null", "optional implements stringable contract");
+        IStringable? boxed=Item(5); Check(boxed.Value.ToString()=="item:5", "optional interface payload");
+        Check(ReadDefault()==91 && ReadDefault(2)==2,"optional default parameters");
+        int[]? sequence=new int[2];sequence.Value[0]=3;sequence.Value[1]=4;
+        int sum=0;if(sequence!=null){sum=sequence[0]+sequence[1];}
+        Check(sum==7,"guarded optional array indexing");
+        Print("optional13 assertions="+checked+" failures="+errors);
+        return errors;
+    }
+}

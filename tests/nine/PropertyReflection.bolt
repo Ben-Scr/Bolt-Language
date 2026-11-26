@@ -1,0 +1,28 @@
+import System.Text.Json
+import System.Reflection
+[Reflect]
+public class Settings {
+private:
+    int fieldValue = 2;
+public:
+    int Id { get; } = 7;
+    [JsonName("name")] string Name { get; set; } = "Bolt";
+    int Value { get { return fieldValue; } set { fieldValue = value; } }
+    int Doubled => fieldValue * 2;
+    [JsonIgnore] int Hidden { get; set; } = 44;
+}
+public static class Program {
+    public static void Main() {
+        Settings value; value.Value = 12;
+        string json = Json.Serialize<Settings>(value);
+        Settings copy = Json.Deserialize<Settings>(json);
+        Print(copy.Id); Print(copy.Name); Print(copy.Value); Print(copy.Doubled);
+        Print(Reflection.Get<Settings,int>(copy, "Value"));
+        Reflection.Set<Settings,int>(copy, "Value", 21);
+        Print(copy.Value);
+        TypeInfo info = Reflection.GetType<Settings>();
+        Print(info.GetFields().Length); Print(info.GetProperties().Length);
+        Print(info.HasProperty("Value")); Print(info.GetProperty("Id").IsReadOnly);
+        Print(info.GetMethods().Length);
+    }
+}

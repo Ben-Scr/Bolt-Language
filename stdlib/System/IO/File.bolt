@@ -1,0 +1,110 @@
+import System
+import System.IO
+import System.Collections.Generic
+import System.Threading.Tasks
+import Bolt.Runtime.IO
+namespace System.IO;
+
+// File operations are ordinary Bolt methods. Only opening/reading/writing handles
+// and filesystem metadata operations cross the platform boundary.
+public static class File
+{
+private:
+    void WriteBytes(string path, const byte[]& bytes, FileMode mode)
+    {
+        FileHandle writer;
+        writer.Open(path, mode);
+        try { writer.WriteAll(path, bytes); }
+        finally { writer.Close(path); }
+    }
+    void WriteText(const string& path, const string& text, FileMode mode)
+    {
+        FileHandle writer;
+        writer.Open(path, mode);
+        try { writer.WriteText(path, text); }
+        finally { writer.Close(path); }
+    }
+    void WriteLines(string path, const string[]& lines, FileMode mode)
+    {
+        FileHandle writer;
+        writer.Open(path, mode);
+        try {
+            for (int i = 0; i < lines.Length; i++) {
+                // Keep the terminator in the same write whenever it fits in a Bolt array.
+                if (lines[i].ByteLength == int.MaxValue) {
+                    writer.WriteText(path, lines[i]);
+                    writer.WriteText(path, "\n");
+                } else {
+                    writer.WriteText(path, lines[i] + "\n");
+                }
+            }
+        } finally { writer.Close(path); }
+    }
+public:
+    FileStream Create(string path) { return FileStream(path, FileMode.Create, FileAccess.ReadWrite); }
+    FileStream Open(string path, FileMode mode = FileMode.Open, FileAccess access = FileAccess.ReadWrite) { return FileStream(path, mode, access); }
+    FileStream OpenRead(string path) { return FileStream(path, FileMode.Open, FileAccess.Read); }
+    FileStream OpenWrite(string path) { return FileStream(path, FileMode.OpenOrCreate, FileAccess.Write); }
+    bool Exists(string path) { return Bolt.Runtime.IO.FileOps.Exists(path); }
+    void Delete(string path) { Bolt.Runtime.IO.FileOps.Delete(path); }
+    void Copy(string source, string destination, bool overwrite = false) { Bolt.Runtime.IO.FileOps.Copy(source, destination, overwrite); }
+    void Move(string source, string destination, bool overwrite = false) { Bolt.Runtime.IO.FileOps.Move(source, destination, overwrite); }
+    long GetLength(string path)
+    {
+#if BoltStandaloneCore && (Windows || (Linux && (X64 || ARM64 || RISCV64)))
+        FileHandle reader;
+        reader.Open(path, FileMode.Open);
+        try { return reader.Length(path); }
+        finally { reader.Close(path); }
+#else
+        FileStream stream = OpenRead(path);
+        try { return stream.Length; }
+        finally { stream.Close(); }
+#endif
+    }
+    byte[] ReadAllBytes(string path)
+    {
+        FileHandle reader;
+        reader.Open(path, FileMode.Open);
+        try { return reader.ReadToEnd(path); }
+        finally { reader.Close(path); }
+    }
+    string ReadAllText(string path)
+    {
+        byte[] bytes = ReadAllBytes(path);
+        string text = string.FromUtf8(bytes);
+        if (bytes.Length >= 3 && bytes[0] == (byte)239 && bytes[1] == (byte)187 && bytes[2] == (byte)191) return text.Substring(1);
+        return text;
+    }
+    string[] ReadAllLines(string path)
+    {
+        string text = ReadAllText(path);
+        // ReadAllText has validated UTF-8. CR and LF cannot be continuation bytes.
+        ulong length = 0ul, start = 0ul;
+        byte* data = Bolt.Runtime.NativeString.Bytes(text, length);
+        List<string> lines;
+        for (ulong i = 0ul; i < length; i++) {
+            if (data[i] != (byte)13 && data[i] != (byte)10) continue;
+            lines.Add(Bolt.Runtime.NativeString.FromUtf8(&data[start], i - start));
+            if (data[i] == (byte)13 && i + 1ul < length && data[i + 1ul] == (byte)10) i++;
+            start = i + 1ul;
+        }
+        if (start < length) lines.Add(Bolt.Runtime.NativeString.FromUtf8(&data[start], length - start));
+        return lines.ToArray();
+    }
+    void WriteAllBytes(string path, const byte[]& bytes)
+    { WriteBytes(path, bytes, FileMode.Create); }
+    void WriteAllText(string path, const string& text) { WriteText(path, text, FileMode.Create); }
+    void AppendAllText(string path, const string& text)
+    { WriteText(path, text, FileMode.Append); }
+    void WriteAllLines(string path, const string[]& lines)
+    { WriteLines(path, lines, FileMode.Create); }
+    void AppendAllLines(string path, const string[]& lines)
+    { WriteLines(path, lines, FileMode.Append); }
+    async Task<string> ReadAllTextAsync(string path) { return ReadAllText(path); }
+    async Task<byte[]> ReadAllBytesAsync(string path) { return ReadAllBytes(path); }
+    async Task<string[]> ReadAllLinesAsync(string path) { return ReadAllLines(path); }
+    async Task<void> WriteAllTextAsync(string path, string text) { WriteAllText(path, text); }
+    async Task<void> AppendAllTextAsync(string path, string text) { AppendAllText(path, text); }
+    async Task<void> WriteAllBytesAsync(string path, byte[] bytes) { WriteAllBytes(path, bytes); }
+}

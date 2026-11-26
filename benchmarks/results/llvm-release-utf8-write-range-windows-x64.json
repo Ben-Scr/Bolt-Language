@@ -1,0 +1,2243 @@
+{
+  "utc": "2026-11-21T20:24:24.648575+00:00",
+  "host": {
+    "platform": "Windows-11-10.0.26300-SP0",
+    "machine": "AMD64",
+    "cpu": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+    "advertised_features": null,
+    "python": "3.13.7",
+    "cpu_affinity": null,
+    "cpu_name": "AMD Ryzen 9 7900X 12-Core Processor"
+  },
+  "case": "utf8-roundtrip-long",
+  "warmup": 4,
+  "runs": 32,
+  "seed": 19793,
+  "pin_cpu": 8,
+  "original_affinity_mask": "0xffffff",
+  "method": "whole-process wall time, balanced randomized blocks, stdout checked",
+  "cc_version": "clang version 23.1.2 (https://github.com/llvm/llvm-project 85ac560262434c9ccfc0c183ec22d4138ed647fb)\nTarget: x86_64-pc-windows-msvc\nThread model: posix\nInstalledDir: C:\\Program Files\\LLVM\\bin\nBuild config: +alloc:rpmalloc",
+  "builds": {
+    "before": {
+      "fixture": "utf8-roundtrip.bolt",
+      "fixture_sha256": "5718d019430825dae289f8be1ba6aaddd67093654c33f101f03a160e4576a50c",
+      "command": [
+        "C:\\Users\\benso\\source\\repos\\Bolt\\build\\utf8-write-release\\before\\bin\\bolt.exe",
+        "compile",
+        "utf8-roundtrip-long.bolt",
+        "--release",
+        "--backend",
+        "llvm",
+        "--require-native",
+        "-o",
+        "program.exe"
+      ],
+      "source_sha256": "49a06e12ce68a487e3e9c2ec57016698c1b5e278b1979777aaba5fc62b73d5e0",
+      "executable_sha256": "30078d0224d2beb496937f5dbf4dc8344ac9f06f35e0ad1595190e3705143417",
+      "build_ms": 952.8275,
+      "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-utf8-measure-d0amvgmt/before/utf8-roundtrip-long/release/program.exe\n\n[bolt] Release compilation: 893.02 ms",
+      "runtime_sha256": {},
+      "compiler_sha256": "12a46f05f17bc5be28bd7bd03fbc9f563ba45daab8adff15a3594a05bbe8bd9a",
+      "aot_runtime_sha256": "74b49ea56124d8ad76d9e74d237ef80483bbafe9211ea8cfb868dae1d8d2a64f"
+    },
+    "after": {
+      "fixture": "utf8-roundtrip.bolt",
+      "fixture_sha256": "5718d019430825dae289f8be1ba6aaddd67093654c33f101f03a160e4576a50c",
+      "command": [
+        "C:\\Users\\benso\\source\\repos\\Bolt\\build\\utf8-write-release\\after\\bin\\bolt.exe",
+        "compile",
+        "utf8-roundtrip-long.bolt",
+        "--release",
+        "--backend",
+        "llvm",
+        "--require-native",
+        "-o",
+        "program.exe"
+      ],
+      "source_sha256": "49a06e12ce68a487e3e9c2ec57016698c1b5e278b1979777aaba5fc62b73d5e0",
+      "executable_sha256": "7c306c95b9d8b6df66b947ec424e0243b8f136172197f58e058ff21011d5234e",
+      "build_ms": 815.0868,
+      "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-utf8-measure-d0amvgmt/after/utf8-roundtrip-long/release/program.exe\n\n[bolt] Release compilation: 756.63 ms",
+      "runtime_sha256": {},
+      "compiler_sha256": "be0e502198299d3ea013127e6c6440a4bbbe620797d75d12ad21b400036d26b0",
+      "aot_runtime_sha256": "a38a6591fd0d64ad8d5859fa2a947b232d12a9f8c6fc128cf624d9aa447efedf"
+    },
+    "c_simd": {
+      "fixture": "utf8-roundtrip.c",
+      "fixture_sha256": "ecdd26506afc326106665dcaf8e4e92756864d990082dd827e5a0b14317994b3",
+      "command": [
+        "C:\\Program Files\\LLVM\\bin\\clang.exe",
+        "-std=c11",
+        "-O3",
+        "-DNDEBUG",
+        "-march=native",
+        "-ffp-contract=off",
+        "-Wl,/map:program.exe.linking.map",
+        "utf8-roundtrip-long-simd.c",
+        "-o",
+        "program.exe"
+      ],
+      "source_sha256": "3f00732e9bb3ce83e3f035ee8d52ee2a4b8e9d11ed2b4cfe664eca91c07c92f3",
+      "executable_sha256": "6786fcc2aad519e96d82f12357a36daf96f9e2b3896db5c4b5495341dd1061a5",
+      "build_ms": 535.8535,
+      "build_log": "",
+      "runtime_sha256": {},
+      "header_sha256": {
+        "Utf8Block.h": "1016bb8ade967b19ca30058cb30df839d6b2800683b79512c16e0bedcaca369d"
+      }
+    },
+    "c_known_edit": {
+      "fixture": "utf8-roundtrip.c",
+      "fixture_sha256": "ecdd26506afc326106665dcaf8e4e92756864d990082dd827e5a0b14317994b3",
+      "command": [
+        "C:\\Program Files\\LLVM\\bin\\clang.exe",
+        "-std=c11",
+        "-O3",
+        "-DNDEBUG",
+        "-march=native",
+        "-ffp-contract=off",
+        "-Wl,/map:program.exe.linking.map",
+        "-DBENCH_UTF8_KNOWN_EDIT=1",
+        "utf8-roundtrip-long-simd.c",
+        "-o",
+        "program.exe"
+      ],
+      "source_sha256": "3f00732e9bb3ce83e3f035ee8d52ee2a4b8e9d11ed2b4cfe664eca91c07c92f3",
+      "executable_sha256": "4145279476162b29d1b38b7d535a4b8b32192289f7ff74d46adc6f9a473df26e",
+      "build_ms": 437.0711,
+      "build_log": "",
+      "runtime_sha256": {},
+      "header_sha256": {
+        "Utf8Block.h": "1016bb8ade967b19ca30058cb30df839d6b2800683b79512c16e0bedcaca369d"
+      }
+    }
+  },
+  "timing": {
+    "normal": {
+      "expected_stdout": "409522176",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "c_simd",
+            "before",
+            "c_known_edit"
+          ],
+          "elapsed_ms": {
+            "after": 235.3724,
+            "c_simd": 168.1772,
+            "before": 291.0994,
+            "c_known_edit": 92.7938
+          }
+        },
+        {
+          "warmup": true,
+          "order": [
+            "c_simd",
+            "before",
+            "c_known_edit",
+            "after"
+          ],
+          "elapsed_ms": {
+            "c_simd": 125.5275,
+            "before": 38.6316,
+            "c_known_edit": 60.9065,
+            "after": 25.4068
+          }
+        },
+        {
+          "warmup": true,
+          "order": [
+            "c_known_edit",
+            "after",
+            "c_simd",
+            "before"
+          ],
+          "elapsed_ms": {
+            "c_known_edit": 27.1716,
+            "after": 25.5063,
+            "c_simd": 103.6208,
+            "before": 41.2504
+          }
+        },
+        {
+          "warmup": true,
+          "order": [
+            "before",
+            "c_known_edit",
+            "after",
+            "c_simd"
+          ],
+          "elapsed_ms": {
+            "before": 45.0337,
+            "c_known_edit": 27.9391,
+            "after": 23.2861,
+            "c_simd": 107.2714
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_known_edit",
+            "after",
+            "c_simd",
+            "before"
+          ],
+          "elapsed_ms": {
+            "c_known_edit": 28.7118,
+            "after": 27.3627,
+            "c_simd": 104.678,
+            "before": 40.4933
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_simd",
+            "before",
+            "c_known_edit",
+            "after"
+          ],
+          "elapsed_ms": {
+            "c_simd": 102.7955,
+            "before": 45.246,
+            "c_known_edit": 26.4532,
+            "after": 25.0068
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "c_known_edit",
+            "after",
+            "c_simd"
+          ],
+          "elapsed_ms": {
+            "before": 39.3369,
+            "c_known_edit": 26.1092,
+            "after": 24.39,
+            "c_simd": 98.4858
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "c_simd",
+            "before",
+            "c_known_edit"
+          ],
+          "elapsed_ms": {
+            "after": 33.3901,
+            "c_simd": 141.9026,
+            "before": 100.5359,
+            "c_known_edit": 68.6507
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "c_simd",
+            "c_known_edit",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 77.8112,
+            "c_simd": 204.2854,
+            "c_known_edit": 40.6191,
+            "after": 90.5226
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before",
+            "c_simd",
+            "c_known_edit"
+          ],
+          "elapsed_ms": {
+            "after": 103.72,
+            "before": 55.8162,
+            "c_simd": 205.8071,
+            "c_known_edit": 60.3562
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_known_edit",
+            "after",
+            "before",
+            "c_simd"
+          ],
+          "elapsed_ms": {
+            "c_known_edit": 42.3353,
+            "after": 106.1529,
+            "before": 66.5134,
+            "c_simd": 176.073
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_simd",
+            "c_known_edit",
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "c_simd": 105.0252,
+            "c_known_edit": 30.1759,
+            "after": 28.2506,
+            "before": 41.3754
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "c_simd",
+            "after",
+            "c_known_edit"
+          ],
+          "elapsed_ms": {
+            "before": 44.0474,
+            "c_simd": 112.6217,
+            "after": 27.131,
+            "c_known_edit": 36.4364
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_simd",
+            "after",
+            "c_known_edit",
+            "before"
+          ],
+          "elapsed_ms": {
+            "c_simd": 107.2989,
+            "after": 27.8772,
+            "c_known_edit": 26.7537,
+            "before": 42.9515
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_known_edit",
+            "before",
+            "c_simd",
+            "after"
+          ],
+          "elapsed_ms": {
+            "c_known_edit": 30.9144,
+            "before": 41.1642,
+            "c_simd": 105.789,
+            "after": 26.5867
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "c_known_edit",
+            "before",
+            "c_simd"
+          ],
+          "elapsed_ms": {
+            "after": 30.4705,
+            "c_known_edit": 27.2207,
+            "before": 40.2527,
+            "c_simd": 108.2223
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_simd",
+            "after",
+            "before",
+            "c_known_edit"
+          ],
+          "elapsed_ms": {
+            "c_simd": 112.167,
+            "after": 44.9629,
+            "before": 91.4892,
+            "c_known_edit": 38.8418
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_known_edit",
+            "c_simd",
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "c_known_edit": 36.5146,
+            "c_simd": 119.6966,
+            "after": 41.8537,
+            "before": 79.3478
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before",
+            "c_known_edit",
+            "c_simd"
+          ],
+          "elapsed_ms": {
+            "after": 125.2965,
+            "before": 85.263,
+            "c_known_edit": 61.345,
+            "c_simd": 170.7343
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "c_known_edit",
+            "c_simd",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 40.6881,
+            "c_known_edit": 45.9892,
+            "c_simd": 155.0379,
+            "after": 98.9978
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_simd",
+            "c_known_edit",
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "c_simd": 154.1206,
+            "c_known_edit": 70.8245,
+            "before": 100.7746,
+            "after": 73.6304
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_known_edit",
+            "before",
+            "after",
+            "c_simd"
+          ],
+          "elapsed_ms": {
+            "c_known_edit": 51.5298,
+            "before": 98.4893,
+            "after": 179.3459,
+            "c_simd": 204.7766
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after",
+            "c_simd",
+            "c_known_edit"
+          ],
+          "elapsed_ms": {
+            "before": 81.1515,
+            "after": 38.6851,
+            "c_simd": 138.6017,
+            "c_known_edit": 47.8565
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "c_simd",
+            "c_known_edit",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 57.0711,
+            "c_simd": 182.7922,
+            "c_known_edit": 76.8465,
+            "before": 96.2668
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before",
+            "c_simd",
+            "c_known_edit"
+          ],
+          "elapsed_ms": {
+            "after": 30.4339,
+            "before": 41.8497,
+            "c_simd": 105.8199,
+            "c_known_edit": 27.2428
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "c_simd",
+            "c_known_edit",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 41.56,
+            "c_simd": 113.4838,
+            "c_known_edit": 27.5615,
+            "after": 26.9665
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_simd",
+            "c_known_edit",
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "c_simd": 147.4042,
+            "c_known_edit": 82.7061,
+            "after": 25.8926,
+            "before": 70.2867
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_known_edit",
+            "after",
+            "before",
+            "c_simd"
+          ],
+          "elapsed_ms": {
+            "c_known_edit": 43.6946,
+            "after": 31.0202,
+            "before": 100.1966,
+            "c_simd": 493.5096
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before",
+            "c_known_edit",
+            "c_simd"
+          ],
+          "elapsed_ms": {
+            "after": 60.2046,
+            "before": 53.8638,
+            "c_known_edit": 34.7726,
+            "c_simd": 114.6583
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_known_edit",
+            "c_simd",
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "c_known_edit": 31.1605,
+            "c_simd": 107.3363,
+            "after": 35.3415,
+            "before": 51.8986
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "c_known_edit",
+            "c_simd",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 41.9564,
+            "c_known_edit": 31.1301,
+            "c_simd": 106.7172,
+            "after": 27.8671
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_simd",
+            "after",
+            "before",
+            "c_known_edit"
+          ],
+          "elapsed_ms": {
+            "c_simd": 117.2191,
+            "after": 46.1247,
+            "before": 48.6919,
+            "c_known_edit": 40.9592
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "c_known_edit",
+            "after",
+            "c_simd"
+          ],
+          "elapsed_ms": {
+            "before": 44.8208,
+            "c_known_edit": 63.9063,
+            "after": 33.0915,
+            "c_simd": 124.4206
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "c_simd",
+            "before",
+            "c_known_edit"
+          ],
+          "elapsed_ms": {
+            "after": 48.7026,
+            "c_simd": 214.9309,
+            "before": 44.6154,
+            "c_known_edit": 35.1644
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_known_edit",
+            "after",
+            "c_simd",
+            "before"
+          ],
+          "elapsed_ms": {
+            "c_known_edit": 60.8015,
+            "after": 34.6945,
+            "c_simd": 106.8038,
+            "before": 41.6488
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_simd",
+            "before",
+            "c_known_edit",
+            "after"
+          ],
+          "elapsed_ms": {
+            "c_simd": 105.3069,
+            "before": 56.9086,
+            "c_known_edit": 28.9945,
+            "after": 39.949
+          }
+        }
+      ],
+      "before": {
+        "n": 32,
+        "median_ms": 50.2953,
+        "p95_ms": 100.5359,
+        "min_ms": 39.3369,
+        "max_ms": 100.7746,
+        "raw_ms": [
+          40.4933,
+          45.246,
+          39.3369,
+          100.5359,
+          77.8112,
+          55.8162,
+          66.5134,
+          41.3754,
+          44.0474,
+          42.9515,
+          41.1642,
+          40.2527,
+          91.4892,
+          79.3478,
+          85.263,
+          40.6881,
+          100.7746,
+          98.4893,
+          81.1515,
+          96.2668,
+          41.8497,
+          41.56,
+          70.2867,
+          100.1966,
+          53.8638,
+          51.8986,
+          41.9564,
+          48.6919,
+          44.8208,
+          44.6154,
+          41.6488,
+          56.9086
+        ]
+      },
+      "after": {
+        "n": 32,
+        "median_ms": 35.018,
+        "p95_ms": 125.2965,
+        "min_ms": 24.39,
+        "max_ms": 179.3459,
+        "raw_ms": [
+          27.3627,
+          25.0068,
+          24.39,
+          33.3901,
+          90.5226,
+          103.72,
+          106.1529,
+          28.2506,
+          27.131,
+          27.8772,
+          26.5867,
+          30.4705,
+          44.9629,
+          41.8537,
+          125.2965,
+          98.9978,
+          73.6304,
+          179.3459,
+          38.6851,
+          57.0711,
+          30.4339,
+          26.9665,
+          25.8926,
+          31.0202,
+          60.2046,
+          35.3415,
+          27.8671,
+          46.1247,
+          33.0915,
+          48.7026,
+          34.6945,
+          39.949
+        ]
+      },
+      "c_simd": {
+        "n": 32,
+        "median_ms": 115.9387,
+        "p95_ms": 214.9309,
+        "min_ms": 98.4858,
+        "max_ms": 493.5096,
+        "raw_ms": [
+          104.678,
+          102.7955,
+          98.4858,
+          141.9026,
+          204.2854,
+          205.8071,
+          176.073,
+          105.0252,
+          112.6217,
+          107.2989,
+          105.789,
+          108.2223,
+          112.167,
+          119.6966,
+          170.7343,
+          155.0379,
+          154.1206,
+          204.7766,
+          138.6017,
+          182.7922,
+          105.8199,
+          113.4838,
+          147.4042,
+          493.5096,
+          114.6583,
+          107.3363,
+          106.7172,
+          117.2191,
+          124.4206,
+          214.9309,
+          106.8038,
+          105.3069
+        ]
+      },
+      "c_known_edit": {
+        "n": 32,
+        "median_ms": 37.6782,
+        "p95_ms": 76.8465,
+        "min_ms": 26.1092,
+        "max_ms": 82.7061,
+        "raw_ms": [
+          28.7118,
+          26.4532,
+          26.1092,
+          68.6507,
+          40.6191,
+          60.3562,
+          42.3353,
+          30.1759,
+          36.4364,
+          26.7537,
+          30.9144,
+          27.2207,
+          38.8418,
+          36.5146,
+          61.345,
+          45.9892,
+          70.8245,
+          51.5298,
+          47.8565,
+          76.8465,
+          27.2428,
+          27.5615,
+          82.7061,
+          43.6946,
+          34.7726,
+          31.1605,
+          31.1301,
+          40.9592,
+          63.9063,
+          35.1644,
+          60.8015,
+          28.9945
+        ]
+      },
+      "after_over_before_ratio_ci95": [
+        0.5295691058651307,
+        0.9034192545372023
+      ],
+      "after_over_c_simd_ratio_ci95": [
+        0.2474398805913958,
+        0.37440733767068285
+      ],
+      "after_over_c_known_edit_ratio_ci95": [
+        0.764169943196642,
+        1.1740173231674351
+      ]
+    },
+    "pinned": {
+      "expected_stdout": "409522176",
+      "rounds": [
+        {
+          "warmup": true,
+          "order": [
+            "after",
+            "c_simd",
+            "before",
+            "c_known_edit"
+          ],
+          "elapsed_ms": {
+            "after": 38.8824,
+            "c_simd": 113.9937,
+            "before": 40.4157,
+            "c_known_edit": 34.2229
+          }
+        },
+        {
+          "warmup": true,
+          "order": [
+            "c_simd",
+            "before",
+            "c_known_edit",
+            "after"
+          ],
+          "elapsed_ms": {
+            "c_simd": 173.8905,
+            "before": 46.2301,
+            "c_known_edit": 29.8449,
+            "after": 90.9702
+          }
+        },
+        {
+          "warmup": true,
+          "order": [
+            "c_known_edit",
+            "after",
+            "c_simd",
+            "before"
+          ],
+          "elapsed_ms": {
+            "c_known_edit": 57.3135,
+            "after": 72.0381,
+            "c_simd": 141.3693,
+            "before": 153.7494
+          }
+        },
+        {
+          "warmup": true,
+          "order": [
+            "before",
+            "c_known_edit",
+            "after",
+            "c_simd"
+          ],
+          "elapsed_ms": {
+            "before": 47.457,
+            "c_known_edit": 39.8331,
+            "after": 40.5651,
+            "c_simd": 147.0375
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_known_edit",
+            "after",
+            "c_simd",
+            "before"
+          ],
+          "elapsed_ms": {
+            "c_known_edit": 38.3382,
+            "after": 28.8321,
+            "c_simd": 138.6225,
+            "before": 60.7876
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_simd",
+            "before",
+            "c_known_edit",
+            "after"
+          ],
+          "elapsed_ms": {
+            "c_simd": 159.2642,
+            "before": 98.3805,
+            "c_known_edit": 38.3794,
+            "after": 31.0165
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "c_known_edit",
+            "after",
+            "c_simd"
+          ],
+          "elapsed_ms": {
+            "before": 46.3293,
+            "c_known_edit": 27.1229,
+            "after": 47.0903,
+            "c_simd": 125.9743
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "c_simd",
+            "before",
+            "c_known_edit"
+          ],
+          "elapsed_ms": {
+            "after": 27.3453,
+            "c_simd": 112.0087,
+            "before": 52.8019,
+            "c_known_edit": 58.0069
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "c_simd",
+            "c_known_edit",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 44.9512,
+            "c_simd": 156.7698,
+            "c_known_edit": 30.667,
+            "after": 32.4279
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before",
+            "c_simd",
+            "c_known_edit"
+          ],
+          "elapsed_ms": {
+            "after": 29.9438,
+            "before": 49.3316,
+            "c_simd": 159.9645,
+            "c_known_edit": 30.3599
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_known_edit",
+            "after",
+            "before",
+            "c_simd"
+          ],
+          "elapsed_ms": {
+            "c_known_edit": 29.8621,
+            "after": 27.1546,
+            "before": 57.6946,
+            "c_simd": 115.8397
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_simd",
+            "c_known_edit",
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "c_simd": 132.5622,
+            "c_known_edit": 82.8845,
+            "after": 60.0364,
+            "before": 101.3989
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "c_simd",
+            "after",
+            "c_known_edit"
+          ],
+          "elapsed_ms": {
+            "before": 52.2121,
+            "c_simd": 143.1404,
+            "after": 168.4636,
+            "c_known_edit": 101.0513
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_simd",
+            "after",
+            "c_known_edit",
+            "before"
+          ],
+          "elapsed_ms": {
+            "c_simd": 195.0966,
+            "after": 97.6462,
+            "c_known_edit": 74.282,
+            "before": 71.256
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_known_edit",
+            "before",
+            "c_simd",
+            "after"
+          ],
+          "elapsed_ms": {
+            "c_known_edit": 56.3213,
+            "before": 128.7291,
+            "c_simd": 202.9513,
+            "after": 130.8636
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "c_known_edit",
+            "before",
+            "c_simd"
+          ],
+          "elapsed_ms": {
+            "after": 99.8875,
+            "c_known_edit": 44.005,
+            "before": 41.6563,
+            "c_simd": 113.7531
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_simd",
+            "after",
+            "before",
+            "c_known_edit"
+          ],
+          "elapsed_ms": {
+            "c_simd": 113.4893,
+            "after": 26.2682,
+            "before": 39.8168,
+            "c_known_edit": 27.7192
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_known_edit",
+            "c_simd",
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "c_known_edit": 26.7643,
+            "c_simd": 106.4538,
+            "after": 27.2295,
+            "before": 42.9569
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before",
+            "c_known_edit",
+            "c_simd"
+          ],
+          "elapsed_ms": {
+            "after": 26.9056,
+            "before": 43.6143,
+            "c_known_edit": 29.7681,
+            "c_simd": 107.6991
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "c_known_edit",
+            "c_simd",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 71.0994,
+            "c_known_edit": 30.7761,
+            "c_simd": 131.0627,
+            "after": 26.9837
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_simd",
+            "c_known_edit",
+            "before",
+            "after"
+          ],
+          "elapsed_ms": {
+            "c_simd": 108.4888,
+            "c_known_edit": 30.8883,
+            "before": 41.9081,
+            "after": 26.7953
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_known_edit",
+            "before",
+            "after",
+            "c_simd"
+          ],
+          "elapsed_ms": {
+            "c_known_edit": 38.5685,
+            "before": 78.7925,
+            "after": 156.7449,
+            "c_simd": 155.8629
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "after",
+            "c_simd",
+            "c_known_edit"
+          ],
+          "elapsed_ms": {
+            "before": 44.4905,
+            "after": 59.8131,
+            "c_simd": 118.691,
+            "c_known_edit": 31.3571
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "c_simd",
+            "c_known_edit",
+            "before"
+          ],
+          "elapsed_ms": {
+            "after": 39.7646,
+            "c_simd": 109.1104,
+            "c_known_edit": 29.37,
+            "before": 46.5648
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before",
+            "c_simd",
+            "c_known_edit"
+          ],
+          "elapsed_ms": {
+            "after": 27.7873,
+            "before": 45.1039,
+            "c_simd": 106.8638,
+            "c_known_edit": 30.0199
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "c_simd",
+            "c_known_edit",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 43.1063,
+            "c_simd": 108.2292,
+            "c_known_edit": 29.2332,
+            "after": 28.8636
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_simd",
+            "c_known_edit",
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "c_simd": 104.6871,
+            "c_known_edit": 41.8219,
+            "after": 27.9521,
+            "before": 51.0665
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_known_edit",
+            "after",
+            "before",
+            "c_simd"
+          ],
+          "elapsed_ms": {
+            "c_known_edit": 28.7592,
+            "after": 25.6426,
+            "before": 43.7326,
+            "c_simd": 109.9096
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "before",
+            "c_known_edit",
+            "c_simd"
+          ],
+          "elapsed_ms": {
+            "after": 73.031,
+            "before": 62.888,
+            "c_known_edit": 26.8113,
+            "c_simd": 123.1809
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_known_edit",
+            "c_simd",
+            "after",
+            "before"
+          ],
+          "elapsed_ms": {
+            "c_known_edit": 31.1888,
+            "c_simd": 112.8657,
+            "after": 36.5765,
+            "before": 57.2627
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "c_known_edit",
+            "c_simd",
+            "after"
+          ],
+          "elapsed_ms": {
+            "before": 59.8848,
+            "c_known_edit": 29.3363,
+            "c_simd": 142.1662,
+            "after": 55.0569
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_simd",
+            "after",
+            "before",
+            "c_known_edit"
+          ],
+          "elapsed_ms": {
+            "c_simd": 144.6909,
+            "after": 31.0827,
+            "before": 52.2472,
+            "c_known_edit": 29.3455
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "before",
+            "c_known_edit",
+            "after",
+            "c_simd"
+          ],
+          "elapsed_ms": {
+            "before": 43.4689,
+            "c_known_edit": 28.6835,
+            "after": 27.4589,
+            "c_simd": 111.2018
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "after",
+            "c_simd",
+            "before",
+            "c_known_edit"
+          ],
+          "elapsed_ms": {
+            "after": 35.419,
+            "c_simd": 118.2151,
+            "before": 44.8683,
+            "c_known_edit": 28.2468
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_known_edit",
+            "after",
+            "c_simd",
+            "before"
+          ],
+          "elapsed_ms": {
+            "c_known_edit": 28.217,
+            "after": 28.4517,
+            "c_simd": 108.5688,
+            "before": 67.1928
+          }
+        },
+        {
+          "warmup": false,
+          "order": [
+            "c_simd",
+            "before",
+            "c_known_edit",
+            "after"
+          ],
+          "elapsed_ms": {
+            "c_simd": 145.7392,
+            "before": 58.6623,
+            "c_known_edit": 28.5507,
+            "after": 28.458
+          }
+        }
+      ],
+      "before": {
+        "n": 32,
+        "median_ms": 51.6393,
+        "p95_ms": 101.3989,
+        "min_ms": 39.8168,
+        "max_ms": 128.7291,
+        "raw_ms": [
+          60.7876,
+          98.3805,
+          46.3293,
+          52.8019,
+          44.9512,
+          49.3316,
+          57.6946,
+          101.3989,
+          52.2121,
+          71.256,
+          128.7291,
+          41.6563,
+          39.8168,
+          42.9569,
+          43.6143,
+          71.0994,
+          41.9081,
+          78.7925,
+          44.4905,
+          46.5648,
+          45.1039,
+          43.1063,
+          51.0665,
+          43.7326,
+          62.888,
+          57.2627,
+          59.8848,
+          52.2472,
+          43.4689,
+          44.8683,
+          67.1928,
+          58.6623
+        ]
+      },
+      "after": {
+        "n": 32,
+        "median_ms": 30.4801,
+        "p95_ms": 156.7449,
+        "min_ms": 25.6426,
+        "max_ms": 168.4636,
+        "raw_ms": [
+          28.8321,
+          31.0165,
+          47.0903,
+          27.3453,
+          32.4279,
+          29.9438,
+          27.1546,
+          60.0364,
+          168.4636,
+          97.6462,
+          130.8636,
+          99.8875,
+          26.2682,
+          27.2295,
+          26.9056,
+          26.9837,
+          26.7953,
+          156.7449,
+          59.8131,
+          39.7646,
+          27.7873,
+          28.8636,
+          27.9521,
+          25.6426,
+          73.031,
+          36.5765,
+          55.0569,
+          31.0827,
+          27.4589,
+          35.419,
+          28.4517,
+          28.458
+        ]
+      },
+      "c_simd": {
+        "n": 32,
+        "median_ms": 118.4531,
+        "p95_ms": 195.0966,
+        "min_ms": 104.6871,
+        "max_ms": 202.9513,
+        "raw_ms": [
+          138.6225,
+          159.2642,
+          125.9743,
+          112.0087,
+          156.7698,
+          159.9645,
+          115.8397,
+          132.5622,
+          143.1404,
+          195.0966,
+          202.9513,
+          113.7531,
+          113.4893,
+          106.4538,
+          107.6991,
+          131.0627,
+          108.4888,
+          155.8629,
+          118.691,
+          109.1104,
+          106.8638,
+          108.2292,
+          104.6871,
+          109.9096,
+          123.1809,
+          112.8657,
+          142.1662,
+          144.6909,
+          111.2018,
+          118.2151,
+          108.5688,
+          145.7392
+        ]
+      },
+      "c_known_edit": {
+        "n": 32,
+        "median_ms": 30.1899,
+        "p95_ms": 82.8845,
+        "min_ms": 26.7643,
+        "max_ms": 101.0513,
+        "raw_ms": [
+          38.3382,
+          38.3794,
+          27.1229,
+          58.0069,
+          30.667,
+          30.3599,
+          29.8621,
+          82.8845,
+          101.0513,
+          74.282,
+          56.3213,
+          44.005,
+          27.7192,
+          26.7643,
+          29.7681,
+          30.7761,
+          30.8883,
+          38.5685,
+          31.3571,
+          29.37,
+          30.0199,
+          29.2332,
+          41.8219,
+          28.7592,
+          26.8113,
+          31.1888,
+          29.3363,
+          29.3455,
+          28.6835,
+          28.2468,
+          28.217,
+          28.5507
+        ]
+      },
+      "after_over_before_ratio_ci95": [
+        0.5035057725185854,
+        0.7901358114306837
+      ],
+      "after_over_c_simd_ratio_ci95": [
+        0.2215337018620016,
+        0.3295118167605752
+      ],
+      "after_over_c_known_edit_ratio_ci95": [
+        0.916459525410952,
+        1.3135725635155804
+      ]
+    }
+  },
+  "profile": {
+    "before": {
+      "samples": 518,
+      "samples_per_launch": [
+        29,
+        30,
+        29,
+        39,
+        26,
+        58,
+        31,
+        30,
+        33,
+        32,
+        28,
+        11,
+        42,
+        29,
+        46,
+        25
+      ],
+      "leaf": {
+        "?validated_length_after_ascii_edits@NativeText@native_abi@bolt@@AEBA_NV?$basic_string_view@DU?$char_traits@D@std@@@std@@AEA_K11@Z": 192,
+        "ntdll.dll": 180,
+        "memcpy_repmovs": 116,
+        "?string_from_bytes@?A0x46afacd1@@YAXAEAUBridgeCall@1@@Z": 6,
+        "?bytes_from_string@?A0x46afacd1@@YAXAEAUBridgeCall@1@@Z": 3,
+        "??$checked@V<lambda_1>@?1??br_static_library_144@@YAXPEAUBrContext@@PEBDPEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_static_library_144@@YAX01PEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@Z": 3,
+        "memset": 3,
+        "?owner_of@memory@bolt@@YAPEAVArena@12@PEBX@Z": 3,
+        "??$checked@V<lambda_1>@?1??br_count@@YAHPEAUBrContext@@PEBDPEAUBrType@@PEBX@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_count@@YAH01PEAUBrType@@PEBX@Z@@Z": 2,
+        "?reserve_snapshot@Sequence@?A0x46afacd1@@QEAAXAEAUContext@2@_K1@Z": 2,
+        "?setmbcp_internal@@YAHH_NQEAU__acrt_ptd@@QEAPEAU__crt_multibyte_data@@@Z": 1,
+        "_malloc_base": 1,
+        "__security_check_cookie": 1,
+        "_Mtx_lock": 1,
+        "__isa_available_init": 1,
+        "KERNELBASE.dll": 1,
+        "msvcrt.dll": 1,
+        "?reserve@Sequence@?A0x46afacd1@@QEAAX_KW4Spare@12@@Z": 1
+      },
+      "pc_rvas": {
+        "program.exe+0x4aceb": 116,
+        "ntdll.dll+0x166e84": 80,
+        "program.exe+0x3ae9f": 56,
+        "ntdll.dll+0x1664c4": 32,
+        "program.exe+0x3ae49": 15,
+        "program.exe+0x3ae95": 15,
+        "program.exe+0x3af2d": 15,
+        "program.exe+0x3ae74": 14,
+        "program.exe+0x3ae46": 12,
+        "program.exe+0x3ae8b": 8,
+        "program.exe+0x3ae91": 8,
+        "ntdll.dll+0x1668e4": 6,
+        "program.exe+0x3ae6d": 6,
+        "program.exe+0x3ae8e": 4,
+        "ntdll.dll+0x166b84": 4,
+        "program.exe+0x3ae77": 4,
+        "program.exe+0x3af23": 4,
+        "ntdll.dll+0x2f8a3": 4,
+        "program.exe+0x3aeb4": 3,
+        "program.exe+0x3aed9": 3,
+        "program.exe+0x3ae88": 3,
+        "program.exe+0x3af03": 3,
+        "ntdll.dll+0x5627c": 3,
+        "ntdll.dll+0x166de4": 3,
+        "program.exe+0x3aefa": 3,
+        "ntdll.dll+0xa079": 2,
+        "program.exe+0x25b3f": 2,
+        "ntdll.dll+0x1667a4": 2,
+        "program.exe+0x38c15": 2,
+        "ntdll.dll+0x55c3d": 2,
+        "program.exe+0x3af52": 2,
+        "program.exe+0x3af19": 2,
+        "ntdll.dll+0x272a5": 1,
+        "ntdll.dll+0x27475": 1,
+        "ntdll.dll+0x5556d": 1,
+        "ntdll.dll+0x125005": 1,
+        "program.exe+0x2569d": 1,
+        "program.exe+0x31f0c": 1,
+        "ntdll.dll+0x9455": 1,
+        "ntdll.dll+0x1666e4": 1,
+        "ntdll.dll+0x55b0c": 1,
+        "ntdll.dll+0x55c35": 1,
+        "ntdll.dll+0x11e962": 1,
+        "ntdll.dll+0x1684d4": 1,
+        "program.exe+0x1135d": 1,
+        "program.exe+0x31f20": 1,
+        "program.exe+0x3ae63": 1,
+        "program.exe+0x3ae7e": 1,
+        "program.exe+0x3aeb1": 1,
+        "ntdll.dll+0x31240": 1,
+        "ntdll.dll+0x3ad6b": 1,
+        "ntdll.dll+0x1693b4": 1,
+        "ntdll.dll+0x16c9b6": 1,
+        "program.exe+0x13c80": 1,
+        "program.exe+0x3af0d": 1,
+        "program.exe+0x4b54b": 1,
+        "ntdll.dll+0x1d784": 1,
+        "ntdll.dll+0x56222": 1,
+        "program.exe+0x25b4b": 1,
+        "program.exe+0x3aebf": 1,
+        "program.exe+0x4b5ba": 1,
+        "program.exe+0x450d7": 1,
+        "ntdll.dll+0x975b7": 1,
+        "ntdll.dll+0x166aa4": 1,
+        "ntdll.dll+0x169d94": 1,
+        "program.exe+0x43a9e": 1,
+        "ntdll.dll+0x1cfac": 1,
+        "ntdll.dll+0x3d409": 1,
+        "ntdll.dll+0x1691e0": 1,
+        "program.exe+0x3aa55": 1,
+        "program.exe+0x4b533": 1,
+        "program.exe+0x4b5d": 1,
+        "program.exe+0x3ae81": 1,
+        "ntdll.dll+0x208bf": 1,
+        "ntdll.dll+0x2752b": 1,
+        "ntdll.dll+0x166a44": 1,
+        "ntdll.dll+0x166d64": 1,
+        "program.exe+0x25678": 1,
+        "program.exe+0x3a720": 1,
+        "program.exe+0x3a875": 1,
+        "program.exe+0x3af75": 1,
+        "ntdll.dll+0x3126e": 1,
+        "ntdll.dll+0x3c579": 1,
+        "ntdll.dll+0x166d04": 1,
+        "ntdll.dll+0x16bc62": 1,
+        "program.exe+0x3aeae": 1,
+        "KERNELBASE.dll+0x42d1e": 1,
+        "ntdll.dll+0x27395": 1,
+        "ntdll.dll+0x3c680": 1,
+        "ntdll.dll+0x55a76": 1,
+        "ntdll.dll+0xe0108": 1,
+        "msvcrt.dll+0x1038": 1,
+        "ntdll.dll+0x55bdc": 1,
+        "ntdll.dll+0x960a4": 1,
+        "program.exe+0x38c19": 1,
+        "program.exe+0x39aa2": 1,
+        "program.exe+0x39b47": 1,
+        "program.exe+0x39bc8": 1,
+        "program.exe+0x3a8c3": 1,
+        "program.exe+0x3aec2": 1,
+        "program.exe+0x3af1c": 1,
+        "ntdll.dll+0x27413": 1,
+        "ntdll.dll+0x3c5c4": 1,
+        "ntdll.dll+0x167854": 1,
+        "program.exe+0x31e88": 1,
+        "program.exe+0x3a798": 1,
+        "program.exe+0x3aea8": 1,
+        "program.exe+0x3af1f": 1,
+        "ntdll.dll+0xaaf8": 1,
+        "ntdll.dll+0x15ee7": 1,
+        "ntdll.dll+0x1666c4": 1,
+        "program.exe+0x3a895": 1
+      },
+      "stacks": {
+        "?validated_length_after_ascii_edits@NativeText@native_abi@bolt@@AEBA_NV?$basic_string_view@DU?$char_traits@D@std@@@std@@AEA_K11@Z <- ?string_from_bytes@?A0x46afacd1@@YAXAEAUBridgeCall@1@@Z <- ??$checked@V<lambda_1>@?1??br_static_library_114@@YAXPEAUBrContext@@PEBDPEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_static_library_114@@YAX01PEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@Z <- br_static_library_114 <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 180,
+        "[outside executable]": 158,
+        "memcpy_repmovs <- ?bytes_from_string@?A0x46afacd1@@YAXAEAUBridgeCall@1@@Z <- ??$checked@V<lambda_1>@?1??br_static_library_144@@YAXPEAUBrContext@@PEBDPEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_static_library_144@@YAX01PEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@Z <- br_static_library_144 <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 108,
+        "[outside executable] <- _malloc_base <- _aligned_malloc <- ??2@YAPEAX_KW4align_val_t@std@@@Z <- ?string_from_bytes@?A0x46afacd1@@YAXAEAUBridgeCall@1@@Z <- ??$checked@V<lambda_1>@?1??br_static_library_114@@YAXPEAUBrContext@@PEBDPEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_static_library_114@@YAX01PEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@Z <- br_static_library_114 <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 7,
+        "?string_from_bytes@?A0x46afacd1@@YAXAEAUBridgeCall@1@@Z <- ??$checked@V<lambda_1>@?1??br_static_library_114@@YAXPEAUBrContext@@PEBDPEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_static_library_114@@YAX01PEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@Z <- br_static_library_114 <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 6,
+        "[outside executable] <- _free_base <- _aligned_free <- ?string_from_bytes@?A0x46afacd1@@YAXAEAUBridgeCall@1@@Z <- ??$checked@V<lambda_1>@?1??br_static_library_114@@YAXPEAUBrContext@@PEBDPEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_static_library_114@@YAX01PEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@Z <- br_static_library_114 <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 5,
+        "[outside executable] <- _malloc_base <- _aligned_malloc <- ??2@YAPEAX_KW4align_val_t@std@@@Z <- ??$make@USequence@?A0x46afacd1@@AEAPEAUBrType@@AEAPEAVArena@memory@bolt@@@memory@bolt@@YAPEAUSequence@?A0x46afacd1@@PEAVArena@01@AEAPEAUBrType@@AEAPEAV401@@Z <- ?bytes_from_string@?A0x46afacd1@@YAXAEAUBridgeCall@1@@Z <- ??$checked@V<lambda_1>@?1??br_static_library_144@@YAXPEAUBrContext@@PEBDPEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_static_library_144@@YAX01PEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@Z <- br_static_library_144 <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 4,
+        "[outside executable] <- ?try_get_function_slow@@YAPEAXW4function_id@?A0x391cf84c@@QEBDQEBW4module_id@2@2@Z <- __acrt_AppPolicyGetProcessTerminationMethodInternal <- __acrt_get_process_end_policy <- ?common_exit@@YAXHW4_crt_exit_cleanup_mode@@W4_crt_exit_return_mode@@@Z": 4,
+        "[outside executable] <- _free_base <- _aligned_free <- ?drop@?A0x46afacd1@@YAXPEAUBrType@@PEAX@Z <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 4,
+        "?bytes_from_string@?A0x46afacd1@@YAXAEAUBridgeCall@1@@Z <- ??$checked@V<lambda_1>@?1??br_static_library_144@@YAXPEAUBrContext@@PEBDPEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_static_library_144@@YAX01PEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@Z <- br_static_library_144 <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 3,
+        "[outside executable] <- ?try_get_function_slow@@YAPEAXW4function_id@?A0x391cf84c@@QEBDQEBW4module_id@2@2@Z <- __acrt_AppPolicyGetProcessTerminationMethodInternal <- __acrt_get_process_end_policy": 3,
+        "memset <- ?drop@?A0x46afacd1@@YAXPEAUBrType@@PEAX@Z <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 3,
+        "??__Finitlocks@std@@YAXXZ": 3,
+        "?owner_of@memory@bolt@@YAPEAVArena@12@PEBX@Z <- ?string_from_bytes@?A0x46afacd1@@YAXAEAUBridgeCall@1@@Z <- ??$checked@V<lambda_1>@?1??br_static_library_114@@YAXPEAUBrContext@@PEBDPEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_static_library_114@@YAX01PEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@Z <- br_static_library_114 <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 3,
+        "??$checked@V<lambda_1>@?1??br_count@@YAHPEAUBrContext@@PEBDPEAUBrType@@PEBX@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_count@@YAH01PEAUBrType@@PEBX@Z@@Z <- br_count <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 2,
+        "[outside executable] <- _free_base <- _aligned_free <- ??$destroy@VNativeText@native_abi@bolt@@@memory@bolt@@YAXPEAVNativeText@native_abi@1@@Z <- ?drop@?A0x46afacd1@@YAXPEAUBrType@@PEAX@Z <- bolt_entry <- bolt_program_entry": 2,
+        "[outside executable] <- ?try_get_function_slow@@YAPEAXW4function_id@?A0x391cf84c@@QEBDQEBW4module_id@2@2@Z <- __acrt_AppPolicyGetProcessTerminationMethodInternal <- __acrt_get_process_end_policy <- ?common_exit@@YAXHW4_crt_exit_cleanup_mode@@W4_crt_exit_return_mode@@@Z <- ?__scrt_common_main_seh@@YAHXZ": 2,
+        "[outside executable] <- _malloc_base <- _aligned_malloc <- ??2@YAPEAX_KW4align_val_t@std@@@Z <- ??$make@USequence@?A0x46afacd1@@AEAPEAUBrType@@AEAPEAVArena@memory@bolt@@@memory@bolt@@YAPEAUSequence@?A0x46afacd1@@PEAVArena@01@AEAPEAUBrType@@AEAPEAV401@@Z <- ?bytes_from_string@?A0x46afacd1@@YAXAEAUBridgeCall@1@@Z <- ??$checked@V<lambda_1>@?1??br_static_library_144@@YAXPEAUBrContext@@PEBDPEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_static_library_144@@YAX01PEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@Z <- br_static_library_144 <- bolt_entry <- bolt_program_entry": 2,
+        "?reserve_snapshot@Sequence@?A0x46afacd1@@QEAAXAEAUContext@2@_K1@Z <- ?bytes_from_string@?A0x46afacd1@@YAXAEAUBridgeCall@1@@Z <- ??$checked@V<lambda_1>@?1??br_static_library_144@@YAXPEAUBrContext@@PEBDPEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_static_library_144@@YAX01PEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@Z <- br_static_library_144 <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 2,
+        "[outside executable] <- _free_base <- _aligned_free <- ?assign@?A0x46afacd1@@YAXPEAUBrType@@PEAXPEBX@Z <- ??$checked@V<lambda_1>@?1??br_copy@@YAXPEAUBrContext@@PEBDPEAUBrType@@PEAXPEBX@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_copy@@YAX01PEAUBrType@@PEAXPEBX@Z@@Z <- br_copy <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "?setmbcp_internal@@YAHH_NQEAU__acrt_ptd@@QEAPEAU__crt_multibyte_data@@@Z <- __acrt_initialize_multibyte <- __acrt_execute_initializers <- __scrt_initialize_crt <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "??$checked@V<lambda_1>@?1??br_static_library_144@@YAXPEAUBrContext@@PEBDPEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_static_library_144@@YAX01PEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@Z <- br_static_library_144 <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "[outside executable] <- _Mtx_lock <- ?drop@?A0x46afacd1@@YAXPEAUBrType@@PEAX@Z <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "_malloc_base <- ?setmbcp_internal@@YAHH_NQEAU__acrt_ptd@@QEAPEAU__crt_multibyte_data@@@Z <- __acrt_initialize_multibyte <- __acrt_execute_initializers <- __scrt_initialize_crt <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "??$common_lseek@_J@@YA_JH_JHAEAV__crt_cached_ptd_host@@@Z <- ??__Finitlocks@std@@YAXXZ <- ??__Finitlocks@std@@YAXXZ <- ??__Finitlocks@std@@YAXXZ <- ??__Finitlocks@std@@YAXXZ <- ??__Finitlocks@std@@YAXXZ": 1,
+        "??__Finitlocks@std@@YAXXZ <- ??__Finitlocks@std@@YAXXZ <- ?bolt_utf8_vector32@@YAHPEBD_KPEA_K@Z": 1,
+        "??__Finitlocks@std@@YAXXZ <- ??__Finitlocks@std@@YAXXZ <- LangCountryEnumProcEx <- wcsnlen <- ?fp_format_e_internal@@YAHQEAD_KH_NIQEAU_strflt@@2AEAV__crt_cached_ptd_host@@@Z <- __acrt_eagerly_load_locale_apis <- ??$_Assign@UDiagnostic@bolt@@@?$_Optional_construct_base@UDiagnostic@bolt@@@std@@QEAAX$$QEAUDiagnostic@bolt@@@Z <- ??1?$vector@UExceptionRecord@?A0x46afacd1@@V?$allocator@UExceptionRecord@?A0x46afacd1@@@std@@@std@@QEAA@XZ <- ??1?$unique_ptr@$$BY0A@DU?$default_delete@$$BY0A@D@std@@@std@@QEAA@XZ <- ?escape_json@?A0xe61fbc5f@bolt@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@V?$basic_string_view@DU?$char_traits@D@std@@@4@@Z": 1,
+        "__security_check_cookie <- ??$checked@V<lambda_1>@?1??br_count@@YAHPEAUBrContext@@PEBDPEAUBrType@@PEBX@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_count@@YAH01PEAUBrType@@PEBX@Z@@Z <- br_count <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "_Mtx_lock <- ?drop@?A0x46afacd1@@YAXPEAUBrType@@PEAX@Z <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "memcpy_repmovs <- ?clone@NativeText@native_abi@bolt@@QEBAPEAV123@PEAVArena@memory@3@@Z <- ?assign@?A0x46afacd1@@YAXPEAUBrType@@PEAXPEBX@Z <- ??$checked@V<lambda_1>@?1??br_copy@@YAXPEAUBrContext@@PEBDPEAUBrType@@PEAXPEBX@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_copy@@YAX01PEAUBrType@@PEAXPEBX@Z@@Z <- br_copy <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "[outside executable] <- _calloc_base <- ??$create_environment@_W@@YAQEAPEA_WQEA_W@Z <- ??$common_initialize_environment_nolock@_W@@YAHXZ <- ?pre_c_initialization@@YAHXZ <- _initterm_e <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "__isa_available_init <- __scrt_initialize_crt <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "[outside executable] <- ??__Finitlocks@std@@YAXXZ": 1,
+        "[outside executable] <- ?__acrt_LCMapStringA_stat@@YAHPEAU__crt_locale_pointers@@PEB_WKPEBDHPEADHHH@Z <- __acrt_LCMapStringA <- ?setSBUpLow@@YAXPEAU__crt_multibyte_data@@@Z <- _setmbcp_nolock <- ?setmbcp_internal@@YAHH_NQEAU__acrt_ptd@@QEAPEAU__crt_multibyte_data@@@Z <- __acrt_initialize_multibyte <- __acrt_execute_initializers <- __scrt_initialize_crt <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "?reserve@Sequence@?A0x46afacd1@@QEAAX_KW4Spare@12@@Z <- ?bytes_from_string@?A0x46afacd1@@YAXAEAUBridgeCall@1@@Z <- ??$checked@V<lambda_1>@?1??br_static_library_144@@YAXPEAUBrContext@@PEBDPEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_static_library_144@@YAX01PEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@Z <- br_static_library_144 <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "memcpy_repmovs <- ?string_from_bytes@?A0x46afacd1@@YAXAEAUBridgeCall@1@@Z <- ??$checked@V<lambda_1>@?1??br_static_library_114@@YAXPEAUBrContext@@PEBDPEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_static_library_114@@YAX01PEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@Z <- br_static_library_114 <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 1
+      }
+    },
+    "after": {
+      "samples": 512,
+      "samples_per_launch": [
+        41,
+        12,
+        14,
+        8,
+        10,
+        11,
+        15,
+        13,
+        11,
+        11,
+        16,
+        15,
+        15,
+        17,
+        16,
+        12,
+        10,
+        38,
+        19,
+        16,
+        20,
+        14,
+        14,
+        5,
+        37,
+        12,
+        16,
+        11,
+        14,
+        14,
+        17,
+        2,
+        16
+      ],
+      "leaf": {
+        "memcpy_repmovs": 248,
+        "ntdll.dll": 219,
+        "?replace_utf8@?A0x46afacd1@@YAXAEAUContext@1@PEAXPEBX_K3@Z": 7,
+        "KERNELBASE.dll": 6,
+        "memcpy": 4,
+        "bolt_entry": 3,
+        "??$make@USequence@?A0x46afacd1@@AEAPEAUBrType@@AEAPEAVArena@memory@bolt@@@memory@bolt@@YAPEAUSequence@?A0x46afacd1@@PEAVArena@01@AEAPEAUBrType@@AEAPEAV401@@Z": 3,
+        "?bytes_from_string@?A0x46afacd1@@YAXAEAUBridgeCall@1@@Z": 3,
+        "?reserve_snapshot@Sequence@?A0x46afacd1@@QEAAXAEAUContext@2@_K1@Z": 2,
+        "KERNEL32.DLL": 2,
+        "?drop@?A0x46afacd1@@YAXPEAUBrType@@PEAX@Z": 2,
+        "br_count": 1,
+        "wcscpy_s": 1,
+        "?has_avx2@native_abi@bolt@@YA_NXZ": 1,
+        "memset": 1,
+        "_calloc_base": 1,
+        "_aligned_free": 1,
+        "__security_check_cookie": 1,
+        "_aligned_malloc": 1,
+        "??$create_environment@_W@@YAQEAPEA_WQEA_W@Z": 1,
+        "br_replace_utf8_edits": 1,
+        "??$checked@V<lambda_1>@?1??br_count@@YAHPEAUBrContext@@PEBDPEAUBrType@@PEBX@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_count@@YAH01PEAUBrType@@PEBX@Z@@Z": 1,
+        "?array_rank@bolt@@YA_KV?$basic_string_view@DU?$char_traits@D@std@@@std@@@Z": 1,
+        "_Mtx_lock": 1
+      },
+      "pc_rvas": {
+        "program.exe+0x4addb": 248,
+        "ntdll.dll+0x166e84": 54,
+        "ntdll.dll+0x1664c4": 26,
+        "ntdll.dll+0x3c582": 22,
+        "ntdll.dll+0x1668e4": 7,
+        "ntdll.dll+0x166a44": 6,
+        "ntdll.dll+0x166624": 4,
+        "ntdll.dll+0x3c576": 3,
+        "ntdll.dll+0x55bdc": 3,
+        "ntdll.dll+0x166d24": 3,
+        "ntdll.dll+0x166de4": 3,
+        "ntdll.dll+0x3c5c1": 3,
+        "ntdll.dll+0x166b84": 3,
+        "ntdll.dll+0x1693b4": 3,
+        "ntdll.dll+0x167854": 3,
+        "ntdll.dll+0xcf8a3": 3,
+        "ntdll.dll+0x56272": 2,
+        "ntdll.dll+0x27384": 2,
+        "ntdll.dll+0x27388": 2,
+        "ntdll.dll+0x1667a4": 2,
+        "ntdll.dll+0x554aa": 2,
+        "ntdll.dll+0x169eb4": 2,
+        "program.exe+0x399c5": 2,
+        "ntdll.dll+0x3d3f6": 2,
+        "program.exe+0x39cbd": 2,
+        "ntdll.dll+0x3c579": 2,
+        "ntdll.dll+0x55c35": 2,
+        "ntdll.dll+0x11e30f": 2,
+        "ntdll.dll+0x3ba95": 1,
+        "ntdll.dll+0x3c5c4": 1,
+        "ntdll.dll+0x55ae0": 1,
+        "ntdll.dll+0x56216": 1,
+        "program.exe+0x2ee0": 1,
+        "program.exe+0x3b4eb": 1,
+        "program.exe+0x4af67": 1,
+        "ntdll.dll+0x27317": 1,
+        "ntdll.dll+0xdb9e5": 1,
+        "ntdll.dll+0x2748f": 1,
+        "ntdll.dll+0x16c9d0": 1,
+        "program.exe+0x2eed": 1,
+        "ntdll.dll+0x55c3d": 1,
+        "ntdll.dll+0x1665c4": 1,
+        "ntdll.dll+0x15d7f": 1,
+        "ntdll.dll+0x55ae2": 1,
+        "ntdll.dll+0x561c9": 1,
+        "ntdll.dll+0x73d2": 1,
+        "program.exe+0x26ff1": 1,
+        "program.exe+0x4af71": 1,
+        "ntdll.dll+0x12f181": 1,
+        "program.exe+0x101ef": 1,
+        "program.exe+0x39f74": 1,
+        "ntdll.dll+0x13b9d6": 1,
+        "program.exe+0x3997f": 1,
+        "program.exe+0x399c1": 1,
+        "ntdll.dll+0x13b993": 1,
+        "ntdll.dll+0x1664e4": 1,
+        "program.exe+0x36cb0": 1,
+        "ntdll.dll+0x31240": 1,
+        "program.exe+0x4b623": 1,
+        "KERNEL32.DLL+0x2da08": 1,
+        "ntdll.dll+0xaa1e": 1,
+        "ntdll.dll+0x55401": 1,
+        "ntdll.dll+0x55460": 1,
+        "ntdll.dll+0x3baae": 1,
+        "program.exe+0x10553": 1,
+        "program.exe+0x48b94": 1,
+        "ntdll.dll+0x8983": 1,
+        "program.exe+0x33e1b": 1,
+        "program.exe+0x3996f": 1,
+        "KERNEL32.DLL+0x23e50": 1,
+        "ntdll.dll+0x3bafd": 1,
+        "ntdll.dll+0x64f93": 1,
+        "ntdll.dll+0xe01e4": 1,
+        "ntdll.dll+0x11e962": 1,
+        "ntdll.dll+0x12f50e": 1,
+        "program.exe+0x2706d": 1,
+        "program.exe+0x4ade0": 1,
+        "program.exe+0x4aef4": 1,
+        "ntdll.dll+0x431ca": 1,
+        "KERNELBASE.dll+0x42d13": 1,
+        "ntdll.dll+0x169a14": 1,
+        "program.exe+0x31fc0": 1,
+        "program.exe+0x33e37": 1,
+        "ntdll.dll+0x95fc": 1,
+        "ntdll.dll+0x55476": 1,
+        "program.exe+0x451c9": 1,
+        "KERNELBASE.dll+0x40058": 1,
+        "ntdll.dll+0x5627c": 1,
+        "program.exe+0x39f97": 1,
+        "ntdll.dll+0x3c59e": 1,
+        "program.exe+0x31f53": 1,
+        "program.exe+0x48bc0": 1,
+        "KERNELBASE.dll+0xf4c60": 1,
+        "program.exe+0xa327": 1,
+        "ntdll.dll+0x3124c": 1,
+        "ntdll.dll+0x3ad65": 1,
+        "ntdll.dll+0x55b1e": 1,
+        "ntdll.dll+0x166d64": 1,
+        "program.exe+0x3c15f": 1,
+        "ntdll.dll+0x1666e4": 1,
+        "program.exe+0x2562d": 1,
+        "ntdll.dll+0x3ad57": 1,
+        "ntdll.dll+0x546a3": 1,
+        "ntdll.dll+0x55b05": 1,
+        "ntdll.dll+0x970e": 1,
+        "ntdll.dll+0x1c491": 1,
+        "ntdll.dll+0xcb2c0": 1,
+        "program.exe+0x27078": 1,
+        "ntdll.dll+0x31253": 1,
+        "ntdll.dll+0x1684d4": 1,
+        "program.exe+0x313c0": 1,
+        "program.exe+0x31e8d": 1,
+        "KERNELBASE.dll+0x14e7ac": 1,
+        "ntdll.dll+0x1cb9e": 1,
+        "ntdll.dll+0x3bc1e": 1,
+        "ntdll.dll+0x553d7": 1,
+        "ntdll.dll+0x55c4b": 1,
+        "ntdll.dll+0x11e315": 1,
+        "program.exe+0x43b8e": 1,
+        "KERNELBASE.dll+0x78c50": 1,
+        "KERNELBASE.dll+0x8eebd": 1,
+        "program.exe+0x2eae": 1
+      },
+      "stacks": {
+        "memcpy_repmovs <- ?bytes_from_string@?A0x46afacd1@@YAXAEAUBridgeCall@1@@Z <- ??$checked@V<lambda_1>@?1??br_static_library_144@@YAXPEAUBrContext@@PEBDPEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_static_library_144@@YAX01PEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@Z <- br_static_library_144 <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 246,
+        "[outside executable]": 163,
+        "[outside executable] <- _malloc_base <- _aligned_malloc <- ??2@YAPEAX_KW4align_val_t@std@@@Z <- ?replace_utf8@?A0x46afacd1@@YAXAEAUContext@1@PEAXPEBX_K3@Z <- ??$checked@V<lambda_1>@?1??br_replace_utf8_edits@@YAXPEAUBrContext@@PEBDPEAXPEBX_K4@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_replace_utf8_edits@@YAX01PEAXPEBX_K4@Z@@Z <- br_replace_utf8_edits <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 15,
+        "[outside executable] <- _malloc_base <- _aligned_malloc <- ??2@YAPEAX_KW4align_val_t@std@@@Z <- ??$make@USequence@?A0x46afacd1@@AEAPEAUBrType@@AEAPEAVArena@memory@bolt@@@memory@bolt@@YAPEAUSequence@?A0x46afacd1@@PEAVArena@01@AEAPEAUBrType@@AEAPEAV401@@Z <- ?bytes_from_string@?A0x46afacd1@@YAXAEAUBridgeCall@1@@Z <- ??$checked@V<lambda_1>@?1??br_static_library_144@@YAXPEAUBrContext@@PEBDPEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_static_library_144@@YAX01PEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@Z <- br_static_library_144 <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 10,
+        "[outside executable] <- _free_base <- _aligned_free <- ?drop@?A0x46afacd1@@YAXPEAUBrType@@PEAX@Z <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 8,
+        "?replace_utf8@?A0x46afacd1@@YAXAEAUContext@1@PEAXPEBX_K3@Z <- ??$checked@V<lambda_1>@?1??br_replace_utf8_edits@@YAXPEAUBrContext@@PEBDPEAXPEBX_K4@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_replace_utf8_edits@@YAX01PEAXPEBX_K4@Z@@Z <- br_replace_utf8_edits <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 7,
+        "[outside executable] <- ?try_get_function_slow@@YAPEAXW4function_id@?A0x391cf84c@@QEBDQEBW4module_id@2@2@Z <- __acrt_AppPolicyGetProcessTerminationMethodInternal <- __acrt_get_process_end_policy <- ?common_exit@@YAXHW4_crt_exit_cleanup_mode@@W4_crt_exit_return_mode@@@Z <- ?__scrt_common_main_seh@@YAHXZ": 5,
+        "[outside executable] <- _Mtx_unlock <- ?drop@?A0x46afacd1@@YAXPEAUBrType@@PEAX@Z <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 3,
+        "bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 3,
+        "??$make@USequence@?A0x46afacd1@@AEAPEAUBrType@@AEAPEAVArena@memory@bolt@@@memory@bolt@@YAPEAUSequence@?A0x46afacd1@@PEAVArena@01@AEAPEAUBrType@@AEAPEAV401@@Z <- ?bytes_from_string@?A0x46afacd1@@YAXAEAUBridgeCall@1@@Z <- ??$checked@V<lambda_1>@?1??br_static_library_144@@YAXPEAUBrContext@@PEBDPEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_static_library_144@@YAX01PEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@Z <- br_static_library_144 <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 3,
+        "?bytes_from_string@?A0x46afacd1@@YAXAEAUBridgeCall@1@@Z <- ??$checked@V<lambda_1>@?1??br_static_library_144@@YAXPEAUBrContext@@PEBDPEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_static_library_144@@YAX01PEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@Z <- br_static_library_144 <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 3,
+        "[outside executable] <- ?try_get_function_slow@@YAPEAXW4function_id@?A0x391cf84c@@QEBDQEBW4module_id@2@2@Z <- __acrt_AppPolicyGetProcessTerminationMethodInternal <- __acrt_get_process_end_policy": 3,
+        "[outside executable] <- _free_base <- _aligned_free <- ?replace_utf8@?A0x46afacd1@@YAXAEAUContext@1@PEAXPEBX_K3@Z <- ??$checked@V<lambda_1>@?1??br_replace_utf8_edits@@YAXPEAUBrContext@@PEBDPEAXPEBX_K4@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_replace_utf8_edits@@YAX01PEAXPEBX_K4@Z@@Z <- br_replace_utf8_edits <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 2,
+        "[outside executable] <- ?try_cor_exit_process@@YAXI@Z <- ?exit_or_terminate_process@@YAXI_N@Z <- ?common_exit@@YAXHW4_crt_exit_cleanup_mode@@W4_crt_exit_return_mode@@@Z <- ?__scrt_common_main_seh@@YAHXZ": 2,
+        "[outside executable] <- ?try_get_function_slow@@YAPEAXW4function_id@?A0x391cf84c@@QEBDQEBW4module_id@2@2@Z <- __acrt_AppPolicyGetProcessTerminationMethodInternal <- __acrt_get_process_end_policy <- ?common_exit@@YAXHW4_crt_exit_cleanup_mode@@W4_crt_exit_return_mode@@@Z": 2,
+        "[outside executable] <- _malloc_base <- _aligned_malloc <- ??2@YAPEAX_KW4align_val_t@std@@@Z <- ??$make@USequence@?A0x46afacd1@@AEAPEAUBrType@@AEAPEAVArena@memory@bolt@@@memory@bolt@@YAPEAUSequence@?A0x46afacd1@@PEAVArena@01@AEAPEAUBrType@@AEAPEAV401@@Z <- ?bytes_from_string@?A0x46afacd1@@YAXAEAUBridgeCall@1@@Z <- ??$checked@V<lambda_1>@?1??br_static_library_144@@YAXPEAUBrContext@@PEBDPEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_static_library_144@@YAX01PEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@Z <- br_static_library_144 <- bolt_entry <- bolt_program_entry": 2,
+        "?reserve_snapshot@Sequence@?A0x46afacd1@@QEAAXAEAUContext@2@_K1@Z <- ?bytes_from_string@?A0x46afacd1@@YAXAEAUBridgeCall@1@@Z <- ??$checked@V<lambda_1>@?1??br_static_library_144@@YAXPEAUBrContext@@PEBDPEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_static_library_144@@YAX01PEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@Z <- br_static_library_144 <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 2,
+        "?drop@?A0x46afacd1@@YAXPEAUBrType@@PEAX@Z <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 2,
+        "memcpy <- ?replace_utf8@?A0x46afacd1@@YAXAEAUContext@1@PEAXPEBX_K3@Z <- ??$checked@V<lambda_1>@?1??br_replace_utf8_edits@@YAXPEAUBrContext@@PEBDPEAXPEBX_K4@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_replace_utf8_edits@@YAX01PEAXPEBX_K4@Z@@Z <- br_replace_utf8_edits <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 2,
+        "br_count <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "memcpy <- ?bytes_from_string@?A0x46afacd1@@YAXAEAUBridgeCall@1@@Z <- ??$checked@V<lambda_1>@?1??br_static_library_144@@YAXPEAUBrContext@@PEBDPEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_static_library_144@@YAX01PEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@Z <- br_static_library_144 <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "[outside executable] <- _calloc_base <- __acrt_lowio_create_handle_array <- __acrt_lowio_ensure_fh_exists <- __acrt_initialize_lowio <- __acrt_execute_initializers <- __scrt_initialize_crt <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "[outside executable] <- _free_base <- ??$destroy@VNativeText@native_abi@bolt@@@memory@bolt@@YAXPEAVNativeText@native_abi@1@@Z <- ?drop@?A0x46afacd1@@YAXPEAUBrType@@PEAX@Z <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "memcpy <- ?put_text@?A0x46afacd1@@YAPEAVNativeText@native_abi@bolt@@PEAXV?$basic_string_view@DU?$char_traits@D@std@@@std@@1@Z <- ??$checked@V<lambda_1>@?1??br_string@@YAXPEAUBrContext@@PEBDPEAX1_K@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_string@@YAX01PEAX1_K@Z@@Z <- br_string <- b_Bolt.Runtime.WindowsConsole::WriteAll(void*,byte*,ulong,bool,) <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "wcscpy_s <- ??$create_environment@_W@@YAQEAPEA_WQEA_W@Z <- ??$common_initialize_environment_nolock@_W@@YAHXZ <- ?pre_c_initialization@@YAHXZ <- _initterm_e <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "[outside executable] <- b_Bolt.Runtime.WindowsConsole::WriteAll(void*,byte*,ulong,bool,) <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "?has_avx2@native_abi@bolt@@YA_NXZ <- br_create <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "memset <- ?drop@?A0x46afacd1@@YAXPEAUBrType@@PEAX@Z <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "_calloc_base <- ?reserve@Sequence@?A0x46afacd1@@QEAAX_KW4Spare@12@@Z <- ??R<lambda_1>@?1??br_array@@YAXPEAUBrContext@@PEBDPEAUBrType@@PEAX_KH@Z@QEBA@XZ <- ??$checked@V<lambda_1>@?1??br_array@@YAXPEAUBrContext@@PEBDPEAUBrType@@PEAX_KH@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_array@@YAX01PEAUBrType@@PEAX_KH@Z@@Z <- br_array <- b_Bolt.Runtime.IntegerFormatting::Unsigned(ulong,) <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "_aligned_free <- ?drop@?A0x46afacd1@@YAXPEAUBrType@@PEAX@Z <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "[outside executable] <- _Mtx_unlock <- ?reserve_snapshot@Sequence@?A0x46afacd1@@QEAAXAEAUContext@2@_K1@Z <- ?bytes_from_string@?A0x46afacd1@@YAXAEAUBridgeCall@1@@Z <- ??$checked@V<lambda_1>@?1??br_static_library_144@@YAXPEAUBrContext@@PEBDPEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_static_library_144@@YAX01PEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@Z <- br_static_library_144 <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "memcpy_repmovs <- ?clone@NativeText@native_abi@bolt@@QEBAPEAV123@PEAVArena@memory@3@@Z <- ?assign@?A0x46afacd1@@YAXPEAUBrType@@PEAXPEBX@Z <- ??$checked@V<lambda_1>@?1??br_copy@@YAXPEAUBrContext@@PEBDPEAUBrType@@PEAXPEBX@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_copy@@YAX01PEAUBrType@@PEAXPEBX@Z@@Z <- br_copy <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "__security_check_cookie <- ??$checked@V<lambda_1>@?1??br_static_library_144@@YAXPEAUBrContext@@PEBDPEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_static_library_144@@YAX01PEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@Z <- br_static_library_144 <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "_aligned_malloc <- ??2@YAPEAX_KW4align_val_t@std@@@Z <- ?replace_utf8@?A0x46afacd1@@YAXAEAUContext@1@PEAXPEBX_K3@Z <- ??$checked@V<lambda_1>@?1??br_replace_utf8_edits@@YAXPEAUBrContext@@PEBDPEAXPEBX_K4@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_replace_utf8_edits@@YAX01PEAXPEBX_K4@Z@@Z <- br_replace_utf8_edits <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "??$create_environment@_W@@YAQEAPEA_WQEA_W@Z <- ??$common_initialize_environment_nolock@_W@@YAHXZ <- ?pre_c_initialization@@YAHXZ <- _initterm_e <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "[outside executable] <- __acrt_initialize_winapi_thunks <- __acrt_execute_initializers <- __scrt_initialize_crt <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "[outside executable] <- _Mtx_lock <- ?reserve_snapshot@Sequence@?A0x46afacd1@@QEAAXAEAUContext@2@_K1@Z <- ?bytes_from_string@?A0x46afacd1@@YAXAEAUBridgeCall@1@@Z <- ??$checked@V<lambda_1>@?1??br_static_library_144@@YAXPEAUBrContext@@PEBDPEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_static_library_144@@YAX01PEAUBrType@@PEAX3PEBQEAU4@PEBQEAX_K@Z@@Z <- br_static_library_144 <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "br_replace_utf8_edits <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "memcpy_repmovs <- __dcrt_get_wide_environment_from_os <- ??$common_initialize_environment_nolock@_W@@YAHXZ <- ?pre_c_initialization@@YAHXZ <- _initterm_e <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "??$checked@V<lambda_1>@?1??br_count@@YAHPEAUBrContext@@PEBDPEAUBrType@@PEBX@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_count@@YAH01PEAUBrType@@PEBX@Z@@Z <- br_count <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "[outside executable] <- _Mtx_lock <- ?drop@?A0x46afacd1@@YAXPEAUBrType@@PEAX@Z <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "[outside executable] <- _free_base <- ??1?$vector@V?$unique_ptr@UBrType@@U?$default_delete@UBrType@@@std@@@std@@V?$allocator@V?$unique_ptr@UBrType@@U?$default_delete@UBrType@@@std@@@std@@@2@@std@@QEAA@XZ <- ??_GContext@?A0x46afacd1@@QEAAPEAXI@Z <- br_destroy <- br_finish <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "[outside executable] <- ?try_get_function_slow@@YAPEAXW4function_id@?A0x391cf84c@@QEBDQEBW4module_id@2@2@Z <- __acrt_LCMapStringEx <- ?__acrt_LCMapStringA_stat@@YAHPEAU__crt_locale_pointers@@PEB_WKPEBDHPEADHHH@Z <- __acrt_LCMapStringA <- ?setSBUpLow@@YAXPEAU__crt_multibyte_data@@@Z <- _setmbcp_nolock <- ?setmbcp_internal@@YAHH_NQEAU__acrt_ptd@@QEAPEAU__crt_multibyte_data@@@Z <- __acrt_initialize_multibyte <- __acrt_execute_initializers <- __scrt_initialize_crt": 1,
+        "[outside executable] <- _free_base <- _aligned_free <- ??$destroy@VNativeText@native_abi@bolt@@@memory@bolt@@YAXPEAVNativeText@native_abi@1@@Z <- ?drop@?A0x46afacd1@@YAXPEAUBrType@@PEAX@Z <- bolt_entry <- bolt_program_entry": 1,
+        "?array_rank@bolt@@YA_KV?$basic_string_view@DU?$char_traits@D@std@@@std@@@Z <- ??R<lambda_1>@?1??br_type@@YAPEAUBrType@@PEAUBrContext@@PEBDH_K@Z@QEBA@XZ <- ??$checked@V<lambda_1>@?1??br_type@@YAPEAUBrType@@PEAUBrContext@@PEBDH_K@Z@@?A0x46afacd1@@YAXPEAUBrContext@@PEBD$$QEAV<lambda_1>@?1??br_type@@YAPEAUBrType@@01H_K@Z@@Z <- br_type <- bolt_module_initialize <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "[outside executable] <- ??__Finitlocks@std@@YAXXZ <- ?try_get_function_slow@@YAPEAXW4function_id@?A0x391cf84c@@QEBDQEBW4module_id@2@2@Z": 1,
+        "_Mtx_lock <- ?drop@?A0x46afacd1@@YAXPEAUBrType@@PEAX@Z <- bolt_entry <- bolt_program_entry <- ?__scrt_common_main_seh@@YAHXZ": 1,
+        "[outside executable] <- __acrt_GetStringTypeA <- ?setSBUpLow@@YAXPEAU__crt_multibyte_data@@@Z <- _setmbcp_nolock <- ?setmbcp_internal@@YAHH_NQEAU__acrt_ptd@@QEAPEAU__crt_multibyte_data@@@Z <- __acrt_initialize_multibyte <- __acrt_execute_initializers <- __scrt_initialize_crt": 1
+      }
+    },
+    "c_simd": {
+      "samples": 870,
+      "samples_per_launch": [
+        81,
+        79,
+        79,
+        70,
+        90,
+        70,
+        62,
+        57,
+        47,
+        71,
+        83,
+        81
+      ],
+      "leaf": {
+        "bolt_utf8_vector32": 582,
+        "memcpy_repmovs": 238,
+        "ntdll.dll": 43,
+        "main": 5,
+        "msvcrt.dll": 1,
+        "KERNELBASE.dll": 1
+      },
+      "pc_rvas": {
+        "program.exe+0x16adb": 238,
+        "program.exe+0x1a69": 97,
+        "program.exe+0x1a59": 54,
+        "program.exe+0x1a85": 50,
+        "program.exe+0x1a6e": 49,
+        "program.exe+0x1a99": 49,
+        "program.exe+0x1a79": 41,
+        "program.exe+0x1a7f": 41,
+        "program.exe+0x1a49": 26,
+        "program.exe+0x1ac5": 25,
+        "program.exe+0x1a27": 20,
+        "program.exe+0x1a3e": 20,
+        "program.exe+0x1a00": 18,
+        "program.exe+0x1a32": 15,
+        "program.exe+0x1a1b": 14,
+        "program.exe+0x1a10": 13,
+        "program.exe+0x1ac7": 13,
+        "ntdll.dll+0x166e84": 13,
+        "program.exe+0x19f5": 9,
+        "program.exe+0x1a63": 9,
+        "program.exe+0x19c6": 6,
+        "program.exe+0x1a74": 4,
+        "ntdll.dll+0x166de4": 3,
+        "program.exe+0x1a4f": 3,
+        "program.exe+0x1a93": 3,
+        "program.exe+0x1455": 2,
+        "ntdll.dll+0x1668e4": 2,
+        "program.exe+0x19c0": 2,
+        "ntdll.dll+0x20933": 1,
+        "ntdll.dll+0x3c56d": 1,
+        "ntdll.dll+0x436e3": 1,
+        "msvcrt.dll+0x7d6f0": 1,
+        "ntdll.dll+0x166624": 1,
+        "ntdll.dll+0x3c53a": 1,
+        "ntdll.dll+0x125005": 1,
+        "ntdll.dll+0x166964": 1,
+        "ntdll.dll+0x8660": 1,
+        "ntdll.dll+0x1b632": 1,
+        "ntdll.dll+0x168a54": 1,
+        "program.exe+0x12e2": 1,
+        "program.exe+0x1afa": 1,
+        "ntdll.dll+0x3c5c4": 1,
+        "ntdll.dll+0x3d3ea": 1,
+        "ntdll.dll+0x166a44": 1,
+        "program.exe+0x13c8": 1,
+        "ntdll.dll+0x30479": 1,
+        "ntdll.dll+0x1a876": 1,
+        "program.exe+0x128c": 1,
+        "ntdll.dll+0x5627c": 1,
+        "ntdll.dll+0xcf7ae": 1,
+        "ntdll.dll+0x1664c4": 1,
+        "KERNELBASE.dll+0xc2260": 1,
+        "ntdll.dll+0x3c69f": 1,
+        "ntdll.dll+0x12513b": 1,
+        "ntdll.dll+0x166b84": 1,
+        "ntdll.dll+0x655c8": 1,
+        "ntdll.dll+0x1667a4": 1,
+        "ntdll.dll+0x166d24": 1,
+        "ntdll.dll+0x1690d4": 1
+      },
+      "stacks": {
+        "bolt_utf8_vector32 <- main <- __local_stdio_printf_options": 582,
+        "memcpy_repmovs <- main <- __local_stdio_printf_options": 238,
+        "[outside executable]": 34,
+        "main <- __local_stdio_printf_options": 5,
+        "[outside executable] <- __acrt_tls2_supported <- __acrt_AppPolicyGetProcessTerminationMethodInternal <- __acrt_get_process_end_policy <- __acrt_initialize_thread_local_exit_callback <- __local_stdio_printf_options": 2,
+        "[outside executable] <- __acrt_initialize_thread_local_exit_callback <- __acrt_initialize_thread_local_exit_callback <- __acrt_initialize_thread_local_exit_callback <- __local_stdio_printf_options": 1,
+        "[outside executable] <- __acrt_tls2_supported": 1,
+        "[outside executable] <- __acrt_initialize_thread_local_exit_callback <- __acrt_initialize_thread_local_exit_callback <- __local_stdio_printf_options": 1,
+        "[outside executable] <- _calloc_base <- __acrt_stdio_allocate_buffer_nolock <- __acrt_stdio_flush_and_write_narrow_nolock <- ?write_string_impl@?$output_adapter_common@DV?$stream_output_adapter@D@__crt_stdio_output@@@__crt_stdio_output@@IEBAXQEBDHQEAHAEAV__crt_cached_ptd_host@@@Z <- ?state_case_type@?$output_processor@DV?$stream_output_adapter@D@__crt_stdio_output@@V?$standard_base@DV?$stream_output_adapter@D@__crt_stdio_output@@@2@@__crt_stdio_output@@AEAA_NXZ <- ?process@?$output_processor@DV?$stream_output_adapter@D@__crt_stdio_output@@V?$standard_base@DV?$stream_output_adapter@D@__crt_stdio_output@@@2@@__crt_stdio_output@@QEAAHXZ <- ?type_case_n@?$output_processor@DV?$stream_output_adapter@D@__crt_stdio_output@@V?$standard_base@DV?$stream_output_adapter@D@__crt_stdio_output@@@2@@__crt_stdio_output@@AEAA_NXZ <- ??$type_case_integer@$09@?$output_processor@DV?$stream_output_adapter@D@__crt_stdio_output@@V?$standard_base@DV?$stream_output_adapter@D@__crt_stdio_output@@@2@@__crt_stdio_output@@AEAA_N_N@Z <- __stdio_common_vfprintf": 1,
+        "[outside executable] <- __acrt_tls2_supported <- __acrt_AppPolicyGetProcessTerminationMethodInternal <- __acrt_get_process_end_policy": 1,
+        "[outside executable] <- __acrt_tls2_supported <- __acrt_AppPolicyGetProcessTerminationMethodInternal <- __acrt_get_process_end_policy <- __acrt_initialize_thread_local_exit_callback": 1,
+        "[outside executable] <- __acrt_initialize_winapi_thunks <- __acrt_execute_initializers <- __scrt_initialize_crt <- __local_stdio_printf_options": 1,
+        "[outside executable] <- _free_base <- main <- __local_stdio_printf_options": 1,
+        "[outside executable] <- __acrt_get_process_end_policy <- __acrt_initialize_thread_local_exit_callback <- __local_stdio_printf_options": 1
+      }
+    },
+    "c_known_edit": {
+      "samples": 518,
+      "samples_per_launch": [
+        15,
+        13,
+        13,
+        17,
+        17,
+        15,
+        16,
+        13,
+        14,
+        15,
+        14,
+        19,
+        14,
+        30,
+        14,
+        17,
+        16,
+        22,
+        13,
+        12,
+        10,
+        12,
+        15,
+        16,
+        14,
+        18,
+        17,
+        16,
+        19,
+        17,
+        17,
+        15,
+        13
+      ],
+      "leaf": {
+        "memcpy_repmovs": 370,
+        "ntdll.dll": 128,
+        "KERNELBASE.dll": 10,
+        "msvcrt.dll": 4,
+        "main": 2,
+        "strcpy_s": 2,
+        "_isatty": 1,
+        "memcpy": 1
+      },
+      "pc_rvas": {
+        "program.exe+0x16b2b": 369,
+        "ntdll.dll+0x166e84": 34,
+        "ntdll.dll+0x1668e4": 13,
+        "ntdll.dll+0x166de4": 5,
+        "ntdll.dll+0x166624": 4,
+        "ntdll.dll+0x3c579": 4,
+        "ntdll.dll+0x166ac4": 4,
+        "ntdll.dll+0x1664c4": 3,
+        "ntdll.dll+0x167854": 3,
+        "ntdll.dll+0x169eb4": 3,
+        "ntdll.dll+0x1693b4": 3,
+        "ntdll.dll+0x3d3f3": 3,
+        "ntdll.dll+0x166a44": 3,
+        "ntdll.dll+0x1766d3": 2,
+        "ntdll.dll+0x1667a4": 2,
+        "ntdll.dll+0x1665c4": 2,
+        "ntdll.dll+0x167e74": 2,
+        "KERNELBASE.dll+0x42d23": 2,
+        "ntdll.dll+0x3c582": 2,
+        "ntdll.dll+0x166b84": 2,
+        "ntdll.dll+0x3c576": 2,
+        "ntdll.dll+0x16bc66": 2,
+        "msvcrt.dll+0x40fed": 1,
+        "ntdll.dll+0x166d24": 1,
+        "KERNELBASE.dll+0x15e82": 1,
+        "ntdll.dll+0x168414": 1,
+        "ntdll.dll+0x208a9": 1,
+        "ntdll.dll+0x121e6b": 1,
+        "ntdll.dll+0x16bc6a": 1,
+        "ntdll.dll+0x3e445": 1,
+        "program.exe+0x16b2e": 1,
+        "ntdll.dll+0x5692b": 1,
+        "program.exe+0x11ef": 1,
+        "ntdll.dll+0x16cac7": 1,
+        "KERNELBASE.dll+0x10038c": 1,
+        "ntdll.dll+0x16c98d": 1,
+        "KERNELBASE.dll+0x538f8": 1,
+        "ntdll.dll+0x11e378": 1,
+        "KERNELBASE.dll+0xc041d": 1,
+        "ntdll.dll+0x6524c": 1,
+        "KERNELBASE.dll+0x1376c": 1,
+        "KERNELBASE.dll+0xc0030": 1,
+        "ntdll.dll+0x3c69f": 1,
+        "ntdll.dll+0x16bbea": 1,
+        "msvcrt.dll+0x7a10": 1,
+        "ntdll.dll+0x62dfc": 1,
+        "program.exe+0x120e": 1,
+        "program.exe+0x66cd": 1,
+        "ntdll.dll+0x27290": 1,
+        "ntdll.dll+0x1665a4": 1,
+        "ntdll.dll+0x2df05": 1,
+        "KERNELBASE.dll+0x1c040": 1,
+        "ntdll.dll+0x168ab4": 1,
+        "ntdll.dll+0x62dff": 1,
+        "ntdll.dll+0x168714": 1,
+        "ntdll.dll+0x166ce4": 1,
+        "ntdll.dll+0x16bc62": 1,
+        "KERNELBASE.dll+0x3b160": 1,
+        "msvcrt.dll+0x6211a": 1,
+        "ntdll.dll+0x3c65b": 1,
+        "ntdll.dll+0x166d04": 1,
+        "msvcrt.dll+0x4025c": 1,
+        "ntdll.dll+0x8660": 1,
+        "ntdll.dll+0x63a09": 1,
+        "program.exe+0xfc34": 1,
+        "ntdll.dll+0x166d64": 1,
+        "ntdll.dll+0x167b14": 1,
+        "ntdll.dll+0x54670": 1,
+        "program.exe+0x16c88": 1,
+        "ntdll.dll+0x1881b": 1,
+        "program.exe+0x66f9": 1
+      },
+      "stacks": {
+        "memcpy_repmovs <- main <- __local_stdio_printf_options": 360,
+        "[outside executable]": 125,
+        "[outside executable] <- __acrt_tls2_supported <- __acrt_AppPolicyGetProcessTerminationMethodInternal <- __acrt_get_process_end_policy": 7,
+        "[outside executable] <- __acrt_tls2_supported <- __acrt_AppPolicyGetProcessTerminationMethodInternal <- __acrt_get_process_end_policy <- __acrt_initialize_thread_local_exit_callback <- __local_stdio_printf_options": 3,
+        "[outside executable] <- __dcrt_get_narrow_environment_from_os <- __dcrt_uninitialize_environments_nolock <- __local_stdio_printf_options <- _initterm_e <- __local_stdio_printf_options": 3,
+        "main <- __local_stdio_printf_options": 2,
+        "[outside executable] <- __acrt_initialize_thread_local_exit_callback <- __acrt_initialize_thread_local_exit_callback <- __local_stdio_printf_options": 2,
+        "[outside executable] <- __acrt_tls2_supported <- __acrt_AppPolicyGetProcessTerminationMethodInternal <- __acrt_get_process_end_policy <- __acrt_initialize_thread_local_exit_callback": 2,
+        "strcpy_s <- __dcrt_uninitialize_environments_nolock <- __dcrt_uninitialize_environments_nolock <- __local_stdio_printf_options <- _initterm_e <- __local_stdio_printf_options": 2,
+        "[outside executable] <- __acrt_GetStringTypeA <- _setmbcp_nolock <- _setmbcp_nolock <- _setmbcp_nolock <- __acrt_initialize_multibyte <- __acrt_execute_initializers <- __scrt_initialize_crt <- __local_stdio_printf_options": 1,
+        "[outside executable] <- __acrt_tls2_supported <- __acrt_LCMapStringEx <- __acrt_LCMapStringA <- __acrt_LCMapStringA <- _setmbcp_nolock <- _setmbcp_nolock <- _setmbcp_nolock <- __acrt_initialize_multibyte <- __acrt_execute_initializers <- __scrt_initialize_crt <- __local_stdio_printf_options": 1,
+        "[outside executable] <- _calloc_base <- __dcrt_uninitialize_environments_nolock <- __dcrt_uninitialize_environments_nolock <- __local_stdio_printf_options <- _initterm_e <- __local_stdio_printf_options": 1,
+        "[outside executable] <- __acrt_LCMapStringEx <- __acrt_LCMapStringA <- __acrt_LCMapStringA <- _setmbcp_nolock <- _setmbcp_nolock <- _setmbcp_nolock <- __acrt_initialize_multibyte <- __acrt_execute_initializers <- __scrt_initialize_crt <- __local_stdio_printf_options": 1,
+        "[outside executable] <- __acrt_tls2_supported <- __acrt_AppPolicyGetProcessTerminationMethodInternal": 1,
+        "[outside executable] <- __acrt_initialize_thread_local_exit_callback <- __acrt_initialize_thread_local_exit_callback <- __acrt_initialize_thread_local_exit_callback <- __local_stdio_printf_options": 1,
+        "memset_avx512_ermsb_amd <- _control87 <- _strnicoll <- memset_avx512_ermsb_amd <- __acrt_initialize_fma3 <- memset_avx512_ermsb_amd <- memset_avx512_ermsb_amd <- memset_avx512_ermsb_amd <- memset_avx512_ermsb_amd": 1,
+        "memset_avx512_ermsb_amd <- memset_avx512_ermsb_amd <- memset_avx512_ermsb_amd <- memset_avx512_ermsb_amd <- memset_avx512_ermsb_amd <- memset_avx512_ermsb_amd <- memset_avx512_ermsb_amd": 1,
+        "memset_avx512_ermsb_amd <- memset_avx512_ermsb_amd <- memset_avx512_ermsb_amd <- memset_avx512_ermsb_amd <- memset_avx512_ermsb_amd <- memset_avx512_ermsb_amd": 1,
+        "memset_avx512_ermsb_amd": 1,
+        "_isatty <- __acrt_should_use_temporary_buffer <- __acrt_stdio_begin_temporary_buffering_nolock <- ?type_case_n@?$output_processor@DV?$stream_output_adapter@D@__crt_stdio_output@@V?$standard_base@DV?$stream_output_adapter@D@__crt_stdio_output@@@2@@__crt_stdio_output@@AEAA_NXZ <- ??$type_case_integer@$09@?$output_processor@DV?$stream_output_adapter@D@__crt_stdio_output@@V?$standard_base@DV?$stream_output_adapter@D@__crt_stdio_output@@@2@@__crt_stdio_output@@AEAA_N_N@Z <- __stdio_common_vfprintf <- printf <- main <- __local_stdio_printf_options": 1,
+        "memcpy <- main <- __local_stdio_printf_options": 1
+      }
+    }
+  },
+  "sampling": {
+    "method": "main thread, nominal 1 ms wall interval, sampled PC and stack",
+    "min_samples": 512,
+    "sampler_sha256": "27559cef748bcd5543805b86422194fc4ca26e306b6df4524470a8e93362aba8"
+  }
+}

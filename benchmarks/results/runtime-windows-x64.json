@@ -1,0 +1,668 @@
+{
+  "schema": 1,
+  "utc": "2026-11-20T14:42:53.164162+00:00",
+  "host": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "machine": "AMD64",
+    "cpu": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+    "advertised_features": null,
+    "python": "3.13.7",
+    "cpu_affinity": null
+  },
+  "toolchains": {
+    "c": "Syntax: cl [ Option... ] Dateiname... [ /link Linkeroption... ]\n\nMicrosoft (R) C/C++ Optimizing Compiler Version 19.51.36260 for x64\nCopyright (C) Microsoft Corporation. Alle Rechte vorbehalten.",
+    "bolt_version": "Bolt 0.16.0 (x86_64-pc-windows-msvc)",
+    "bolt_backends": "Host: x86_64-pc-windows-msvc\nFast: available (AOT/JIT)\nLLVM: 23.1.2 (AOT/JIT)\nShared runtime ABI: core/collections, IO, memory/arenas, threads/atomics, processes, sockets, diagnostics; direct exception/cleanup control flow\nC++: compatibility backend for unsupported features/FFI; requires an external C++20 compiler",
+    "bolt_sha256": "943c44c42e28d36dddd2e0576ee99bdb696df23e707c7bb7cedb75646aa7a67a"
+  },
+  "metric": "whole process wall time including startup and output",
+  "seed": 442109,
+  "warmup": 2,
+  "runs": 15,
+  "timeout_s": 120,
+  "min_duration_ms": 200,
+  "min_speedup": null,
+  "workload": "regular",
+  "cases": {
+    "arithmetic": {
+      "expected_stdout": "17925543158443646234",
+      "profiles": {
+        "c": {
+          "fixture": "arithmetic.c",
+          "fixture_sha256": "8f8d09af5d61b196a81e30b231fef34b3acbf5eee5207d346e1f17cdadc1c699",
+          "command": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+            "/nologo",
+            "/O2",
+            "/DNDEBUG",
+            "/std:c11",
+            "arithmetic.c",
+            "/Fe:program.exe"
+          ],
+          "source_sha256": "8f8d09af5d61b196a81e30b231fef34b3acbf5eee5207d346e1f17cdadc1c699",
+          "executable_sha256": "149064aedfe7c761d4a521d43705716834ef8ad54a672af360367c4398fbebf0",
+          "build_ms": 352.5824,
+          "build_log": "arithmetic.c",
+          "runtime_sha256": {},
+          "n": 15,
+          "median_ms": 564.9556,
+          "p95_ms": 581.4556,
+          "min_ms": 560.0824,
+          "max_ms": 581.4556,
+          "raw_ms": [
+            563.5508,
+            564.9556,
+            561.9927,
+            562.2998,
+            564.6764,
+            573.2224,
+            581.4556,
+            567.0614,
+            570.5655,
+            567.7122,
+            562.7495,
+            562.3012,
+            560.0824,
+            574.3983,
+            573.3196
+          ]
+        },
+        "release": {
+          "fixture": "arithmetic.bolt",
+          "fixture_sha256": "4fad334107d7aa0a9925d333365d6436e505cbea4ebf3ff7910a66923a0852be",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-f5-benchmark-r50yw7dj\\sdk\\bin\\bolt.exe",
+            "compile",
+            "arithmetic.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "4fad334107d7aa0a9925d333365d6436e505cbea4ebf3ff7910a66923a0852be",
+          "executable_sha256": "5c629295b7cd7fc07391ad44d1666c7a36315123458b872c5b32223a160a26e7",
+          "build_ms": 417.2229,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-suite-sg4isl5p/arithmetic/release/program.exe\n\n[bolt] Release compilation: 394.10 ms",
+          "runtime_sha256": {
+            "BoltRuntime.dll": "ec85d9ddccddd8a8d404bb8da529443a5b02abd79b89a296c66079335bee97e2"
+          },
+          "n": 15,
+          "median_ms": 404.4866,
+          "p95_ms": 423.5275,
+          "min_ms": 401.8106,
+          "max_ms": 423.5275,
+          "raw_ms": [
+            403.7659,
+            403.7076,
+            403.4476,
+            401.8106,
+            406.3309,
+            407.6103,
+            423.5275,
+            417.9665,
+            404.0032,
+            407.4878,
+            404.1514,
+            404.8215,
+            404.4866,
+            404.8898,
+            403.2827
+          ]
+        }
+      },
+      "measurement_order": [
+        [
+          "release",
+          "c"
+        ],
+        [
+          "release",
+          "c"
+        ],
+        [
+          "c",
+          "release"
+        ],
+        [
+          "c",
+          "release"
+        ],
+        [
+          "c",
+          "release"
+        ],
+        [
+          "release",
+          "c"
+        ],
+        [
+          "release",
+          "c"
+        ],
+        [
+          "release",
+          "c"
+        ],
+        [
+          "c",
+          "release"
+        ],
+        [
+          "release",
+          "c"
+        ],
+        [
+          "release",
+          "c"
+        ],
+        [
+          "c",
+          "release"
+        ],
+        [
+          "c",
+          "release"
+        ],
+        [
+          "release",
+          "c"
+        ],
+        [
+          "c",
+          "release"
+        ]
+      ],
+      "c_over_release": {
+        "speedup": 1.3967226602809586,
+        "valid_duration_and_sample_count": true,
+        "bolt_over_c_median_ci95_paired_bootstrap": [
+          0.7080750588670363,
+          0.7193635889503234
+        ],
+        "p95_speedup": 1.3728874748392963
+      }
+    },
+    "pointers": {
+      "expected_stdout": "3495758670\n313794096",
+      "profiles": {
+        "c": {
+          "fixture": "pointers.c",
+          "fixture_sha256": "5b793a8383e7a7dc489a41afcaad9a0272b5c0571b91cfcf33fdbe613969b87f",
+          "command": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+            "/nologo",
+            "/O2",
+            "/DNDEBUG",
+            "/std:c11",
+            "pointers.c",
+            "/Fe:program.exe"
+          ],
+          "source_sha256": "5b793a8383e7a7dc489a41afcaad9a0272b5c0571b91cfcf33fdbe613969b87f",
+          "executable_sha256": "2bf28e49b1b13aba20073da98ca2c0602ca6c5c9548bc44f1f486d6c1abe607d",
+          "build_ms": 104.3549,
+          "build_log": "pointers.c",
+          "runtime_sha256": {},
+          "n": 15,
+          "median_ms": 240.2668,
+          "p95_ms": 241.7339,
+          "min_ms": 239.363,
+          "max_ms": 241.7339,
+          "raw_ms": [
+            239.4879,
+            240.4845,
+            241.0116,
+            241.4285,
+            239.9247,
+            240.3601,
+            239.6773,
+            239.8415,
+            240.2668,
+            240.7798,
+            239.7337,
+            241.7339,
+            240.2145,
+            240.3339,
+            239.363
+          ]
+        },
+        "release": {
+          "fixture": "pointers.bolt",
+          "fixture_sha256": "13657a7a059c3c5f766b19c65bfea35b47bd790b1009fb94965d65213fb90b4f",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-f5-benchmark-r50yw7dj\\sdk\\bin\\bolt.exe",
+            "compile",
+            "pointers.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "13657a7a059c3c5f766b19c65bfea35b47bd790b1009fb94965d65213fb90b4f",
+          "executable_sha256": "2f58f6eb4e572e4cccfc02b20b07f2cce8ca0fd2adf02847fd41467480348108",
+          "build_ms": 209.6622,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-suite-sg4isl5p/pointers/release/program.exe\n\n[bolt] Release compilation: 185.99 ms",
+          "runtime_sha256": {
+            "BoltRuntime.dll": "ec85d9ddccddd8a8d404bb8da529443a5b02abd79b89a296c66079335bee97e2"
+          },
+          "n": 15,
+          "median_ms": 94.7302,
+          "p95_ms": 96.3679,
+          "min_ms": 93.2097,
+          "max_ms": 96.3679,
+          "raw_ms": [
+            94.3076,
+            94.7764,
+            94.7302,
+            93.2097,
+            96.3679,
+            95.6037,
+            96.0534,
+            94.3792,
+            94.1118,
+            94.2386,
+            94.8433,
+            94.1049,
+            94.5164,
+            95.4065,
+            95.941
+          ]
+        }
+      },
+      "measurement_order": [
+        [
+          "release",
+          "c"
+        ],
+        [
+          "c",
+          "release"
+        ],
+        [
+          "release",
+          "c"
+        ],
+        [
+          "c",
+          "release"
+        ],
+        [
+          "c",
+          "release"
+        ],
+        [
+          "c",
+          "release"
+        ],
+        [
+          "release",
+          "c"
+        ],
+        [
+          "c",
+          "release"
+        ],
+        [
+          "c",
+          "release"
+        ],
+        [
+          "release",
+          "c"
+        ],
+        [
+          "c",
+          "release"
+        ],
+        [
+          "release",
+          "c"
+        ],
+        [
+          "release",
+          "c"
+        ],
+        [
+          "release",
+          "c"
+        ],
+        [
+          "release",
+          "c"
+        ]
+      ],
+      "c_over_release": {
+        "speedup": 2.536327380286329,
+        "valid_duration_and_sample_count": false,
+        "bolt_over_c_median_ci95_paired_bootstrap": [
+          0.3919730807983062,
+          0.3977953172648553
+        ],
+        "p95_speedup": 2.508448352615342
+      }
+    },
+    "memory": {
+      "expected_stdout": "63747311",
+      "profiles": {
+        "c": {
+          "fixture": "memory.c",
+          "fixture_sha256": "699c1751f7b81b5f1118d14b947762892a86634f368efb4ad89f1577b0806e01",
+          "command": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+            "/nologo",
+            "/O2",
+            "/DNDEBUG",
+            "/std:c11",
+            "memory.c",
+            "/Fe:program.exe"
+          ],
+          "source_sha256": "699c1751f7b81b5f1118d14b947762892a86634f368efb4ad89f1577b0806e01",
+          "executable_sha256": "0c45c908e8d097dad81e213562eee1d837c7fa32152ffd753ae10e7939b02b0f",
+          "build_ms": 109.8648,
+          "build_log": "memory.c",
+          "runtime_sha256": {},
+          "n": 15,
+          "median_ms": 112.7292,
+          "p95_ms": 117.6556,
+          "min_ms": 111.6722,
+          "max_ms": 117.6556,
+          "raw_ms": [
+            116.3187,
+            115.24,
+            111.7638,
+            111.6722,
+            116.2136,
+            112.3439,
+            117.4365,
+            113.6019,
+            112.5833,
+            112.0792,
+            112.6536,
+            113.5216,
+            117.6556,
+            112.1265,
+            112.7292
+          ]
+        },
+        "release": {
+          "fixture": "memory.bolt",
+          "fixture_sha256": "2ca256e2114ab152f6b9ab5040c5031c4f12b8dcc29ff01308ed29b70d6fa2f8",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-f5-benchmark-r50yw7dj\\sdk\\bin\\bolt.exe",
+            "compile",
+            "memory.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "2ca256e2114ab152f6b9ab5040c5031c4f12b8dcc29ff01308ed29b70d6fa2f8",
+          "executable_sha256": "e7f3f0a1de9e6f5a52f0a4921ee184d2f2d026476b03145bc894ac772fed7482",
+          "build_ms": 251.4417,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-suite-sg4isl5p/memory/release/program.exe\n\n[bolt] Release compilation: 225.64 ms",
+          "runtime_sha256": {
+            "BoltRuntime.dll": "ec85d9ddccddd8a8d404bb8da529443a5b02abd79b89a296c66079335bee97e2"
+          },
+          "n": 15,
+          "median_ms": 79.1184,
+          "p95_ms": 84.5459,
+          "min_ms": 76.7912,
+          "max_ms": 84.5459,
+          "raw_ms": [
+            79.3402,
+            79.2019,
+            79.9488,
+            76.9855,
+            76.7912,
+            81.0674,
+            79.1184,
+            81.5165,
+            77.9679,
+            77.9475,
+            81.1356,
+            77.562,
+            84.5459,
+            78.6073,
+            78.2623
+          ]
+        }
+      },
+      "measurement_order": [
+        [
+          "release",
+          "c"
+        ],
+        [
+          "release",
+          "c"
+        ],
+        [
+          "release",
+          "c"
+        ],
+        [
+          "c",
+          "release"
+        ],
+        [
+          "c",
+          "release"
+        ],
+        [
+          "c",
+          "release"
+        ],
+        [
+          "c",
+          "release"
+        ],
+        [
+          "release",
+          "c"
+        ],
+        [
+          "c",
+          "release"
+        ],
+        [
+          "release",
+          "c"
+        ],
+        [
+          "c",
+          "release"
+        ],
+        [
+          "release",
+          "c"
+        ],
+        [
+          "release",
+          "c"
+        ],
+        [
+          "release",
+          "c"
+        ],
+        [
+          "c",
+          "release"
+        ]
+      ],
+      "c_over_release": {
+        "speedup": 1.4248164775829644,
+        "valid_duration_and_sample_count": false,
+        "bolt_over_c_median_ci95_paired_bootstrap": [
+          0.6821181881291218,
+          0.7136095435023534
+        ],
+        "p95_speedup": 1.391618044162993
+      }
+    },
+    "buffer": {
+      "expected_stdout": "17179607040",
+      "profiles": {
+        "c": {
+          "fixture": "buffer.c",
+          "fixture_sha256": "9b0de434c4a3174204eebacdd56a63f46abd1925bee15b2f3fbc83e116867812",
+          "command": [
+            "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe",
+            "/nologo",
+            "/O2",
+            "/DNDEBUG",
+            "/std:c11",
+            "buffer.c",
+            "/Fe:program.exe"
+          ],
+          "source_sha256": "9b0de434c4a3174204eebacdd56a63f46abd1925bee15b2f3fbc83e116867812",
+          "executable_sha256": "e3a853dbae3c1edc663d85a67963e8a1fbab0f495dc57874240875e566653a7c",
+          "build_ms": 121.0188,
+          "build_log": "buffer.c",
+          "runtime_sha256": {},
+          "n": 15,
+          "median_ms": 8.9409,
+          "p95_ms": 9.6892,
+          "min_ms": 8.454,
+          "max_ms": 9.6892,
+          "raw_ms": [
+            8.938,
+            8.454,
+            8.6841,
+            9.0204,
+            9.349,
+            8.9409,
+            8.6098,
+            9.091,
+            9.0819,
+            9.0117,
+            8.7554,
+            9.6892,
+            9.0234,
+            8.8886,
+            8.6612
+          ]
+        },
+        "release": {
+          "fixture": "buffer.bolt",
+          "fixture_sha256": "20b2307100520e6943353483cb72c2b08443dcf6db1b2e58f7305b1c9127ac41",
+          "command": [
+            "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-f5-benchmark-r50yw7dj\\sdk\\bin\\bolt.exe",
+            "compile",
+            "buffer.bolt",
+            "--release",
+            "--backend",
+            "llvm",
+            "--require-native",
+            "-o",
+            "program.exe"
+          ],
+          "source_sha256": "20b2307100520e6943353483cb72c2b08443dcf6db1b2e58f7305b1c9127ac41",
+          "executable_sha256": "b94b8ab8324f753a380a5f2f30e1553dd5063badbaceec2039c48b6502ae6a84",
+          "build_ms": 240.8256,
+          "build_log": "Built Release (LLVM 23.1.2): C:/Users/benso/AppData/Local/Temp/bolt-suite-sg4isl5p/buffer/release/program.exe\n\n[bolt] Release compilation: 214.22 ms",
+          "runtime_sha256": {
+            "BoltRuntime.dll": "ec85d9ddccddd8a8d404bb8da529443a5b02abd79b89a296c66079335bee97e2"
+          },
+          "n": 15,
+          "median_ms": 11.1234,
+          "p95_ms": 11.7664,
+          "min_ms": 10.6699,
+          "max_ms": 11.7664,
+          "raw_ms": [
+            11.7664,
+            10.7986,
+            10.9413,
+            11.2348,
+            11.2551,
+            11.2207,
+            10.992,
+            10.9039,
+            11.1882,
+            11.0104,
+            11.3338,
+            11.5087,
+            11.1234,
+            10.6699,
+            10.6744
+          ]
+        }
+      },
+      "measurement_order": [
+        [
+          "release",
+          "c"
+        ],
+        [
+          "c",
+          "release"
+        ],
+        [
+          "c",
+          "release"
+        ],
+        [
+          "c",
+          "release"
+        ],
+        [
+          "release",
+          "c"
+        ],
+        [
+          "release",
+          "c"
+        ],
+        [
+          "release",
+          "c"
+        ],
+        [
+          "release",
+          "c"
+        ],
+        [
+          "c",
+          "release"
+        ],
+        [
+          "release",
+          "c"
+        ],
+        [
+          "release",
+          "c"
+        ],
+        [
+          "release",
+          "c"
+        ],
+        [
+          "release",
+          "c"
+        ],
+        [
+          "c",
+          "release"
+        ],
+        [
+          "release",
+          "c"
+        ]
+      ],
+      "c_over_release": {
+        "speedup": 0.8037920060413183,
+        "valid_duration_and_sample_count": false,
+        "bolt_over_c_median_ci95_paired_bootstrap": [
+          1.2197476613735476,
+          1.2691082067150048
+        ],
+        "p95_speedup": 0.8234634212673374
+      }
+    }
+  }
+}

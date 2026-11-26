@@ -1,0 +1,206 @@
+import System
+namespace System.Security.Cryptography;
+
+// FIPS 197 AES block cipher implemented entirely in Bolt.
+// Keys of 16, 24 and 32 bytes select AES-128, AES-192 and AES-256.
+public sealed class AES
+{
+private:
+    byte[] roundKeys;
+    byte[] sbox;
+    byte[] inverseSbox;
+    int rounds;
+    int keyBytes;
+
+    static byte GfMultiply(byte a, byte b)
+    {
+        uint x = (uint)a;
+        uint y = (uint)b;
+        uint result = 0u;
+        for (int i = 0; i < 8; i++)
+        {
+            if ((y & 1u) != 0u) result = result ^ x;
+            bool high = (x & 128u) != 0u;
+            x = (x << 1) & 255u;
+            if (high) x = x ^ 27u;
+            y = y >> 1;
+        }
+        return (byte)result;
+    }
+
+    static byte GfPower(byte value, int exponent)
+    {
+        byte result = (byte)1;
+        byte factor = value;
+        int power = exponent;
+        while (power > 0)
+        {
+            if ((power & 1) != 0) result = GfMultiply(result, factor);
+            factor = GfMultiply(factor, factor);
+            power = power >> 1;
+        }
+        return result;
+    }
+
+    static byte RotateByte(byte value, int amount)
+    {
+        uint x = (uint)value;
+        return (byte)(((x << amount) | (x >> (8 - amount))) & 255u);
+    }
+
+    void BuildSBoxes()
+    {
+        sbox = new byte[256];
+        inverseSbox = new byte[256];
+        for (int i = 0; i < 256; i++)
+        {
+            byte x = (byte)i;
+            byte inverse = x == (byte)0 ? (byte)0 : GfPower(x, 254);
+            byte transformed = (byte)((uint)inverse ^ (uint)RotateByte(inverse, 1) ^ (uint)RotateByte(inverse, 2) ^
+                                      (uint)RotateByte(inverse, 3) ^ (uint)RotateByte(inverse, 4) ^ 99u);
+            sbox[i] = transformed;
+            inverseSbox[(int)transformed] = x;
+        }
+    }
+
+    void ExpandKey(const byte[]& key)
+    {
+        keyBytes = key.Length;
+        rounds = keyBytes / 4 + 6;
+        roundKeys = new byte[16 * (rounds + 1)];
+        for (int i = 0; i < keyBytes; i++) roundKeys[i] = key[i];
+
+        int generated = keyBytes;
+        byte rcon = (byte)1;
+        byte[] temp = new byte[4];
+        while (generated < roundKeys.Length)
+        {
+            for (int i = 0; i < 4; i++) temp[i] = roundKeys[generated - 4 + i];
+
+            if ((generated % keyBytes) == 0)
+            {
+                byte first = temp[0];
+                temp[0] = temp[1]; temp[1] = temp[2]; temp[2] = temp[3]; temp[3] = first;
+                for (int i = 0; i < 4; i++) temp[i] = sbox[(int)temp[i]];
+                temp[0] = (byte)(temp[0] ^ rcon);
+                rcon = GfMultiply(rcon, (byte)2);
+            }
+            elif (keyBytes == 32 && (generated % keyBytes) == 16)
+            {
+                for (int i = 0; i < 4; i++) temp[i] = sbox[(int)temp[i]];
+            }
+
+            for (int i = 0; i < 4 && generated < roundKeys.Length; i++)
+            {
+                roundKeys[generated] = (byte)(roundKeys[generated - keyBytes] ^ temp[i]);
+                generated++;
+            }
+        }
+    }
+
+    void AddRoundKey(byte[]& state, int round)
+    {
+        int offset = round * 16;
+        for (int i = 0; i < 16; i++) state[i] = (byte)(state[i] ^ roundKeys[offset + i]);
+    }
+
+    void SubBytes(byte[]& state)
+    {
+        for (int i = 0; i < 16; i++) state[i] = sbox[(int)state[i]];
+    }
+
+    void InverseSubBytes(byte[]& state)
+    {
+        for (int i = 0; i < 16; i++) state[i] = inverseSbox[(int)state[i]];
+    }
+
+    void ShiftRows(byte[]& s)
+    {
+        byte t;
+        t = s[1]; s[1] = s[5]; s[5] = s[9]; s[9] = s[13]; s[13] = t;
+        t = s[2]; s[2] = s[10]; s[10] = t; t = s[6]; s[6] = s[14]; s[14] = t;
+        t = s[15]; s[15] = s[11]; s[11] = s[7]; s[7] = s[3]; s[3] = t;
+    }
+
+    void InverseShiftRows(byte[]& s)
+    {
+        byte t;
+        t = s[13]; s[13] = s[9]; s[9] = s[5]; s[5] = s[1]; s[1] = t;
+        t = s[2]; s[2] = s[10]; s[10] = t; t = s[6]; s[6] = s[14]; s[14] = t;
+        t = s[3]; s[3] = s[7]; s[7] = s[11]; s[11] = s[15]; s[15] = t;
+    }
+
+    void MixColumns(byte[]& state)
+    {
+        for (int c = 0; c < 4; c++)
+        {
+            int i = c * 4;
+            byte a0 = state[i], a1 = state[i + 1], a2 = state[i + 2], a3 = state[i + 3];
+            state[i] = (byte)(GfMultiply(a0, (byte)2) ^ GfMultiply(a1, (byte)3) ^ a2 ^ a3);
+            state[i + 1] = (byte)(a0 ^ GfMultiply(a1, (byte)2) ^ GfMultiply(a2, (byte)3) ^ a3);
+            state[i + 2] = (byte)(a0 ^ a1 ^ GfMultiply(a2, (byte)2) ^ GfMultiply(a3, (byte)3));
+            state[i + 3] = (byte)(GfMultiply(a0, (byte)3) ^ a1 ^ a2 ^ GfMultiply(a3, (byte)2));
+        }
+    }
+
+    void InverseMixColumns(byte[]& state)
+    {
+        for (int c = 0; c < 4; c++)
+        {
+            int i = c * 4;
+            byte a0 = state[i], a1 = state[i + 1], a2 = state[i + 2], a3 = state[i + 3];
+            state[i] = (byte)(GfMultiply(a0, (byte)14) ^ GfMultiply(a1, (byte)11) ^ GfMultiply(a2, (byte)13) ^ GfMultiply(a3, (byte)9));
+            state[i + 1] = (byte)(GfMultiply(a0, (byte)9) ^ GfMultiply(a1, (byte)14) ^ GfMultiply(a2, (byte)11) ^ GfMultiply(a3, (byte)13));
+            state[i + 2] = (byte)(GfMultiply(a0, (byte)13) ^ GfMultiply(a1, (byte)9) ^ GfMultiply(a2, (byte)14) ^ GfMultiply(a3, (byte)11));
+            state[i + 3] = (byte)(GfMultiply(a0, (byte)11) ^ GfMultiply(a1, (byte)13) ^ GfMultiply(a2, (byte)9) ^ GfMultiply(a3, (byte)14));
+        }
+    }
+
+public:
+    AES(const byte[]& key)
+    {
+        if (key.Length != 16 && key.Length != 24 && key.Length != 32)
+            throw ArgumentException("AES keys must contain exactly 16, 24 or 32 bytes.");
+        BuildSBoxes();
+        ExpandKey(key);
+    }
+
+    int KeySize => keyBytes * 8;
+    int Rounds => rounds;
+
+    byte[] EncryptBlock(const byte[]& input)
+    {
+        if (input.Length != 16) throw ArgumentException("AES EncryptBlock requires exactly 16 bytes.");
+        byte[] state = CryptoPrimitives.Copy(input);
+        AddRoundKey(state, 0);
+        for (int round = 1; round < rounds; round++)
+        {
+            SubBytes(state);
+            ShiftRows(state);
+            MixColumns(state);
+            AddRoundKey(state, round);
+        }
+        SubBytes(state);
+        ShiftRows(state);
+        AddRoundKey(state, rounds);
+        return state;
+    }
+
+    byte[] DecryptBlock(const byte[]& input)
+    {
+        if (input.Length != 16) throw ArgumentException("AES DecryptBlock requires exactly 16 bytes.");
+        byte[] state = CryptoPrimitives.Copy(input);
+        AddRoundKey(state, rounds);
+        for (int round = rounds - 1; round > 0; round--)
+        {
+            InverseShiftRows(state);
+            InverseSubBytes(state);
+            AddRoundKey(state, round);
+            InverseMixColumns(state);
+        }
+        InverseShiftRows(state);
+        InverseSubBytes(state);
+        AddRoundKey(state, 0);
+        return state;
+    }
+}

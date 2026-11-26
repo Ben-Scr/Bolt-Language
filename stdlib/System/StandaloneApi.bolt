@@ -1,0 +1,87 @@
+#ifndef Windows
+namespace Bolt.Runtime.StandalonePosix;
+[Header("stdlib.h"), Native("calloc")]
+extern "C" byte* AllocateZeroed(ulong count, ulong bytes);
+[Header("unistd.h"), Native("getcwd")]
+extern "C" byte* WorkingDirectory(byte* buffer, ulong capacity);
+[Header("unistd.h"), Native("chdir")]
+extern "C" int SetDirectory(byte* path);
+[Header("stdlib.h"), Native("getenv")]
+extern "C" byte* Variable(byte* name);
+[Header("unistd.h"), Native("access")]
+extern "C" int Access(byte* path, int mode);
+[Header("unistd.h"), Native("lseek")]
+extern "C" long Seek(int descriptor, long offset, int origin);
+// A const reference passes the address of the first array byte to the C ABI.
+[Header("unistd.h"), Native("write")]
+extern "C" long WriteBytes(int descriptor, const byte& first, ulong count);
+#ifdef MacOS
+[Header("fcntl.h"), Native("filesec_init")]
+extern "C" void* NewFileSecurity();
+[Header("fcntl.h"), Native("filesec_set_property")]
+extern "C" int SetFileSecurity(void* security, int property, void* value);
+[Header("fcntl.h"), Native("filesec_free")]
+extern "C" void FreeFileSecurity(void* security);
+[Header("fcntl.h"), Native("openx_np")]
+extern "C" int OpenFile(byte* path, int flags, void* security);
+[Header("unistd.h"), Native("close")]
+extern "C" int Close(int descriptor);
+#else
+[Header("stdio.h"), Native("fopen")]
+extern "C" void* OpenFile(byte* path, byte* mode);
+[Header("stdio.h"), Native("fileno")]
+extern "C" int Descriptor(void* file);
+[Header("stdio.h"), Native("fclose")]
+extern "C" int Close(void* file);
+#endif
+#elif Windows
+namespace Bolt.Runtime.StandaloneWindows;
+[Header("windows.h"), Native("WaitForSingleObject")]
+extern "C" uint WaitFileJob(void* thread, uint milliseconds);
+[Header("windows.h"), Native("GetCommandLineW")]
+extern "C" ushort* CommandLine();
+[Header("shellapi.h"), Native("CommandLineToArgvW")]
+extern "C" ushort** Arguments(ushort* command, int* count);
+[Header("windows.h"), Native("LocalFree")]
+extern "C" void* FreeArguments(void* values);
+[Header("windows.h"), Native("GetCurrentDirectoryW")]
+extern "C" uint CurrentDirectory(uint capacity,ushort* path);
+[Header("windows.h"), Native("GetTempPathW")]
+extern "C" uint TempPath(uint capacity,ushort* path);
+[Header("windows.h"), Native("SetCurrentDirectoryW")]
+extern "C" int SetDirectory(ushort* path);
+[Header("windows.h"), Native("CreateFileW")]
+extern "C" void* OpenFile(ushort* path, uint access, uint sharing, void* security, uint disposition, uint attributes, void* templateFile);
+[Header("windows.h"), Native("GetFileAttributesW")]
+extern "C" uint Attributes(ushort* path);
+[Header("windows.h"), Native("CopyFileW")]
+extern "C" int CopyFile(ushort* source, ushort* destination, int failIfExists);
+[Header("windows.h"), Native("MoveFileExW")]
+extern "C" int MoveFile(ushort* source, ushort* destination, uint flags);
+[Header("windows.h"), Native("DeleteFileW")]
+extern "C" int DeleteFile(ushort* path);
+[Header("windows.h"), Native("CreateDirectoryW")]
+extern "C" int MakeDirectory(ushort* path, void* security);
+[Header("windows.h"), Native("RemoveDirectoryW")]
+extern "C" int RemoveDirectory(ushort* path);
+[Header("windows.h"), Native("FindFirstFileW")]
+extern "C" void* FindFirst(ushort* pattern, void* data);
+[Header("windows.h"), Native("FindNextFileW")]
+extern "C" int FindNext(void* search, void* data);
+[Header("windows.h"), Native("FindClose")]
+extern "C" int EndSearch(void* search);
+[Header("windows.h"), Native("GetFileType")]
+extern "C" uint FileType(void* handle);
+[Header("windows.h"), Native("GetFileInformationByHandleEx")]
+extern "C" int FileInformation(void* handle, int kind, void* buffer, uint size);
+[Header("windows.h"), Native("SetFilePointerEx")]
+extern "C" int PositionFile(void* file, long offset, long* position, uint origin);
+[Header("windows.h"), Native("SetEndOfFile")]
+extern "C" int TruncateFile(void* file);
+[Header("windows.h"), Native("GetFileSizeEx")]
+extern "C" int FileSize(void* handle, Bolt.Runtime.Windows.LargeInteger* size);
+[Header("windows.h"), Native("CloseHandle")]
+extern "C" int Close(void* handle);
+[Header("windows.h"), Native("WriteFile")]
+extern "C" int WriteBytes(void* handle, const byte& first, uint count, uint* written, void* overlapped);
+#endif

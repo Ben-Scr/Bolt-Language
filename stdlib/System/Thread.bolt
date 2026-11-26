@@ -1,0 +1,34 @@
+import Bolt.Runtime
+namespace System.Threading;
+
+// Copies share one worker handle. The final handle owner joins its worker.
+// Jobs are copied into the worker; nested raw pointers remain caller-owned.
+public sealed class Thread
+{
+private:
+    Worker worker;
+public:
+    Thread() {}
+    static Thread Start<T>(T job)
+    {
+        Thread result;
+        result.worker = Worker.Start<T>(job);
+        return result;
+    }
+    bool Join(int milliseconds = -1) { return worker.Join(milliseconds); }
+    bool IsCompleted => worker.IsCompleted;
+    bool IsRunning => !worker.IsCompleted;
+    bool IsFaulted => worker.IsFaulted;
+    ulong Id => worker.Id;
+    string Error => worker.Error;
+    static ulong CurrentId => Worker.CurrentId();
+    static void Sleep(int milliseconds)
+    {
+        if (milliseconds < 0) Bolt.Runtime.Failure.Range("Sleep duration must be non-negative.");
+        Bolt.Runtime.ThreadOps.Sleep(milliseconds);
+    }
+    static void Yield()
+    {
+        Bolt.Runtime.ThreadOps.Yield();
+    }
+}

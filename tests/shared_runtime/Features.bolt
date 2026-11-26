@@ -1,0 +1,153 @@
+import System
+import System.IO
+import System.Diagnostics
+import System.Collections.Generic
+
+public struct NativeValues {
+public:
+    TimeSpan Span;
+    DateTime When;
+    Random Rng;
+    string Name = "value";
+}
+public enum Bits : byte { A = 1, B = 2, C = 4 }
+public static class Program {
+public:
+    int Checks = 0;
+    int Failures = 0;
+    int SideEffects = 0;
+    void Check(bool value, string name) {
+        Checks++;
+        if (!value) { Print("FAIL " + name); Failures++; }
+    }
+    TimeSpan MakeSpan(int value) { return TimeSpan.FromMilliseconds(value); }
+    int* Pointer(int& value) { SideEffects++; return &value; }
+    int Main(string[] args) {
+        Check(args.Length == 3, "argv count");
+        Check(args[0] == "two words" && args[1] == "Ä😀" && args[2] == "", "argv contents");
+        Directory.Create("data");
+        File.Create("data/empty");
+        Check(File.Exists("data/empty") && File.GetLength("data/empty") == 0, "create");
+        File.WriteAllText("data/ü.txt", "Ä😀\n");
+        File.AppendAllText("data/ü.txt", "last");
+        Check(File.ReadAllText("data/ü.txt") == "Ä😀\nlast", "text roundtrip");
+        Check(File.ReadAllLines("data/ü.txt").Length == 2, "lines");
+        File.Copy("data/ü.txt", "data/copy");
+        File.Move("data/copy", "data/moved");
+        Check(File.Exists("data/moved") && !File.Exists("data/copy"), "copy move");
+        Check(Directory.GetFiles("data").Length == 3, "list files");
+        Check(Path.GetFileName(Path.Combine("data", "a.txt")) == "a.txt", "paths");
+        byte[] bytes = {0,1,128,255};
+        File.WriteAllBytes("data/bytes", bytes);
+        byte[] restored = File.ReadAllBytes("data/bytes");
+        Check(restored.Length == 4 && restored[3] == 255, "byte roundtrip");
+        {
+            FileStream f = File.OpenRead("data/bytes");
+            Check(f.Length == 4 && f.CanRead && !f.CanWrite, "file properties");
+            Stream& borrowed = f;
+            byte[] buffer = new byte[6];
+            Check(borrowed.Read(buffer, 1, 4) == 4 && buffer[4] == 255, "mutable read");
+            f.Seek(0);
+            FileStream copy = f;
+            Check(copy.ReadByte() == 0 && f.ReadByte() == 1, "shared stream cursor");
+            copy.Close();
+            Check(!f.CanRead, "shared close");
+        }
+        {
+            MemoryStream memory;
+            BinaryWriter writer = BinaryWriter(memory, true);
+            writer.Write<int>(123456);writer.Write<string>("Ä😀");writer.Write<char>('😀');
+            writer.Flush();memory.Seek(0);
+            BinaryReader reader = BinaryReader(memory, true);
+            Check(reader.ReadInt() == 123456, "binary int");
+            Check(reader.ReadString() == "Ä😀", "binary text");
+            Check(reader.ReadChar() == '😀', "binary char");
+            reader.Close();writer.Close();
+            Check(memory.CanRead, "leave open");
+            MemoryStream target;
+            memory.Seek(0);memory.CopyTo(target);
+            Check(target.Length == memory.Length, "stream copy");
+            Check(target.ToArray().Length == memory.Length, "stream array");
+        }
+        {
+            StreamWriter writer = StreamWriter("data/written");
+            writer.WriteLine<string>("hello");writer.Write<int>(42);writer.Close();
+            StreamReader reader = StreamReader("data/written");
+            Check(reader.ReadLine() == "hello", "text reader");
+            Check(reader.ReadToEnd() == "42", "text remainder");
+            Check(reader.EndOfStream, "end of stream");reader.Close();
+        }
+        Random rng = Random(123);
+        Random twin = rng;
+        Check(rng.Next<int>(1000) == twin.Next<int>(1000), "random copies");
+        rng.NextBytes(bytes);Check(bytes.Length == 4, "random bytes");
+        double next = rng.NextDouble();Check(next >= 0 && next < 1, "random bounds");
+        TimeSpan span = TimeSpan.FromSeconds(2.5);
+        Check(span.TotalMilliseconds == 2500 && span.Ticks == 25000000, "time span");
+        Check((span + TimeSpan.FromSeconds(1)).TotalMilliseconds == 3500, "time operators");
+        DateTime date = DateTime(2024, 2, 29, 12, 30, 10);
+        Check(date.Year == 2024 && date.Month == 2 && date.Day == 29, "date properties");
+        Check(date.AddDays(1).Month == 3, "date arithmetic");
+        Check(DateTime.Parse(date.ToString()) == date, "date string roundtrip");
+        Stopwatch watch;watch.Start();watch.Pause();
+        Check(!watch.IsRunning && watch.Elapsed.Ticks >= 0, "stopwatch");
+        watch.Unpause();watch.Reset();Check(watch.ElapsedTicks == 0, "stopwatch reset");
+        Check(Converter.ToInt(" 123 ") == 123 && Converter.ToBool("true"), "conversions");
+        int parsed = 5;
+        Check(Converter.TryTo<int>("17", parsed) && parsed == 17, "try conversion");
+        Check(!Converter.TryTo<int>("no", parsed) && parsed == 17, "failed conversion unchanged");
+        Check(Converter.ToChar("😀") == '😀', "char conversion");
+        Check("  Straße😀  ".Trim().ToUpper() == "STRASSE😀", "unicode strings");
+        Check("Ä😀x".Length == 3 && "Ä😀x".ByteLength == 7, "unicode lengths");
+        Check("Ä😀x"[1] == '😀', "unicode index");
+        Check(string.Join("-", "a,b,c".Split(',')) == "a-b-c", "split join");
+        Check(string.FromUtf8("Ä😀".ToUtf8()) == "Ä😀", "utf8");
+        int count=0; for(character : "Ä😀") { Check(character == 'Ä' || character == '😀', "range char");count++; }
+        Check(count == 2, "string range count");
+        NativeValues a; a.Span = span;a.When = date;a.Rng.Seed(456);
+        NativeValues b = a;a.Span = TimeSpan.FromSeconds(8);
+        Check(b.Span.TotalMilliseconds == 2500 && b.When == date && b.Name == "value", "native fields copy");
+        Check(a.Rng.Next<int>(1000) == b.Rng.Next<int>(1000), "nested random copy");
+        List<TimeSpan> spans;
+        for(int i=0;i<200;i++) spans.Add(MakeSpan(i));
+        spans.Insert(3, MakeSpan(700));spans.RemoveAt(4);
+        List<TimeSpan> spansCopy = spans;spans[0] = MakeSpan(20);
+        Check(spansCopy[0].TotalMilliseconds == 0 && spans[0].TotalMilliseconds == 20, "list independent copies");
+        Check(spans[3].TotalMilliseconds == 700 && spans.Length == 200, "list relocation");
+        Queue<TimeSpan> queue;HashSet<TimeSpan> set;
+        for(int i=0;i<40;i++){ queue.Enqueue(MakeSpan(i));set.Add(MakeSpan(i)); }
+        Check(queue.Dequeue().Ticks == 0 && queue.Peek().TotalMilliseconds == 1, "queue native values");
+        Check(set.Contains(MakeSpan(20)) && set.Count == 40, "set native values");
+        Dictionary<string, TimeSpan> lookup;lookup.Add("first", span);lookup.Add("second", MakeSpan(900));
+        Dictionary<string, TimeSpan> copiedLookup = lookup;lookup["first"] = MakeSpan(1);
+        Check(copiedLookup["first"].TotalMilliseconds == 2500, "dictionary native copies");
+        int pairs=0;for(pair : lookup){ Check(pair.Key == "first" || pair.Key == "second", "dictionary pair");Check(pair.Value.Ticks>0, "dictionary value");pairs++; }
+        Check(pairs == 2, "dictionary range count");
+        TimeSpan[] array = new TimeSpan[4];array[2] = span;
+        TimeSpan[] copyArray = array;array[2] = MakeSpan(3);
+        Check(copyArray[2].TotalMilliseconds == 2500, "array native independent copy");
+        List<Random> generators;
+        for(int i=0;i<15;i++)generators.Add(Random((ulong)i));
+        List<Random> generatorCopy = generators;
+        for(int i=0;i<15;i++)Check(generators[i].Next<int>(1000) == generatorCopy[i].Next<int>(1000), "large inline object copy");
+        int[] integers={1,2,3};for(int& value:integers)value+=2;
+        Check(integers[0]==3 && integers[2]==5, "range reference");
+        int total=0;for(value:integers){if(value==3)continue;total+=value;if(value==4)break;}
+        Check(total==4, "range break continue");
+        int visited=0;for(value:set)visited++;Check(visited==40, "set range");
+        visited=0;for(value:queue)visited++;Check(visited==39, "queue range");
+        int bits=1<<4;bits|=3;bits^=1;bits&=6;bits>>=1;
+        Check(bits==1 && ~0==-1, "bitwise");
+        Bits mask=Bits.A|Bits.B;mask&=~Bits.B;Check(mask==Bits.A, "enum bitwise");
+        Check((Bits.A<<2)==Bits.C, "enum shift");
+        int n=42;int* p=&n;int* empty=null;
+        Check(*(p??Pointer(n))==42 && SideEffects==0, "coalesce lazy");
+        Check(*(empty??Pointer(n))==42 && SideEffects==1, "coalesce fallback");
+        empty??=&n;Check(*empty==42, "coalesce assignment");
+        Check((n==42?11:12)==11, "conditional");
+        File.Delete("data/empty");Check(!File.Exists("data/empty"), "delete file");
+        Directory.Delete("data");Check(!Directory.Exists("data"), "delete directory");
+        Print("Shared runtime assertions: " + Checks);
+        return Failures;
+    }
+}

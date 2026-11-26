@@ -1,0 +1,47 @@
+{
+  "scopeName": "source.bolt",
+  "name": "Bolt",
+  "patterns": [
+    { "name": "comment.line.double-slash.bolt", "match": "//.*$" },
+    { "name": "comment.block.bolt", "begin": "/\\*", "end": "\\*/" },
+    { "name": "meta.preprocessor.bolt", "match": "^[ \\t]*#.*$" },
+    { "include": "#strings" },
+    { "name": "keyword.control.bolt", "match": "\\b(?:if|elif|else|while|for|return|break|continue|try|catch|finally|throw|await|switch|case|do)(?![\\p{L}\\p{N}_])" },
+    { "name": "support.type.primitive.bolt", "match": "\\b(?:void|bool|char|string|float|double|byte|short|ushort|int|uint|long|ulong)(?![\\p{L}\\p{N}_])" },
+    { "name": "keyword.other.bolt", "match": "\\b(?:import|namespace|class|struct|interface|enum|concept|require|operator|public|private|protected|internal|get|set|static|const|sealed|abstract|virtual|override|this|base|true|false|null|default|new|delete|var|extern|async|event|implicit|explicit|sizeof)(?![\\p{L}\\p{N}_])" },
+    { "name": "constant.numeric.bolt", "match": "(?:0[xX][a-fA-F0-9_]*|0[bB][01_]*|(?:[0-9][0-9_]*(?:\\.[0-9][0-9_]*)?|\\.[0-9][0-9_]*)(?:[eE][+-]?[0-9][0-9_]*)?)[uUlLfFdD]*" },
+    { "name": "variable.other.bolt", "match": "[\\p{L}_][\\p{L}\\p{N}_]*" },
+    { "name": "punctuation.section.braces.bolt", "match": "[{}]" },
+    { "name": "punctuation.section.parentheses.bolt", "match": "[()]" },
+    { "name": "punctuation.section.brackets.bolt", "match": "[\\[\\]]" },
+    { "name": "keyword.operator.bolt", "match": "\\.\\.\\.|\\?\\.|[+\\-*/%=<>!&|^~?:@]+" },
+    { "name": "punctuation.separator.bolt", "match": "[,;.]" },
+    { "name": "invalid.illegal.bolt", "match": "\\S" }
+  ],
+  "repository": {
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.interpolated.bolt",
+          "begin": "\\$\"", "end": "\"|$",
+          "patterns": [
+            { "match": "\\\\.|\\{\\{|\\}\\}" },
+            { "include": "#interpolation" }
+          ]
+        },
+        { "name": "string.quoted.double.bolt", "begin": "\"", "end": "\"|$", "patterns": [{ "match": "\\\\." }] },
+        { "name": "string.quoted.single.bolt", "begin": "'", "end": "'|$", "patterns": [{ "match": "\\\\." }] }
+      ]
+    },
+    "interpolation": {
+      "comment": "IntelliJ keeps the lexical string color throughout an interpolation. Track delimiters until the expression closes.",
+      "begin": "\\{", "end": "\\}",
+      "patterns": [
+        { "include": "#interpolation" },
+        { "begin": "//", "end": "$" },
+        { "begin": "/\\*", "end": "\\*/" },
+        { "include": "#strings" }
+      ]
+    }
+  }
+}

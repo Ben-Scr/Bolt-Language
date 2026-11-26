@@ -1,0 +1,17 @@
+import System
+import Bolt.Runtime
+
+static class Program {
+public:
+    void Main() {
+        bool first = false, second = false, third = false;
+        try { Failure.Argument("Grün/😀"); }
+        catch (ArgumentException& e) { first = e.Message == "Grün/😀"; }
+        try { Failure.MissingKey(""); }
+        catch (KeyNotFoundException& e) { second = e.Message.ByteLength == 0; }
+        string dynamic = "not a literal argument";
+        try { Failure.InvalidOperation(dynamic); }
+        catch (InvalidOperationException& e) { third = e.Message == dynamic; }
+        Print(first && second && third);
+    }
+}

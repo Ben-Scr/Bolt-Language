@@ -1,0 +1,5 @@
+
+class Box {public: IStringable Text=(IStringable)2; }
+static class Program {public: void Main(){
+Box b;Box c=b;c.Text="ok";Print(b.Text);Print(c.Text);
+}}

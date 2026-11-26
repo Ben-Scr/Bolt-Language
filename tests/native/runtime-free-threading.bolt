@@ -1,0 +1,77 @@
+import System
+import System.Threading
+import System.Threading.Tasks
+
+public class NestedFailure : System.Exception {
+public:
+    int Code;
+    NestedFailure(int code) : base("worker error") { Code = code; }
+}
+
+public class Job {
+public:
+    Semaphore Signal;
+    Atomic<int> Count;
+    Job(Semaphore signal, Atomic<int> count) : Signal(signal), Count(count) {}
+    void Run() {
+        System.SharedRandom.Seed(0ul);
+        Signal.Wait();
+        if (System.SharedRandom.Next<ulong>(ulong.MaxValue) != 16294208416658607535ul) return;
+        Count.Add(1);
+    }
+}
+
+public class Observer {
+public:
+    Task<int> Pending;
+    Atomic<int> Total;
+    Observer(Task<int> pending, Atomic<int> total) : Pending(pending), Total(total) {}
+    void Run() { Total.Add(Pending.Result); }
+}
+
+static class Program {
+public:
+    static async Task<int> Work(int n) {
+        if (n < 0) throw NestedFailure(n);
+        return n + 1;
+    }
+    static async Task<int> Nested(int n) { return await Work(n); }
+    static int Main() {
+        Atomic<int> count;
+        Semaphore gate(0, 2);
+        System.SharedRandom.Seed(ulong.MaxValue);
+        System.Random expected = System.Random(ulong.MaxValue);
+        Thread a = Thread.Start(Job(gate, count)), b = Thread.Start(Job(gate, count));
+        if (a.Join(0) || a.Id == Thread.CurrentId) return 1;
+        gate.Release(2);
+        if (!a.Join(2000) || !b.Join(2000) || count.Load() != 2) return 2;
+        if (System.SharedRandom.Next<ulong>(ulong.MaxValue) != expected.Next<ulong>(ulong.MaxValue)) return 13;
+
+        Task<int> success = Nested(41);
+        if (success.Result != 42) return 3;
+        Task<int> failed = Nested(-7);
+        for (int i = 0; i < 2; i++) {
+            try { failed.Wait(); return 4; }
+            catch (NestedFailure& error) { if (error.Code != -7) return 5; }
+        }
+
+        Task<int> pending = Task<int>.CreatePending(), alias = pending;
+        Thread first = Thread.Start(Observer(alias, count)), second = Thread.Start(Observer(pending, count));
+        pending.SetResult(23);
+        if (alias.Wait(0)) return 6;
+        pending.Complete();
+        if (alias.Result != 23) return 7;
+        if (!first.Join(3000) || !second.Join(3000) || count.Load() != 48) return 10;
+        try { pending.SetResult(9); return 11; } catch (InvalidOperationException& error) {}
+        try { success.Complete(); return 12; } catch (InvalidOperationException& error) {}
+
+        Mutex mutex;
+        {
+            LockGuard guard = LockGuard(mutex);
+            if (!mutex.IsOwnedByCurrentThread) return 8;
+        }
+        if (!mutex.TryLock()) return 9;
+        mutex.Unlock();
+        return 0;
+    }
+}

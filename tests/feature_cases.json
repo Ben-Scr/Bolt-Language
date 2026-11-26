@@ -1,0 +1,402 @@
+[
+  {
+    "name": "inherited-generic-overloads",
+    "file": "tests/features/inherited-generic-overloads.bolt",
+    "stdout": "3\n"
+  },
+  {
+    "name": "v2-all-features",
+    "file": "tests/features/all-features.bolt",
+    "stdout": "10, 5\n18\n3\n9\n7\n10\nint\nstring\ndouble\n2\n8\ntrue\n7\n1\njob\nDog\nDog\n1\n3\n0\ntrue\n2\n"
+  },
+  {
+    "name": "v2-constructors",
+    "file": "tests/features/constructors.bolt",
+    "stdout": "19\n"
+  },
+  {
+    "name": "v2-base-constructor",
+    "file": "tests/features/base-constructor.bolt",
+    "stdout": "6\n12\n"
+  },
+  {
+    "name": "v2-constructor-dispatch",
+    "file": "tests/features/constructor-dispatch.bolt",
+    "stdout": "base\nderived\n"
+  },
+  {
+    "name": "v2-reference-return",
+    "file": "tests/features/reference-return.bolt",
+    "stdout": "9\n"
+  },
+  {
+    "name": "v2-reference-field-return",
+    "file": "tests/features/reference-field-return.bolt",
+    "stdout": "5\n"
+  },
+  {
+    "name": "v2-const-reference",
+    "file": "tests/features/const-reference.bolt",
+    "stdout": "7\n"
+  },
+  {
+    "name": "v2-pointer-null",
+    "file": "tests/features/pointer-null.bolt",
+    "stdout": "true\n5\n"
+  },
+  {
+    "name": "v2-pointer-value-copy",
+    "file": "tests/features/pointer-value-copy.bolt",
+    "stdout": "6\n9\n"
+  },
+  {
+    "name": "v2-heap-primitive",
+    "file": "tests/features/heap-primitive.bolt",
+    "stdout": "7\ntrue\n"
+  },
+  {
+    "name": "v2-array-value-copy",
+    "file": "tests/features/array-value-copy.bolt",
+    "stdout": "7\n8\n3\n"
+  },
+  {
+    "name": "v2-nested-arrays",
+    "file": "tests/features/nested-arrays.bolt",
+    "stdout": "2\n1\n"
+  },
+  {
+    "name": "v2-bool-arrays-references",
+    "file": "tests/features/bool-arrays-references.bolt",
+    "stdout": "false\ntrue\n"
+  },
+  {
+    "name": "v2-array-custom-ctors",
+    "file": "tests/features/array-custom-ctors.bolt",
+    "stdout": "8\n"
+  },
+  {
+    "name": "v2-generic-inference",
+    "file": "tests/features/generic-inference.bolt",
+    "stdout": "7\nab\n"
+  },
+  {
+    "name": "v2-generic-multiple",
+    "file": "tests/features/generic-multiple.bolt",
+    "stdout": "9\n4\nfour\n"
+  },
+  {
+    "name": "v2-generic-nested",
+    "file": "tests/features/generic-nested.bolt",
+    "stdout": "6\nyes\n"
+  },
+  {
+    "name": "v2-variadic-fixed",
+    "file": "tests/features/variadic-fixed.bolt",
+    "stdout": "string\ndouble\n"
+  },
+  {
+    "name": "v2-concept-custom",
+    "file": "tests/features/concept-custom.bolt",
+    "stdout": "7\n"
+  },
+  {
+    "name": "v2-concept-logic",
+    "file": "tests/features/concept-logic.bolt",
+    "stdout": "ok\n"
+  },
+  {
+    "name": "v2-list-api",
+    "file": "tests/features/list-api.bolt",
+    "stdout": "1\ntrue\n3\n3\n0\n"
+  },
+  {
+    "name": "v2-hashset-custom",
+    "file": "tests/features/hashset-custom.bolt",
+    "stdout": "true\nfalse\ntrue\ntrue\n0\n"
+  },
+  {
+    "name": "v2-dictionary-api",
+    "file": "tests/features/dictionary-api.bolt",
+    "stdout": "2\nfalse\n9\ntrue\ntrue\n0\n"
+  },
+  {
+    "name": "v2-dictionary-custom",
+    "file": "tests/features/dictionary-custom.bolt",
+    "stdout": "one\n"
+  },
+  {
+    "name": "v2-queue-api",
+    "file": "tests/features/queue-api.bolt",
+    "stdout": "false\n9\n1\ntrue\n1\n2\n0\n"
+  },
+  {
+    "name": "v2-enum-all-storage",
+    "file": "tests/features/enum-all-storage.bolt",
+    "stdout": "-128\n18446744073709551615\n5\ntrue\n"
+  },
+  {
+    "name": "v2-math-functions",
+    "file": "tests/features/math-functions.bolt",
+    "stdout": "9\n2\n3\n4\n3\n-3\n3\n3\n8\n3\n0\ntrue\n"
+  },
+  {
+    "name": "v2-random-ranges",
+    "file": "tests/features/random-ranges.bolt",
+    "stdout": "true\n"
+  },
+  {
+    "name": "v2-runtime-new-features",
+    "file": "tests/features/runtime-new-features.bolt",
+    "stdout": "9\n"
+  },
+  {
+    "name": "v2-base-slicing",
+    "file": "tests/features/base-slicing.bolt",
+    "stdout": "base\ndog\nbase\n"
+  },
+  {
+    "name": "v2-reference-array-parameter",
+    "file": "tests/features/reference-array-parameter.bolt",
+    "stdout": "7\n"
+  },
+  {
+    "name": "v2-fully-qualified-collection",
+    "file": "tests/features/fully-qualified-collection.bolt",
+    "stdout": "3\n"
+  },
+  {
+    "name": "v2-constructor-private",
+    "file": "tests/features/constructor-private.bolt",
+    "stdout": "",
+    "error": "private",
+    "phase": "compile"
+  },
+  {
+    "name": "v2-constructor-no-default",
+    "file": "tests/features/constructor-no-default.bolt",
+    "stdout": "",
+    "error": "no matching overload",
+    "phase": "compile"
+  },
+  {
+    "name": "v2-base-no-default",
+    "file": "tests/features/base-no-default.bolt",
+    "stdout": "",
+    "error": "no matching overload",
+    "phase": "compile"
+  },
+  {
+    "name": "v2-reference-temporary",
+    "file": "tests/features/reference-temporary.bolt",
+    "stdout": "",
+    "error": "no matching overload",
+    "phase": "compile"
+  },
+  {
+    "name": "v2-reference-null",
+    "file": "tests/features/reference-null.bolt",
+    "stdout": "",
+    "error": "cannot assign",
+    "phase": "compile"
+  },
+  {
+    "name": "v2-reference-uninitialized",
+    "file": "tests/features/reference-uninitialized.bolt",
+    "stdout": "",
+    "error": "initializer",
+    "phase": "compile"
+  },
+  {
+    "name": "v2-reference-return-local",
+    "file": "tests/features/reference-return-local.bolt",
+    "stdout": "",
+    "error": "reference to a local",
+    "phase": "compile"
+  },
+  {
+    "name": "v2-const-reference-write",
+    "file": "tests/features/const-reference-write.bolt",
+    "stdout": "",
+    "error": "const",
+    "phase": "compile"
+  },
+  {
+    "name": "v2-array-type",
+    "file": "tests/features/array-type.bolt",
+    "stdout": "",
+    "error": "cannot assign",
+    "phase": "compile"
+  },
+  {
+    "name": "v2-generic-constraint",
+    "file": "tests/features/generic-constraint.bolt",
+    "stdout": "",
+    "error": "does not satisfy concept",
+    "phase": "compile"
+  },
+  {
+    "name": "v2-generic-class-arity",
+    "file": "tests/features/generic-class-arity.bolt",
+    "stdout": "",
+    "error": "arity",
+    "phase": "compile"
+  },
+  {
+    "name": "v2-generic-pack-return",
+    "file": "tests/features/generic-pack-return.bolt",
+    "stdout": "",
+    "error": "must return void",
+    "phase": "compile"
+  },
+  {
+    "name": "v2-enum-floating",
+    "file": "tests/features/enum-floating.bolt",
+    "stdout": "",
+    "error": "underlying type",
+    "phase": "compile"
+  },
+  {
+    "name": "v2-enum-custom",
+    "file": "tests/features/enum-custom.bolt",
+    "stdout": "",
+    "error": "underlying type",
+    "phase": "compile"
+  },
+  {
+    "name": "v2-enum-overflow",
+    "file": "tests/features/enum-overflow.bolt",
+    "stdout": "",
+    "error": "out of range",
+    "phase": "compile"
+  },
+  {
+    "name": "v2-enum-strong-typing",
+    "file": "tests/features/enum-strong-typing.bolt",
+    "stdout": "",
+    "error": "cannot assign",
+    "phase": "compile"
+  },
+  {
+    "name": "v2-sealed-class",
+    "file": "tests/features/sealed-class.bolt",
+    "stdout": "",
+    "error": "sealed class",
+    "phase": "compile"
+  },
+  {
+    "name": "v2-sealed-method",
+    "file": "tests/features/sealed-method.bolt",
+    "stdout": "",
+    "error": "sealed method",
+    "phase": "compile"
+  },
+  {
+    "name": "v2-override-missing",
+    "file": "tests/features/override-missing.bolt",
+    "stdout": "",
+    "error": "override does not match",
+    "phase": "compile"
+  },
+  {
+    "name": "v2-math-invalid-type",
+    "file": "tests/features/math-invalid-type.bolt",
+    "stdout": "",
+    "error": "FloatingPoint",
+    "phase": "compile"
+  },
+  {
+    "name": "v2-array-bounds",
+    "file": "tests/features/array-bounds.bolt",
+    "stdout": "",
+    "error": "index out of range"
+  },
+  {
+    "name": "v2-null-dereference",
+    "file": "tests/features/null-dereference.bolt",
+    "stdout": "",
+    "error": "null pointer"
+  },
+  {
+    "name": "v2-dictionary-missing",
+    "file": "tests/features/dictionary-missing.bolt",
+    "stdout": "",
+    "error": "dictionary key not found"
+  },
+  {
+    "name": "v2-queue-empty",
+    "file": "tests/features/queue-empty.bolt",
+    "stdout": "",
+    "error": "queue is empty"
+  },
+  {
+    "name": "v2-random-empty",
+    "file": "tests/features/random-empty.bolt",
+    "stdout": "",
+    "error": "min < max"
+  },
+  {
+    "name": "v2-dictionary-duplicate",
+    "file": "tests/features/dictionary-duplicate.bolt",
+    "stdout": "",
+    "error": "duplicate dictionary key"
+  },
+  {
+    "name": "v2-const-pointer-binding",
+    "file": "tests/features/const-pointer-binding.bolt",
+    "stdout": "5\n"
+  },
+  {
+    "name": "v2-const-pointer-reference",
+    "file": "tests/features/const-pointer-reference.bolt",
+    "stdout": "8\n"
+  },
+  {
+    "name": "v2-const-pointer-reassign",
+    "file": "tests/features/const-pointer-reassign.bolt",
+    "stdout": "",
+    "error": "const",
+    "phase": "compile"
+  },
+  {
+    "name": "v2-reference-temporary-receiver",
+    "file": "tests/features/reference-temporary-receiver.bolt",
+    "stdout": "",
+    "error": "temporary receiver",
+    "phase": "compile"
+  },
+  {
+    "name": "v2-reference-local-field-return",
+    "file": "tests/features/reference-local-field-return.bolt",
+    "stdout": "",
+    "error": "reference to a local",
+    "phase": "compile"
+  },
+  {
+    "name": "v2-reference-local-array-return",
+    "file": "tests/features/reference-local-array-return.bolt",
+    "stdout": "",
+    "error": "reference to a local",
+    "phase": "compile"
+  },
+  {
+    "name": "v2-dictionary-nondefault-value",
+    "file": "tests/features/dictionary-nondefault-value.bolt",
+    "stdout": "5\n"
+  },
+  {
+    "name": "v2-pointer-field-default",
+    "file": "tests/features/pointer-field-default.bolt",
+    "stdout": "true\n"
+  },
+  {
+    "name": "v2-pointer-collections",
+    "file": "tests/features/pointer-collections.bolt",
+    "stdout": "5\n1\n9\n2\n3\n"
+  },
+  {
+    "name": "v2-virtual-generic-rejected",
+    "file": "tests/features/virtual-generic-rejected.bolt",
+    "error": "generic methods cannot be virtual",
+    "phase": "compile"
+  }
+]

@@ -1,0 +1,79 @@
+#ifdef Windows
+namespace Bolt.Runtime.Windows;
+
+[Header("windows.h"), Native("GetFullPathNameW")]
+extern "C" uint FullPathName(ushort* input, uint capacity, ushort* output, void* filePart);
+
+[Header("windows.h"), Native("Sleep")]
+extern "C" void SleepMilliseconds(uint duration);
+[Header("windows.h"), Native("SwitchToThread")]
+extern "C" int YieldThread();
+[Native("LARGE_INTEGER")]
+public struct LargeInteger {}
+[Header("windows.h"), Native("QueryPerformanceCounter")]
+extern "C" int PerformanceCounter(LargeInteger* counter);
+[Header("windows.h"), Native("QueryPerformanceFrequency")]
+extern "C" int PerformanceFrequency(LargeInteger* frequency);
+
+[Header("bcrypt.h"), Native("BCryptGenRandom")]
+extern "C" int BCryptGenRandom(void* algorithm, byte* buffer, uint count, uint flags);
+
+// These declarations call the Windows ABI directly from compiled Bolt code.
+// HANDLE and buffer addresses are pointers; SIZE_T is 64 bits on supported
+// Windows targets. A by-value COORD occupies one packed 32-bit argument.
+[Header("windows.h"), Native("GetStdHandle")]
+extern "C" void* GetStdHandle(uint standardHandle);
+[Header("windows.h"), Native("GetConsoleMode")]
+extern "C" int GetConsoleMode(void* handle, uint* mode);
+[Header("windows.h"), Native("GetProcessHeap")]
+extern "C" void* GetProcessHeap();
+[Header("windows.h"), Native("HeapAlloc")]
+extern "C" void* HeapAlloc(void* heap, uint flags, ulong bytes);
+[Header("windows.h"), Native("HeapReAlloc")]
+extern "C" void* HeapReAlloc(void* heap, uint flags, void* memory, ulong bytes);
+[Header("windows.h"), Native("HeapFree")]
+extern "C" int HeapFree(void* heap, uint flags, void* memory);
+[Header("windows.h"), Native("WriteConsoleW")]
+extern "C" int WriteConsoleW(void* handle, void* buffer, uint units, uint* written, void* reserved);
+[Header("windows.h"), Native("WriteFile")]
+extern "C" int WriteFile(void* handle, void* buffer, uint bytes, uint* written, void* overlapped);
+[Header("windows.h"), Native("ReadConsoleW")]
+extern "C" int ReadConsoleW(void* handle, void* buffer, uint units, uint* read, void* inputControl);
+[Header("windows.h"), Native("ReadFile")]
+extern "C" int ReadFile(void* handle, void* buffer, uint bytes, uint* read, void* overlapped);
+[Header("windows.h"), Native("GetLastError")]
+extern "C" uint GetLastError();
+[Header("windows.h"), Native("MultiByteToWideChar")]
+extern "C" int MultiByteToWideChar(uint codePage, uint flags, byte* input, int bytes, ushort* output, int units);
+[Header("windows.h"), Native("WideCharToMultiByte")]
+extern "C" int WideCharToMultiByte(uint codePage, uint flags, ushort* input, int units, byte* output, int bytes, void* defaultCharacter, void* usedDefaultCharacter);
+[Header("windows.h"), Native("GetConsoleScreenBufferInfo")]
+extern "C" int GetConsoleScreenBufferInfo(void* handle, void* information);
+[Header("windows.h"), Native("FillConsoleOutputCharacterW")]
+extern "C" int FillConsoleOutputCharacterW(void* handle, ushort character, uint cells, uint origin, uint* written);
+[Header("windows.h"), Native("FillConsoleOutputAttribute")]
+extern "C" int FillConsoleOutputAttribute(void* handle, ushort attributes, uint cells, uint origin, uint* written);
+[Header("windows.h"), Native("SetConsoleCursorPosition")]
+extern "C" int SetConsoleCursorPosition(void* handle, uint position);
+
+// Opaque Win32 date/time structures. WindowsDateTime.bolt owns their raw
+// storage and calls Kernel32 directly; no Bolt C++ DateTime bridge is involved.
+[Native("FILETIME")]
+public struct FileTime {}
+[Native("SYSTEMTIME")]
+public struct SystemTime {}
+[Native("TIME_ZONE_INFORMATION")]
+public struct TimeZoneInformation {}
+
+[Header("windows.h"), Native("GetSystemTimePreciseAsFileTime")]
+extern "C" void GetSystemTimePreciseAsFileTime(FileTime* value);
+[Header("windows.h"), Native("FileTimeToSystemTime")]
+extern "C" int FileTimeToSystemTime(FileTime* fileTime, SystemTime* systemTime);
+[Header("windows.h"), Native("SystemTimeToFileTime")]
+extern "C" int SystemTimeToFileTime(SystemTime* systemTime, FileTime* fileTime);
+[Header("windows.h"), Native("SystemTimeToTzSpecificLocalTime")]
+extern "C" int SystemTimeToTzSpecificLocalTime(TimeZoneInformation* zone, SystemTime* utc, SystemTime* local);
+[Header("windows.h"), Native("TzSpecificLocalTimeToSystemTime")]
+extern "C" int TzSpecificLocalTimeToSystemTime(TimeZoneInformation* zone, SystemTime* local, SystemTime* utc);
+
+#endif

@@ -1,0 +1,448 @@
+#if BoltStandaloneCore || !BoltCppCompatibility
+import System
+import System.Memory
+import System.Collections.Generic
+import Bolt.Runtime
+namespace Ecs;
+
+// ECS policy is ordinary Bolt code. Only allocation, typed storage and value
+// lifetime use the same compiler primitives as other source-authored libraries.
+public struct Entity : IStringable {
+private:
+    ulong world = 0ul;
+    uint index = uint.MaxValue;
+    uint generation = 0u;
+public:
+    uint Index => index;
+    uint Generation => generation;
+    Entity() {}
+    Entity(uint slot, uint version, ulong identity) { index=slot; generation=version; world=identity; }
+    ulong World => world;
+    string ToString() { return $"{Index}:{Generation}"; }
+    static bool operator ==(const Entity& a, const Entity& b) { return a.Index==b.Index && a.Generation==b.Generation && a.world==b.world; }
+}
+
+public abstract class Pool {
+public:
+    byte* Key;
+    abstract bool Has(uint index);
+    abstract void Remove(uint index);
+    abstract void Clear();
+    abstract void Reserve(int capacity);
+}
+public abstract class Callback<T> {
+public:
+    abstract void Invoke(Registry& registry, Entity entity, T& value);
+}
+public class OwnedCallback<T,H> : Callback<T> {
+private:
+    H handler;
+public:
+    OwnedCallback(H value) : handler(value) {}
+    override void Invoke(Registry& registry, Entity entity, T& value) { handler.OnAdd(registry,entity,value); }
+}
+public class BorrowedCallback<T,H> : Callback<T> {
+private:
+    H* handler;
+public:
+    BorrowedCallback(H* value) { handler=value; }
+    override void Invoke(Registry& registry, Entity entity, T& value) { handler->OnAdd(registry,entity,value); }
+}
+public class SignalSlot<T> {
+public:
+    ulong Id;
+    bool Connected=true;
+    Callback<T>* Handler=null;
+    SignalSlot() {}
+    ~SignalSlot() { if (Handler!=null) delete Handler; }
+}
+public class SignalState<T> {
+public:
+    List<Shared<SignalSlot<T>>> Slots;
+    ulong Next=1ul;
+    ulong Connect(Callback<T>* handler) {
+        if (Next==0ul) { delete handler; throw OverflowException("Signal token space exhausted."); }
+        ulong id=Next;
+        Next=Next==ulong.MaxValue?0ul:Next+1ul;
+        Shared<SignalSlot<T>> slot;
+        try { slot=Shared<SignalSlot<T>>.Create(); } catch { delete handler; throw; }
+        slot.Get().Id=id; slot.Get().Handler=handler; Slots.Add(slot);
+        return id;
+    }
+    bool Disconnect(ulong token) {
+        for(int i=0;i<Slots.Length;i++) if(Slots[i].Get().Id==token) {
+            Slots[i].Get().Connected=false; Slots.RemoveAt(i); return true;
+        }
+        return false;
+    }
+    void Clear() { for(int i=0;i<Slots.Length;i++) Slots[i].Get().Connected=false; Slots.Clear(); }
+    void Publish(Registry& registry, Entity entity, T& value) {
+        List<Shared<SignalSlot<T>>> snapshot=Slots;
+        for(int i=0;i<snapshot.Length;i++) if(snapshot[i].Get().Connected) snapshot[i].Get().Handler->Invoke(registry,entity,value);
+    }
+}
+public class ComponentSignal<T> {
+private:
+    Shared<SignalState<T>> state;
+public:
+    ComponentSignal() {}
+    ComponentSignal(Shared<SignalState<T>> value) { state=value; }
+    ulong Connect<H>(H handler) { return state.Get().Connect(new OwnedCallback<T,H>(handler)); }
+    ulong ConnectRef<H>(H& handler) { return state.Get().Connect(new BorrowedCallback<T,H>(&handler)); }
+    bool Disconnect(ulong token) { return state.Get().Disconnect(token); }
+    void Clear() { state.Get().Clear(); }
+    int Count => state.Get().Slots.Length;
+}
+public class TypedPool<T> : Pool {
+private:
+    List<T*> cells;
+public:
+    Shared<SignalState<T>> Signal;
+    TypedPool() { Key=ExecutionMemory.Descriptor<T>(); Signal=Shared<SignalState<T>>.Create(); }
+    ~TypedPool() { Clear(); }
+    override bool Has(uint index) { return index<(uint)cells.Length && cells[(int)index]!=null; }
+    override void Reserve(int capacity) { cells.Reserve(capacity); }
+    T& AddValue(uint index, const T& value) {
+        if(Has(index)) throw InvalidOperationException("The entity already has this component.");
+        while(cells.Length<=(int)index) cells.Add(null);
+        cells[(int)index]=Bolt.Runtime.TypedMemory.Copy<T>(value); return *cells[(int)index];
+    }
+    T& AddDefault<U>(uint index) {
+        if(Has(index)) throw InvalidOperationException("The entity already has this component.");
+        while(cells.Length<=(int)index) cells.Add(null);
+        cells[(int)index]=new U(); return *cells[(int)index];
+    }
+    T& Get(uint index) { if(!Has(index)) throw KeyNotFoundException("The entity does not have this component."); return *cells[(int)index]; }
+    T* TryGet(uint index) { if(!Has(index)) return null; return cells[(int)index]; }
+    override void Remove(uint index) { if(!Has(index)) return; T* value=cells[(int)index]; cells[(int)index]=null; delete value; }
+    override void Clear() { for(int i=0;i<cells.Length;i++) if(cells[i]!=null) { delete cells[i]; cells[i]=null; } }
+}
+public struct State {
+private:
+    static ulong nextWorld;
+public:
+    ulong World;
+    // Capacity and logical length are separate: Create writes reserved slots
+    // directly, without generic collection growth or element-copy operations.
+    // Low 32 bits: generation. High 32 bits: dense index + 1, or zero when
+    // dead. Primitive zero-filled slots avoid constructing unused capacity.
+    ulong[] Slots;
+    uint[] Free;
+    uint[] Dense;
+    int SlotCount=0;
+    int FreeCount=0;
+    int DenseCount=0;
+    int Capacity=0;
+    List<Pool*> Pools;
+    int Reserved=0;
+    int Iterators=0;
+    int Dispatch=0;
+    State() {
+        ulong observed=Bolt.Runtime.AtomicOps.Add(nextWorld,0ul);
+        while(true) {
+            if(observed==ulong.MaxValue) throw OverflowException("ECS world identity exhausted.");
+            ulong next=observed+1ul;
+            ulong actual=Bolt.Runtime.AtomicOps.Cas(nextWorld,observed,next);
+            if(actual==observed) { World=next; return; }
+            observed=actual;
+        }
+    }
+    ~State() { for(int i=0;i<Pools.Length;i++) delete Pools[i]; }
+    bool Valid(Entity entity) {
+        if(entity.World!=World || entity.Index>=(uint)SlotCount) return false;
+        ulong slot=Slots[(int)entity.Index];
+        return (slot>>32)!=0ul && (uint)(slot & (ulong)uint.MaxValue)==entity.Generation;
+    }
+    Entity Handle(uint index) { return Entity(index,(uint)(Slots[(int)index] & (ulong)uint.MaxValue),World); }
+    void Require(Entity entity) { if(!Valid(entity)) throw InvalidOperationException("Invalid, destroyed, or foreign ECS entity."); }
+    void Mutating() {
+        if(Dispatch!=0) throw InvalidOperationException("Structural ECS changes are not allowed inside OnAdd callbacks.");
+        if(Iterators!=0) throw InvalidOperationException("Structural ECS changes during normal query iteration require .Stable().");
+    }
+    Pool* FindKey(byte* key) { for(int i=0;i<Pools.Length;i++) if(Pools[i]->Key==key) return Pools[i]; return null; }
+    TypedPool<T>* Find<T>() { return (TypedPool<T>*)FindKey(ExecutionMemory.Descriptor<T>()); }
+    TypedPool<T>* Ensure<T>() {
+        TypedPool<T>* pool=Find<T>(); if(pool!=null) return pool;
+        pool=new TypedPool<T>();
+        try { pool->Reserve(Reserved); Pools.Add(pool); } catch { delete pool; throw; }
+        return pool;
+    }
+    bool HasKeys(Entity entity, byte*... keys) {
+        if(!Valid(entity)) return false;
+        for(int i=0;i<keys.Length;i++) { Pool* pool=FindKey(keys[i]); if(pool==null || !pool->Has(entity.Index)) return false; }
+        return true;
+    }
+}
+public class Components {
+protected:
+    Shared<State> state;
+    Entity entity;
+public:
+    Components() {}
+    Components(Shared<State> value, Entity handle) { state=value; entity=handle; }
+    bool IsValid() { return state.HasValue && state.Get().Valid(entity); }
+    T& Get<T>() {
+        state.Get().Require(entity); TypedPool<T>* pool=state.Get().Find<T>();
+        if(pool==null) throw KeyNotFoundException("The component type has not been added to this registry.");
+        return pool->Get(entity.Index);
+    }
+    T* TryGet<T>() { if(!IsValid()) return null; TypedPool<T>* pool=state.Get().Find<T>(); if(pool==null) return null; return pool->TryGet(entity.Index); }
+    bool Has<T...>() { return state.HasValue && state.Get().HasKeys(entity,ExecutionMemory.Descriptor<T>()...); }
+}
+public class Row : Components {
+public:
+    Row() {}
+    Row(Shared<State> value, Ecs.Entity handle) : base(value,handle) {}
+    Ecs.Entity Entity { get { if(!IsValid()) throw InvalidOperationException("The query entity no longer exists."); return entity; } }
+}
+public struct QueryData {
+public:
+    Shared<State> State;
+    List<byte*> Required;
+    List<byte*> Excluded;
+    bool IsStable=false;
+    QueryData() {}
+    QueryData(Shared<Ecs.State> value) { State=value; }
+    void RequireKeys(byte*... keys) { for(int i=0;i<keys.Length;i++) if(!Required.Contains(keys[i])) Required.Add(keys[i]); }
+    void ExcludeKeys(byte*... keys) { for(int i=0;i<keys.Length;i++) if(!Excluded.Contains(keys[i])) Excluded.Add(keys[i]); }
+    bool Matches(Entity entity) {
+        if(!State.Get().Valid(entity)) return false;
+        for(int i=0;i<Required.Length;i++) { Pool* pool=State.Get().FindKey(Required[i]); if(pool==null || !pool->Has(entity.Index)) return false; }
+        for(int i=0;i<Excluded.Length;i++) { Pool* pool=State.Get().FindKey(Excluded[i]); if(pool!=null && pool->Has(entity.Index)) return false; }
+        return true;
+    }
+    long Count { get { long result=0l; for(int i=0;i<State.Get().DenseCount;i++) if(Matches(State.Get().Handle(State.Get().Dense[i]))) result++; return result; } }
+}
+public class Iteration {
+public:
+    QueryData Data;
+    List<Entity> Snapshot;
+    bool Guarded=false;
+    Iteration() {}
+    void Initialize(QueryData data) {
+        Data=data;
+        if(Data.IsStable) { for(int i=0;i<Data.State.Get().DenseCount;i++) { Entity entity=Data.State.Get().Handle(Data.State.Get().Dense[i]); if(Data.Matches(entity)) Snapshot.Add(entity); } }
+        else { Data.State.Get().Iterators++; Guarded=true; }
+    }
+    ~Iteration() { if(Guarded) Data.State.Get().Iterators--; }
+    int Length => Data.IsStable?Snapshot.Length:Data.State.Get().DenseCount;
+    Entity At(int index) { return Data.IsStable?Snapshot[index]:Data.State.Get().Handle(Data.State.Get().Dense[index]); }
+}
+public struct QueryEnumerator {
+private:
+    Shared<Iteration> iteration;
+    int index=-1;
+public:
+    QueryEnumerator(QueryData data) { iteration=Shared<Iteration>.Create(); iteration.Get().Initialize(data); }
+    bool MoveNext() { while(++index<iteration.Get().Length) if(iteration.Get().Data.Matches(iteration.Get().At(index))) return true; return false; }
+    Row Current => Row(iteration.Get().Data.State,iteration.Get().At(index));
+}
+public struct ComponentEnumerator {
+private:
+    Shared<Iteration> iteration;
+    int index=-1;
+public:
+    ComponentEnumerator(QueryData data) { iteration=Shared<Iteration>.Create(); iteration.Get().Initialize(data); }
+    bool MoveNext() { while(++index<iteration.Get().Length) if(iteration.Get().Data.Matches(iteration.Get().At(index))) return true; return false; }
+    Components Current => Components(iteration.Get().Data.State,iteration.Get().At(index));
+}
+public class Query {
+private:
+    QueryData data;
+public:
+    Query() {}
+    Query(QueryData value) { data=value; }
+    Query With<T...>() { Query result=Query(data); result.data.RequireKeys(ExecutionMemory.Descriptor<T>()...); return result; }
+    Query Without<T...>() { Query result=Query(data); result.data.ExcludeKeys(ExecutionMemory.Descriptor<T>()...); return result; }
+    ComponentQuery WithoutEntity() { return ComponentQuery(data); }
+    Query Stable() { Query result=Query(data); result.data.IsStable=true; return result; }
+    long Count => data.Count;
+    bool IsEmpty() { return Count==0l; }
+    QueryEnumerator GetEnumerator() { return QueryEnumerator(data); }
+}
+public class ComponentQuery {
+private:
+    QueryData data;
+public:
+    ComponentQuery() {}
+    ComponentQuery(QueryData value) { data=value; }
+    ComponentQuery With<T...>() { ComponentQuery result=ComponentQuery(data); result.data.RequireKeys(ExecutionMemory.Descriptor<T>()...); return result; }
+    ComponentQuery Without<T...>() { ComponentQuery result=ComponentQuery(data); result.data.ExcludeKeys(ExecutionMemory.Descriptor<T>()...); return result; }
+    ComponentQuery WithoutEntity() { return ComponentQuery(data); }
+    ComponentQuery Stable() { ComponentQuery result=ComponentQuery(data); result.data.IsStable=true; return result; }
+    long Count => data.Count;
+    bool IsEmpty() { return Count==0l; }
+    ComponentEnumerator GetEnumerator() { return ComponentEnumerator(data); }
+}
+public class Registry {
+private:
+    Shared<State> state;
+    bool RemoveOne<T>(Entity entity) { TypedPool<T>* pool=state.Get().Find<T>(); if(pool!=null) pool->Remove(entity.Index); return true; }
+    bool AddDefault<T>(Entity entity) { Add<T>(entity); return true; }
+    void Unique(byte*... keys) { for(int i=0;i<keys.Length;i++) for(int j=0;j<i;j++) if(keys[i]==keys[j]) throw ArgumentException("Duplicate component types."); }
+    void AddMany(Entity entity, bool... added) {}
+    void AddTypes<T...>(Entity entity) { AddMany(entity,AddDefault<T>(entity)...); }
+    void EnsureAbsent(Entity entity, byte*... keys) { for(int i=0;i<keys.Length;i++) { Pool* pool=state.Get().FindKey(keys[i]); if(pool!=null && pool->Has(entity.Index)) throw InvalidOperationException("One or more components already exist."); } }
+public:
+    Registry() { state=Shared<State>.Create(); }
+    void Reserve(long capacity) {
+        state.Get().Mutating(); if(capacity<0l || capacity>(long)int.MaxValue) throw ArgumentOutOfRangeException("Invalid ECS capacity.");
+        State& s=state.Get(); int n=(int)capacity;
+        if(n>s.Capacity) {
+            // Preserve logical elements in every replacement. Commit capacity
+            // last: after a failed copy, Create must retry growing all tables.
+            ulong[] slots=new ulong[n]; uint[] free=new uint[n]; uint[] dense=new uint[n];
+            for(int i=0;i<s.SlotCount;i++) slots[i]=s.Slots[i];
+            for(int i=0;i<s.FreeCount;i++) free[i]=s.Free[i];
+            for(int i=0;i<s.DenseCount;i++) dense[i]=s.Dense[i];
+            s.Slots=slots; s.Free=free; s.Dense=dense;
+            s.Capacity=n;
+        }
+        for(int i=0;i<s.Pools.Length;i++) s.Pools[i]->Reserve(n);
+        if(n>s.Reserved) s.Reserved=n;
+    }
+    Entity Create() {
+        State& s=state.Get(); s.Mutating(); uint index; uint generation=0u;
+        int denseIndex=s.DenseCount;
+        if(s.FreeCount!=0) {
+            index=s.Free[--s.FreeCount];
+            generation=(uint)(s.Slots[(int)index] & (ulong)uint.MaxValue);
+        }
+        else {
+            if(s.SlotCount==int.MaxValue) throw OverflowException("ECS entity capacity exhausted.");
+            // Reserve every entity table before changing their logical lengths.
+            // A failed allocation must not leave partially initialized slots.
+            if(s.SlotCount==s.Capacity) {
+                long capacity=s.Capacity==0?64l:(long)s.Capacity*2l;
+                if(capacity>(long)int.MaxValue) capacity=(long)int.MaxValue;
+                Reserve(capacity);
+            }
+            index=(uint)s.SlotCount++;
+        }
+        s.Slots[(int)index]=((ulong)(denseIndex+1)<<32) | (ulong)generation;
+        s.Dense[s.DenseCount++]=index; return Entity(index,generation,s.World);
+    }
+    Entity Create<T...>() {
+        Unique(ExecutionMemory.Descriptor<T>()...); Entity entity=Create();
+        try { AddTypes<T...>(entity); } catch { Destroy(entity); throw; }
+        return entity;
+    }
+    bool IsValid(Entity entity) { return state.Get().Valid(entity); }
+    long GetEntityCount() { return (long)state.Get().DenseCount; }
+    long EntityCount => GetEntityCount();
+    void Destroy(Entity entity) {
+        State& s=state.Get(); s.Mutating(); if(!s.Valid(entity)) return;
+        for(int i=0;i<s.Pools.Length;i++) s.Pools[i]->Remove(entity.Index);
+        ulong& slot=s.Slots[(int)entity.Index]; int index=(int)(slot>>32)-1;
+        uint generation=(uint)(slot & (ulong)uint.MaxValue);
+        uint last=s.Dense[--s.DenseCount];
+        s.Dense[index]=last;
+        s.Slots[(int)last]=((ulong)(index+1)<<32) | (s.Slots[(int)last] & (ulong)uint.MaxValue);
+        slot=(ulong)generation;
+        if(generation!=uint.MaxValue) { slot=(ulong)(generation+1u); s.Free[s.FreeCount++]=entity.Index; }
+    }
+    T& Add<T>(Entity entity) {
+        State& s=state.Get(); s.Mutating(); s.Require(entity); TypedPool<T>* pool=s.Ensure<T>(); T& value=pool->AddDefault<T>(entity.Index);
+        s.Dispatch++;
+        try { Registry registry=Registry(state); pool->Signal.Get().Publish(registry,entity,value); }
+        catch { pool->Remove(entity.Index); throw; }
+        finally { s.Dispatch--; }
+        return value;
+    }
+    T& Add<T>(Entity entity, const T& initialValue) {
+        State& s=state.Get(); s.Mutating(); s.Require(entity); TypedPool<T>* pool=s.Ensure<T>(); T& value=pool->AddValue(entity.Index,initialValue);
+        s.Dispatch++;
+        try { Registry registry=Registry(state); pool->Signal.Get().Publish(registry,entity,value); }
+        catch { pool->Remove(entity.Index); throw; }
+        finally { s.Dispatch--; }
+        return value;
+    }
+    Row Add<A,B,T...>(Entity entity) {
+        Unique(ExecutionMemory.Descriptor<A>(),ExecutionMemory.Descriptor<B>(),ExecutionMemory.Descriptor<T>()...); state.Get().Mutating(); state.Get().Require(entity); EnsureAbsent(entity,ExecutionMemory.Descriptor<A>(),ExecutionMemory.Descriptor<B>(),ExecutionMemory.Descriptor<T>()...);
+        try { Add<A>(entity); Add<B>(entity); AddTypes<T...>(entity); }
+        catch { Remove<A,B,T...>(entity); throw; }
+        return Row(state,entity);
+    }
+    T& Get<T>(Entity entity) { state.Get().Require(entity); TypedPool<T>* pool=state.Get().Find<T>(); if(pool==null) throw KeyNotFoundException("The component type has not been added to this registry."); return pool->Get(entity.Index); }
+    Row Get<A,B,T...>(Entity entity) { if(!Has<A,B,T...>(entity)) throw KeyNotFoundException("The entity lacks a requested component."); return Row(state,entity); }
+    T* TryGet<T>(Entity entity) { if(!IsValid(entity)) return null; TypedPool<T>* pool=state.Get().Find<T>(); if(pool==null) return null; return pool->TryGet(entity.Index); }
+    T& GetOrAdd<T>(Entity entity) { T* value=TryGet<T>(entity); if(value!=null) return *value; return Add<T>(entity); }
+    bool Has<T...>(Entity entity) { return state.Get().HasKeys(entity,ExecutionMemory.Descriptor<T>()...); }
+    void Remove<T...>(Entity entity) { state.Get().Mutating(); if(!IsValid(entity)) return; AddMany(entity,RemoveOne<T>(entity)...); }
+    ComponentSignal<T> OnAdd<T>() { if(state.Get().Find<T>()==null) state.Get().Mutating(); return ComponentSignal<T>(state.Get().Ensure<T>()->Signal); }
+    Ecs.Query Query<T...>() { QueryData data=QueryData(state); data.RequireKeys(ExecutionMemory.Descriptor<T>()...); return Ecs.Query(data); }
+    void Clear() { state.Get().Mutating(); while(state.Get().DenseCount!=0) Destroy(state.Get().Handle(state.Get().Dense[state.Get().DenseCount-1])); }
+    void Reset() { Clear(); for(int i=0;i<state.Get().Pools.Length;i++) delete state.Get().Pools[i]; state.Get().Pools.Clear(); state.Get().Reserved=0; }
+private:
+    Registry(Shared<State> value) { state=value; }
+}
+#else
+namespace Ecs;
+[Native("bolt::library::ecs::Entity")] public struct Entity {
+public:
+    const uint Index;
+    const uint Generation;
+    string ToString();
+}
+[Native("bolt::library::ecs::ComponentSignal")] public class ComponentSignal<T> {
+public:
+    ulong Connect<H>(H handler);
+    ulong ConnectRef<H>(H& handler);
+    bool Disconnect(ulong token);
+    void Clear();
+    [NativeProperty("Count")] const int Count;
+}
+[Native("bolt::library::ecs::Components")] public class Components {
+public:
+    T& Get<T>();
+    T* TryGet<T>();
+    [NativePack(1)] bool Has<T...>();
+    bool IsValid();
+}
+[Native("bolt::library::ecs::Row")] public class Row : Components {
+public:
+    [NativeProperty("Entity")] const Entity Entity;
+}
+[Native("bolt::library::ecs::Query")] public class Query {
+public:
+    [NativePack(1)] Query With<T...>();
+    [NativePack(1)] Query Without<T...>();
+    ComponentQuery WithoutEntity();
+    Query Stable();
+    [NativeProperty("Count")] const long Count;
+    bool IsEmpty();
+}
+[Native("bolt::library::ecs::ComponentQuery")] public class ComponentQuery {
+public:
+    [NativePack(1)] ComponentQuery With<T...>();
+    [NativePack(1)] ComponentQuery Without<T...>();
+    ComponentQuery WithoutEntity();
+    ComponentQuery Stable();
+    [NativeProperty("Count")] const long Count;
+    bool IsEmpty();
+}
+[Native("bolt::library::ecs::Registry")] public class Registry {
+public:
+    Registry();
+    void Reserve(long capacity);
+    Entity Create();
+    [NativePack(1)] Entity Create<T...>();
+    void Destroy(Entity entity);
+    bool IsValid(Entity entity);
+    long GetEntityCount();
+    [NativeProperty("EntityCount")] const long EntityCount;
+    T& Add<T>(Entity entity);
+    T& Add<T>(Entity entity, const T& initialValue);
+    [NativePack(2)] Row Add<T...>(Entity entity);
+    T& Get<T>(Entity entity);
+    [NativePack(2)] Row Get<T...>(Entity entity);
+    T* TryGet<T>(Entity entity);
+    T& GetOrAdd<T>(Entity entity);
+    [NativePack(1)] bool Has<T...>(Entity entity);
+    [NativePack(1)] void Remove<T...>(Entity entity);
+    ComponentSignal<T> OnAdd<T>();
+    [NativePack] Query Query<T...>();
+    void Clear();
+    void Reset();
+}
+#endif

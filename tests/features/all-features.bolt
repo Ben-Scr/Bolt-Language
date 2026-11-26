@@ -1,0 +1,31 @@
+import Console
+import Math
+import Random
+import Type
+import System.Collections.Generic
+namespace Demo;
+public class Vector2 {public: float X; float Y; Vector2(float x,float y){X=x;Y=y;} }
+public class Container<T> {public:T Value; Container(T value){Value=value;} }
+public enum Status : byte { Idle=0, Running=1, Finished=2 }
+public class Animal {public:void Speak(){Console.WriteLine("Animal");}}
+public sealed class Dog : Animal {public:override sealed void Speak(){Console.WriteLine("Dog");}}
+T Add<T>(T a,T b) : Number, Addable {return a+b;}
+void Bump(int& value,int add){value+=add;}
+void Test<T...>(){Console.WriteLine(Type.Name<T>());}
+static class Program {public:void Main(){
+Vector2 v=Vector2(10,5); Console.WriteLine(v.X+", "+v.Y);
+int x=5;Bump(x,10);int* ptr=&x;*ptr+=3;Console.WriteLine(x);
+int[] values={1,2,3};values[1]=9;Console.WriteLine(values.Length);Console.WriteLine(values[1]);
+Container<int> box=Container<int>(7); Console.WriteLine(box.Value);
+Console.WriteLine(Add<uint>(3,7));Test<int,string,double>();
+List<int> list;list.Add(4);list.Add(8);Console.WriteLine(list.Count);Console.WriteLine(list[1]);
+Dictionary<string,int> dict;dict["a"]=7;int found=0;Console.WriteLine(dict.TryGetValue("a",found));Console.WriteLine(found);
+HashSet<int> set;set.Add(1);set.Add(1);Console.WriteLine(set.Count);
+Queue<string> queue;queue.Enqueue("job");Console.WriteLine(queue.Dequeue());
+Dog dog;Animal& animal=dog;animal.Speak();Animal* a=&dog;a->Speak();
+Status state=Status.Running;Console.WriteLine(byte(state));
+Console.WriteLine(Math.Floor<double>(3.9));Console.WriteLine(Math.Sin<double>(0));
+int r=Random.Next<int>(10,25);Console.WriteLine(r>=10&&r<25);
+Vector2* allocated=new Vector2(2,3);Console.WriteLine(allocated->X);delete allocated;
+}
+}

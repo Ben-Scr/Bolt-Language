@@ -1,0 +1,90 @@
+import System
+import System.Collections.Generic
+import Bolt.Runtime
+namespace System.Text.Json.Internal;
+
+// BJS1, unchanged from 0.7-0.10: signature, tagged little-endian nodes,
+// ulong byte lengths and counts. NOT BSON, CBOR or MessagePack.
+public static class JsonBinary
+{
+private:
+    void Depth(int depth) { if (depth > 96) throw JsonException("Binary JSON nesting exceeds 96 levels."); }
+    void Need(const byte[]& bytes, int p, int count)
+    { if (p < 0 || p > bytes.Length || count < 0 || count > bytes.Length - p) throw JsonException("Truncated Binary JSON."); }
+    void UInt64(ulong n, List<byte>& output)
+    { for (int i = 0; i < 8; i++) { output.Add((byte)(n & 255ul)); n >>= 8; } }
+    ulong UInt64(const byte[]& input, int& p)
+    {
+        Need(input, p, 8); ulong n = 0ul;
+        for (int i = 0; i < 8; i++) n |= (ulong)input[p++] << (i * 8);
+        return n;
+    }
+    void Text(const string& value, List<byte>& output)
+    { byte[] bytes = value.ToUtf8(); UInt64((ulong)bytes.Length, output); output.AddRange(bytes); }
+    string Text(const byte[]& input, int& p)
+    {
+        ulong size = UInt64(input, p);
+        if (size > (ulong)(input.Length - p)) throw JsonException("Invalid Binary JSON string length.");
+        int count = (int)size; List<byte> bytes; bytes.AddRange(input, p, count); p += count;
+        return string.FromUtf8(bytes.ToArray());
+    }
+    void Write(const ValueTree& tree, int node, List<byte>& output, int depth)
+    {
+        Depth(depth); int kind = tree.Kind(node);
+        if (kind == 0) output.Add((byte)0);
+        elif (kind == 1) output.Add((byte)(tree.Boolean(node) ? 2 : 1));
+        elif (kind == 2) { output.Add((byte)3); UInt64(Reinterpret<ulong>(tree.Integer(node)), output); }
+        elif (kind == 3) { output.Add((byte)4); UInt64(tree.Natural(node), output); }
+        elif (kind == 4) { output.Add((byte)5); UInt64(Reinterpret<ulong>(tree.Floating(node)), output); }
+        elif (kind == 5) { output.Add((byte)6); Text(tree.String(node), output); }
+        elif (kind == 6)
+        {
+            output.Add((byte)7); int count = tree.Count(node); UInt64((ulong)count, output);
+            for (int i = 0; i < count; i++) Write(tree, tree.Child(node, i), output, depth + 1);
+        }
+        else
+        {
+            output.Add((byte)8); string[] keys = tree.Keys(node); UInt64((ulong)keys.Length, output);
+            for (int i = 0; i < keys.Length; i++) { Text(keys[i], output); Write(tree, tree.Member(node, keys[i]), output, depth + 1); }
+        }
+    }
+    int Read(const byte[]& input, int& p, ValueTree& tree, int depth)
+    {
+        Depth(depth); Need(input, p, 1); int tag = input[p++];
+        if (tag == 0) return tree.Null();
+        if (tag == 1 || tag == 2) return tree.Bool(tag == 2);
+        if (tag == 3) return tree.Signed(Reinterpret<long>(UInt64(input, p)));
+        if (tag == 4) return tree.Unsigned(UInt64(input, p));
+        if (tag == 5) return tree.Real(Reinterpret<double>(UInt64(input, p)));
+        if (tag == 6) return tree.Text(Text(input, p));
+        if (tag == 7 || tag == 8)
+        {
+            ulong count = UInt64(input, p);
+            int remaining = input.Length - p;
+            if (count > (ulong)(tag == 8 ? remaining / 9 : remaining)) throw JsonException("Invalid Binary JSON container length.");
+            int node = tag == 8 ? tree.Object() : tree.Array();
+            for (ulong i = 0ul; i < count; i++)
+            {
+                if (tag == 8) { string key = Text(input, p); int child = Read(input, p, tree, depth + 1); tree.Put(node, key, child); }
+                else { int child = Read(input, p, tree, depth + 1); tree.Add(node, child); }
+            }
+            return node;
+        }
+        throw JsonException("Unknown Binary JSON tag.");
+    }
+public:
+    byte[] Encode(const ValueTree& tree)
+    {
+        List<byte> output; output.Add((byte)66); output.Add((byte)74); output.Add((byte)83); output.Add((byte)1);
+        Write(tree, tree.Root(), output, 0); return output.ToArray();
+    }
+    ValueTree Parse(const byte[]& bytes)
+    {
+        Need(bytes, 0, 4);
+        if (bytes[0] != 66 || bytes[1] != 74 || bytes[2] != 83 || bytes[3] != 1) throw JsonException("Unknown Binary JSON signature or version.");
+        int p = 4; ValueTree result;
+        int root = Read(bytes, p, result, 0); result.SetRoot(root);
+        if (p != bytes.Length) throw JsonException("Trailing bytes after Binary JSON value.");
+        return result;
+    }
+}

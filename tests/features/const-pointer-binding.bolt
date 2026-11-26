@@ -1,0 +1,2 @@
+void Touch(const int* p){*p+=2;}
+static class Program{public:void Main(){int x=1;const int* p=&x;int* q=p;*p=3;Touch(p);Console.WriteLine(*q);}}

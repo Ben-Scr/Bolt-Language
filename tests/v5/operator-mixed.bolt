@@ -1,0 +1,5 @@
+
+class N:IStringable{public:int V;N(int v){V=v;}string ToString(){return (string)V;}static N operator +(N n,int x){return N(n.V+x);}static N operator +(int x,N n){return N(n.V+x);}}
+static class Program {public: void Main(){
+N n=N(5);Print(n+2);Print(3+n);
+}}

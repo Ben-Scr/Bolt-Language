@@ -1,0 +1,8 @@
+namespace System;
+// Optional marker for declared, user-defined metadata attributes. Known built-in
+// attributes are compiler contracts and do not need instances of this class.
+public class Attribute
+{
+public:
+    Attribute() {}
+}

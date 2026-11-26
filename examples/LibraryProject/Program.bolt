@@ -1,0 +1,48 @@
+import System
+import System.IO
+import System.Diagnostics
+import System.Text.Json
+import System.Threading.Tasks
+
+[Reflect]
+public class Measurement {
+public:
+    string Name = "Bolt";
+    int Total;
+}
+
+public static class Program {
+public:
+    T Add<T>(T... values) : Addable<T> {
+        if (values.Length == 0) {
+            throw ArgumentException("Add requires at least one value.");
+        }
+        T result = values[0];
+        for (int i = 1; i < values.Length; i++) result += values[i];
+        return result;
+    }
+
+    async Task<int> Main(string[] args) {
+        Stopwatch timer;
+        timer.Start();
+        try {
+            Measurement result;
+            result.Total = Add<int>(1, 2, 3, 4, 5);
+            string json = Json.Serialize<Measurement>(result);
+            string path = args.Length > 0 ? args[0] : "measurement.json";
+            await File.WriteAllTextAsync(path, json);
+            string saved = await File.ReadAllTextAsync(path);
+            Measurement loaded = Json.Deserialize<Measurement>(saved);
+            Print($"{loaded.Name}: {loaded.Total}");
+            return 0;
+        }
+        catch (Exception& error) {
+            Print(error.ToString());
+            return 1;
+        }
+        finally {
+            timer.Pause();
+            Print($"Elapsed: {timer.Elapsed.TotalMilliseconds} ms");
+        }
+    }
+}

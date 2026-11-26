@@ -1,0 +1,84 @@
+import System
+namespace System.Security.Cryptography;
+
+// Deterministic CSPRNG based on ChaCha20. Security depends entirely on the seed.
+// This class deliberately performs no OS entropy call: callers must provide an
+// unpredictable seed (at least 32 bytes) when cryptographic unpredictability is required.
+public sealed class ChaCha20Random
+{
+private:
+    byte[] key;
+    byte[] nonce;
+    uint counter;
+    byte[] buffer;
+    int bufferOffset;
+    bool exhausted;
+
+    void Initialize(const byte[]& seed)
+    {
+        if (seed.Length < 32) throw ArgumentException("ChaCha20Random seed must contain at least 32 bytes.");
+        byte[] material = SHA512.Hash(seed);
+        key = CryptoPrimitives.Slice(material, 0, 32);
+        nonce = CryptoPrimitives.Slice(material, 32, 12);
+        counter = 0u;
+        buffer = new byte[64];
+        bufferOffset = 64;
+        exhausted = false;
+    }
+
+    void Refill()
+    {
+        if (exhausted) throw InvalidOperationException("ChaCha20Random stream exhausted; reseed the generator.");
+        buffer = ChaCha20.Block(key, nonce, counter);
+        bufferOffset = 0;
+        if (counter == uint.MaxValue) exhausted = true;
+        else counter = CryptoPrimitives.Add32(counter, 1u);
+    }
+
+public:
+    ChaCha20Random(const byte[]& seed) { Initialize(seed); }
+
+    void Reseed(const byte[]& seed) { Initialize(seed); }
+
+    byte NextByte()
+    {
+        if (bufferOffset >= 64) Refill();
+        return buffer[bufferOffset++];
+    }
+
+    void NextBytes(byte[]& output)
+    {
+        for (int i = 0; i < output.Length; i++) output[i] = NextByte();
+    }
+
+    byte[] NextBytes(int count)
+    {
+        if (count < 0) throw ArgumentOutOfRangeException("Random byte count must be nonnegative.");
+        byte[] output = new byte[count];
+        NextBytes(output);
+        return output;
+    }
+
+    uint NextUInt32()
+    {
+        byte[] value = NextBytes(4);
+        return CryptoPrimitives.ReadUInt32LE(value, 0);
+    }
+
+    ulong NextUInt64()
+    {
+        byte[] value = NextBytes(8);
+        return ((ulong)value[0]) | ((ulong)value[1] << 8) | ((ulong)value[2] << 16) | ((ulong)value[3] << 24) |
+               ((ulong)value[4] << 32) | ((ulong)value[5] << 40) | ((ulong)value[6] << 48) | ((ulong)value[7] << 56);
+    }
+}
+
+public static class RandomBytes
+{
+public:
+    byte[] FromSeed(const byte[]& seed, int count)
+    {
+        ChaCha20Random random = ChaCha20Random(seed);
+        return random.NextBytes(count);
+    }
+}

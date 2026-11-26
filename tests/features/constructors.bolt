@@ -1,0 +1,5 @@
+
+class Point {public:int X; Point(){X=1;} Point(int x){X=x;} Point(int x,int y){X=x+y;} }
+static class Program { public: void Main() {
+Point a=Point(); Point b=Point(9); Point c(4,5); Console.WriteLine(a.X+b.X+c.X);
+} }

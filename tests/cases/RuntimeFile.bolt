@@ -1,0 +1,7 @@
+static class Program {
+public:
+    void Main() {
+        int result = Runtime.ExecuteFile("tests/cases/RuntimeChild.bolt");
+        Console.WriteLine("child=" + result);
+    }
+}

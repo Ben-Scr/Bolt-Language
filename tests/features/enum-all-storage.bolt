@@ -1,0 +1,5 @@
+
+enum A:short {First=-128} enum B:ulong {Last=18446744073709551615ul} enum Status {First=4,Second,Third=Second+1}
+static class Program { public: void Main() {
+A a=A.First; B b=B.Last; Console.WriteLine(short(a)); Console.WriteLine(ulong(b)); Console.WriteLine(Status.Second); Console.WriteLine(Status.Second>Status.First);
+} }

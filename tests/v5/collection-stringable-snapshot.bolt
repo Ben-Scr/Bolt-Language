@@ -1,0 +1,29 @@
+import System.Collections.Generic
+
+class Tick:IStringable {
+public:
+ int Value;
+ string ToString() { Value++; return (string)Value; }
+}
+
+static class Program {
+public:
+ void Main() {
+  Tick original;
+  List<Tick> list; list.Add(original);
+  Print(list.ToString()); Print(list); Print(list[0].Value);
+  Queue<Tick> queue; queue.Enqueue(original);
+  Print(queue.ToString()); Print(queue);
+  Tick first=queue.Peek(); Print(first.Value);
+  HashSet<Tick> set; set.Add(original);
+  Print(set.ToString()); Print(set); Print(set.Contains(original));
+  Dictionary<Tick,Tick> map; map.Add(original,original);
+  Print(map.ToString()); Print(map); Print(map.ContainsKey(original));
+  Print(map[original].Value);
+  List<List<Tick>> nested; nested.Add(list);
+  Print(nested.ToString()); Print(nested); Print(nested[0][0].Value);
+  List<IStringable> boxed; boxed.Add(original);
+  Print(boxed.ToString()); Print(boxed);
+  Print(original.Value);
+ }
+}

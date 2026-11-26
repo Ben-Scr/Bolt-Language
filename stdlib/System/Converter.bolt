@@ -1,0 +1,31 @@
+import Bolt.Runtime
+namespace System;
+
+public static class Converter
+{
+public:
+    T To<T>(const string& text)
+    {
+        T value = default; int error = 0;
+        if (!NumericParsing.TryValue(text, value, error))
+        {
+            if (error == 2) throw OverflowException("The number is outside the target type's range.");
+            throw FormatException("The text does not represent the requested type.");
+        }
+        return value;
+    }
+    bool TryTo<T>(const string& text, T& value)
+    { T parsed = default; int error = 0; if (!NumericParsing.TryValue(text, parsed, error)) return false; value = parsed; return true; }
+    string ToString<T>(const T& value) : IStringable<T> { return (string)value; }
+    bool ToBool(const string& text) { return To<bool>(text); }
+    char ToChar(const string& text) { return To<char>(text); }
+    int ToInt(const string& text) { return To<int>(text); }
+    short ToInt16(const string& text) { return To<short>(text); }
+    long ToInt64(const string& text) { return To<long>(text); }
+    byte ToUInt8(const string& text) { return To<byte>(text); }
+    ushort ToUInt16(const string& text) { return To<ushort>(text); }
+    uint ToUInt32(const string& text) { return To<uint>(text); }
+    ulong ToUInt64(const string& text) { return To<ulong>(text); }
+    float ToFloat(const string& text) { return To<float>(text); }
+    double ToDouble(const string& text) { return To<double>(text); }
+}

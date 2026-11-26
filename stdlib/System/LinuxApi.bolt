@@ -1,0 +1,42 @@
+#ifdef Linux
+namespace Bolt.Runtime.Linux;
+
+// Direct POSIX process I/O used by LinuxConsole. These functions are called
+// from generated Bolt code; no Bolt C++ terminal adapter sits between the
+// Console implementation and the operating-system/libc ABI.
+[Header("unistd.h"), Native("write")]
+extern "C" long Write(int fileDescriptor, byte* buffer, ulong count);
+[Header("unistd.h"), Native("read")]
+extern "C" long Read(int fileDescriptor, byte* buffer, ulong count);
+[Header("unistd.h"), Native("isatty")]
+extern "C" int IsTerminal(int fileDescriptor);
+
+[Header("sys/random.h"), Native("getrandom")]
+extern "C" long GetRandom(void* buffer, ulong bytes, uint flags);
+[Header("errno.h"), Native("__errno_location")]
+extern "C" int* ErrnoLocation();
+
+[Header("stdlib.h"), Native("malloc")]
+extern "C" void* Allocate(ulong bytes);
+[Header("stdlib.h"), Native("realloc")]
+extern "C" void* Reallocate(void* memory, ulong bytes);
+[Header("stdlib.h"), Native("free")]
+extern "C" void Free(void* memory);
+
+// Opaque POSIX calendar/time structures. They are only passed by pointer from
+// native Bolt code; their storage is owned as raw bytes by LinuxDateTime.bolt.
+[Native("time_t")]
+public enum TimeValue : long { Zero = 0 }
+[Native("timespec")]
+public struct TimeSpec {}
+[Native("tm")]
+public struct CalendarTime {}
+
+[Header("time.h"), Native("clock_gettime")]
+extern "C" int ClockGetTime(int clockId, TimeSpec* value);
+[Header("time.h"), Native("localtime_r")]
+extern "C" CalendarTime* LocalTime(TimeValue* value, CalendarTime* result);
+[Header("time.h"), Native("mktime")]
+extern "C" long MakeTime(CalendarTime* value);
+
+#endif

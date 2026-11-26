@@ -1,0 +1,59 @@
+import Bolt.Runtime
+
+struct Pair { public: ulong A; ulong B; }
+struct Wide { public: Pair A; Pair B; Pair C; Pair D; Pair E; }
+struct Padded { public: byte Kind; ulong Id; }
+struct Managed { public: Pair Point; string Name; }
+class Saved { public: Buffer<Pair> Entries; }
+
+static class Program {
+public:
+    void Main() {
+        Wide w;
+        w.A.A = 11ul;
+        w.E.B = 99ul;
+        Buffer<Wide> wide;
+        wide.Reserve(1);
+        wide.Add(w);
+        wide.Insert(0, wide[0]);
+        wide[0].E.B = 44ul;
+        Wide[] frozen = wide.ToArray();
+        wide.RemoveAt(0);
+        bool ok = wide.Length == 1 && wide[0].A.A == 11ul && wide[0].E.B == 99ul;
+        ok = ok && frozen[0].E.B == 44ul && frozen[1].E.B == 99ul;
+        Pair pair; pair.A = 17ul; pair.B = 109ul;
+        Buffer<Pair> items;
+        items.Add(pair);
+        items.Insert(0, items[0]);
+        items[0].A = 13ul;
+        Pair[] snapshot = items.ToArray();
+        items[1].B = 71ul;
+        ok = ok && snapshot[0].A == 13ul && snapshot[1].B == 109ul;
+
+        // Only the declared fields are portable across compiler backends.
+        Padded[] padded = new Padded[1];
+        padded[0].Kind = (byte)3; padded[0].Id = 25ul;
+        byte* original = (byte*)&padded[0];
+        original[3] = (byte)77;
+        Buffer<Padded> packed;
+        packed.AppendRange(padded, 0, 1);
+        byte* copied = (byte*)&packed[0];
+        ok = ok && copied[0] == (byte)3 && packed[0].Id == 25ul;
+
+        Buffer<Managed> managed;
+        Managed m; m.Point.A = 21ul; m.Name = "before";
+        managed.Add(m); managed.Insert(0, managed[0]);
+        managed[0].Name = "after";
+        Managed[] saved = managed.ToArray();
+        managed.Clear();
+        ok = ok && saved[0].Name == "after" && saved[1].Name == "before" && saved[1].Point.A == 21ul;
+
+        Arena arena = Arena.Fixed(16384);
+        Saved* owner = new(arena) Saved();
+        owner->Entries.Add(pair);
+        Pair[] outside = owner->Entries.ToArray();
+        arena.Reset();
+        ok = ok && outside[0].A == 17ul && outside[0].B == 109ul;
+        Print(ok);
+    }
+}

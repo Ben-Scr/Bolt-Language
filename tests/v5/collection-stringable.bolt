@@ -1,0 +1,36 @@
+import System.Collections.Generic
+
+static class Program {
+public:
+ void Main() {
+  List<int> list;
+  Queue<string> queue;
+  HashSet<int> set;
+  Dictionary<string,bool> map;
+  Print(list.ToString());
+  Print(queue.ToString());
+  Print(set.ToString());
+  Print(map.ToString());
+
+  list.Add(10); list.Add(2); list.Add(-1);
+  queue.Enqueue("first"); queue.Enqueue("second"); queue.Dequeue(); queue.Enqueue("third");
+  set.Add(2); set.Add(10); set.Add(-1);
+  map.Add("z",true); map.Add("a",false);
+  Print(list.ToString());
+  Print(queue.ToString());
+  Print(set.ToString());
+  Print(map.ToString());
+  Print(list);
+  Console.Write(queue); Console.WriteLine();
+  Console.WriteLine(set);
+  Print((string)map);
+  Print(string(list));
+  Print("queue=" + queue);
+  Print($"set={set}; map={map}");
+  string appended="list="; appended+=list; Print(appended);
+
+  const List<int> frozen=list;
+  Print(frozen.ToString());
+  Print(frozen);
+ }
+}

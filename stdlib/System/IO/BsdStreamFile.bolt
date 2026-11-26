@@ -1,0 +1,50 @@
+#if BoltStandaloneCore && (MacOS || FreeBSD)
+import System
+import System.IO
+namespace Bolt.Runtime.IO;
+
+static class BsdStreamFile
+{
+public:
+    int Open(const string& path, FileMode mode, FileAccess access)
+    {
+        if (path == "" || path.Contains('\0')) throw ArgumentException("Invalid file path.");
+        byte[] name = (path + "\0").ToUtf8();
+        // O_CLOEXEC differs between Darwin and FreeBSD. The other flags below agree.
+#ifdef MacOS
+        int flags = 16777216;
+#else
+        int flags = 1048576;
+#endif
+        if (access == FileAccess.Write) flags |= 1;
+        if (access == FileAccess.ReadWrite) flags |= 2;
+        if (mode == FileMode.CreateNew || mode == FileMode.Create || mode == FileMode.OpenOrCreate || mode == FileMode.Append)
+            flags |= 512; // O_CREAT
+        if (mode == FileMode.CreateNew) flags |= 2048; // O_EXCL
+        if (mode == FileMode.Create || mode == FileMode.Truncate) flags |= 1024; // O_TRUNC
+        if (mode == FileMode.Append) flags |= 8; // O_APPEND
+        int fd = -1;
+        while (fd < 0) {
+            fd = Bolt.Runtime.BsdStreamApi.Open(&name[0], flags, 438u); // 0666, subject to umask
+            if (fd >= 0) break;
+            int code = *Bolt.Runtime.MacOS.ErrnoLocation();
+            if (code == 4) continue;
+            string message = "'" + path + "': OS error " + (string)code;
+            if (code == 2) throw FileNotFoundException(message);
+            if (code == 13 || code == 1) throw UnauthorizedAccessException(message);
+            throw IOException(message);
+        }
+        return fd;
+    }
+    long Length(int fd)
+    {
+        ulong[] status = new ulong[32];
+        if (Bolt.Runtime.BsdStreamApi.Status(fd, &status[0]) != 0) throw IOException("Cannot read file length.");
+#ifdef MacOS
+        return ((long*)&status[0])[12]; // Darwin LP64 struct stat with 64-bit inodes
+#else
+        return ((long*)&status[0])[14]; // FreeBSD 12+ LP64 struct stat
+#endif
+    }
+}
+#endif

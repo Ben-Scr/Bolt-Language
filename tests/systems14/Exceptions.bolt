@@ -1,0 +1,52 @@
+import System
+import System.Memory
+import System.Diagnostics
+public class CustomError : Exception {
+public:
+ int Code;
+ CustomError(int value) : base("custom failure"){Code=value;}
+ [ReadOnly] override string ToString(){return "custom:"+Code;}
+}
+public class Owned {
+public:
+ static int Destroyed=0;
+ MemoryBlock Buffer;
+ Owned(Allocator allocator){Buffer=allocator.Allocate(32ul);}
+ ~Owned(){Destroyed++;}
+}
+public class BaseGuard {
+public:
+ static int Destroyed=0;
+ MemoryBlock Buffer;
+ BaseGuard(Allocator allocator){Buffer=allocator.Allocate(64ul);}
+ ~BaseGuard(){Destroyed++;}
+}
+public class Broken : BaseGuard {
+public:
+ static int FailedDestroyed=0;
+ MemoryBlock Buffer2;
+ Broken(Allocator allocator) : base(allocator){Buffer2=allocator.Allocate(99ul);throw ArgumentException("failed ctor");}
+ ~Broken(){FailedDestroyed++;}
+}
+static class Program { public:
+ static int checks=0,fin=0;
+ void Check(bool x){Assert.That(x);checks++;}
+ int ReturnFinally(){try{return 7;}finally{fin++;}}
+ void ThrowInner(){throw ArgumentException("nested");}
+ void Main(){
+  bool caught=false;try{ThrowInner();}catch(ArgumentNullException& e){Check(false);}catch(ArgumentException& e){caught=true;Check(e.Message=="nested");}Check(caught);
+  caught=false;try{try{ThrowInner();}catch(Exception& e){Check(e.Message=="nested");throw;}finally{fin++;}}catch(ArgumentException& e){caught=true;}Check(caught&&fin==1);
+  Check(ReturnFinally()==7&&fin==2);
+  for(int i=0;i<4;i++){try{if(i<2)continue;break;}finally{fin++;}}Check(fin==5);
+  caught=false;try{try{throw ArgumentException("old");}finally{throw InvalidOperationException("new");}}catch(InvalidOperationException& e){Check(e.Message=="new");caught=true;}Check(caught);
+  caught=false;try{throw CustomError(42);}catch(CustomError& e){Check(e.Code==42&&e.Message=="custom failure");Exception& base=e;Check(base.ToString()=="custom:42");try{throw;}catch(Exception& e2){Check(e2.Message=="custom failure");}caught=true;}Check(caught);
+  caught=false;try{int z=0;Print(10/z);}catch(DivideByZeroException& e){Check(e.Message.Contains("division"));caught=true;}Check(caught);
+  Allocator allocator;
+  try {Owned* p=new Owned(allocator);Check(allocator.LiveBytes==32ul);delete p;Check(allocator.LiveBytes==0ul);throw ArgumentException("body");}catch(Exception& e){}Check(Owned.Destroyed==1);
+  try{Broken* p=new Broken(allocator);}catch(ArgumentException& e){Check(e.Message=="failed ctor");}
+  Check(allocator.LiveBytes==0ul);Check(BaseGuard.Destroyed==1);Check(Broken.FailedDestroyed==0);
+  {MemoryBlock b=allocator.Allocate(44ul);try{MemoryBlock child=allocator.Allocate(25ul);throw ArgumentException("x");}catch(Exception& e){Check(allocator.LiveBytes==44ul);}}
+  Check(allocator.LiveAllocations==0ul);
+  Print("EXCEPTIONS14:"+checks);
+ }
+}

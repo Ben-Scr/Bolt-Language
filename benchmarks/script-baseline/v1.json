@@ -1,0 +1,26 @@
+{
+  "navigation": {
+    "input_bytes": 17408,
+    "input_sha256": "29d95ce67203db9c2ad60eb873d9f746fc75a262ed00789806b12e81cfade299",
+    "output_sha256": [
+      "33b6f48fa2e3432a58a4f21c5a4ff576e01664328c42f74eb03d73f030d79d51",
+      "5df3e3d702d40749d26a4032271877251d7e13990d6aff237a2c073227c4ecc6"
+    ]
+  },
+  "terrain": {
+    "input_bytes": 4194304,
+    "input_sha256": "5f2c02dc55b1109434c72d7ee904e6c518d1d95aac8e46f3a460e8980a6aa6dd",
+    "output_sha256": [
+      "b02d0072a17dbb8cba47938e6b1c1b74b5d9735d53667d592fe0d1d4f89d7d10",
+      "b938cb2eed0ea27f2d76b5285f21ef2848f4648d1943c6a38eb003d4ff63d549"
+    ]
+  },
+  "inventory": {
+    "input_bytes": 3000000,
+    "input_sha256": "45dea152a040696146b14e042828befbbfc4bd96904019f3a8baed9be36759a1",
+    "output_sha256": [
+      "c940200dfaecfb60618dfe8b59efacc5bceb6eba529b889e305bf86cced40e23",
+      "52a8b4453034027fb90ffc5b6c3f55d8872c36d9137557711d67c511c7a8838c"
+    ]
+  }
+}

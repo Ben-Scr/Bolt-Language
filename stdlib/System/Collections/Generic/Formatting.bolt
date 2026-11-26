@@ -1,0 +1,24 @@
+namespace System.Collections.Generic;
+// Heap sort: no auxiliary array, deterministic ordinal output; not iteration order.
+public static class CollectionFormatting
+{
+private:
+    void Sift(string[]& items, int root, int end)
+    {
+        while (root < end / 2)
+        {
+            int child = root * 2 + 1;
+            if (child + 1 < end && items[child] < items[child + 1]) child++;
+            if (!(items[root] < items[child])) return;
+            string value = items[root]; items[root] = items[child]; items[child] = value; root = child;
+        }
+    }
+public:
+    string Braces(string[]& pieces)
+    {
+        for (int i = pieces.Length / 2; i > 0; i--) Sift(pieces, i - 1, pieces.Length);
+        for (int end = pieces.Length; end > 1; end--)
+        { string value = pieces[0]; pieces[0] = pieces[end - 1]; pieces[end - 1] = value; Sift(pieces, 0, end - 1); }
+        return "{" + string.Join(", ", pieces) + "}";
+    }
+}

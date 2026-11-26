@@ -1,0 +1,9 @@
+namespace Bolt.Runtime;
+
+// Sequentially consistent operations on naturally aligned machine words.
+[Native("bolt::platform::AtomicOps")]
+public static class AtomicOps {
+public:
+    ulong Add(ulong& location, ulong increment);
+    ulong Cas(ulong& location, ulong expected, ulong desired);
+}

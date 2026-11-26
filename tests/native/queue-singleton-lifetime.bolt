@@ -1,0 +1,44 @@
+import System.Collections.Generic
+public sealed class Tagged {
+public:
+    static bool Record = false;
+    static int Hits = 0;
+    static int Unexpected = 0;
+    int Tag;
+    string Name;
+    int[] Data;
+    Tagged(int tag, string name) {
+        Tag=tag; Name=name; Data=new int[1]; Data[0]=tag;
+    }
+    ~Tagged() {
+        if (Record) {
+            Hits++;
+            if (Tag!=73 || Name!="Küste" || Data.Length!=1 || Data[0]!=73) Unexpected++;
+        }
+    }
+}
+static class Program {
+public:
+    int Main() {
+        Queue<Tagged> q(3);
+        Tagged original=Tagged(73,"Küste");
+        q.Enqueue(original);
+        Tagged[] detached=q.ToArray();
+        Tagged.Hits=0;
+        Tagged.Record=true;
+        Tagged returned=q.Dequeue();
+        Tagged.Record=false;
+        int atReturn=Tagged.Hits;
+        if (atReturn==0 || Tagged.Unexpected!=0 || returned.Tag!=73 || returned.Data[0]!=73) return 1;
+        if (q.Count!=0 || q.ToArray().Length!=0) return 2;
+        Tagged.Hits=0; Tagged.Record=true;
+        q.Clear();
+        Tagged.Record=false;
+        if (Tagged.Hits!=0) return 3;
+        returned.Data[0]=8;
+        if (detached[0].Data[0]!=73 || original.Data[0]!=73) return 4;
+        q.Enqueue(original); original.Data[0]=5;
+        if (q.Dequeue().Data[0]!=73 || detached[0].Data[0]!=73) return 5;
+        Print("singleton lifetime OK"); return 0;
+    }
+}

@@ -1,0 +1,23 @@
+# Compiler and editor build output
+/build/*
+!/build/visualstudio/
+/build/visualstudio/*
+!/build/visualstudio/Release/
+/build/visualstudio/Release/*
+!/build/visualstudio/Release/Bolt.VisualStudio.vsix
+/*/**/bin/
+obj/
+.bolt/
+__pycache__/
+*.pyc
+*.pdb
+node_modules/
+/editors/vscode/dist/
+
+# Files created by a local SDK installation
+/.bolt-install.json
+/file-icons.ps1
+/uninstall.bat
+/uninstall.ps1
+/libexec/
+/share/

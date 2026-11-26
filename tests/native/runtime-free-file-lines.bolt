@@ -1,0 +1,54 @@
+import System
+import System.IO
+
+static class Program
+{
+private:
+    bool Matches(const string& path, const string[]& expected)
+    {
+        string[] actual = File.ReadAllLines(path);
+        if (actual.Length != expected.Length) return false;
+        for (int i = 0; i < actual.Length; i++) if (actual[i] != expected[i]) return false;
+        return true;
+    }
+public:
+    int Main()
+    {
+        string path = "Zeilen-ü😀.txt";
+        string[] empty = new string[0];
+        File.WriteAllLines(path, ["old content that must disappear", "second old line"]);
+        File.WriteAllLines(path, ["Grüße😀", "", "A\0B"]);
+        File.AppendAllText(path, "offen");
+        File.AppendAllLines(path, ["+Ende", "", "Ω"]);
+        File.AppendAllLines(path, empty);
+        File.AppendAllText(path, "");
+        if (!Matches(path, ["Grüße😀", "", "A\0B", "offen+Ende", "", "Ω"])) return 1;
+
+        File.AppendAllText("new-text", "anfang");
+        File.AppendAllText("new-text", "!");
+        if (!Matches("new-text", ["anfang!"])) return 2;
+        File.AppendAllLines("new-lines", ["", "ä", ""]);
+        if (!Matches("new-lines", ["", "ä", ""])) return 3;
+        File.AppendAllLines("new-empty", empty);
+        File.AppendAllText("empty-text", "");
+        File.WriteAllLines("new-lines", empty);
+        if (!Matches("new-lines", empty) || !Matches("new-empty", empty) || !Matches("empty-text", empty)) return 4;
+
+        byte[] bom = [(byte)239, (byte)187, (byte)191];
+        string last = "D" + (string)(char)8232 + "E";
+        File.WriteAllBytes("mixed", bom);
+        File.AppendAllText("mixed", "\r\nα\r\r\nB\n\nC\r" + last);
+        if (!Matches("mixed", ["", "α", "", "B", "", "C", last])) return 5;
+        File.AppendAllText("mixed", "\r");
+        if (!Matches("mixed", ["", "α", "", "B", "", "C", last])) return 6;
+        File.WriteAllBytes("bom-only", bom);
+        if (!Matches("bom-only", empty)) return 7;
+
+        File.WriteAllBytes("opaque", [(byte)255, (byte)0]);
+        File.AppendAllText("opaque", "é");
+        File.AppendAllLines("opaque", ["x"]);
+        try { File.ReadAllLines("opaque"); return 8; } catch (FormatException& e) {}
+        try { File.AppendAllLines("missing-parent/file", empty); return 9; } catch (FileNotFoundException& e) {}
+        return 0;
+    }
+}

@@ -1,0 +1,3 @@
+import System.Collections.Generic
+class Plain { public: string ToString() { return "manual"; } }
+static class Program { public: void Main() { List<Plain> values; Print(values); } }

@@ -1,0 +1,40 @@
+import System
+namespace System.Security.Cryptography;
+
+// AES-CTR stream transformation. Encryption and decryption are the same operation.
+public static class AESCTR
+{
+private:
+    bool Increment(byte[]& counter)
+    {
+        for (int i = 15; i >= 0; i--)
+        {
+            if (counter[i] != (byte)255) { counter[i] = (byte)((int)counter[i] + 1); return true; }
+            counter[i] = (byte)0;
+        }
+        return false;
+    }
+
+public:
+    byte[] Transform(const byte[]& input, const byte[]& key, const byte[]& initialCounter)
+    {
+        if (initialCounter.Length != 16) throw ArgumentException("AES-CTR initial counter must contain exactly 16 bytes.");
+        AES aes = AES(key);
+        byte[] counter = CryptoPrimitives.Copy(initialCounter);
+        byte[] output = new byte[input.Length];
+        int offset = 0;
+        while (offset < input.Length)
+        {
+            byte[] stream = aes.EncryptBlock(counter);
+            int count = input.Length - offset;
+            if (count > 16) count = 16;
+            for (int i = 0; i < count; i++) output[offset + i] = (byte)(input[offset + i] ^ stream[i]);
+            offset += count;
+            if (offset < input.Length && !Increment(counter)) throw InvalidOperationException("AES-CTR counter exhausted.");
+        }
+        return output;
+    }
+
+    byte[] Encrypt(const byte[]& plaintext, const byte[]& key, const byte[]& initialCounter) { return Transform(plaintext, key, initialCounter); }
+    byte[] Decrypt(const byte[]& ciphertext, const byte[]& key, const byte[]& initialCounter) { return Transform(ciphertext, key, initialCounter); }
+}

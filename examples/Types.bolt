@@ -1,0 +1,21 @@
+static class Program {
+public:
+    void Main() {
+        int a = int.MaxValue;
+        short b = short.MinValue;
+        short c = short.MaxValue;
+        long d = long.MinValue;
+        byte e = byte.MaxValue;
+        ushort f = ushort.MaxValue;
+        uint g = uint.MaxValue;
+        ulong h = ulong.MaxValue;
+        float x = 1.5f;
+        double y = 2.75;
+        bool flag = true;
+        string text = "Fixed-width numbers";
+        Console.WriteLine(text);
+        Console.WriteLine(a + ", " + b + ", " + c + ", " + d);
+        Console.WriteLine(e + ", " + f + ", " + g + ", " + h);
+        Console.WriteLine(x + ", " + y + ", " + !flag);
+    }
+}

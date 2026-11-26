@@ -1,0 +1,17 @@
+import System.Diagnostics
+
+static class Program {
+public:
+    int Main() {
+        Stopwatch clock = Stopwatch.StartNew();
+        long previous = 0l;
+        for (int i = 0; i < 6000000; i++) {
+            long elapsed = clock.ElapsedTicks;
+            if (elapsed < previous) return 1;
+            previous = elapsed;
+        }
+        if (previous == 0l) return 2;
+        Print(6000000);
+        return 0;
+    }
+}

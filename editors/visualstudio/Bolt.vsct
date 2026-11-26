@@ -1,0 +1,66 @@
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable">
+  <Extern href="stdidcmd.h"/><Extern href="vsshlids.h"/>
+  <Commands package="Package">
+    <Menus><Menu guid="Bolt" id="Menu" priority="0x0600" type="Menu">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_MM_TOOLSADDINS"/><Strings><ButtonText>Bolt</ButtonText></Strings>
+    </Menu></Menus>
+    <Groups><Group guid="Bolt" id="Tools" priority="0x0100"><Parent guid="Bolt" id="Menu"/></Group>
+      <Group guid="Bolt" id="Editor" priority="0x0650"><Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN"/></Group>
+      <Group guid="Bolt" id="Folder" priority="0x0650"><Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_FOLDERNODE"/></Group>
+    </Groups>
+    <Buttons>
+      <Button guid="Bolt" id="Run" priority="0x100" type="Button"><Parent guid="Bolt" id="Tools"/>
+        <CommandFlag>DynamicVisibility</CommandFlag><Strings><ButtonText>Run</ButtonText><CommandName>Bolt.Run</CommandName></Strings></Button>
+      <Button guid="Bolt" id="Debug" priority="0x101" type="Button"><Parent guid="Bolt" id="Tools"/>
+        <CommandFlag>DynamicVisibility</CommandFlag><Strings><ButtonText>Debug</ButtonText><CommandName>Bolt.Debug</CommandName></Strings></Button>
+      <Button guid="Bolt" id="Build" priority="0x102" type="Button"><Parent guid="Bolt" id="Tools"/>
+        <CommandFlag>DynamicVisibility</CommandFlag><Strings><ButtonText>Build</ButtonText><CommandName>Bolt.Build</CommandName></Strings></Button>
+      <Button guid="Bolt" id="Check" priority="0x103" type="Button"><Parent guid="Bolt" id="Tools"/>
+        <CommandFlag>DynamicVisibility</CommandFlag><Strings><ButtonText>Check</ButtonText><CommandName>Bolt.Check</CommandName></Strings></Button>
+      <Button guid="Bolt" id="NewClass" priority="0x104" type="Button"><Parent guid="Bolt" id="Tools"/>
+        <CommandFlag>DynamicVisibility</CommandFlag><Strings><ButtonText>New Class…</ButtonText><CommandName>Bolt.NewClass</CommandName></Strings></Button>
+      <Button guid="Bolt" id="NewProject" priority="0x105" type="Button"><Parent guid="Bolt" id="Tools"/>
+        <CommandFlag>DynamicVisibility</CommandFlag><Strings><ButtonText>New Project…</ButtonText><CommandName>Bolt.NewProject</CommandName></Strings></Button>
+      <Button guid="Bolt" id="Compiler" priority="0x106" type="Button"><Parent guid="Bolt" id="Tools"/>
+        <CommandFlag>DynamicVisibility</CommandFlag><Strings><ButtonText>Select Compiler…</ButtonText><CommandName>Bolt.Compiler</CommandName></Strings></Button>
+      <Button guid="Bolt" id="Profile" priority="0x107" type="Button"><Parent guid="Bolt" id="Tools"/>
+        <CommandFlag>DynamicVisibility</CommandFlag><Strings><ButtonText>Select Build and Analysis Profile…</ButtonText><CommandName>Bolt.Profile</CommandName></Strings></Button>
+      <Button guid="Bolt" id="Restart" priority="0x108" type="Button"><Parent guid="Bolt" id="Tools"/>
+        <CommandFlag>DynamicVisibility</CommandFlag><Strings><ButtonText>Restart Language Server</ButtonText><CommandName>Bolt.Restart</CommandName></Strings></Button>
+      <Button guid="Bolt" id="Info" priority="0x109" type="Button"><Parent guid="Bolt" id="Tools"/>
+        <CommandFlag>DynamicVisibility</CommandFlag><Strings><ButtonText>Show Toolchain Info</ButtonText><CommandName>Bolt.Info</CommandName></Strings></Button>
+      <Button guid="Bolt" id="Options" priority="0x10a" type="Button"><Parent guid="Bolt" id="Tools"/>
+        <CommandFlag>DynamicVisibility</CommandFlag><Strings><ButtonText>Options…</ButtonText><CommandName>Bolt.Options</CommandName></Strings></Button>
+      <Button guid="Bolt" id="Task" priority="0x010B" type="Button"><Parent guid="Bolt" id="Tools"/>
+        <Strings><ButtonText>Run Configured Task…</ButtonText></Strings></Button>
+      <Button guid="Bolt" id="Cancel" priority="0x010C" type="Button"><Parent guid="Bolt" id="Tools"/>
+        <CommandFlag>DynamicVisibility</CommandFlag><Strings><ButtonText>Cancel Build or Check</ButtonText></Strings></Button>
+    </Buttons>
+  </Commands>
+  <CommandPlacements>
+    <CommandPlacement guid="Bolt" id="Run" priority="0x100"><Parent guid="Bolt" id="Editor"/></CommandPlacement>
+    <CommandPlacement guid="Bolt" id="Debug" priority="0x101"><Parent guid="Bolt" id="Editor"/></CommandPlacement>
+    <CommandPlacement guid="Bolt" id="Build" priority="0x102"><Parent guid="Bolt" id="Editor"/></CommandPlacement>
+    <CommandPlacement guid="Bolt" id="Check" priority="0x103"><Parent guid="Bolt" id="Editor"/></CommandPlacement>
+    <CommandPlacement guid="Bolt" id="NewClass" priority="0x104"><Parent guid="Bolt" id="Folder"/></CommandPlacement>
+    <CommandPlacement guid="Bolt" id="NewProject" priority="0x105"><Parent guid="Bolt" id="Folder"/></CommandPlacement>
+  </CommandPlacements>
+  <Symbols><GuidSymbol name="Package" value="{56B30167-5122-4746-9CAD-13DA36200610}"/>
+    <GuidSymbol name="Bolt" value="{C11DF32E-21E4-4BBA-BFDF-98A976145388}">
+      <IDSymbol name="Menu" value="0x2000"/><IDSymbol name="Tools" value="0x2010"/>
+      <IDSymbol name="Editor" value="0x2011"/><IDSymbol name="Folder" value="0x2012"/>
+      <IDSymbol name="Run" value="0x100"/>
+      <IDSymbol name="Debug" value="0x101"/>
+      <IDSymbol name="Build" value="0x102"/>
+      <IDSymbol name="Check" value="0x103"/>
+      <IDSymbol name="NewClass" value="0x104"/>
+      <IDSymbol name="NewProject" value="0x105"/>
+      <IDSymbol name="Compiler" value="0x106"/>
+      <IDSymbol name="Profile" value="0x107"/>
+      <IDSymbol name="Restart" value="0x108"/>
+      <IDSymbol name="Info" value="0x109"/>
+      <IDSymbol name="Options" value="0x10a"/>
+      <IDSymbol name="Task" value="0x10b"/>
+      <IDSymbol name="Cancel" value="0x10c"/>
+    </GuidSymbol></Symbols>
+</CommandTable>

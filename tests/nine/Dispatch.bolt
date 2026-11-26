@@ -1,0 +1,22 @@
+public class Base {
+public:
+    virtual int Number { get { return 1; } set {} }
+}
+public class Derived : Base {
+private:
+    int stored = 10;
+public:
+    override int Number { get => stored; set => stored = value * 2; }
+}
+public static class Program {
+public:
+    void Main() {
+        Derived object;
+        Base& reference = object;
+        reference.Number = 6;
+        Print(reference.Number);
+        Base* pointer = &object;
+        pointer->Number += 2;
+        Print(pointer->Number);
+    }
+}

@@ -1,0 +1,30 @@
+namespace Examples.Geometry;
+
+public class Vector2 : IMovable, IStringable
+{
+public:
+    float X;
+    float Y;
+
+    Vector2(float x, float y)
+    {
+        X = x;
+        Y = y;
+    }
+
+    void Move(float x, float y)
+    {
+        X += x;
+        Y += y;
+    }
+
+    string ToString()
+    {
+        return $"({X}, {Y})";
+    }
+
+    static Vector2 operator +(Vector2 a, Vector2 b)
+    {
+        return Vector2(a.X + b.X, a.Y + b.Y);
+    }
+}

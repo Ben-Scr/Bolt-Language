@@ -1,0 +1,5 @@
+
+class A {public:override void Test(){}}
+static class Program { public: void Main() {
+
+} }

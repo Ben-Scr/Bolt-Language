@@ -1,0 +1,182 @@
+{
+  "workload": "Dictionary<int,int> insert, lookup, clear and reuse; whole process wall time",
+  "fixture": "benchmarks/performance/cases/dictionary-clear.bolt",
+  "fixture_sha256": "44b5dbd2b6f23e810ab4d1e0c03f033ef1df443651968ef8b8f5a0a558572f1f",
+  "cpu": "AMD Ryzen 9 7900X",
+  "toolchain": "Windows x64, MSVC 19.51.36260, Bolt 0.16.0, LLVM 23.1.2, --release --backend llvm --require-native",
+  "baseline": "Previous local build with bulk List.AddRange",
+  "baseline_compiler_sha256": "b8fe37a41b86bbebcaf4a28adc7b4bb7e1726ef950c8357da122f0dacab794ac",
+  "candidate_compiler_sha256": "1630344c29a8aebf4fd33158b172e2047f3c96b83488906adc80f25f997b998e",
+  "cases": {
+    "sparse": {
+      "case": "dictionary-clear-sparse",
+      "measured_at_utc": "2026-11-20T15:34:48.588363+00:00",
+      "metric": "whole_process_wall_clock_including_startup",
+      "note": "Not a compile-time or isolated-kernel benchmark. Matching stdout only checks outputs, not semantic equivalence.",
+      "host": {
+        "platform": "Windows-11-10.0.26200-SP0",
+        "machine": "AMD64",
+        "processor": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+        "python": "3.13.7"
+      },
+      "warmup_runs": 3,
+      "runs": 15,
+      "min_duration_ms": 200.0,
+      "valid_duration_gate": true,
+      "baseline": {
+        "executable": "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-clear-eaa964aa4eec40b39d6957d4614c8cdb\\before\\program.exe",
+        "sha256": "39c01c778a6aa5eddfe4411b98f97b77fb90839f6ef1865dd14b91e885228b78",
+        "arguments": [
+          "16384",
+          "32",
+          "80000"
+        ],
+        "n": 15,
+        "median_ms": 961.1109,
+        "p95_ms": 1041.8578,
+        "min_ms": 930.1671,
+        "max_ms": 1041.8578,
+        "raw_ms": [
+          989.7517,
+          977.3137,
+          1041.8578,
+          961.1109,
+          950.2623,
+          1001.6403,
+          936.6249,
+          999.5327,
+          938.987,
+          990.3139,
+          943.1964,
+          946.8506,
+          935.4069,
+          930.1671,
+          970.2572
+        ]
+      },
+      "candidate": {
+        "executable": "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-clear-eaa964aa4eec40b39d6957d4614c8cdb\\after\\program.exe",
+        "sha256": "6b207801dbea29537d87a03a88524a6fc09d3d14b2e9a63c5dc0dcaa5980d8cc",
+        "arguments": [
+          "16384",
+          "32",
+          "80000"
+        ],
+        "n": 15,
+        "median_ms": 261.6228,
+        "p95_ms": 340.6022,
+        "min_ms": 249.8305,
+        "max_ms": 340.6022,
+        "raw_ms": [
+          249.8305,
+          261.6228,
+          251.9732,
+          259.0174,
+          249.9757,
+          254.4582,
+          250.7677,
+          340.6022,
+          277.965,
+          265.3686,
+          266.5902,
+          254.6357,
+          267.1996,
+          290.2584,
+          287.7628
+        ]
+      },
+      "speedup_baseline_over_candidate": 3.67365,
+      "output": "5040000",
+      "paired_median_speedup": 3.7184518902887533,
+      "paired_median_speedup_bootstrap_ci95": [
+        3.378076376522224,
+        3.7355830608035694
+      ]
+    },
+    "dense": {
+      "case": "dictionary-clear-dense",
+      "measured_at_utc": "2026-11-20T15:35:04.797155+00:00",
+      "metric": "whole_process_wall_clock_including_startup",
+      "note": "Not a compile-time or isolated-kernel benchmark. Matching stdout only checks outputs, not semantic equivalence.",
+      "host": {
+        "platform": "Windows-11-10.0.26200-SP0",
+        "machine": "AMD64",
+        "processor": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+        "python": "3.13.7"
+      },
+      "warmup_runs": 3,
+      "runs": 15,
+      "min_duration_ms": 200.0,
+      "valid_duration_gate": true,
+      "baseline": {
+        "executable": "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-clear-eaa964aa4eec40b39d6957d4614c8cdb\\before\\program.exe",
+        "sha256": "39c01c778a6aa5eddfe4411b98f97b77fb90839f6ef1865dd14b91e885228b78",
+        "arguments": [
+          "16384",
+          "16384",
+          "256"
+        ],
+        "n": 15,
+        "median_ms": 441.9305,
+        "p95_ms": 539.5964,
+        "min_ms": 412.6146,
+        "max_ms": 539.5964,
+        "raw_ms": [
+          448.8264,
+          412.6146,
+          425.156,
+          441.9305,
+          426.3466,
+          448.9331,
+          475.1889,
+          435.4266,
+          436.5916,
+          539.5964,
+          469.428,
+          476.7249,
+          426.4292,
+          422.7578,
+          452.8279
+        ]
+      },
+      "candidate": {
+        "executable": "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-clear-eaa964aa4eec40b39d6957d4614c8cdb\\after\\program.exe",
+        "sha256": "6b207801dbea29537d87a03a88524a6fc09d3d14b2e9a63c5dc0dcaa5980d8cc",
+        "arguments": [
+          "16384",
+          "16384",
+          "256"
+        ],
+        "n": 15,
+        "median_ms": 439.987,
+        "p95_ms": 476.8868,
+        "min_ms": 419.6957,
+        "max_ms": 476.8868,
+        "raw_ms": [
+          437.7963,
+          458.7513,
+          438.8433,
+          447.6441,
+          476.8868,
+          433.5601,
+          467.2319,
+          419.6957,
+          458.0784,
+          469.4833,
+          455.0959,
+          421.2282,
+          436.7051,
+          439.987,
+          433.8932
+        ]
+      },
+      "speedup_baseline_over_candidate": 1.00442,
+      "output": "8388352",
+      "paired_median_speedup": 1.0170300872008098,
+      "paired_median_speedup_bootstrap_ci95": [
+        0.960841570319123,
+        1.0354575986120496
+      ]
+    }
+  }
+}

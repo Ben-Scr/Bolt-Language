@@ -1,0 +1,14 @@
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.sln]
+end_of_line = crlf
+
+[*.{cpp,hpp,blt,py,md,json,txt}]
+end_of_line = lf

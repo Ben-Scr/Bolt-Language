@@ -1,0 +1,5 @@
+
+void Touch(int& x){x++;}
+static class Program { public: void Main() {
+Touch(1);
+} }

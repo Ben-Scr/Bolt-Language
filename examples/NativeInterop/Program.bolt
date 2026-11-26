@@ -1,0 +1,32 @@
+[Header("ffi.h"), Native("native_add")] extern "C" int AddNative(int a,int b);
+[Header("ffi.h"), Native("native_increment")] extern "C" void IncrementNative(int& value);
+[Header("ffi.h"), Native("native_greeting")] extern "C" string GreetingNative();
+[Header("ffi.h"), Native("native_bytes")] extern "C" int SumNative(const byte[]& bytes,int count);
+[Header("ffi.h"), Native("native_flush_stdout")] extern "C" int FlushNativeStdout();
+[Header("stdio.h"), Native("puts")] extern "C" int Puts(const string& message);
+[Header("ffi.h"), Native("demo::twice")] extern "C++" double Twice(double value);
+[Header("ffi.h"), Native("demo::Vector")] public struct NativeVec {
+public:
+    float X;
+    float Y;
+    NativeVec(float x,float y);
+    float LengthSquared();
+}
+public static class Program {
+public:
+    void Main() {
+        int value=1;
+        IncrementNative(value);
+        Print(value);
+        Print(AddNative(4,5));
+        Print(GreetingNative());
+        byte[] bytes={1,2,3};
+        Print(SumNative(bytes,bytes.Length));
+        Puts("Bolt calls C UTF-8 Ä");
+        // puts may buffer stdout when the host redirects it to a pipe.
+        if (FlushNativeStdout() != 0) throw IOException("Cannot flush C stdout.");
+        Print(Twice(3.5));
+        NativeVec vector=NativeVec(3,4);
+        Print(vector.LengthSquared());
+    }
+}

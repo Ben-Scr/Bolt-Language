@@ -1,0 +1,31 @@
+public class Player {
+public:
+    int Health = 0;
+    event Action<int> Changed;
+    void Set(int value){Health=value;Changed.Invoke(value);}
+    void RaiseAgain(int value){Changed(value);}
+}
+public class Listener {
+public:
+    int total = 0;
+    void Handle(int value){total+=value;}
+}
+public static class Program {
+private:
+    void Static(int value){Print("static="+value);}
+public:
+    void Main(){
+        Player p;Listener a;
+        p.Changed += Static;
+        p.Changed += a.Handle;
+        p.Set(4);
+        p.Changed -= Static;
+        p.Set(6);
+        Print(a.total);
+        p.Changed -= a.Handle;
+        p.RaiseAgain(8);
+        Action<int> handler = a.Handle;
+        handler(5);
+        Print(a.total);
+    }
+}

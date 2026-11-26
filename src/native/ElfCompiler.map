@@ -1,0 +1,7 @@
+{
+  global:
+    bolt_compiler_*;
+    bolt_module_*;
+  local:
+    *;
+};

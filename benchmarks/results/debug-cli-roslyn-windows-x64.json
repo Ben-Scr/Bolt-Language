@@ -1,0 +1,603 @@
+{
+  "method": "fresh compiler process and output per build; OS-cache warm; validation outside timed section",
+  "outputs": {
+    "bolt": "Fast Debug native executable",
+    "csharp": "Debug IL assembly + portable PDB"
+  },
+  "host": "Windows-11-10.0.26200-SP0",
+  "dotnet_sdk": "10.0.403",
+  "reference_pack": "10.0.14",
+  "bolt": {
+    "compilerHostAbi": 1,
+    "executable": "C:/Users/benso/source/repos/Bolt/bin/bolt.exe",
+    "runtimeAbi": 1048578,
+    "target": "x86_64-pc-windows-msvc",
+    "version": "0.16.0"
+  },
+  "sha256": {
+    "bolt": "1630344c29a8aebf4fd33158b172e2047f3c96b83488906adc80f25f997b998e",
+    "csc": "f9ea6e4b51f4ac07b9005fddf3e5a0022d9d60cf95a1c404809de63ba6d0eb3b",
+    "dotnet": "1e881ec1786c31ba712d052258b4ad4202ac155df5965794030037878abb822f"
+  },
+  "flags": {
+    "bolt": [
+      "--debug",
+      "--backend",
+      "fast",
+      "--require-native"
+    ],
+    "csharp": [
+      "-noconfig",
+      "-nostdlib+",
+      "-optimize-",
+      "-debug:portable",
+      "-target:exe"
+    ]
+  },
+  "generator_sha256": "e09fe3c197d65b15bc0445076adbfae54f78a9730324804c5ede45c291b1cdd7",
+  "warmup": 2,
+  "runs": 14,
+  "cases": [
+    {
+      "files": 2,
+      "expected_output": "35",
+      "median_ms": {
+        "bolt": 181.00740000000002,
+        "csharp": 392.1873
+      },
+      "rounds": [
+        {
+          "order": [
+            "bolt",
+            "csharp"
+          ],
+          "warmup": true,
+          "compile_ms": {
+            "bolt": 191.5023,
+            "csharp": 387.5188
+          }
+        },
+        {
+          "order": [
+            "csharp",
+            "bolt"
+          ],
+          "warmup": true,
+          "compile_ms": {
+            "csharp": 382.4231,
+            "bolt": 225.2612
+          }
+        },
+        {
+          "order": [
+            "bolt",
+            "csharp"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "bolt": 280.8613,
+            "csharp": 389.3023
+          }
+        },
+        {
+          "order": [
+            "bolt",
+            "csharp"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "bolt": 163.1712,
+            "csharp": 432.4657
+          }
+        },
+        {
+          "order": [
+            "bolt",
+            "csharp"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "bolt": 194.2707,
+            "csharp": 395.4657
+          }
+        },
+        {
+          "order": [
+            "csharp",
+            "bolt"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "csharp": 373.9801,
+            "bolt": 196.3819
+          }
+        },
+        {
+          "order": [
+            "csharp",
+            "bolt"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "csharp": 438.2859,
+            "bolt": 187.1693
+          }
+        },
+        {
+          "order": [
+            "csharp",
+            "bolt"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "csharp": 381.6659,
+            "bolt": 170.8212
+          }
+        },
+        {
+          "order": [
+            "bolt",
+            "csharp"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "bolt": 151.3927,
+            "csharp": 923.5487
+          }
+        },
+        {
+          "order": [
+            "csharp",
+            "bolt"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "csharp": 362.259,
+            "bolt": 153.7418
+          }
+        },
+        {
+          "order": [
+            "csharp",
+            "bolt"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "csharp": 374.5504,
+            "bolt": 172.3987
+          }
+        },
+        {
+          "order": [
+            "bolt",
+            "csharp"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "bolt": 152.6742,
+            "csharp": 470.6086
+          }
+        },
+        {
+          "order": [
+            "csharp",
+            "bolt"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "csharp": 381.7642,
+            "bolt": 270.6392
+          }
+        },
+        {
+          "order": [
+            "bolt",
+            "csharp"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "bolt": 184.4375,
+            "csharp": 395.0723
+          }
+        },
+        {
+          "order": [
+            "bolt",
+            "csharp"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "bolt": 177.5773,
+            "csharp": 376.2398
+          }
+        },
+        {
+          "order": [
+            "csharp",
+            "bolt"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "csharp": 396.9212,
+            "bolt": 238.0007
+          }
+        }
+      ]
+    },
+    {
+      "files": 32,
+      "expected_output": "52981",
+      "median_ms": {
+        "bolt": 263.45079999999996,
+        "csharp": 423.7233
+      },
+      "rounds": [
+        {
+          "order": [
+            "bolt",
+            "csharp"
+          ],
+          "warmup": true,
+          "compile_ms": {
+            "bolt": 345.0992,
+            "csharp": 422.0939
+          }
+        },
+        {
+          "order": [
+            "csharp",
+            "bolt"
+          ],
+          "warmup": true,
+          "compile_ms": {
+            "csharp": 456.9219,
+            "bolt": 180.7947
+          }
+        },
+        {
+          "order": [
+            "bolt",
+            "csharp"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "bolt": 233.4151,
+            "csharp": 420.098
+          }
+        },
+        {
+          "order": [
+            "bolt",
+            "csharp"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "bolt": 476.8306,
+            "csharp": 403.981
+          }
+        },
+        {
+          "order": [
+            "bolt",
+            "csharp"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "bolt": 192.8148,
+            "csharp": 409.3844
+          }
+        },
+        {
+          "order": [
+            "csharp",
+            "bolt"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "csharp": 424.3026,
+            "bolt": 215.1052
+          }
+        },
+        {
+          "order": [
+            "csharp",
+            "bolt"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "csharp": 441.9547,
+            "bolt": 199.6548
+          }
+        },
+        {
+          "order": [
+            "csharp",
+            "bolt"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "csharp": 397.406,
+            "bolt": 203.3993
+          }
+        },
+        {
+          "order": [
+            "csharp",
+            "bolt"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "csharp": 423.144,
+            "bolt": 293.4865
+          }
+        },
+        {
+          "order": [
+            "bolt",
+            "csharp"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "bolt": 183.4797,
+            "csharp": 446.3907
+          }
+        },
+        {
+          "order": [
+            "csharp",
+            "bolt"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "csharp": 425.34,
+            "bolt": 826.0455
+          }
+        },
+        {
+          "order": [
+            "bolt",
+            "csharp"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "bolt": 1976.8284,
+            "csharp": 489.4319
+          }
+        },
+        {
+          "order": [
+            "bolt",
+            "csharp"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "bolt": 1142.2774,
+            "csharp": 462.1597
+          }
+        },
+        {
+          "order": [
+            "bolt",
+            "csharp"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "bolt": 1564.2139,
+            "csharp": 418.4066
+          }
+        },
+        {
+          "order": [
+            "csharp",
+            "bolt"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "csharp": 407.1218,
+            "bolt": 196.7051
+          }
+        },
+        {
+          "order": [
+            "csharp",
+            "bolt"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "csharp": 440.5859,
+            "bolt": 366.487
+          }
+        }
+      ]
+    },
+    {
+      "files": 128,
+      "expected_output": "52549",
+      "median_ms": {
+        "bolt": 341.67235,
+        "csharp": 422.74980000000005
+      },
+      "rounds": [
+        {
+          "order": [
+            "bolt",
+            "csharp"
+          ],
+          "warmup": true,
+          "compile_ms": {
+            "bolt": 1098.7296,
+            "csharp": 424.5679
+          }
+        },
+        {
+          "order": [
+            "csharp",
+            "bolt"
+          ],
+          "warmup": true,
+          "compile_ms": {
+            "csharp": 447.5512,
+            "bolt": 318.7728
+          }
+        },
+        {
+          "order": [
+            "csharp",
+            "bolt"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "csharp": 444.3636,
+            "bolt": 401.2848
+          }
+        },
+        {
+          "order": [
+            "bolt",
+            "csharp"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "bolt": 327.1291,
+            "csharp": 440.8741
+          }
+        },
+        {
+          "order": [
+            "bolt",
+            "csharp"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "bolt": 322.7481,
+            "csharp": 440.5424
+          }
+        },
+        {
+          "order": [
+            "bolt",
+            "csharp"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "bolt": 628.6205,
+            "csharp": 414.8685
+          }
+        },
+        {
+          "order": [
+            "bolt",
+            "csharp"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "bolt": 389.5057,
+            "csharp": 763.1242
+          }
+        },
+        {
+          "order": [
+            "csharp",
+            "bolt"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "csharp": 410.1301,
+            "bolt": 317.2643
+          }
+        },
+        {
+          "order": [
+            "bolt",
+            "csharp"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "bolt": 346.0632,
+            "csharp": 420.0604
+          }
+        },
+        {
+          "order": [
+            "csharp",
+            "bolt"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "csharp": 410.9277,
+            "bolt": 323.6991
+          }
+        },
+        {
+          "order": [
+            "csharp",
+            "bolt"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "csharp": 425.4392,
+            "bolt": 337.2815
+          }
+        },
+        {
+          "order": [
+            "csharp",
+            "bolt"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "csharp": 404.8906,
+            "bolt": 375.9699
+          }
+        },
+        {
+          "order": [
+            "bolt",
+            "csharp"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "bolt": 374.0581,
+            "csharp": 433.5684
+          }
+        },
+        {
+          "order": [
+            "bolt",
+            "csharp"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "bolt": 334.7246,
+            "csharp": 430.8833
+          }
+        },
+        {
+          "order": [
+            "csharp",
+            "bolt"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "csharp": 411.94,
+            "bolt": 314.3102
+          }
+        },
+        {
+          "order": [
+            "csharp",
+            "bolt"
+          ],
+          "warmup": false,
+          "compile_ms": {
+            "csharp": 418.334,
+            "bolt": 441.1899
+          }
+        }
+      ]
+    }
+  ],
+  "cpu_model": "AMD Ryzen 9 7900X 12-Core Processor",
+  "roslyn_version": "5.9.0-1.26523.112 (5a2162bea6845eabc1fc721624a43568c65db3b1)",
+  "driver_basis": "examples/FunkeEditorBench/release_cli.py, switched to Bolt --debug --backend fast and csc -optimize- -debug:portable; otherwise identical generators and validation."
+}

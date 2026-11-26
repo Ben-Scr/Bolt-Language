@@ -1,0 +1,28 @@
+import System.IO
+
+static class Program {
+public:
+    int Main() {
+        string first = "Grüße\0😀", second = "second-é";
+        StreamWriter writer = StreamWriter("lines.txt");
+        for (int i = 0; i < 4096; i++) {
+            writer.WriteLine<string>(first);
+            writer.WriteLine<string>(second);
+            writer.WriteLine();
+        }
+        writer.Flush();
+        writer.Close();
+
+        StreamReader reader = StreamReader("lines.txt");
+        long sum = 0l;
+        for (int i = 0; i < 4096; i++) {
+            string a = reader.ReadLine(), b = reader.ReadLine(), empty = reader.ReadLine();
+            if (a != first || b != second || empty != "") return 1;
+            sum += a.ByteLength + b.ByteLength;
+        }
+        if (!reader.EndOfStream) return 2;
+        reader.Close();
+        Print(sum);
+        return 0;
+    }
+}

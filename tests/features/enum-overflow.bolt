@@ -1,0 +1,5 @@
+
+enum E:byte{A=256}
+static class Program { public: void Main() {
+
+} }

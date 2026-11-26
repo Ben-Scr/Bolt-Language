@@ -1,0 +1,11 @@
+namespace Bolt.Runtime;
+
+// General access to the language's existing UTF-8 string storage. Bytes borrows
+// storage until the string is changed/destroyed; FromUtf8 copies the given bytes.
+[Native("bolt::platform::NativeString")]
+public static class NativeString
+{
+public:
+    byte* Bytes(const string& value, ulong& length);
+    string FromUtf8(byte* bytes, ulong length);
+}

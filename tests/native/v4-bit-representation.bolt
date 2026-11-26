@@ -1,0 +1,1 @@
+static class Program { public: void Main(){Print(Reinterpret<uint>(1.0f)); Print(Reinterpret<float>(1065353216u));Print(Reinterpret<ulong>(1.0));Print(Reinterpret<short>(ushort(65535)));} }

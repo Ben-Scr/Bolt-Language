@@ -1,0 +1,74 @@
+import System
+namespace System.Security.Cryptography;
+
+// AES-CBC with optional PKCS#7 padding. The IV must be unique/unpredictable for
+// the key. CBC provides confidentiality only; prefer AES-GCM when authentication is needed.
+public static class AESCBC
+{
+private:
+    byte[] Pad(const byte[]& input)
+    {
+        int amount = 16 - (input.Length % 16);
+        byte[] output = new byte[input.Length + amount];
+        for (int i = 0; i < input.Length; i++) output[i] = input[i];
+        for (int i = input.Length; i < output.Length; i++) output[i] = (byte)amount;
+        return output;
+    }
+
+    byte[] Unpad(const byte[]& input)
+    {
+        if (input.Length == 0 || (input.Length % 16) != 0) throw ArgumentException("Invalid AES-CBC PKCS#7 payload length.");
+        int amount = (int)input[input.Length - 1];
+        if (amount < 1 || amount > 16) throw ArgumentException("Invalid AES-CBC PKCS#7 padding.");
+        uint difference = 0u;
+        for (int i = 0; i < 16; i++)
+        {
+            int index = input.Length - 1 - i;
+            byte expected = i < amount ? (byte)amount : input[index];
+            difference = difference | (uint)(input[index] ^ expected);
+        }
+        if (difference != 0u) throw ArgumentException("Invalid AES-CBC PKCS#7 padding.");
+        return CryptoPrimitives.Slice(input, 0, input.Length - amount);
+    }
+
+    byte[] EncryptCore(const byte[]& plaintext, const byte[]& key, const byte[]& iv, bool padding)
+    {
+        if (iv.Length != 16) throw ArgumentException("AES-CBC IV must contain exactly 16 bytes.");
+        if (!padding && (plaintext.Length % 16) != 0) throw ArgumentException("AES-CBC without padding requires a block-aligned plaintext.");
+        byte[] input = padding ? Pad(plaintext) : CryptoPrimitives.Copy(plaintext);
+        AES aes = AES(key);
+        byte[] output = new byte[input.Length];
+        byte[] previous = CryptoPrimitives.Copy(iv);
+        for (int offset = 0; offset < input.Length; offset += 16)
+        {
+            byte[] block = new byte[16];
+            for (int i = 0; i < 16; i++) block[i] = (byte)(input[offset + i] ^ previous[i]);
+            byte[] encrypted = aes.EncryptBlock(block);
+            for (int i = 0; i < 16; i++) { output[offset + i] = encrypted[i]; previous[i] = encrypted[i]; }
+        }
+        return output;
+    }
+
+    byte[] DecryptCore(const byte[]& ciphertext, const byte[]& key, const byte[]& iv, bool padding)
+    {
+        if (iv.Length != 16) throw ArgumentException("AES-CBC IV must contain exactly 16 bytes.");
+        if ((ciphertext.Length % 16) != 0) throw ArgumentException("AES-CBC ciphertext must be block aligned.");
+        AES aes = AES(key);
+        byte[] output = new byte[ciphertext.Length];
+        byte[] previous = CryptoPrimitives.Copy(iv);
+        for (int offset = 0; offset < ciphertext.Length; offset += 16)
+        {
+            byte[] block = CryptoPrimitives.Slice(ciphertext, offset, 16);
+            byte[] decrypted = aes.DecryptBlock(block);
+            for (int i = 0; i < 16; i++) output[offset + i] = (byte)(decrypted[i] ^ previous[i]);
+            previous = block;
+        }
+        return padding ? Unpad(output) : output;
+    }
+
+public:
+    byte[] Encrypt(const byte[]& plaintext, const byte[]& key, const byte[]& iv) { return EncryptCore(plaintext, key, iv, true); }
+    byte[] Decrypt(const byte[]& ciphertext, const byte[]& key, const byte[]& iv) { return DecryptCore(ciphertext, key, iv, true); }
+    byte[] EncryptNoPadding(const byte[]& plaintext, const byte[]& key, const byte[]& iv) { return EncryptCore(plaintext, key, iv, false); }
+    byte[] DecryptNoPadding(const byte[]& ciphertext, const byte[]& key, const byte[]& iv) { return DecryptCore(ciphertext, key, iv, false); }
+}

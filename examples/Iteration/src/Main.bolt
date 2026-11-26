@@ -1,0 +1,118 @@
+import System.Collections.Generic
+
+// Ordinary user code: neither the collection nor its iterator needs a runtime interface.
+concept PredicateFor<P, T> {
+    require (P predicate, T value) { predicate.Invoke(value) -> bool; }
+}
+
+public struct AtLeast {
+private:
+    int minimum;
+public:
+    AtLeast(int minimum) { this.minimum = minimum; }
+    bool Invoke(int value) { return value >= minimum; }
+}
+
+// This query deliberately owns a value snapshot. Filtering itself is lazy.
+public class FilteredList<T, P> {
+private:
+    List<T> values;
+    P predicate;
+public:
+    FilteredList(const List<T>& values, P predicate) : values(values), predicate(predicate) {}
+    FilteredEnumerator<T, P> GetEnumerator() {
+        return FilteredEnumerator<T, P>(values, predicate);
+    }
+}
+
+// Each enumerator owns its data and position, so it survives a temporary query
+// and does not share traversal state with another enumerator.
+public struct FilteredEnumerator<T, P> {
+private:
+    List<T> values;
+    P predicate;
+    int index = -1;
+public:
+    FilteredEnumerator(const List<T>& values, P predicate) : values(values), predicate(predicate) {}
+    bool MoveNext() {
+        while (index < values.Length) {
+            index++;
+            if (index < values.Length && predicate.Invoke(values[index])) return true;
+        }
+        return false;
+    }
+    T Current {
+        get { return values.ItemAt(index); }
+    }
+}
+
+public struct NumberRange {
+private:
+    int start;
+    int end;
+public:
+    NumberRange(int start, int end) { this.start = start; this.end = end; }
+    RangeEnumerator GetEnumerator() { return RangeEnumerator(start, end); }
+}
+
+public struct RangeEnumerator {
+private:
+    int next;
+    int end;
+    int current;
+public:
+    RangeEnumerator(int start, int end) { next = start; this.end = end; }
+    bool MoveNext() {
+        if (next >= end) return false;
+        current = next;
+        next++;
+        return true;
+    }
+    int Current => current;
+}
+
+public static class QueryExtensions {
+public:
+    FilteredList<T, P> Where<T, P>(this const List<T>& values, P predicate) : PredicateFor<P, T> {
+        return FilteredList<T, P>(values, predicate);
+    }
+    int Sum<S>(this S& values) : Iterable<S, int> {
+        int total = 0;
+        for (int value : values) total += value;
+        return total;
+    }
+}
+
+public static class Program {
+public:
+    int failures = 0;
+    void Check(bool condition) { if (!condition) failures++; }
+    int Main() {
+        List<int> values;
+        values.Add(1); values.Add(2); values.Add(3); values.Add(4);
+        var query = values.Where(AtLeast(3));
+        values.Add(100); // The already-created query retains its snapshot.
+        for (int value : query) Print(value);
+        Check(query.Sum() == 7);
+        Check(QueryExtensions.Sum(query) == 7);
+
+        var first = query.GetEnumerator();
+        var second = query.GetEnumerator();
+        Check(first.MoveNext() && first.Current == 3);
+        Check(first.MoveNext() && first.Current == 4);
+        Check(second.MoveNext() && second.Current == 3);
+        Check(!first.MoveNext() && !first.MoveNext());
+
+        int total = 0;
+        for (int value : values.Where(AtLeast(4))) total += value;
+        Check(total == 104);
+
+        NumberRange range = NumberRange(1, 5);
+        Check(range.Sum() == 10);
+        int[] array = [1, 2, 3];
+        Check(array.Sum() == 6);
+        if (failures != 0) return 1;
+        Print("ITERATION_OK");
+        return 0;
+    }
+}

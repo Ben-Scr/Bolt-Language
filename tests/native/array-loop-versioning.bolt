@@ -1,0 +1,230 @@
+import System
+
+public static class Program {
+public:
+    void Reverse(const int[]& source, int[]& dest, int n) {
+        int limit = n;
+        for (int i = 0; i < limit; i++) {
+            int j = limit - 1 - i;
+            dest[i] = source[j] + 1;
+        }
+    }
+    void Shift(const int[]& source, int[]& dest, int n, int offset) {
+        int limit = n;
+        int baseIndex = offset;
+        for (int i = 0; i < limit; i++) {
+            int j = baseIndex + i;
+            dest[i] = source[j - baseIndex];
+        }
+    }
+    void Scatter(const byte[]& records, int[]& totals) {
+        for (int i = 0; i < records.Length; i += 2) {
+            int bucket = records[i];
+            int delta = records[i + 1];
+            if (delta != 0) totals[bucket] += delta;
+            else totals[bucket]++;
+        }
+    }
+    void Neighbors(int center, int[]& trace) {
+        int baseIndex = center;
+        int[] offsets = new int[4];
+        offsets[0] = 1; offsets[1] = -1; offsets[2] = 2; offsets[3] = -2;
+        int tail = 0;
+        for (int i = 0; i < 4; i++) {
+            int at = baseIndex + offsets[i];
+            if (trace[at] == 0) {
+                trace[at] = 1;
+                trace[tail++] = at;
+            }
+        }
+    }
+    void StrideEnd(int[]& a) {
+        for (int i = 2147483628; i < 2147483647; i += 4) {
+            int index = i - 2147483628;
+            a[index] = a[index] + 1;
+        }
+    }
+    int Buckets(const byte[]& records, int debit) {
+        int[] balance = new int[2];
+        int[] declined = new int[1];
+        int amount = debit;
+        balance[0] = 2;
+        balance[1] = 3;
+        for (int p = 0; p < records.Length; p += 2) {
+            int id = records[p];
+            if (records[p+1] == 0) balance[id] += amount;
+            else if (balance[id] >= amount) balance[id] -= amount;
+            else declined[id]++;
+        }
+        return balance[0] + balance[1] + declined[0];
+    }
+    bool CursorFailure(int initial) {
+        int[] slots = new int[18];
+        byte[] enabled = new byte[32];
+        int cursor = initial;
+        try {
+            for (int i = 0; i < 32; i++) {
+                if (enabled[i] == 0) {
+                    enabled[i] = (byte)1;
+                    slots[cursor++] = i + 1;
+                }
+            }
+        } catch (Exception e) {
+            if (initial == 0)
+                return e.Message == "index out of range" && cursor == 19 && slots[17] == 18 && enabled[18] == 1;
+            return e.Message == "integer overflow in +" && cursor == int.MaxValue && enabled[0] == 1;
+        }
+        return false;
+    }
+    int Fold(const byte[]& data, int first) {
+        int pos = first;
+        int result = 0;
+        for (int n = 0; n < 1; n++) {
+            int sum = 7;
+            while (data[pos] != 0) {
+                sum = sum * 3 - data[pos];
+                pos++;
+            }
+            result = sum;
+        }
+        return result;
+    }
+    int Pick(const int[]& source, int[]& dest, int choice, int first, int second) {
+        int left = first;
+        int right = second;
+        try {
+            for (int k = 0; k < 5; k++) {
+                if (choice == 1 || (choice == 0 && source[left] <= source[right])) dest[k] = source[left++];
+                else dest[k] = source[right++];
+            }
+        } catch (Exception e) {
+            if (e.Message == "integer overflow in +") return -1;
+            if (e.Message != "index out of range") return -2;
+        }
+        return left * 10 + right;
+    }
+    bool SplitStores(int initial) {
+        int[] data = new int[5];
+        int pos = initial;
+        try {
+            for (int i = 0; i < 4; i++) {
+                data[pos++] = i + 1;
+                if (i != 0) data[pos++] = i + 5;
+            }
+        } catch (Exception e) {
+            return e.Message == "index out of range" && pos == 6 && data[4] == 7;
+        }
+        return false;
+    }
+    bool SentinelTail(int limit) {
+        int[] input = new int[2];
+        int[] output = new int[4];
+        int cursor = 0;
+        try {
+            for (int i = 0; i < 4; i++) {
+                if (cursor == limit || i < 0) output[i] = 1;
+                else {
+                    output[i] = input[cursor++] + 3;
+                    output[i] = input[cursor] + 4;
+                }
+            }
+        } catch (Exception e) {
+            return e.Message == "index out of range" && cursor == 2 && output[0] == 4 && output[1] == 3;
+        }
+        return false;
+    }
+    int ConditionalCount(int key, int threshold, int initial) {
+        int[] counters = new int[2];
+        counters[1] = initial;
+        int slot = key;
+        for (int i = 0; i < 5; i++) {
+            if (i >= threshold) counters[slot + 1]++;
+        }
+        return counters[1];
+    }
+    int Main() {
+        int[] source = new int[32];
+        int[] dest = new int[32];
+        for (int i = 0; i < 32; i++) source[i] = i + 4;
+        Reverse(source, dest, 32);
+        for (int i = 0; i < 32; i++) if (dest[i] != 36 - i) return 1;
+        int[] shortDest = new int[24];
+        bool failed = false;
+        try { Reverse(source, shortDest, 32); }
+        catch (Exception e) { failed = true; }
+        if (!failed || shortDest[23] != 13) return 2;
+        failed = false;
+        try { Shift(source, dest, 32, int.MaxValue - 3); }
+        catch (Exception e) { failed = e.Message == "integer overflow in +"; }
+        if (!failed || dest[3] != 7 || dest[4] != 32) return 3;
+        int[] empty = new int[0];
+        Shift(empty, empty, 0, int.MaxValue);
+        Reverse(source, source, 32);
+        if (source[0] != 36 || source[31] != 37) return 4;
+        byte[] records = new byte[35];
+        int[] totals = new int[2];
+        for (int i = 0; i < 34; i += 2) records[i + 1] = (byte)2;
+        failed = false;
+        try { Scatter(records, totals); } catch (Exception e) { failed = true; }
+        if (!failed || totals[0] != 34) return 5;
+        int[] trace = new int[16];
+        Neighbors(8, trace);
+        if (trace[0] != 9 || trace[1] != 7 || trace[2] != 10 || trace[3] != 6) return 6;
+        int[] edge = new int[16];
+        failed = false;
+        try { Neighbors(0, edge); } catch (Exception e) { failed = true; }
+        if (!failed || edge[0] != 1 || edge[1] != 1) return 7;
+        failed = false;
+        int[] visited = new int[20];
+        try { StrideEnd(visited); } catch (Exception e) { failed = e.Message == "integer overflow in +"; }
+        if (!failed || visited[0] != 1 || visited[16] != 1 || visited[17] != 0) return 8;
+        byte[] entries = new byte[20];
+        entries[0] = (byte)1;
+        entries[3] = (byte)1;
+        entries[5] = (byte)1;
+        if (Buckets(entries,2) != 20) return 9;
+        entries[1] = (byte)1;
+        entries[2] = (byte)1;
+        failed = false;
+        try { Buckets(entries,2); } catch (Exception e) { failed = e.Message == "index out of range"; }
+        if (!failed) return 10;
+        entries[1] = (byte)0;
+        failed = false;
+        try { Buckets(entries,int.MaxValue); } catch (Exception e) { failed = e.Message == "integer overflow in +"; }
+        if (!failed) return 11;
+        entries[1] = (byte)1;
+        failed = false;
+        try { Buckets(entries,int.MinValue); } catch (Exception e) { failed = e.Message == "integer overflow in -"; }
+        if (!failed) return 12;
+        if (!CursorFailure(0) || !CursorFailure(int.MaxValue)) return 13;
+        byte[] bytes = new byte[24];
+        for (int i = 0; i < 6; i++) bytes[i] = (byte)2;
+        if (Fold(bytes,0) != 4375 || Fold(bytes,4) != 55 || Fold(bytes,23) != 7) return 14;
+        bytes[23] = (byte)1;
+        failed = false;
+        try { Fold(bytes,23); } catch (Exception e) { failed = e.Message == "index out of range"; }
+        if (!failed) return 15;
+        for (int i = 0; i < 24; i++) bytes[i] = (byte)2;
+        failed = false;
+        try { Fold(bytes,0); } catch (Exception e) { failed = e.Message == "integer overflow in *"; }
+        if (!failed) return 16;
+        int[] pair = new int[2];
+        pair[0] = 3; pair[1] = 8;
+        if (Pick(pair,pair,0,0,1) != 21 || pair[0] != 3 || pair[1] != 8) return 17;
+        if (Pick(pair,pair,1,1,0) != 30 || pair[0] != 8) return 18;
+        if (Pick(pair,pair,1,int.MaxValue,0) != -1) return 19;
+        if (!SplitStores(0)) return 20;
+        if (ConditionalCount(0,2,3) != 6 || ConditionalCount(int.MaxValue,5,int.MaxValue) != int.MaxValue) return 21;
+        failed = false;
+        try { ConditionalCount(int.MaxValue,4,0); } catch (Exception e) { failed = e.Message == "integer overflow in +"; }
+        if (!failed) return 22;
+        failed = false;
+        try { ConditionalCount(1,4,0); } catch (Exception e) { failed = e.Message == "index out of range"; }
+        if (!failed) return 23;
+        failed = false;
+        try { ConditionalCount(0,4,int.MaxValue); } catch (Exception e) { failed = e.Message == "integer overflow in +"; }
+        if (!failed) return 24;
+        if (!SentinelTail(2)) return 25;
+        return 0;
+    }
+}

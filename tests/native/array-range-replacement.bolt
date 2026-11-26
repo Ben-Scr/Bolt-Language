@@ -1,0 +1,46 @@
+import System
+import System.Collections.Generic
+
+static class Program {
+public:
+    void Main() {
+        int[] values = [1,2,3];
+        int[] replacement = [41,42,43];
+        int visits = 0;
+        bool caught = false;
+        try {
+            for (int item : values) {
+                visits += item;
+                values = replacement;
+            }
+        } catch (Exception error) { caught = true; }
+        bool ok = caught && visits == 1 && values[1] == 42;
+        bool[] flags = [false,true,false];
+        caught = false;
+        try {
+            for (bool item : flags) flags = [true,true,false];
+        } catch (Exception error) { caught = true; }
+        ok = ok && caught && flags[0];
+        int total = 0;
+        int index = 0;
+        for (int item : values) {
+            total += item;
+            values[index] = item + 1;
+            index++;
+        }
+        ok = ok && total == 126 && values[2] == 44;
+        int[] empty;
+        for (int item : empty) total += item;
+        for (int item : values) {
+            if (item == 42) continue;
+            if (item == 44) break;
+            total += item;
+        }
+        List<short> list;
+        for (short item : list) total += item;
+        list.Add((short)-7);
+        list.Add((short)2);
+        for (short item : list) total += item;
+        Print(ok && total == 164);
+    }
+}

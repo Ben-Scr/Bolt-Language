@@ -1,0 +1,55 @@
+import System
+import System.Collections.Generic
+
+public class TreeNode
+{
+public:
+    int Tag;
+    List<TreeNode> Children;
+    TreeNode(int tag) { Tag = tag; }
+}
+
+static class Program
+{
+public:
+    int Main()
+    {
+        List<int> numbers;
+        numbers.Add(4);
+        numbers.Add(9);
+        numbers.AddRange(numbers);
+        numbers.AddRange(numbers);
+        if (numbers.Count != 8 || numbers.Capacity != 8) return 1;
+        for (int i = 0; i < numbers.Count; i++)
+            if (numbers[i] != (i % 2 == 0 ? 4 : 9)) return 2;
+
+        List<int> empty;
+        BufferEnumerator<int> iterator = numbers.GetEnumerator();
+        numbers.AddRange(empty);
+        if (!iterator.MoveNext() || iterator.Current != 4) return 3;
+
+        numbers.AddRange(numbers);
+        bool invalidated = false;
+        try { iterator.MoveNext(); }
+        catch (InvalidOperationException& error) { invalidated = true; }
+        if (!invalidated) return 5;
+
+        List<string> names;
+        names.Add("first");
+        names.Add("second");
+        List<string> copied;
+        copied.AddRange(names);
+        names[0] = "changed";
+        copied.AddRange(copied);
+        copied[0] = "again";
+        if (copied.Count != 4 || copied[2] != "first" || copied[3] != "second") return 4;
+        List<TreeNode> nodes(4);
+        for (int i = 0; i < 4; i++) nodes.Add(TreeNode(i));
+        nodes[0].Children.Add(TreeNode(17));
+        nodes.AddRange(nodes[0].Children);
+        nodes[4].Tag = 42;
+        if (nodes.Capacity != 8 || nodes[0].Children[0].Tag != 17 || nodes[4].Tag != 42) return 6;
+        Print("list add range OK");
+        return 0;
+    }
+}

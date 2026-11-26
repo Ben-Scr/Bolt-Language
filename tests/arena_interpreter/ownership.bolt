@@ -1,0 +1,61 @@
+import System.Collections.Generic
+
+class Payload {
+public:
+    string Title;
+    int[] Numbers;
+    List<string> Items;
+    Dictionary<string,string> Names;
+    Queue<string> Pending;
+    HashSet<string> Tags;
+    IStringable Box = (IStringable)0;
+    int* Borrowed;
+    Payload(string title) { Title = title; Numbers = new int[3]; }
+}
+
+static class Program {
+public:
+    Payload* Create(Arena& destination, string title) {
+        return new(destination) Payload(title);
+    }
+    void Main() {
+        Arena temporary = Arena.Fixed(1024 * 1024);
+        Arena retained = Arena.Growable(1024, 1024 * 1024);
+        Payload* source = Create(temporary, "source");
+        ulong before = temporary.UsedBytes;
+        source->Title = "a title replaced after construction";
+        source->Numbers[1] = 42;
+        for (int i = 0; i < 40; ++i) source->Items.Add("a persistent collection string");
+        source->Names.Add("key", "dictionary value");
+        source->Pending.Enqueue("queue value");
+        source->Tags.Add("set value");
+        source->Box = "boxed text";
+        int* borrowed = new int(17);
+        source->Borrowed = borrowed;
+        Print(temporary.UsedBytes > before);
+        Print(temporary.UsedBytes <= temporary.CapacityBytes);
+        Print(temporary.CapacityBytes <= temporary.LimitBytes);
+        Payload outside = *source;
+        Payload* survivor = Create(retained, "placeholder");
+        *survivor = *source;
+        temporary.Reset();
+        Print(temporary.UsedBytes == 0ul);
+        Print(temporary.PeakBytes > 0ul);
+        Print(outside.Title);
+        Print(outside.Numbers[1]);
+        Print(outside.Items.Count);
+        Print(outside.Names["key"]);
+        Print(outside.Pending.Dequeue());
+        Print(outside.Tags.Contains("set value"));
+        Print(outside.Box);
+        Print(*outside.Borrowed);
+        Print(survivor->Title);
+        Print(survivor->Items.Count);
+        Print(*survivor->Borrowed);
+        retained.Dispose();
+        retained.Dispose();
+        Print(retained.CapacityBytes == 0ul);
+        Print(outside.Items.Count);
+        delete borrowed;
+    }
+}

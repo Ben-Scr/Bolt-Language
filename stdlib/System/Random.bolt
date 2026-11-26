@@ -1,0 +1,115 @@
+import Type
+import Bolt.Runtime
+namespace System;
+
+// SplitMix64. State transition and bounded sampling are Bolt code.
+// Algorithm by Sebastiano Vigna (2015), public domain; see THIRD_PARTY_NOTICES.md.
+public sealed class Random
+{
+private:
+    ulong state;
+    ulong Raw()
+    {
+        state = Bolt.Runtime.Bits.Add64(state, 11400714819323198485ul);
+        ulong z = state;
+        z = Bolt.Runtime.Bits.Multiply64(z ^ (z >> 30), 13787848793156543929ul);
+        z = Bolt.Runtime.Bits.Multiply64(z ^ (z >> 27), 10723151780598845931ul);
+        return z ^ (z >> 31);
+    }
+    ulong Bounded(ulong range)
+    {
+        // Rejection sampling avoids modulo bias, including near the full 64-bit range.
+        ulong value = Raw();
+        // The rejection threshold is always below range. For narrow bounds
+        // almost every 64-bit draw skips this second remainder operation.
+        if (value < range)
+        {
+            ulong threshold = Bolt.Runtime.Bits.Add64(~range, 1ul) % range;
+            while (value < threshold) value = Raw();
+        }
+        return value % range;
+    }
+    float FloatRange(float min, float max)
+    {
+        float t = NextFloat();
+        float result = (float)((double)min * (1.0 - (double)t) + (double)max * (double)t);
+        if (result < min) result = min;
+        if (result >= max)
+        {
+            if (max == 0.0f) return Reinterpret<float>(2147483649u);
+            uint bits = Reinterpret<uint>(max);
+            result = Reinterpret<float>(max > 0.0f ? bits - 1u : bits + 1u);
+        }
+        return result;
+    }
+    double DoubleRange(double min, double max)
+    {
+        double t = NextDouble();
+        double result = min * (1.0 - t) + max * t;
+        if (result < min) result = min;
+        if (result >= max)
+        {
+            if (max == 0.0) return Reinterpret<double>(9223372036854775809ul);
+            ulong bits = Reinterpret<ulong>(max);
+            result = Reinterpret<double>(max > 0.0 ? bits - 1ul : bits + 1ul);
+        }
+        return result;
+    }
+public:
+    Random() : state(System.Security.Cryptography.RandomNumberGenerator.GetUInt64()) {}
+    Random(ulong seed) : state(seed) {}
+    ulong State => state;
+    void Seed(ulong seed) { state = seed; }
+    T Next<T>(T max) : Number<T> { return Next<T>((T)0, max); }
+    T Next<T>(T min, T max) : Number<T>
+    {
+        if (!(min < max)) Bolt.Runtime.Failure.Range("Random bounds must satisfy min < max.");
+        if (Type.IsFloatingPoint<T>())
+        {
+            // Values can be nonfinite only through explicit reinterpretation.
+            if (!((double)min >= -double.MaxValue && (double)max <= double.MaxValue))
+                Bolt.Runtime.Failure.Range("Random bounds must be finite.");
+            if (Type.IsFloat32<T>()) return (T)FloatRange((float)min, (float)max);
+            return (T)DoubleRange((double)min, (double)max);
+        }
+        if (Type.IsUnsigned<T>())
+        {
+            ulong low = (ulong)min, high = (ulong)max;
+            return (T)(low + Bounded(high - low));
+        }
+        long low = (long)min, high = (long)max;
+        // Map signed order to unsigned order without signed overflow.
+        ulong mappedLow = Reinterpret<ulong>(low) ^ 9223372036854775808ul;
+        ulong mappedHigh = Reinterpret<ulong>(high) ^ 9223372036854775808ul;
+        return (T)Reinterpret<long>((mappedLow + Bounded(mappedHigh - mappedLow)) ^ 9223372036854775808ul);
+    }
+    double NextDouble() { return (double)(Raw() >> 11) * (1.0 / 9007199254740992.0); }
+    float NextFloat() { return (float)(Raw() >> 40) * (1.0f / 16777216.0f); }
+    bool NextBool() { return (Raw() & 1ul) != 0ul; }
+    void NextBytes(byte[]& values)
+    {
+        int i = 0;
+        while (i < values.Length)
+        {
+            ulong value = Raw();
+            for (int j = 0; j < 8 && i < values.Length; j++, i++)
+                values[i] = (byte)((value >> (j * 8)) & 255ul);
+        }
+    }
+}
+
+// Random.Next remains a module convenience API with per-thread independent state.
+// OS thread-local storage holds the state between calls.
+public static class SharedRandom
+{
+public:
+    void Seed(ulong seed) { Bolt.Runtime.RandomState.Set(seed); }
+    T Next<T>(T max) : Number<T> { return Next<T>((T)0, max); }
+    T Next<T>(T min, T max) : Number<T>
+    {
+        System.Random random = System.Random(Bolt.Runtime.RandomState.Get());
+        T value = random.Next<T>(min, max);
+        Bolt.Runtime.RandomState.Set(random.State);
+        return value;
+    }
+}

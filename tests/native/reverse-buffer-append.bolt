@@ -1,0 +1,52 @@
+import Bolt.Runtime
+import System
+
+struct Point { public: long X; long Y; }
+
+static class Program {
+public:
+    void Main() {
+        Buffer<int> source;
+        source.Add(1); source.Add(7); source.Add(11);
+        Buffer<int> destination;
+        destination.Reserve(8); destination.Add(99);
+        for (int i = source.Length - 1; i >= 0; i--) destination.Add(source[i]);
+        bool ok = destination.Length == 4 && destination[0] == 99 &&
+                  destination[1] == 11 && destination[2] == 7 && destination[3] == 1;
+        for (int i = source.Length - 1; i >= 0; i--) source.Add(source[i]);
+        ok = ok && source.Length == 6 && source[3] == 11 && source[4] == 7 && source[5] == 1;
+        Buffer<int> empty;
+        for (int i = empty.Length - 1; i >= 0; --i) destination.Add(empty[i]);
+        ok = ok && destination.Length == 4;
+        int[] shortInput = [2,4];
+        bool failed = false;
+        try {
+            for (int i = source.Length - 1; i >= 0; i--) destination.Add(shortInput[i]);
+        } catch (Exception e) { failed = true; }
+        ok = ok && failed && destination.Length == 4;
+        for (int i = shortInput.Length - 1; i >= 0; --i) destination.Add(shortInput[i]);
+        ok = ok && destination[4] == 4 && destination[5] == 2;
+        int[] longInput = [5,4,3,2,1];
+        for (int i = longInput.Length - 1; i >= 0; i--) destination.Add(longInput[i]);
+        ok = ok && destination.Length == 11 && destination[6] == 1 && destination[10] == 5;
+        Point[] points = new Point[2];
+        points[0].X = 45l; points[1].Y = 231l;
+        Buffer<Point> held; held.Reserve(4);
+        for (int i = points.Length - 1; i >= 0; --i) held.Add(points[i]);
+        points[1].Y = 98l;
+        ok = ok && held[0].Y == 231l && held[1].X == 45l;
+        Buffer<string> words;
+        words.Add("first"); words.Add("second");
+        Buffer<string> retained; retained.Reserve(4);
+        for (int i = words.Length - 1; i >= 0; i--) retained.Add(words[i]);
+        words[1] = "changed";
+        ok = ok && retained[0] == "second" && retained[1] == "first";
+        failed = false;
+        try {
+            for (int entry : destination) {
+                for (int i = shortInput.Length - 1; i >= 0; i--) destination.Add(shortInput[i]);
+            }
+        } catch (Exception e) { failed = true; }
+        Print(ok && failed && destination.Length == 13);
+    }
+}

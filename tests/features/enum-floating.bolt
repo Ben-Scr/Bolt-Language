@@ -1,0 +1,5 @@
+
+enum E:float{A}
+static class Program { public: void Main() {
+
+} }

@@ -1,0 +1,24 @@
+static class Program {
+public:
+    void Main() {
+        string empty;
+        bool ok = empty == "" && empty.ByteLength == 0 && empty != "x";
+        for (int n = 0; n < 70; n++) {
+            byte[] bytes = new byte[n];
+            for (int i = 0; i < n; i++) bytes[i] = (byte)((i * 11) & 63);
+            string a = string.FromUtf8(bytes);
+            string b = string.FromUtf8(bytes);
+            ok = ok && a == b && !(a != b) && a.ByteLength == n;
+            ok = ok && (a == empty) == (n == 0);
+            for (int i = 0; i < n; i++) {
+                bytes[i] ^= (byte)1;
+                string different = string.FromUtf8(bytes);
+                ok = ok && a != different && !(a == different);
+                bytes[i] ^= (byte)1;
+            }
+        }
+        string uni = "π😀";
+        ok = ok && uni.ByteLength == 6 && uni.Length == 2 && uni == "π😀" && uni != "π😁";
+        Print(ok);
+    }
+}

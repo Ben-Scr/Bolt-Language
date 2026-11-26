@@ -1,0 +1,1 @@
+static class Program { public: void Main(){Print(Reinterpret<double>(1));} }

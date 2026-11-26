@@ -1,0 +1,48 @@
+{
+  "workload": "256 ToArray copies of 131072 signed int32 elements with source mutation and checksum",
+  "expected_checksum": 32640,
+  "timer_tick_ns": 100,
+  "pairs": 12,
+  "affinity": 6,
+  "unit": "ns per ToArray call",
+  "median_ns": {
+    "old": 776882.8125,
+    "new": 223228.125
+  },
+  "raw_ticks": {
+    "old": [
+      1863113,
+      4577923,
+      1866341,
+      1796394,
+      1962331,
+      2021166,
+      2365889,
+      1886228,
+      1864896,
+      2555990,
+      2063270,
+      2015309
+    ],
+    "new": [
+      600934,
+      942366,
+      509698,
+      529090,
+      529401,
+      530809,
+      564350,
+      575450,
+      567478,
+      1757929,
+      1445810,
+      607365
+    ]
+  },
+  "runtime_sha256": {
+    "old": "ce4633c0d9a99bd50f3d1f773c51a6a8512253140fae7d326ed41a4b4fd66e25",
+    "new": "ac6bfe87149bb9c153819b1267295ea5c473050da32d5da9d63ad372910d791b"
+  },
+  "executable_sha256": "72be0c5fdafc70d7dd0a5d6f3495bc40109dc4a1773b5b726002b884ee7a93e7",
+  "fixture_sha256": "15fd5d98d59262c06b25f9f377be2ae43367ef7fea98ca6c27c8522047485369"
+}

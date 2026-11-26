@@ -1,0 +1,2 @@
+void Read(const int*& p){*p+=1;}
+static class Program{public:void Main(){int x=7;int* p=&x;Read(p);Console.WriteLine(x);}}

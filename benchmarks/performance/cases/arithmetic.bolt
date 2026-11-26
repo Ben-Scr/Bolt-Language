@@ -1,0 +1,18 @@
+// Experimental Bolt fixture: validate syntax/semantics against arithmetic.c before use.
+// Serial integer dependency to discourage removal of the hot loop.
+public static class Program
+{
+public:
+    void Main()
+    {
+        ulong state = 1ul;
+        for (int i = 0; i < 500000000; i++)
+        {
+            ulong next = state ^ (ulong)i;
+            state = (next << 9) | (next >> 55);
+            state = state ^ 11400714819323198485ul;
+            state = state ^ (state >> 17);
+        }
+        Print(state);
+    }
+}

@@ -1,0 +1,2 @@
+import GameMath
+public static class Program { public: void Main() { Print(Operations.Add(20, 22)); } }

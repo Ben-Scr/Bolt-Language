@@ -1,0 +1,8 @@
+#if Linux || MacOS || FreeBSD
+namespace Bolt.Runtime.Posix;
+
+[Header("sched.h"), Native("sched_yield")]
+extern "C" int YieldThread();
+[Header("time.h"), Native("nanosleep")]
+extern "C" int NanoSleep(void* requested, void* remaining);
+#endif

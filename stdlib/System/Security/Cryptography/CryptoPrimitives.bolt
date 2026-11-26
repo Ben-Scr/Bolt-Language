@@ -1,0 +1,160 @@
+import System
+namespace System.Security.Cryptography;
+
+// Pure-Bolt helpers used by the cryptographic implementations in this namespace.
+// No platform, operating-system, C, C++ or Bolt.Runtime calls are used here.
+public static class CryptoPrimitives
+{
+public:
+    uint Add32(uint a, uint b)
+    {
+        while (b != 0u)
+        {
+            uint carry = (a & b) << 1;
+            a = a ^ b;
+            b = carry;
+        }
+        return a;
+    }
+
+    uint Add32(uint a, uint b, uint c) { return Add32(Add32(a, b), c); }
+    uint Add32(uint a, uint b, uint c, uint d) { return Add32(Add32(a, b), Add32(c, d)); }
+    uint Add32(uint a, uint b, uint c, uint d, uint e) { return Add32(Add32(a, b, c), Add32(d, e)); }
+
+    ulong Add64(ulong a, ulong b)
+    {
+        while (b != 0ul)
+        {
+            ulong carry = (a & b) << 1;
+            a = a ^ b;
+            b = carry;
+        }
+        return a;
+    }
+
+    ulong Add64(ulong a, ulong b, ulong c) { return Add64(Add64(a, b), c); }
+    ulong Add64(ulong a, ulong b, ulong c, ulong d) { return Add64(Add64(a, b), Add64(c, d)); }
+    ulong Add64(ulong a, ulong b, ulong c, ulong d, ulong e) { return Add64(Add64(a, b, c), Add64(d, e)); }
+
+    uint RotL32(uint value, int amount)
+    {
+        amount = amount & 31;
+        if (amount == 0) return value;
+        return (value << amount) | (value >> (32 - amount));
+    }
+
+    uint RotR32(uint value, int amount)
+    {
+        amount = amount & 31;
+        if (amount == 0) return value;
+        return (value >> amount) | (value << (32 - amount));
+    }
+
+    ulong RotL64(ulong value, int amount)
+    {
+        amount = amount & 63;
+        if (amount == 0) return value;
+        return (value << amount) | (value >> (64 - amount));
+    }
+
+    ulong RotR64(ulong value, int amount)
+    {
+        amount = amount & 63;
+        if (amount == 0) return value;
+        return (value >> amount) | (value << (64 - amount));
+    }
+
+    uint ReadUInt32BE(const byte[]& data, int offset)
+    {
+        return ((uint)data[offset] << 24) |
+               ((uint)data[offset + 1] << 16) |
+               ((uint)data[offset + 2] << 8) |
+               (uint)data[offset + 3];
+    }
+
+    uint ReadUInt32LE(const byte[]& data, int offset)
+    {
+        return (uint)data[offset] |
+               ((uint)data[offset + 1] << 8) |
+               ((uint)data[offset + 2] << 16) |
+               ((uint)data[offset + 3] << 24);
+    }
+
+    ulong ReadUInt64BE(const byte[]& data, int offset)
+    {
+        ulong value = 0ul;
+        for (int i = 0; i < 8; i++) value = (value << 8) | (ulong)data[offset + i];
+        return value;
+    }
+
+    void WriteUInt32BE(uint value, byte[]& data, int offset)
+    {
+        data[offset] = (byte)((value >> 24) & 255u);
+        data[offset + 1] = (byte)((value >> 16) & 255u);
+        data[offset + 2] = (byte)((value >> 8) & 255u);
+        data[offset + 3] = (byte)(value & 255u);
+    }
+
+    void WriteUInt32LE(uint value, byte[]& data, int offset)
+    {
+        data[offset] = (byte)(value & 255u);
+        data[offset + 1] = (byte)((value >> 8) & 255u);
+        data[offset + 2] = (byte)((value >> 16) & 255u);
+        data[offset + 3] = (byte)((value >> 24) & 255u);
+    }
+
+    void WriteUInt64BE(ulong value, byte[]& data, int offset)
+    {
+        for (int i = 7; i >= 0; i--)
+        {
+            data[offset + i] = (byte)(value & 255ul);
+            value = value >> 8;
+        }
+    }
+
+    void WriteUInt64LE(ulong value, byte[]& data, int offset)
+    {
+        for (int i = 0; i < 8; i++)
+        {
+            data[offset + i] = (byte)(value & 255ul);
+            value = value >> 8;
+        }
+    }
+
+    byte[] Copy(const byte[]& input)
+    {
+        byte[] result = new byte[input.Length];
+        for (int i = 0; i < input.Length; i++) result[i] = input[i];
+        return result;
+    }
+
+    byte[] Slice(const byte[]& input, int offset, int count)
+    {
+        if (offset < 0 || count < 0 || offset > input.Length || count > input.Length - offset)
+            throw ArgumentOutOfRangeException("Byte-array slice is outside the source range.");
+        byte[] result = new byte[count];
+        for (int i = 0; i < count; i++) result[i] = input[offset + i];
+        return result;
+    }
+
+    byte[] Concat(const byte[]& a, const byte[]& b)
+    {
+        byte[] result = new byte[a.Length + b.Length];
+        for (int i = 0; i < a.Length; i++) result[i] = a[i];
+        for (int i = 0; i < b.Length; i++) result[a.Length + i] = b[i];
+        return result;
+    }
+
+    bool FixedTimeEquals(const byte[]& a, const byte[]& b)
+    {
+        if (a.Length != b.Length) return false;
+        uint difference = 0u;
+        for (int i = 0; i < a.Length; i++) difference = difference | (uint)(a[i] ^ b[i]);
+        return difference == 0u;
+    }
+
+    void XorInto(byte[]& target, int targetOffset, const byte[]& value, int valueOffset, int count)
+    {
+        for (int i = 0; i < count; i++) target[targetOffset + i] = (byte)(target[targetOffset + i] ^ value[valueOffset + i]);
+    }
+}

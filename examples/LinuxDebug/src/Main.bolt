@@ -1,0 +1,14 @@
+public static class Movement {
+    public static int Advance(int position, int velocity) {
+        int nextPosition = position + velocity;
+        return nextPosition;
+    }
+}
+
+public static class Program {
+    public static int Main() {
+        int position = Movement.Advance(17, 25);
+        Print(position);
+        return 0;
+    }
+}

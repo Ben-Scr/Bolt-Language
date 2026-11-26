@@ -1,0 +1,67 @@
+import Bolt.Runtime
+
+public class Tagged {
+public:
+    static bool Recording = false;
+    static int History = 0;
+    int Number;
+    Tagged(int number) { Number = number; }
+    ~Tagged() { if (Recording) History = History * 10 + Number; }
+}
+
+struct WideTag {
+public:
+    static bool Recording = false;
+    static int Drops = 0;
+    static ulong Total = 0ul;
+    ulong A, B, C, D, E, F, G, H, Tag;
+    ~WideTag() { if (Recording) { Drops++; Total += Tag; } }
+}
+struct Wrapper { public: WideTag Child; ulong Tail; }
+
+static class Program {
+public:
+    bool WideDrops() {
+        WideTag first; first.Tag = 23ul;
+        WideTag second; second.Tag = 31ul;
+        Buffer<WideTag> pair; pair.Add(first); pair.Add(second);
+        Wrapper nested; nested.Child.Tag = 11ul; nested.Tail = 2ul;
+        Buffer<Wrapper> wrappers; wrappers.Add(nested);
+        WideTag.Recording = true;
+        pair.Truncate(1); wrappers.Clear(); pair.Clear();
+        WideTag.Recording = false;
+        return WideTag.Drops == 3 && WideTag.Total == 65ul;
+    }
+    void BuildAndDrop() {
+        Buffer<Tagged> values;
+        values.Reserve(16);
+        values.Add(Tagged(1));
+        values.Add(Tagged(2));
+        values.Add(Tagged(3));
+        Tagged.History = 0;
+        Tagged.Recording = true;
+        values.Truncate(1);
+        values.Truncate(1);
+    }
+    void Main() {
+        Buffer<int> counts;
+        counts.Reserve(31);
+        for (int i = 0; i < 19; i++) counts.Add(i);
+        counts.Truncate(6);
+        counts.Add(counts[5]);
+        bool ok = counts.Length == 7 && counts.Capacity == 31 &&
+                  counts[0] == 0 && counts[5] == 5 && counts[6] == 5;
+        counts.Truncate(0);
+        counts.Add(97);
+        ok = ok && counts.Length == 1 && counts[0] == 97;
+        Buffer<string> names;
+        names.Add("alpha"); names.Add("beta"); names.Add("gamma");
+        string saved = names[2];
+        names.Truncate(1);
+        names.Add(saved);
+        ok = ok && names[0] == "alpha" && names[1] == "gamma";
+        BuildAndDrop();
+        Tagged.Recording = false;
+        Print(ok && Tagged.History == 321 && WideDrops());
+    }
+}

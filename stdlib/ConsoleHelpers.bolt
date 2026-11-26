@@ -1,0 +1,11 @@
+namespace System;
+
+// This is a normal standard-library class, automatically imported by Bolt.
+// Output behavior and accepted types are the same as Console.WriteLine.
+public static class ConsoleHelpers
+{
+public:
+    void Print() { Console.WriteLine(); }
+    void Print<T>(T value) : IStringable<T> { Console.WriteLine(value); }
+    string Read() { return Console.ReadLine(); }
+}

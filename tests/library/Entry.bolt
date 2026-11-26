@@ -1,0 +1,10 @@
+import System.Threading.Tasks
+public static class Program {
+public:
+    async Task<int> Main(string[] args) {
+        await Task.Delay(1);
+        Print(args.Length);
+        for(arg : args) Print(arg);
+        return 0;
+    }
+}

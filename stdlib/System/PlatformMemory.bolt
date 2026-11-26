@@ -1,0 +1,284 @@
+#ifdef BoltStandaloneCore
+import System
+import Bolt.Runtime
+namespace System.Memory;
+
+// Ledger mutations use a Bolt ticket lock built from native atomic instructions.
+class AllocationLedger
+{
+public:
+    ulong Tickets = 0ul;
+    ulong Serving = 0ul;
+    ulong Bytes = 0ul;
+    ulong Count = 0ul;
+    ulong Limit = ulong.MaxValue;
+    long Remaining = -1l;
+    void Lock() {
+        ulong ticket=AtomicOps.Add(Tickets,1ul);
+        while(AtomicOps.Add(Serving,0ul)!=ticket){}
+    }
+    void Unlock() { AtomicOps.Add(Serving,1ul); }
+}
+class AllocationState
+{
+public:
+    Shared<AllocationLedger> Ledger;
+    byte* Base = null;
+    byte* Pointer = null;
+    ulong Bytes = 0ul;
+    ulong Alignment = 16ul;
+    bool Live = true;
+    void Close()
+    {
+        if (!Ledger.HasValue) return;
+        Ledger.Get().Lock();
+        try {
+            if (!Live) return;
+            Live = false;
+            if (Base != null) {
+                StandaloneCore.Free(Base);
+                Base = null; Pointer = null;
+                Ledger.Get().Bytes -= Bytes; Ledger.Get().Count--;
+            }
+        } finally { Ledger.Get().Unlock(); }
+    }
+    ~AllocationState() { Close(); }
+}
+public sealed class MemoryBlock
+{
+private:
+    Shared<AllocationState> state;
+    [ReadOnly] void Check() { if (!IsAlive) throw ObjectDisposedException("Memory block is not alive."); }
+public:
+    MemoryBlock() {}
+    MemoryBlock(const Shared<AllocationState>& value) { state = value; }
+    [ReadOnly] AllocationLedger* Origin => state.HasValue ? state.Get().Ledger.Borrow() : null;
+    [ReadOnly] byte* Data { get { Check(); return state.Get().Pointer; } }
+    [ReadOnly] ulong Length { get { Check(); return state.Get().Bytes; } }
+    [ReadOnly] ulong Alignment { get { Check(); return state.Get().Alignment; } }
+    [ReadOnly] bool IsAlive => state.HasValue && state.Get().Live;
+    [ReadOnly] byte Read(ulong index) { Check(); if (index >= state.Get().Bytes) throw IndexOutOfRangeException("Memory block index out of range."); return state.Get().Pointer[index]; }
+    void Write(ulong index, byte value) { Check(); if (index >= state.Get().Bytes) throw IndexOutOfRangeException("Memory block index out of range."); state.Get().Pointer[index] = value; }
+    void Close() { if (state.HasValue) state.Get().Close(); }
+}
+public class Allocator
+{
+private:
+    Shared<AllocationLedger> state;
+public:
+    Allocator(long byteLimit = -1l)
+    {
+        if (byteLimit < -1l) throw ArgumentOutOfRangeException("Allocator limit must be -1 or non-negative.");
+        state = Shared<AllocationLedger>.Create();
+        if (byteLimit >= 0l) state.Get().Limit = (ulong)byteLimit;
+    }
+    MemoryBlock Allocate(ulong bytes, ulong alignment = 16ul)
+    {
+        MemoryOps.ValidateAlignment(alignment);
+        if (alignment < 16ul) alignment = 16ul;
+        Shared<AllocationState> block = Shared<AllocationState>.Create();
+        block.Get().Ledger = state; block.Get().Bytes = bytes; block.Get().Alignment = alignment;
+        if (bytes == 0ul) return MemoryBlock(block);
+        // Reject overflow before touching the ledger or requesting pages.
+        if (bytes > ulong.MaxValue - (alignment - 1ul)) throw OutOfMemoryException("Allocation size exceeds address space.");
+        ulong size = bytes + alignment - 1ul;
+        state.Get().Lock();
+        try {
+            if (bytes > state.Get().Limit - state.Get().Bytes || state.Get().Remaining == 0l)
+                throw OutOfMemoryException("Allocator budget or injected allocation failure.");
+            byte* raw = StandaloneCore.Allocate(size);
+            if(raw==null) throw OutOfMemoryException("Allocation failed.");
+            ulong address = MemoryOps.Address(raw);
+            ulong padding = (alignment - (address & (alignment - 1ul))) & (alignment - 1ul);
+            block.Get().Base = raw; block.Get().Pointer = &raw[padding];
+            state.Get().Bytes += bytes; state.Get().Count++;
+            if (state.Get().Remaining > 0l) state.Get().Remaining--;
+        } finally { state.Get().Unlock(); }
+        return MemoryBlock(block);
+    }
+    void Free(MemoryBlock& block)
+    {
+        if (block.Origin != null && block.Origin != state.Borrow()) throw ArgumentException("Memory must be freed by its originating allocator.");
+        block.Close();
+    }
+    MemoryBlock Reallocate(MemoryBlock& block, ulong bytes, ulong alignment = 16ul)
+    {
+        if (block.Origin != null && block.Origin != state.Borrow()) throw ArgumentException("Allocator mismatch.");
+        MemoryBlock next = Allocate(bytes, alignment);
+        if (block.IsAlive)
+        {
+            ulong count = block.Length < bytes ? block.Length : bytes;
+            MemoryOps.Copy(next.Data, block.Data, count); block.Close();
+        }
+        return next;
+    }
+    [ReadOnly] ulong LiveBytes { get { state.Get().Lock(); ulong value=state.Get().Bytes; state.Get().Unlock(); return value; } }
+    [ReadOnly] ulong LiveAllocations { get { state.Get().Lock(); ulong value=state.Get().Count; state.Get().Unlock(); return value; } }
+    void FailAfter(long count)
+    {
+        if (count < -1l) throw ArgumentOutOfRangeException("Failure countdown must be -1 or non-negative.");
+        state.Get().Lock(); state.Get().Remaining = count; state.Get().Unlock();
+    }
+}
+class ArenaEpoch
+{
+public:
+    ulong Generation = 1ul;
+    bool Live = true;
+    ulong Owner = 0ul;
+    ArenaEpoch() { Owner = ThreadKernel.Identity(); }
+}
+public sealed class ArenaSlice
+{
+private:
+    Shared<ArenaEpoch> epoch;
+    ulong generation = 0ul;
+    byte* pointer = null;
+    ulong count = 0ul;
+    [ReadOnly] void Check()
+    {
+        if (!epoch.HasValue || epoch.Get().Owner != ThreadKernel.Identity()) throw InvalidOperationException("Arena handles are confined to their creating thread.");
+        if (!IsAlive) throw ObjectDisposedException("Arena handle was invalidated by reset or disposal.");
+    }
+public:
+    ArenaSlice() {}
+    ArenaSlice(const Shared<ArenaEpoch>& value, byte* data, ulong length) { epoch = value; generation = epoch.Get().Generation; pointer = data; count = length; }
+    [ReadOnly] bool IsAlive => epoch.HasValue && epoch.Get().Owner == ThreadKernel.Identity() && epoch.Get().Live && generation == epoch.Get().Generation;
+    [ReadOnly] byte* Data { get { Check(); return pointer; } }
+    [ReadOnly] ulong Length { get { Check(); return count; } }
+    [ReadOnly] byte Read(ulong index) { Check(); if (index >= count) throw IndexOutOfRangeException("Arena index out of range."); return pointer[index]; }
+    void Write(ulong index, byte value) { Check(); if (index >= count) throw IndexOutOfRangeException("Arena index out of range."); pointer[index] = value; }
+}
+class ArenaBlock
+{
+public:
+    MemoryBlock Memory;
+    ulong Used = 0ul;
+}
+class ArenaState
+{
+public:
+    Allocator Allocations;
+    System.Collections.Generic.List<ArenaBlock> Blocks;
+    Shared<ArenaEpoch> Epoch;
+    ArenaState() { Epoch = Shared<ArenaEpoch>.Create(); }
+    ulong Initial = 0ul;
+    ulong Limit = 0ul;
+    ulong Capacity = 0ul;
+    ulong Used = 0ul;
+    [ReadOnly] void Check()
+    {
+        if (Epoch.Get().Owner != ThreadKernel.Identity()) throw InvalidOperationException("Arena used by another thread.");
+        if (!Epoch.Get().Live) throw ObjectDisposedException("Arena is disposed.");
+    }
+    ~ArenaState() { Epoch.Get().Live = false; }
+}
+public sealed class ByteArena
+{
+private:
+    Shared<ArenaState> state;
+    byte* Attempt(ArenaBlock& block, ulong bytes, ulong alignment)
+    {
+        ulong address = MemoryOps.Address(&block.Memory.Data[block.Used]);
+        ulong padding = (alignment - (address & (alignment - 1ul))) & (alignment - 1ul);
+        ulong space = block.Memory.Length - block.Used;
+        ulong needed = bytes == 0ul ? 1ul : bytes;
+        if (padding > space || needed > space - padding) return null;
+        byte* result = &block.Memory.Data[block.Used + padding];
+        block.Used += padding + bytes; state.Get().Used += padding + bytes;
+        return result;
+    }
+public:
+    ByteArena(ulong initial = 4096ul, ulong maximum = 1048576ul)
+    {
+        if (initial == 0ul || initial > maximum) throw ArgumentOutOfRangeException("Invalid arena capacities.");
+        state = Shared<ArenaState>.Create(); state.Get().Initial = initial; state.Get().Limit = maximum;
+    }
+    ArenaSlice Allocate(ulong bytes, ulong alignment = 16ul)
+    {
+        state.Get().Check(); MemoryOps.ValidateAlignment(alignment);
+        if (bytes > state.Get().Limit || alignment - 1ul > ulong.MaxValue - bytes) throw OutOfMemoryException("Arena capacity exhausted.");
+        byte* pointer = null;
+        for (int i = 0; i < state.Get().Blocks.Length; i++)
+        {
+            pointer = Attempt(state.Get().Blocks[i], bytes, alignment);
+            if (pointer != null) return ArenaSlice(state.Get().Epoch, pointer, bytes);
+        }
+        ulong available = state.Get().Limit - state.Get().Capacity;
+        ulong size = (bytes == 0ul ? 1ul : bytes) + alignment - 1ul;
+        if (size < state.Get().Initial) size = state.Get().Initial;
+        if (size > available) size = available;
+        if (size < bytes || size == 0ul) throw OutOfMemoryException("Arena capacity exhausted.");
+        ArenaBlock block; block.Memory = state.Get().Allocations.Allocate(size, alignment);
+        state.Get().Blocks.Add(block); state.Get().Capacity += size;
+        pointer = Attempt(state.Get().Blocks[state.Get().Blocks.Length - 1], bytes, alignment);
+        if (pointer == null) throw OutOfMemoryException("Arena alignment exceeds remaining capacity.");
+        return ArenaSlice(state.Get().Epoch, pointer, bytes);
+    }
+    void Reset()
+    {
+        state.Get().Check();
+        if (state.Get().Epoch.Get().Generation == ulong.MaxValue) throw OverflowException("Arena generation exhausted.");
+        state.Get().Epoch.Get().Generation++;
+        for (int i = 0; i < state.Get().Blocks.Length; i++) state.Get().Blocks[i].Used = 0ul;
+        state.Get().Used = 0ul;
+    }
+    void Close()
+    {
+        if (!state.Get().Epoch.Get().Live) return;
+        state.Get().Check(); state.Get().Epoch.Get().Live = false;
+        state.Get().Blocks.Clear(); state.Get().Used = 0ul; state.Get().Capacity = 0ul;
+    }
+    [ReadOnly] ulong Used { get { state.Get().Check(); return state.Get().Used; } }
+    [ReadOnly] ulong Capacity { get { state.Get().Check(); return state.Get().Capacity; } }
+}
+#else
+namespace System.Memory;
+[Native("bolt::system::MemoryBlock")]
+public sealed class MemoryBlock
+{
+public:
+    MemoryBlock();
+    [NativeProperty("Data")] const byte* Data;
+    [NativeProperty("Length")] const ulong Length;
+    [NativeProperty("Alignment")] const ulong Alignment;
+    [NativeProperty("IsAlive")] const bool IsAlive;
+    byte Read(ulong index);
+    void Write(ulong index, byte value);
+    void Close();
+}
+[Native("bolt::system::Allocator")]
+public class Allocator
+{
+public:
+    Allocator(long byteLimit = -1l);
+    MemoryBlock Allocate(ulong bytes, ulong alignment = 16ul);
+    MemoryBlock Reallocate(MemoryBlock& block, ulong bytes, ulong alignment = 16ul);
+    void Free(MemoryBlock& block);
+    [NativeProperty("LiveBytes")] const ulong LiveBytes;
+    [NativeProperty("LiveAllocations")] const ulong LiveAllocations;
+    void FailAfter(long count);
+}
+[Native("bolt::system::ArenaSlice")]
+public sealed class ArenaSlice
+{
+public:
+    ArenaSlice();
+    [NativeProperty("Data")] const byte* Data;
+    [NativeProperty("Length")] const ulong Length;
+    [NativeProperty("IsAlive")] const bool IsAlive;
+    byte Read(ulong index);
+    void Write(ulong index, byte value);
+}
+[Native("bolt::system::ByteArena")]
+public sealed class ByteArena
+{
+public:
+    ByteArena(ulong initial = 4096ul, ulong maximum = 1048576ul);
+    ArenaSlice Allocate(ulong bytes, ulong alignment = 16ul);
+    void Reset();
+    void Close();
+    [NativeProperty("Used")] const ulong Used;
+    [NativeProperty("Capacity")] const ulong Capacity;
+}
+#endif

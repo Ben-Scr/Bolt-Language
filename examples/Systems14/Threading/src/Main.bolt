@@ -1,0 +1,19 @@
+import System.Threading
+import System.Diagnostics
+public class IncrementJob {
+public:
+ Atomic<int> Counter;
+ IncrementJob(Atomic<int> counter){Counter=counter;}
+ void Run(){for(int i=0;i<1000;i++)Counter.Add(1);}
+}
+public static class Program {
+public:
+ void Main(){
+  Atomic<int> counter;
+  Thread first=Thread.Start(IncrementJob(counter));
+  Thread second=Thread.Start(IncrementJob(counter));
+  Assert.That(first.Join(10000)&&second.Join(10000));
+  Assert.Equal(2000,counter.Load());
+  Print(counter.Load());
+ }
+}

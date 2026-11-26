@@ -1,0 +1,25 @@
+import System.Collections.Generic
+public interface ICounter { int Add(int amount); int Get(); }
+public class Counter : ICounter, IStringable {
+public:
+ int Value;
+ Counter(int value) { Value=value; }
+ int Add(int amount) { Value+=amount; return Value; }
+ int Get() { return Value; }
+ string ToString() { return $"Counter({Value})"; }
+ static Counter operator +(Counter a,Counter b) { return Counter(a.Value+b.Value); }
+ static Counter operator ++(Counter a) { return Counter(a.Value+1); }
+ static Counter operator --(Counter a) { return Counter(a.Value-1); }
+}
+static class Program {public: void Main(){
+List<IStringable> list;
+list.Add(1);list.Add("a");list.Add(Counter(7));
+Print(list[0]);Print(list[1]);Print(list[2]);
+IStringable[] array={true,2.5,Counter(8)}; Print(array[0]);Print(array[1]);Print(array[2]);
+Dictionary<string,IStringable> map; map.Add("x",Counter(4));Print(map["x"]);map["x"]=2;Print(map["x"]);
+Dictionary<Counter,IStringable> boxed; boxed.Add(Counter(12),Counter(34));
+Counter[] keys=boxed.Keys; IStringable[] values=boxed.Values; boxed.Clear();
+if(keys.Length!=1 || values.Length!=1 || keys[0].Value!=12 || values[0].ToString()!="Counter(34)") Print("invalid dictionary snapshot");
+Queue<IStringable> queue;queue.Enqueue(9);Print(queue.Dequeue());
+HashSet<IStringable> set;Print(set.Add(3));Print(set.Add(3));Print(set.Contains(3));Print(set.Add("3"));Print(set.Count);
+}}

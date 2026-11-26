@@ -1,0 +1,47 @@
+namespace System.Reflection;
+[Native("bolt::library::FieldInfo")] public class FieldInfo {
+public:
+    FieldInfo();
+    [NativeProperty("Name")] const string Name;
+    [NativeProperty("TypeName")] const string TypeName;
+    [NativeProperty("IsReadOnly")] const bool IsReadOnly;
+    [NativeProperty("IsProperty")] const bool IsProperty;
+    [NativeProperty("Attributes")] const string[] Attributes;
+    string ToString();
+}
+[Native("bolt::library::MethodInfo")] public class MethodInfo {
+public:
+    MethodInfo();
+    [NativeProperty("Name")] const string Name;
+    [NativeProperty("ReturnType")] const string ReturnType;
+    [NativeProperty("IsStatic")] const bool IsStatic;
+    [NativeProperty("ParameterTypes")] const string[] ParameterTypes;
+    [NativeProperty("Attributes")] const string[] Attributes;
+    string ToString();
+}
+[Native("bolt::library::TypeInfo")] public class TypeInfo {
+public:
+    TypeInfo();
+    [NativeProperty("Name")] const string Name;
+    [NativeProperty("Namespace")] const string Namespace;
+    [NativeProperty("IsStruct")] const bool IsStruct;
+    [NativeProperty("IsClass")] const bool IsClass;
+    [NativeProperty("Attributes")] const string[] Attributes;
+    FieldInfo[] GetFields();
+    FieldInfo[] GetProperties();
+    FieldInfo GetProperty(string name);
+    bool HasProperty(string name);
+    MethodInfo[] GetMethods();
+    FieldInfo GetField(string name);
+    bool HasField(string name);
+    bool HasMethod(string name);
+    string ToString();
+}
+[Native("bolt::library::Reflection")] public static class Reflection {
+public:
+    bool IsReflected<T>();
+    TypeInfo GetType<T>();
+    V Get<O, V>(const O& value, string field);
+    void Set<O, V>(O& value, string field, const V& data);
+    R Invoke<R, O, T...>(O& value, string method, T... args);
+}

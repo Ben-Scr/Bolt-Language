@@ -1,0 +1,100 @@
+import System
+namespace System.IO;
+[Native("bolt::library::FileMode")] public enum FileMode : int {CreateNew=1, Create=2, Open=3, OpenOrCreate=4, Truncate=5, Append=6}
+[Native("bolt::library::FileAccess")] public enum FileAccess : int {Read=1, Write=2, ReadWrite=3}
+[Native("bolt::library::SeekOrigin")] public enum SeekOrigin : int {Begin=0, Current=1, End=2}
+
+#if !(BoltStandaloneCore && (Windows || MacOS || FreeBSD || (Linux && (X64 || ARM64 || RISCV64))))
+[Native("bolt::library::Stream")]
+public abstract class Stream
+{
+public:
+    [NativeProperty("CanRead")] const bool CanRead;
+    [NativeProperty("CanWrite")] const bool CanWrite;
+    [NativeProperty("CanSeek")] const bool CanSeek;
+    [NativeProperty("Length")] const long Length;
+    [NativeProperty("Position")] const long Position;
+    int Read(byte[]& buffer, int offset = 0, int count = -1);
+    int ReadByte();
+    byte[] ReadAllBytes();
+    void Write(const byte[]& buffer, int offset = 0, int count = -1);
+    void WriteByte(byte value);
+    long Seek(long offset, SeekOrigin origin = SeekOrigin.Begin);
+    void SetLength(long length);
+    void CopyTo(Stream& destination, int bufferSize = 81920);
+    void Flush();
+    void Close();
+    void Dispose();
+
+}
+
+[Native("bolt::library::FileStream")]
+public sealed class FileStream : Stream
+{
+public:
+    FileStream();
+    FileStream(string path, FileMode mode = FileMode.Open, FileAccess access = FileAccess.ReadWrite);
+
+}
+
+[Native("bolt::library::MemoryStream")]
+public sealed class MemoryStream : Stream
+{
+public:
+    MemoryStream();
+    MemoryStream(int capacity);
+    MemoryStream(const byte[]& bytes);
+    byte[] ToArray();
+
+}
+
+[Native("bolt::library::StreamReader")]
+public class StreamReader
+{
+public:
+    StreamReader(string path);
+    StreamReader(Stream& stream, bool leaveOpen = false);
+    string ReadLine();
+    string ReadToEnd();
+    void Close();
+    void Dispose();
+    [NativeProperty("EndOfStream")] const bool EndOfStream;
+
+}
+
+[Native("bolt::library::BinaryWriter")]
+public class BinaryWriter
+{
+public:
+    BinaryWriter(Stream& stream, bool leaveOpen = false);
+    void Write<T>(T value);
+    void Flush();
+    void Close();
+    void Dispose();
+
+}
+
+[Native("bolt::library::BinaryReader")]
+public class BinaryReader
+{
+public:
+    BinaryReader(Stream& stream, bool leaveOpen = false);
+    T Read<T>();
+    byte[] ReadBytes(int count);
+    void Close();
+    void Dispose();
+    int ReadInt();
+    short ReadInt16();
+    long ReadInt64();
+    byte ReadUInt8();
+    ushort ReadUInt16();
+    uint ReadUInt32();
+    ulong ReadUInt64();
+    bool ReadBool();
+    char ReadChar();
+    float ReadFloat();
+    double ReadDouble();
+    string ReadString();
+
+}
+#endif

@@ -1,0 +1,5 @@
+
+interface I{T Get<T>();}
+static class Program {public: void Main(){
+
+}}

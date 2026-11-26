@@ -1,0 +1,204 @@
+import Bolt.Runtime
+namespace System.Collections.Generic;
+
+// Dense entries plus bucket chains; all hashing, growth and erase policy is Bolt code.
+public struct HashEntry<TKey, TValue>
+{
+public:
+    TKey Key;
+    TValue Value;
+    ulong Hash;
+    int Next;
+    HashEntry(TKey key, TValue value, ulong hash, int next)
+        : Key(key), Value(value), Hash(hash), Next(next) {}
+}
+
+public sealed class HashTable<TKey, TValue>
+{
+private:
+    Bolt.Runtime.Buffer<HashEntry<TKey, TValue>> entries;
+    int[] buckets;
+    int bucketMask = -1;
+    ulong revision = 0ul;
+    void Changed() { revision = revision == ulong.MaxValue ? 0ul : revision + 1ul; }
+    [ReadOnly]
+    int Bucket(ulong hash)
+    {
+        // Rehash records the mask once. Arbitrary explicit reservations still
+        // use the exact bucket count and are never rounded or truncated.
+        if (bucketMask >= 0) return (int)(hash & (ulong)bucketMask);
+        return (int)(hash % (ulong)buckets.Length);
+    }
+    [ReadOnly] int FindHashed(const TKey& key, ulong hash)
+    {
+        if (entries.Length == 0) return -1;
+        int cursor = buckets[Bucket(hash)];
+        while (cursor != 0)
+        {
+            int index = cursor - 1;
+            const HashEntry<TKey, TValue>& entry = entries[index];
+            if (entry.Hash == hash && Bolt.Runtime.Values.Equal<TKey>(entry.Key, key)) return index;
+            // Equality can call user code. Reacquire the entry after it returns.
+            cursor = entries[index].Next;
+        }
+        return -1;
+    }
+    void Rehash(int count)
+    {
+        int[] next = new int[count];
+        int mask = count - 1;
+        bool powerOfTwo = (count & mask) == 0;
+        for (int i = 0; i < entries.Length; i++)
+        {
+            ulong hash = entries[i].Hash;
+            int bucket = powerOfTwo ? (int)(hash & (ulong)mask) : (int)(hash % (ulong)count);
+            entries[i].Next = next[bucket]; next[bucket] = i + 1;
+        }
+        buckets = next;
+        bucketMask = powerOfTwo ? mask : -1;
+    }
+    void Ensure(int count)
+    {
+        if (count < 0) Bolt.Runtime.Failure.Range("Hash table capacity must be nonnegative.");
+        if (count > entries.Capacity)
+        {
+            long capacity = entries.Capacity == 0 ? 4 : (long)entries.Capacity * 2;
+            if (capacity < count) capacity = count;
+            if (capacity > int.MaxValue) capacity = int.MaxValue;
+            entries.Reserve((int)capacity);
+        }
+        if ((long)count * 4 > (long)buckets.Length * 3)
+        {
+            long capacity = buckets.Length == 0 ? 8 : (long)buckets.Length * 2;
+            long required = ((long)count * 4 + 2) / 3;
+            if (capacity < required) capacity = required;
+            if (capacity > int.MaxValue) Bolt.Runtime.Failure.Range("Hash table exceeds the maximum bucket count.");
+            Rehash((int)capacity);
+        }
+    }
+    // Replace one chain link. Indexes use +1 so zero-initialized buckets are empty.
+    void ReplaceLink(ulong hash, int oldLink, int newLink)
+    {
+        int bucket = Bucket(hash);
+        if (buckets[bucket] == oldLink) { buckets[bucket] = newLink; return; }
+        int cursor = buckets[bucket];
+        while (cursor != 0)
+        {
+            int index = cursor - 1;
+            if (entries[index].Next == oldLink) { entries[index].Next = newLink; return; }
+            cursor = entries[index].Next;
+        }
+        Bolt.Runtime.Failure.InvalidOperation("Corrupt hash-table chain.");
+    }
+public:
+    HashTable(int capacity = 0) { Ensure(capacity); }
+    int Length => entries.Length;
+    int Capacity => entries.Capacity;
+    [ReadOnly] int Find(const TKey& key)
+    {
+        if (entries.Length == 0) return -1;
+        return FindHashed(key, Bolt.Runtime.Values.Hash<TKey>(key));
+    }
+    [ReadOnly] bool ContainsKey(const TKey& key) { return Find(key) >= 0; }
+    bool Put(TKey key, TValue value, bool overwrite)
+    {
+        ulong hash = Bolt.Runtime.Values.Hash<TKey>(key);
+        int existing = FindHashed(key, hash);
+        if (existing >= 0) { if (overwrite) entries[existing].Value = value; return false; }
+        Ensure(entries.Length + 1);
+        int bucket = Bucket(hash);
+        entries.Add(HashEntry<TKey, TValue>(key, value, hash, buckets[bucket]));
+        buckets[bucket] = entries.Length; Changed(); return true;
+    }
+    TValue& Get(const TKey& key)
+    {
+        int index = Find(key);
+        if (index < 0) Bolt.Runtime.Failure.MissingKey("dictionary key not found.");
+        return entries[index].Value;
+    }
+    [ReadOnly] bool TryGetValue(const TKey& key, TValue& value)
+    {
+        int index = Find(key); if (index < 0) return false;
+        value = entries[index].Value; return true;
+    }
+    bool Remove(const TKey& key)
+    {
+        int index = Find(key); if (index < 0) return false;
+        ReplaceLink(entries[index].Hash, index + 1, entries[index].Next);
+        int last = entries.Length - 1;
+        if (index != last)
+        {
+            ReplaceLink(entries[last].Hash, last + 1, index + 1);
+            entries[index] = entries[last];
+        }
+        entries.Truncate(last); Changed(); return true;
+    }
+    void Clear()
+    {
+        int count = entries.Length;
+        if (count == 0) return;
+        // On sparse tables only buckets named by a live entry can have a chain.
+        // Prefer sequential writes once the table is more densely populated.
+        if (count <= buckets.Length / 32)
+        {
+            for (int i = 0; i < count; i++) buckets[Bucket(entries[i].Hash)] = 0;
+            entries.Clear();
+        }
+        else
+        {
+            entries.Clear();
+            for (int i = 0; i < buckets.Length; i++) buckets[i] = 0;
+        }
+        Changed();
+    }
+    void Reserve(int capacity)
+    {
+        if (capacity < 0) Bolt.Runtime.Failure.Range("Hash table capacity must be nonnegative.");
+        if (capacity > entries.Capacity) { Ensure(capacity); Changed(); }
+    }
+    [ReadOnly] TKey KeyAt(int index) { return entries[index].Key; }
+    [ReadOnly] TValue ValueAt(int index) { return entries[index].Value; }
+    [ReadOnly] KeyValuePair<TKey, TValue> EntryAt(int index)
+    { return KeyValuePair<TKey, TValue>(entries[index].Key, entries[index].Value); }
+    [ReadOnly] bool SameEntries(const HashTable<TKey, TValue>& other, bool compareValues)
+    {
+        if (entries.Length != other.entries.Length) return false;
+        for (int i = 0; i < entries.Length; i++)
+        {
+            int index = other.Find(entries[i].Key); if (index < 0) return false;
+            if (compareValues && !Bolt.Runtime.Values.Equal<TValue>(entries[i].Value, other.entries[index].Value)) return false;
+        }
+        return true;
+    }
+    [ReadOnly] ulong ContentHash(bool includeValues)
+    {
+        ulong result = 0ul;
+        for (int i = 0; i < entries.Length; i++)
+        {
+            ulong hash = entries[i].Hash;
+            if (includeValues) hash ^= Bolt.Runtime.Bits.Multiply64(Bolt.Runtime.Values.Hash<TValue>(entries[i].Value), 16777619ul);
+            result ^= hash;
+        }
+        return result;
+    }
+    HashEnumerator<TKey, TValue> GetEnumerator()
+    { return HashEnumerator<TKey, TValue>(&entries, &revision); }
+}
+
+public struct HashEnumerator<TKey, TValue>
+{
+private:
+    Bolt.Runtime.Buffer<HashEntry<TKey, TValue>>* source;
+    ulong* revision;
+    ulong expected;
+    int index = -1;
+    void Check() { if (*revision != expected) Bolt.Runtime.Failure.InvalidOperation("Collection was modified during iteration."); }
+public:
+    HashEnumerator() {}
+    HashEnumerator(Bolt.Runtime.Buffer<HashEntry<TKey, TValue>>* entries, ulong* version)
+    { source = entries; revision = version; expected = *version; }
+    bool MoveNext() { Check(); if (index < source->Length) index++; return index < source->Length; }
+    TKey Key { get { Check(); return (*source)[index].Key; } }
+    KeyValuePair<TKey, TValue> Current
+    { get { Check(); return KeyValuePair<TKey, TValue>((*source)[index].Key, (*source)[index].Value); } }
+}

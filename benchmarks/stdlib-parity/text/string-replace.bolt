@@ -1,0 +1,14 @@
+static class Program {
+public:
+    void Main() {
+        string text = "user=id; path=/home/user; group=users; ";
+        for (int i = 0; i < 6; i++) text += text;
+        string[] words = ["record", "x", "", "user-name"];
+        long total = 0l;
+        for (int i = 0; i < 20000; i++) {
+            string result = text.Replace("user", words[i & 3]);
+            total += (long)result.ByteLength + (long)result[i & 15];
+        }
+        Print(total);
+    }
+}

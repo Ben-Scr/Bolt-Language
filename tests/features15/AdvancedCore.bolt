@@ -1,0 +1,31 @@
+import System.Collections.Generic
+class Publisher {
+public:
+    int Value=9;
+    event Action<int&> Change;
+    void Raise(int& value){Change.Invoke(value);}
+}
+class Listener {
+public:
+    int Count=0;
+    void Handle(int& value){Count++;value+=2;}
+    void Fail(int& value){value+=5;throw ArgumentException("handler");}
+}
+interface IParent { int Get(); implicit int(){return Get();} }
+interface ILeft:IParent {}
+interface IRight:IParent {}
+class Diamond:ILeft,IRight {public:int Get(){return 9;}}
+static class Program {public:
+void Main(){
+    Publisher p;Listener l;int number=1;
+    p.Change+=l.Handle;p.Raise(number);
+    if(number!=3||l.Count!=1)throw Exception("reference args");
+    p.Change+=l.Fail;p.Change+=l.Handle;
+    try{p.Raise(number);throw Exception("missing error");}
+    catch(ArgumentException& e){Print(e.Message);}
+    if(number!=10||l.Count!=2)throw Exception("exception stops invoke list");
+    p.Change-=l.Fail;p.Raise(number);
+    if(number!=14||l.Count!=4)throw Exception("event survives exception");
+    Diamond diamond;int value=diamond;if(value!=9)throw Exception("diamond default");
+    Print("ADVANCED_OK");
+}}

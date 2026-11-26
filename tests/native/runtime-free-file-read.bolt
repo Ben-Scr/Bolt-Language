@@ -1,0 +1,28 @@
+import System
+import System.IO
+
+static class Program
+{
+public:
+    int Main()
+    {
+        if (File.ReadAllBytes("empty").Length != 0 || File.ReadAllText("empty") != "") return 1;
+        byte[] raw = File.ReadAllBytes("ü😀.txt");
+        if (raw.Length != 16 || raw[0] != (byte)239 || raw[1] != (byte)187 || raw[2] != (byte)191) return 2;
+        if (File.ReadAllText("ü😀.txt") != "Grüße\0😀\n") return 3;
+        if (File.ReadAllText("plain") != "first\r\nlast" || File.ReadAllText("bom-only") != "") return 4;
+        byte[] binary = File.ReadAllBytes("binary");
+        if (binary.Length != 24576) return 5;
+        for (int i = 0; i < binary.Length; i++) if (binary[i] != (byte)(i % 256)) return 6;
+        try { File.ReadAllText("invalid-utf8"); return 7; } catch (FormatException& e) {}
+        try { File.ReadAllText("missing"); return 8; } catch (FileNotFoundException& e) {}
+        try { File.ReadAllBytes("plain\0suffix"); return 9; } catch (ArgumentException& e) {}
+        try { File.ReadAllBytes(""); return 10; } catch (ArgumentException& e) {}
+#if Linux || MacOS || FreeBSD
+        string pipe = File.ReadAllText("/dev/stdin");
+        if (pipe.Length != 24579 || pipe[24575] != 's' || !pipe.EndsWith("end")) return 11;
+        try { File.ReadAllBytes("too-large"); return 12; } catch (IOException& e) {}
+#endif
+        return 0;
+    }
+}

@@ -1,0 +1,42 @@
+#ifdef BoltStandaloneCore
+import System
+namespace System.Memory;
+
+// Value ownership: copies create an independent T, moves transfer the pointer.
+public class Owner<T>
+{
+private:
+    T* pointer = null;
+    void CopyValue() { T* previous = pointer; pointer = null; if (previous != null) pointer = Bolt.Runtime.TypedMemory.Copy<T>(*previous); }
+public:
+    Owner() {}
+    Owner(const T& value) { pointer = Bolt.Runtime.TypedMemory.Copy<T>(value); }
+    ~Owner() { Reset(); }
+    static Owner<T> Create() { Owner<T> result; result.pointer = new T(); return result; }
+    [ReadOnly] bool HasValue => pointer != null;
+    [ReadOnly] T& Get() { if (pointer == null) throw InvalidOperationException("The Owner is empty."); return *pointer; }
+    [ReadOnly] T* Borrow() { return pointer; }
+    void Reset() { T* old = pointer; pointer = null; delete old; }
+    void Reset(const T& value) { T* next = Bolt.Runtime.TypedMemory.Copy<T>(value); Reset(); pointer = next; }
+    T* Release() { T* result = pointer; pointer = null; return result; }
+    static bool operator ==(const Owner<T>& a, const Owner<T>& b) {
+        if(a.pointer==null || b.pointer==null)return a.pointer==b.pointer;
+        return Bolt.Runtime.Values.Equal<T>(*a.pointer,*b.pointer);
+    }
+    [ReadOnly] ulong GetHashCode() { return pointer==null ? 0ul : Bolt.Runtime.Values.Hash<T>(*pointer); }
+}
+#else
+namespace System.Memory;
+[Native("bolt::library::Owner")] public class Owner<T> {
+public:
+    Owner();
+    Owner(const T& value);
+    static Owner<T> Create();
+    [NativeProperty("HasValue")] const bool HasValue;
+    T& Get();
+    T* Borrow();
+    void Reset();
+    void Reset(const T& value);
+    T* Release();
+}
+#endif

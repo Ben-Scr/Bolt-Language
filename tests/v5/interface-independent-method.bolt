@@ -1,0 +1,5 @@
+
+interface ILeft{int Left();} interface IRight{string Right();} class Item:ILeft,IRight {public:int Left(){return 5;}string Right(){return "r";}}
+static class Program {public: void Main(){
+Item x; ILeft& l=x; IRight& r=x; Print(l.Left());Print(r.Right());
+}}

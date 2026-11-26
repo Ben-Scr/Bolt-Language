@@ -1,0 +1,40 @@
+import System
+public class SceneError : Exception {
+public:
+    int Code;
+    SceneError(int n) : base("scene") { Code=n; }
+    [ReadOnly] override string ToString() { return "E" + Code; }
+}
+public static class Program {
+public:
+    static int resets;
+    int WithReturn() { try { return 7; } finally { resets++; } }
+    void Raise() { throw SceneError(41); }
+    int Main() {
+        try {
+            try { Raise(); }
+            catch (ArgumentException& e) { return 1; }
+            catch (SceneError& e) {
+                if(e.Code!=41 || e.Message!="scene" || e.SourceLine!=12 || e.SourceColumn<=0) return 2;
+                if(!e.StackTrace.Contains("Raise")) return 3;
+                Exception& base=e; if(base.ToString()!="E41")return 4;
+                throw;
+            } finally { resets++; }
+        } catch(Exception& e) { if(e.Message!="scene")return 5; }
+        if(WithReturn()!=7 || resets!=2)return 6;
+        for(int i=0;i<4;i++) {
+            try { if(i<2)continue; break; } finally { resets++; }
+        }
+        if(resets!=5)return 7;
+        try {
+            try { throw ArgumentException("first"); }
+            finally { throw InvalidOperationException("replacement"); }
+        } catch (InvalidOperationException& e) { if(e.Message!="replacement")return 8; }
+        try { int n=0; Print(5/n); }
+        catch (ArithmeticException& e) { if(!e.Message.Contains("zero"))return 9; }
+        try { int[] a=[1]; Print(a[-1]); return 10; }
+        catch (IndexOutOfRangeException& e) { if(e.Message!="index out of range")return 11; }
+        Print("portable-exceptions-ok");
+        return 0;
+    }
+}

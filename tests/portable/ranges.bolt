@@ -1,0 +1,23 @@
+import System
+import System.Collections.Generic
+public static class Program {
+public:
+    int Main() {
+        int[] a=[1,2,3]; for(int& v:a){v*=2;}
+        if(a[0]!=2 || a[2]!=6)return 1;
+        int n=0; for(char c:"a🌍é"){n++;} if(n!=3)return 2;
+        List<int> list;list.Add(1);list.Add(2);
+        bool caught=false;
+        try {for(int x:list){list.RemoveAt(0);list.Add(x);}}
+        catch (Exception& e) {caught=e.Message.Contains("modified");}
+        if(!caught)return 3;
+        Dictionary<int,int> d;d.Add(2,10);d.Add(4,20);
+        int sum=0;for(var pair:d){sum+=pair.Key+pair.Value;}
+        if(sum!=36)return 4;
+        string s="abc";caught=false;
+        try {for(char ch:s){s="xyz";}}
+        catch(InvalidOperationException& e){caught=e.Message.Contains("modified");}
+        if(!caught)return 5;
+        Print("portable-ranges-ok");return 0;
+    }
+}

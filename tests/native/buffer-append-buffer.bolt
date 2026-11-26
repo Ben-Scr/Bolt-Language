@@ -1,0 +1,20 @@
+import Bolt.Runtime
+import System
+public class Node { public: int Tag; Buffer<Node> Children; Node(int id){Tag=id;} }
+static class Program {
+public:
+    int Main() {
+        Buffer<int> a; a.Reserve(2); a.Add(4); a.Add(9); a.AppendBuffer(0,2,a);
+        if(a.Length != 4 || a[0] != 4 || a[1] != 9 || a[2] != 4 || a[3] != 9) return 1;
+        a.Reserve(11); a.AppendBuffer(1,2,a); a.AppendBuffer(6,0,a);
+        if(a.Length != 6 || a[4] != 9 || a[5] != 4) return 2;
+        Buffer<Node> tree; tree.Reserve(1); tree.Add(Node(11)); tree[0].Children.Add(Node(33));
+        tree.AppendBuffer(0,1,tree[0].Children);
+        if(tree.Length != 2 || tree[0].Children.Length != 1 || tree[1].Tag != 33) return 3;
+        tree[1].Tag = 100;
+        if(tree[0].Children[0].Tag != 33) return 4;
+        Buffer<string> names; names.Add("a"); names.Add("b"); Buffer<string> copy;
+        copy.AppendBuffer(1,1,names); names[1]="changed"; if(copy[0]!="b")return 5;
+        Print("append buffer OK"); return 0;
+    }
+}

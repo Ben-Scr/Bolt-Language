@@ -1,0 +1,5 @@
+
+class Point {public:int X; Point(int x){X=x;} }
+static class Program { public: void Main() {
+Point[] a={Point(4),Point(8)}; Console.WriteLine(a[1].X);
+} }

@@ -1,0 +1,20 @@
+import System.Collections.Generic
+static class Program {
+public:
+    void Main() {
+        string[] names = new string[1024];
+        Dictionary<string,int> values;
+        for (int i = 0; i < 1024; i++) {
+            names[i] = $"scene/entity/component-{i}";
+            values.Add(names[i], i * 7 + 3);
+        }
+        ulong sum = 0ul;
+        for (int round = 0; round < 1024; round++) {
+            for (int i = 0; i < 1024; i++) {
+                int k = (i * 31 + round) & 1023;
+                sum += (ulong)values[names[k]];
+            }
+        }
+        Print(sum);
+    }
+}

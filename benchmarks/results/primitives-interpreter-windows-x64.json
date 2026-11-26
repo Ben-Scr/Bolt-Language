@@ -1,0 +1,6932 @@
+{
+  "host": {
+    "platform": "Windows-11-10.0.26300-SP0",
+    "machine": "AMD64",
+    "cpu": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+    "advertised_features": null,
+    "python": "3.13.7",
+    "cpu_affinity": null
+  },
+  "utc": "2026-11-21T11:15:20.185343+00:00",
+  "iterations": 4096,
+  "seed": 731,
+  "warmup": 1,
+  "runs": 7,
+  "portable_array_inputs": true,
+  "flags": {
+    "interpreter": [
+      "--runtime",
+      "--steps",
+      "0"
+    ]
+  },
+  "stopwatch_tick_ns": 100,
+  "compilers": {
+    "after": "2f7e396fc81ec24a3ab8542d7c2d99f3cc5f04387f789f4ebf86382205c1e813",
+    "before": "040d6c5a7e6d9aa38e968d7b299d28ce60b417f2518dc3ee42998f68cd39bca8"
+  },
+  "programs": {
+    "0/interpreter-after": {
+      "source_sha256": "8aa65e2a136e1de1b723e6f495cf45294d6ef66de0c6284a0eab3c7a103bba2c"
+    },
+    "0/interpreter-before": {
+      "source_sha256": "8aa65e2a136e1de1b723e6f495cf45294d6ef66de0c6284a0eab3c7a103bba2c"
+    },
+    "16/interpreter-after": {
+      "source_sha256": "c8e6bdb41c0f4680c4ff9ae2eb7b2b027c1840596dcdd6ee8ae3dd4b676f952f"
+    },
+    "16/interpreter-before": {
+      "source_sha256": "c8e6bdb41c0f4680c4ff9ae2eb7b2b027c1840596dcdd6ee8ae3dd4b676f952f"
+    },
+    "32/interpreter-after": {
+      "source_sha256": "0780ce91b78303fcc72fc9fa79d63fc5889047f3263efe600453f06ceb927b46"
+    },
+    "32/interpreter-before": {
+      "source_sha256": "0780ce91b78303fcc72fc9fa79d63fc5889047f3263efe600453f06ceb927b46"
+    },
+    "48/interpreter-after": {
+      "source_sha256": "9cf0705a3073e18e96b7d41c1221d2da784529f1b7c9754958da73defbce7be7"
+    },
+    "48/interpreter-before": {
+      "source_sha256": "9cf0705a3073e18e96b7d41c1221d2da784529f1b7c9754958da73defbce7be7"
+    },
+    "64/interpreter-after": {
+      "source_sha256": "549604438b57fe86e97c5a9cb916522ace700008dfe919d66908b520e698a26f"
+    },
+    "64/interpreter-before": {
+      "source_sha256": "549604438b57fe86e97c5a9cb916522ace700008dfe919d66908b520e698a26f"
+    },
+    "80/interpreter-after": {
+      "source_sha256": "28d35c779a0b5e5f30ec3e3da3511fee6e74fda16b82b094eb634432347b5106"
+    },
+    "80/interpreter-before": {
+      "source_sha256": "28d35c779a0b5e5f30ec3e3da3511fee6e74fda16b82b094eb634432347b5106"
+    },
+    "96/interpreter-after": {
+      "source_sha256": "02ce263aea6f8dc8f8fece4a4fddee9b49591df9e65756268e3cc701497cad61"
+    },
+    "96/interpreter-before": {
+      "source_sha256": "02ce263aea6f8dc8f8fece4a4fddee9b49591df9e65756268e3cc701497cad61"
+    },
+    "112/interpreter-after": {
+      "source_sha256": "56e4907736b04e1f44480d2af47a7dfeb66fa0ac72cb26708694510d2fce8847"
+    },
+    "112/interpreter-before": {
+      "source_sha256": "56e4907736b04e1f44480d2af47a7dfeb66fa0ac72cb26708694510d2fce8847"
+    },
+    "128/interpreter-after": {
+      "source_sha256": "8285d70309965906f59460b0bb3f5234b178e9d13ecf251a7508f77b9a980abf"
+    },
+    "128/interpreter-before": {
+      "source_sha256": "8285d70309965906f59460b0bb3f5234b178e9d13ecf251a7508f77b9a980abf"
+    },
+    "144/interpreter-after": {
+      "source_sha256": "866a18321e6b843d672303a9f87f14820e7c5992769775c3295c048f6a69a241"
+    },
+    "144/interpreter-before": {
+      "source_sha256": "866a18321e6b843d672303a9f87f14820e7c5992769775c3295c048f6a69a241"
+    },
+    "160/interpreter-after": {
+      "source_sha256": "9039fa8d42778480a0b075ad1c220bdc6d2c845171eb7a8e6d39df32f181cd95"
+    },
+    "160/interpreter-before": {
+      "source_sha256": "9039fa8d42778480a0b075ad1c220bdc6d2c845171eb7a8e6d39df32f181cd95"
+    },
+    "176/interpreter-after": {
+      "source_sha256": "79fef1aae4ed0f4ba534900ca5b24cc62e76a74e339d35d5908fc60e310a48ae"
+    },
+    "176/interpreter-before": {
+      "source_sha256": "79fef1aae4ed0f4ba534900ca5b24cc62e76a74e339d35d5908fc60e310a48ae"
+    },
+    "192/interpreter-after": {
+      "source_sha256": "f90c179d9783b8b02391fc6040ef19098d9439811d997eb6903d11ae1f6e168e"
+    },
+    "192/interpreter-before": {
+      "source_sha256": "f90c179d9783b8b02391fc6040ef19098d9439811d997eb6903d11ae1f6e168e"
+    },
+    "208/interpreter-after": {
+      "source_sha256": "b603ad915ca08d2b4f8cecb99cd2e42cb4185d412b3fc2272a3d8af8540a300a"
+    },
+    "208/interpreter-before": {
+      "source_sha256": "b603ad915ca08d2b4f8cecb99cd2e42cb4185d412b3fc2272a3d8af8540a300a"
+    },
+    "224/interpreter-after": {
+      "source_sha256": "e63bfdb67d07e1b7a0de69f7e6df826a699f4fe4aa908d19625b8554b5281065"
+    },
+    "224/interpreter-before": {
+      "source_sha256": "e63bfdb67d07e1b7a0de69f7e6df826a699f4fe4aa908d19625b8554b5281065"
+    },
+    "240/interpreter-after": {
+      "source_sha256": "8ff48e25109c3756957d039387979a85dd71c3f54ee78004087e97fee932ccc5"
+    },
+    "240/interpreter-before": {
+      "source_sha256": "8ff48e25109c3756957d039387979a85dd71c3f54ee78004087e97fee932ccc5"
+    }
+  },
+  "cases": {
+    "byte.add": {
+      "expected": 161096,
+      "ticks": {
+        "interpreter-after": [
+          111948,
+          113176,
+          113018,
+          112377,
+          111538,
+          112121,
+          111682
+        ],
+        "interpreter-before": [
+          277444,
+          280167,
+          278449,
+          278181,
+          275119,
+          276066,
+          275954
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2737.3291,
+        "interpreter-before": 6773.5352
+      }
+    },
+    "byte.sub": {
+      "expected": 156536,
+      "ticks": {
+        "interpreter-after": [
+          113005,
+          114633,
+          114504,
+          113683,
+          114311,
+          113331,
+          112247
+        ],
+        "interpreter-before": [
+          276331,
+          282112,
+          276665,
+          278016,
+          275518,
+          274615,
+          276516
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2775.4639,
+        "interpreter-before": 6750.8789
+      }
+    },
+    "byte.mul": {
+      "expected": 1080452,
+      "ticks": {
+        "interpreter-after": [
+          112920,
+          113578,
+          110687,
+          113746,
+          112860,
+          112289,
+          112335
+        ],
+        "interpreter-before": [
+          276418,
+          280447,
+          278047,
+          277602,
+          274405,
+          273965,
+          275431
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2755.3711,
+        "interpreter-before": 6748.4863
+      }
+    },
+    "byte.div": {
+      "expected": 24268,
+      "ticks": {
+        "interpreter-after": [
+          113317,
+          110797,
+          112056,
+          114348,
+          113086,
+          113057,
+          112217
+        ],
+        "interpreter-before": [
+          276366,
+          278595,
+          277532,
+          276680,
+          273354,
+          274878,
+          275302
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2760.1807,
+        "interpreter-before": 6747.2168
+      }
+    },
+    "byte.eq": {
+      "expected": 44,
+      "ticks": {
+        "interpreter-after": [
+          116669,
+          116530,
+          116105,
+          117456,
+          117215,
+          115967,
+          116952
+        ],
+        "interpreter-before": [
+          299888,
+          304960,
+          302807,
+          302085,
+          301655,
+          299097,
+          299500
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2848.3643,
+        "interpreter-before": 7364.624
+      }
+    },
+    "byte.ne": {
+      "expected": 4052,
+      "ticks": {
+        "interpreter-after": [
+          116957,
+          116741,
+          116138,
+          117881,
+          117985,
+          116689,
+          116849
+        ],
+        "interpreter-before": [
+          301634,
+          305721,
+          303842,
+          304470,
+          307622,
+          303205,
+          300861
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2852.7588,
+        "interpreter-before": 7418.0176
+      }
+    },
+    "byte.lt": {
+      "expected": 584,
+      "ticks": {
+        "interpreter-after": [
+          117510,
+          117379,
+          118535,
+          118090,
+          118541,
+          121924,
+          117892
+        ],
+        "interpreter-before": [
+          303608,
+          304892,
+          303087,
+          303485,
+          298750,
+          299684,
+          298975
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2883.0566,
+        "interpreter-before": 7399.585
+      }
+    },
+    "byte.le": {
+      "expected": 628,
+      "ticks": {
+        "interpreter-after": [
+          117311,
+          117270,
+          119459,
+          118163,
+          118828,
+          118255,
+          117931
+        ],
+        "interpreter-before": [
+          302654,
+          306452,
+          305549,
+          304543,
+          299497,
+          297953,
+          300950
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2884.8389,
+        "interpreter-before": 7389.0137
+      }
+    },
+    "byte.gt": {
+      "expected": 3468,
+      "ticks": {
+        "interpreter-after": [
+          116182,
+          117171,
+          119452,
+          118215,
+          118422,
+          119755,
+          119402
+        ],
+        "interpreter-before": [
+          300349,
+          305452,
+          302565,
+          301666,
+          298479,
+          299910,
+          298476
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2891.1621,
+        "interpreter-before": 7332.7393
+      }
+    },
+    "byte.ge": {
+      "expected": 3512,
+      "ticks": {
+        "interpreter-after": [
+          117460,
+          116758,
+          119732,
+          118537,
+          118364,
+          118648,
+          117324
+        ],
+        "interpreter-before": [
+          303232,
+          306268,
+          302121,
+          302803,
+          301047,
+          300897,
+          299401
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2889.7461,
+        "interpreter-before": 7376.001
+      }
+    },
+    "byte.rem": {
+      "expected": 15684,
+      "ticks": {
+        "interpreter-after": [
+          111949,
+          112279,
+          112707,
+          113317,
+          113629,
+          112439,
+          112529
+        ],
+        "interpreter-before": [
+          275274,
+          279689,
+          279675,
+          278319,
+          274910,
+          274959,
+          275116
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2747.29,
+        "interpreter-before": 6720.5566
+      }
+    },
+    "byte.and": {
+      "expected": 17492,
+      "ticks": {
+        "interpreter-after": [
+          112565,
+          112068,
+          112769,
+          113909,
+          113740,
+          113567,
+          112640
+        ],
+        "interpreter-before": [
+          277721,
+          278618,
+          278331,
+          278384,
+          278512,
+          274422,
+          275476
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2753.1494,
+        "interpreter-before": 6795.1904
+      }
+    },
+    "byte.or": {
+      "expected": 143604,
+      "ticks": {
+        "interpreter-after": [
+          113161,
+          113414,
+          112982,
+          117134,
+          113622,
+          113873,
+          120008
+        ],
+        "interpreter-before": [
+          275523,
+          279182,
+          277478,
+          277998,
+          273166,
+          275355,
+          275247
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2773.9746,
+        "interpreter-before": 6726.6357
+      }
+    },
+    "byte.xor": {
+      "expected": 126112,
+      "ticks": {
+        "interpreter-after": [
+          113296,
+          114944,
+          113593,
+          114778,
+          113977,
+          112513,
+          112556
+        ],
+        "interpreter-before": [
+          278245,
+          280085,
+          278239,
+          275874,
+          274219,
+          275360,
+          276669
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2773.2666,
+        "interpreter-before": 6754.6143
+      }
+    },
+    "byte.not_low_byte": {
+      "expected": 918432,
+      "ticks": {
+        "interpreter-after": [
+          114237,
+          114091,
+          115067,
+          115707,
+          114508,
+          114416,
+          114132
+        ],
+        "interpreter-before": [
+          311556,
+          313685,
+          312411,
+          310500,
+          308042,
+          309848,
+          309420
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2793.3594,
+        "interpreter-before": 7580.5664
+      }
+    },
+    "byte.shl": {
+      "expected": 3832104,
+      "ticks": {
+        "interpreter-after": [
+          122409,
+          121885,
+          122419,
+          123804,
+          122628,
+          123130,
+          122461
+        ],
+        "interpreter-before": [
+          307911,
+          310881,
+          310691,
+          308081,
+          305245,
+          304657,
+          307430
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2989.7705,
+        "interpreter-before": 7517.3584
+      }
+    },
+    "byte.shr": {
+      "expected": 31832,
+      "ticks": {
+        "interpreter-before": [
+          305992,
+          306671,
+          308610,
+          307027,
+          306160,
+          307811,
+          306257
+        ],
+        "interpreter-after": [
+          131587,
+          122002,
+          123346,
+          123121,
+          121963,
+          123326,
+          122378
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 7487.085,
+        "interpreter-after": 3005.8838
+      }
+    },
+    "byte.to_byte": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-before": [
+          248775,
+          248954,
+          256293,
+          249225,
+          251450,
+          249940,
+          249752
+        ],
+        "interpreter-after": [
+          96357,
+          94840,
+          94532,
+          94109,
+          93421,
+          97493,
+          93767
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6097.4609,
+        "interpreter-after": 2307.9102
+      }
+    },
+    "byte.to_short": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-before": [
+          249661,
+          248383,
+          255671,
+          249271,
+          254893,
+          249586,
+          248616
+        ],
+        "interpreter-after": [
+          101103,
+          93362,
+          95625,
+          94097,
+          93363,
+          96021,
+          94370
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6093.4082,
+        "interpreter-after": 2303.9551
+      }
+    },
+    "byte.to_ushort": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-before": [
+          248944,
+          248049,
+          252964,
+          249725,
+          249904,
+          250306,
+          249201
+        ],
+        "interpreter-after": [
+          96969,
+          93844,
+          94716,
+          93706,
+          93954,
+          96842,
+          94178
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6096.8018,
+        "interpreter-after": 2299.2676
+      }
+    },
+    "byte.to_int": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-before": [
+          249727,
+          245806,
+          254851,
+          249871,
+          249016,
+          257410,
+          252484
+        ],
+        "interpreter-after": [
+          100490,
+          94467,
+          94882,
+          93651,
+          93912,
+          96876,
+          94712
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6100.3662,
+        "interpreter-after": 2312.3047
+      }
+    },
+    "byte.to_uint": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-before": [
+          249431,
+          249263,
+          252114,
+          251460,
+          248051,
+          252099,
+          249049
+        ],
+        "interpreter-after": [
+          94333,
+          94472,
+          95071,
+          93529,
+          94061,
+          96348,
+          94263
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6089.624,
+        "interpreter-after": 2303.0518
+      }
+    },
+    "byte.to_long": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-before": [
+          249318,
+          247813,
+          250760,
+          248789,
+          249314,
+          251267,
+          248948
+        ],
+        "interpreter-after": [
+          100543,
+          93627,
+          94213,
+          93639,
+          93644,
+          95724,
+          94195
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6086.7676,
+        "interpreter-after": 2299.6826
+      }
+    },
+    "byte.to_ulong": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-before": [
+          248824,
+          249007,
+          252107,
+          249663,
+          249133,
+          249356,
+          249950
+        ],
+        "interpreter-after": [
+          96084,
+          94441,
+          95991,
+          93394,
+          94513,
+          96308,
+          94572
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6087.793,
+        "interpreter-after": 2308.8867
+      }
+    },
+    "byte.to_float": {
+      "expected": 4683398365814194176,
+      "ticks": {
+        "interpreter-before": [
+          252192,
+          253079,
+          262189,
+          253996,
+          253771,
+          254342,
+          257277
+        ],
+        "interpreter-after": [
+          105817,
+          98651,
+          99307,
+          98019,
+          98975,
+          101956,
+          98826
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6201.0742,
+        "interpreter-after": 2416.3818
+      }
+    },
+    "byte.to_double": {
+      "expected": 4683398365814194176,
+      "ticks": {
+        "interpreter-before": [
+          252398,
+          253277,
+          254057,
+          252116,
+          255614,
+          254372,
+          252082
+        ],
+        "interpreter-after": [
+          98994,
+          98658,
+          98649,
+          97492,
+          98644,
+          101696,
+          98384
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6183.5205,
+        "interpreter-after": 2408.4229
+      }
+    },
+    "byte.to_char": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-before": [
+          248132,
+          248730,
+          257277,
+          249072,
+          250001,
+          249843,
+          248811
+        ],
+        "interpreter-after": [
+          100951,
+          94118,
+          95502,
+          93244,
+          95600,
+          96659,
+          95206
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6080.8594,
+        "interpreter-after": 2331.5918
+      }
+    },
+    "short.add": {
+      "expected": 30024,
+      "ticks": {
+        "interpreter-before": [
+          276351,
+          274468,
+          273935,
+          274288,
+          274408,
+          274348,
+          278413
+        ],
+        "interpreter-after": [
+          111979,
+          111556,
+          111993,
+          111244,
+          111686,
+          114052,
+          112505
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6699.4141,
+        "interpreter-after": 2733.8623
+      }
+    },
+    "short.sub": {
+      "expected": -40072,
+      "ticks": {
+        "interpreter-before": [
+          272676,
+          273656,
+          275896,
+          273733,
+          273363,
+          276347,
+          273709
+        ],
+        "interpreter-after": [
+          119853,
+          111345,
+          111772,
+          109595,
+          111206,
+          113227,
+          110692
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6682.3486,
+        "interpreter-after": 2718.3838
+      }
+    },
+    "short.mul": {
+      "expected": -41084,
+      "ticks": {
+        "interpreter-before": [
+          272771,
+          273422,
+          276308,
+          273316,
+          274310,
+          275764,
+          275138
+        ],
+        "interpreter-after": [
+          111250,
+          111489,
+          112474,
+          110067,
+          111168,
+          111612,
+          110459
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6697.0215,
+        "interpreter-after": 2716.0645
+      }
+    },
+    "short.div": {
+      "expected": -1344,
+      "ticks": {
+        "interpreter-before": [
+          272733,
+          273240,
+          281337,
+          273287,
+          273741,
+          274846,
+          276065
+        ],
+        "interpreter-after": [
+          126215,
+          110932,
+          112320,
+          110971,
+          110876,
+          112915,
+          111529
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6683.1299,
+        "interpreter-after": 2722.876
+      }
+    },
+    "short.eq": {
+      "expected": 68,
+      "ticks": {
+        "interpreter-before": [
+          296158,
+          299940,
+          297261,
+          297045,
+          296559,
+          297837,
+          296260
+        ],
+        "interpreter-after": [
+          115651,
+          115563,
+          116399,
+          114732,
+          114678,
+          118245,
+          115296
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 7252.0752,
+        "interpreter-after": 2821.3623
+      }
+    },
+    "short.ne": {
+      "expected": 4028,
+      "ticks": {
+        "interpreter-after": [
+          118687,
+          115180,
+          115262,
+          114278,
+          115647,
+          122748,
+          116026
+        ],
+        "interpreter-before": [
+          298304,
+          298993,
+          298707,
+          304965,
+          297361,
+          297887,
+          296270
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2823.4131,
+        "interpreter-before": 7282.8125
+      }
+    },
+    "short.lt": {
+      "expected": 2652,
+      "ticks": {
+        "interpreter-after": [
+          118109,
+          115860,
+          117096,
+          115976,
+          117208,
+          116000,
+          116797
+        ],
+        "interpreter-before": [
+          301076,
+          298072,
+          298557,
+          295896,
+          306757,
+          296976,
+          295220
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2851.4893,
+        "interpreter-before": 7277.1484
+      }
+    },
+    "short.le": {
+      "expected": 2720,
+      "ticks": {
+        "interpreter-after": [
+          119026,
+          116479,
+          117206,
+          115108,
+          117520,
+          117372,
+          115614
+        ],
+        "interpreter-before": [
+          300062,
+          298584,
+          299633,
+          303389,
+          297408,
+          298665,
+          296766
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2861.4746,
+        "interpreter-before": 7291.626
+      }
+    },
+    "short.gt": {
+      "expected": 1376,
+      "ticks": {
+        "interpreter-after": [
+          118701,
+          116138,
+          117164,
+          115244,
+          117706,
+          116799,
+          115761
+        ],
+        "interpreter-before": [
+          299767,
+          298699,
+          297953,
+          296816,
+          295726,
+          296974,
+          295259
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2851.5381,
+        "interpreter-before": 7250.3418
+      }
+    },
+    "short.ge": {
+      "expected": 1444,
+      "ticks": {
+        "interpreter-after": [
+          118581,
+          116744,
+          118846,
+          116932,
+          118839,
+          117962,
+          116177
+        ],
+        "interpreter-before": [
+          299160,
+          301171,
+          301386,
+          303893,
+          296493,
+          303337,
+          297329
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2879.9316,
+        "interpreter-before": 7352.8076
+      }
+    },
+    "short.neg": {
+      "expected": 5024,
+      "ticks": {
+        "interpreter-after": [
+          97377,
+          96591,
+          98440,
+          96818,
+          98357,
+          97163,
+          95688
+        ],
+        "interpreter-before": [
+          231572,
+          235181,
+          231842,
+          231466,
+          230489,
+          232551,
+          231419
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2372.1436,
+        "interpreter-before": 5653.6133
+      }
+    },
+    "short.rem": {
+      "expected": -756,
+      "ticks": {
+        "interpreter-after": [
+          112664,
+          111480,
+          113178,
+          112067,
+          114809,
+          112813,
+          110897
+        ],
+        "interpreter-before": [
+          275192,
+          277889,
+          275594,
+          279711,
+          273880,
+          274993,
+          271570
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2750.5859,
+        "interpreter-before": 6718.5547
+      }
+    },
+    "short.and": {
+      "expected": 17492,
+      "ticks": {
+        "interpreter-after": [
+          113964,
+          112350,
+          112707,
+          110839,
+          112410,
+          112381,
+          110816
+        ],
+        "interpreter-before": [
+          274880,
+          278761,
+          279510,
+          273286,
+          274520,
+          272024,
+          272492
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2743.6768,
+        "interpreter-before": 6702.1484
+      }
+    },
+    "short.or": {
+      "expected": 12532,
+      "ticks": {
+        "interpreter-after": [
+          113247,
+          111531,
+          112706,
+          110471,
+          111034,
+          112558,
+          110592
+        ],
+        "interpreter-before": [
+          277339,
+          277977,
+          275913,
+          278862,
+          274740,
+          272860,
+          271735
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2722.9248,
+        "interpreter-before": 6736.1572
+      }
+    },
+    "short.xor": {
+      "expected": -4960,
+      "ticks": {
+        "interpreter-after": [
+          113145,
+          111458,
+          112290,
+          111959,
+          111648,
+          112943,
+          110865
+        ],
+        "interpreter-before": [
+          277102,
+          278381,
+          275942,
+          271759,
+          275999,
+          273832,
+          274364
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2733.374,
+        "interpreter-before": 6736.8652
+      }
+    },
+    "short.not_low_byte": {
+      "expected": 506784,
+      "ticks": {
+        "interpreter-after": [
+          115240,
+          113896,
+          114332,
+          112906,
+          112989,
+          113896,
+          112565
+        ],
+        "interpreter-before": [
+          307942,
+          306634,
+          312296,
+          313881,
+          308287,
+          307330,
+          307445
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2780.6641,
+        "interpreter-before": 7518.1152
+      }
+    },
+    "short.shl": {
+      "expected": -154072,
+      "ticks": {
+        "interpreter-after": [
+          123373,
+          122730,
+          122182,
+          121951,
+          121513,
+          121324,
+          120792
+        ],
+        "interpreter-before": [
+          305436,
+          305235,
+          306363,
+          301894,
+          304888,
+          301882,
+          315435
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2977.3193,
+        "interpreter-before": 7452.0264
+      }
+    },
+    "short.shr": {
+      "expected": -2492,
+      "ticks": {
+        "interpreter-after": [
+          125920,
+          121463,
+          121186,
+          120869,
+          121384,
+          121990,
+          120462
+        ],
+        "interpreter-before": [
+          305124,
+          305887,
+          303547,
+          309743,
+          305571,
+          302325,
+          303056
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2963.4766,
+        "interpreter-before": 7449.3164
+      }
+    },
+    "short.to_byte": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          94937,
+          94289,
+          93575,
+          93307,
+          93094,
+          94761,
+          92840
+        ],
+        "interpreter-before": [
+          248139,
+          250187,
+          250076,
+          248306,
+          250643,
+          249230,
+          249889
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2284.5459,
+        "interpreter-before": 6100.8057
+      }
+    },
+    "short.to_short": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          95861,
+          93679,
+          93425,
+          93061,
+          94168,
+          93657,
+          93367
+        ],
+        "interpreter-before": [
+          247366,
+          250659,
+          247719,
+          252550,
+          249154,
+          248931,
+          246691
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2286.5479,
+        "interpreter-before": 6077.417
+      }
+    },
+    "short.to_ushort": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          95208,
+          94519,
+          93306,
+          93706,
+          94447,
+          96089,
+          93064
+        ],
+        "interpreter-before": [
+          246637,
+          248767,
+          249941,
+          246196,
+          248642,
+          247985,
+          246413
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2305.835,
+        "interpreter-before": 6054.3213
+      }
+    },
+    "short.to_int": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-before": [
+          247426,
+          247286,
+          247061,
+          247818,
+          249005,
+          246968,
+          248144
+        ],
+        "interpreter-after": [
+          91588,
+          95395,
+          93550,
+          92481,
+          92079,
+          92601,
+          93506
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6040.6738,
+        "interpreter-after": 2260.7666
+      }
+    },
+    "short.to_uint": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-before": [
+          249046,
+          249971,
+          250236,
+          250312,
+          251763,
+          250007,
+          249431
+        ],
+        "interpreter-after": [
+          93568,
+          95127,
+          95568,
+          93227,
+          94621,
+          93417,
+          93866
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6103.6865,
+        "interpreter-after": 2291.6504
+      }
+    },
+    "short.to_long": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-before": [
+          246266,
+          246729,
+          246494,
+          248850,
+          248830,
+          246176,
+          247852
+        ],
+        "interpreter-after": [
+          93852,
+          95438,
+          94591,
+          93225,
+          93701,
+          94048,
+          93869
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6023.6572,
+        "interpreter-after": 2291.7236
+      }
+    },
+    "short.to_ulong": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-before": [
+          248562,
+          249550,
+          247835,
+          248909,
+          249395,
+          247855,
+          247995
+        ],
+        "interpreter-after": [
+          92965,
+          95907,
+          94725,
+          93497,
+          93395,
+          93513,
+          94900
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6068.4082,
+        "interpreter-after": 2283.0322
+      }
+    },
+    "short.to_float": {
+      "expected": 4683398365814194176,
+      "ticks": {
+        "interpreter-before": [
+          251577,
+          251904,
+          251247,
+          252912,
+          253472,
+          254433,
+          252358
+        ],
+        "interpreter-after": [
+          98738,
+          99278,
+          99748,
+          97603,
+          98812,
+          99170,
+          99207
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6161.084,
+        "interpreter-after": 2421.1426
+      }
+    },
+    "short.to_double": {
+      "expected": 4683398365814194176,
+      "ticks": {
+        "interpreter-before": [
+          250727,
+          251463,
+          259753,
+          253279,
+          252156,
+          251008,
+          251543
+        ],
+        "interpreter-after": [
+          97359,
+          98301,
+          99669,
+          97648,
+          96634,
+          98643,
+          97163
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6141.1865,
+        "interpreter-after": 2383.9844
+      }
+    },
+    "short.to_char": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-before": [
+          246943,
+          248473,
+          247154,
+          249585,
+          249570,
+          247793,
+          248493
+        ],
+        "interpreter-after": [
+          93458,
+          94666,
+          95168,
+          93938,
+          92680,
+          94726,
+          93524
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6066.2354,
+        "interpreter-after": 2293.4082
+      }
+    },
+    "ushort.add": {
+      "expected": 161096,
+      "ticks": {
+        "interpreter-before": [
+          273777,
+          274481,
+          273035,
+          277015,
+          274898,
+          277410,
+          275944
+        ],
+        "interpreter-after": [
+          112470,
+          116657,
+          115415,
+          113873,
+          113406,
+          113555,
+          113621
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6711.377,
+        "interpreter-after": 2773.9502
+      }
+    },
+    "ushort.sub": {
+      "expected": 156536,
+      "ticks": {
+        "interpreter-before": [
+          273132,
+          273894,
+          273352,
+          277395,
+          275162,
+          277603,
+          275598
+        ],
+        "interpreter-after": [
+          111831,
+          111106,
+          114533,
+          112951,
+          112497,
+          112877,
+          112778
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6717.8223,
+        "interpreter-after": 2753.3691
+      }
+    },
+    "ushort.mul": {
+      "expected": 1080452,
+      "ticks": {
+        "interpreter-before": [
+          272827,
+          273833,
+          272854,
+          275098,
+          273730,
+          276037,
+          275453
+        ],
+        "interpreter-after": [
+          113536,
+          111730,
+          114979,
+          113078,
+          113821,
+          113521,
+          112016
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6685.376,
+        "interpreter-after": 2771.5088
+      }
+    },
+    "ushort.div": {
+      "expected": 24268,
+      "ticks": {
+        "interpreter-before": [
+          274514,
+          273307,
+          279296,
+          277106,
+          275735,
+          276429,
+          274943
+        ],
+        "interpreter-after": [
+          111562,
+          112271,
+          115581,
+          112082,
+          112634,
+          113148,
+          112824
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6731.8115,
+        "interpreter-after": 2749.8535
+      }
+    },
+    "ushort.eq": {
+      "expected": 44,
+      "ticks": {
+        "interpreter-before": [
+          296317,
+          295791,
+          294709,
+          297653,
+          298758,
+          299127,
+          299193
+        ],
+        "interpreter-after": [
+          115472,
+          119020,
+          126700,
+          116797,
+          117262,
+          117135,
+          145564
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 7266.9189,
+        "interpreter-after": 2862.8418
+      }
+    },
+    "ushort.ne": {
+      "expected": 4052,
+      "ticks": {
+        "interpreter-before": [
+          296196,
+          296941,
+          295247,
+          298936,
+          299398,
+          300110,
+          300560
+        ],
+        "interpreter-after": [
+          117704,
+          116549,
+          117136,
+          117352,
+          117314,
+          117337,
+          117372
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 7298.2422,
+        "interpreter-after": 2864.6729
+      }
+    },
+    "ushort.lt": {
+      "expected": 584,
+      "ticks": {
+        "interpreter-before": [
+          295493,
+          296203,
+          295881,
+          298649,
+          297036,
+          298413,
+          298594
+        ],
+        "interpreter-after": [
+          115624,
+          116377,
+          117435,
+          116480,
+          118232,
+          117712,
+          115614
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 7251.8555,
+        "interpreter-after": 2843.75
+      }
+    },
+    "ushort.le": {
+      "expected": 628,
+      "ticks": {
+        "interpreter-before": [
+          296811,
+          297292,
+          297095,
+          298603,
+          299841,
+          298610,
+          298477
+        ],
+        "interpreter-after": [
+          116587,
+          118028,
+          118146,
+          117152,
+          117912,
+          117952,
+          117842
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 7287.0361,
+        "interpreter-after": 2878.7109
+      }
+    },
+    "ushort.gt": {
+      "expected": 3468,
+      "ticks": {
+        "interpreter-before": [
+          296371,
+          295400,
+          294956,
+          299000,
+          298349,
+          299131,
+          301494
+        ],
+        "interpreter-after": [
+          116083,
+          118338,
+          117758,
+          116931,
+          117639,
+          117360,
+          118827
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 7283.9111,
+        "interpreter-after": 2872.0459
+      }
+    },
+    "ushort.ge": {
+      "expected": 3512,
+      "ticks": {
+        "interpreter-after": [
+          117417,
+          118067,
+          118252,
+          116640,
+          117282,
+          115883,
+          117522
+        ],
+        "interpreter-before": [
+          297084,
+          297705,
+          305280,
+          296904,
+          296634,
+          297186,
+          299559
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2866.626,
+        "interpreter-before": 7255.5176
+      }
+    },
+    "ushort.rem": {
+      "expected": 15684,
+      "ticks": {
+        "interpreter-after": [
+          114173,
+          114828,
+          115512,
+          113587,
+          113189,
+          112708,
+          113272
+        ],
+        "interpreter-before": [
+          274721,
+          272542,
+          272067,
+          273801,
+          273379,
+          275299,
+          274629
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2773.1201,
+        "interpreter-before": 6684.5947
+      }
+    },
+    "ushort.and": {
+      "expected": 17492,
+      "ticks": {
+        "interpreter-after": [
+          113906,
+          115986,
+          114749,
+          115616,
+          113345,
+          113334,
+          112272
+        ],
+        "interpreter-before": [
+          273400,
+          272673,
+          273428,
+          272876,
+          274220,
+          275987,
+          273998
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2780.9082,
+        "interpreter-before": 6675.4883
+      }
+    },
+    "ushort.or": {
+      "expected": 143604,
+      "ticks": {
+        "interpreter-after": [
+          113499,
+          115469,
+          114308,
+          114387,
+          113697,
+          112804,
+          112746
+        ],
+        "interpreter-before": [
+          274635,
+          274140,
+          274095,
+          273453,
+          273028,
+          274688,
+          274993
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2775.8057,
+        "interpreter-before": 6692.8711
+      }
+    },
+    "ushort.xor": {
+      "expected": 126112,
+      "ticks": {
+        "interpreter-after": [
+          112621,
+          115106,
+          115600,
+          126336,
+          114298,
+          114154,
+          112773
+        ],
+        "interpreter-before": [
+          273775,
+          273883,
+          272438,
+          275062,
+          273287,
+          273813,
+          274116
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2790.4785,
+        "interpreter-before": 6684.8877
+      }
+    },
+    "ushort.not_low_byte": {
+      "expected": 918432,
+      "ticks": {
+        "interpreter-after": [
+          114137,
+          116920,
+          116603,
+          115300,
+          113287,
+          115150,
+          113905
+        ],
+        "interpreter-before": [
+          307410,
+          308136,
+          309132,
+          306482,
+          306791,
+          305761,
+          307933
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2811.2793,
+        "interpreter-before": 7505.127
+      }
+    },
+    "ushort.shl": {
+      "expected": 3832104,
+      "ticks": {
+        "interpreter-after": [
+          122534,
+          124762,
+          122737,
+          122377,
+          137874,
+          122687,
+          121006
+        ],
+        "interpreter-before": [
+          300416,
+          302934,
+          301948,
+          300697,
+          302948,
+          303843,
+          303985
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2995.2881,
+        "interpreter-before": 7395.8496
+      }
+    },
+    "ushort.shr": {
+      "expected": 31832,
+      "ticks": {
+        "interpreter-after": [
+          123043,
+          123682,
+          123222,
+          123119,
+          122146,
+          122934,
+          121748
+        ],
+        "interpreter-before": [
+          302092,
+          303533,
+          301699,
+          303315,
+          303831,
+          302860,
+          304243
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 3003.9795,
+        "interpreter-before": 7405.1514
+      }
+    },
+    "ushort.to_byte": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          94409,
+          95530,
+          94460,
+          94900,
+          94386,
+          93852,
+          93760
+        ],
+        "interpreter-before": [
+          260604,
+          250336,
+          247476,
+          246908,
+          247286,
+          248738,
+          249201
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2304.9072,
+        "interpreter-before": 6072.7051
+      }
+    },
+    "ushort.to_short": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          94466,
+          94875,
+          95124,
+          94747,
+          94076,
+          94924,
+          93173
+        ],
+        "interpreter-before": [
+          248146,
+          248526,
+          247137,
+          246195,
+          246007,
+          246350,
+          248920
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2313.1592,
+        "interpreter-before": 6033.6182
+      }
+    },
+    "ushort.to_ushort": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          95250,
+          94978,
+          94297,
+          93510,
+          93897,
+          94805,
+          94014
+        ],
+        "interpreter-before": [
+          247670,
+          249349,
+          246407,
+          245795,
+          245830,
+          249299,
+          256190
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2302.1729,
+        "interpreter-before": 6046.6309
+      }
+    },
+    "ushort.to_int": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          94362,
+          94643,
+          95267,
+          92978,
+          103136,
+          94103,
+          94061
+        ],
+        "interpreter-before": [
+          246813,
+          247968,
+          260329,
+          246355,
+          245494,
+          247146,
+          245971
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2303.7598,
+        "interpreter-before": 6025.708
+      }
+    },
+    "ushort.to_uint": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          94765,
+          95149,
+          97558,
+          93447,
+          94194,
+          94257,
+          94954
+        ],
+        "interpreter-before": [
+          249443,
+          249700,
+          249563,
+          247895,
+          248177,
+          247673,
+          247582
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2313.5986,
+        "interpreter-before": 6059.0088
+      }
+    },
+    "ushort.to_long": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          94743,
+          94144,
+          94855,
+          94907,
+          94253,
+          93603,
+          94516
+        ],
+        "interpreter-before": [
+          247878,
+          249240,
+          247706,
+          248023,
+          248206,
+          249190,
+          247374
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2307.5195,
+        "interpreter-before": 6055.249
+      }
+    },
+    "ushort.to_ulong": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          95222,
+          95047,
+          94644,
+          95604,
+          94689,
+          94414,
+          95093
+        ],
+        "interpreter-before": [
+          250240,
+          248622,
+          246766,
+          247065,
+          246431,
+          248797,
+          248145
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2320.4834,
+        "interpreter-before": 6058.2275
+      }
+    },
+    "ushort.to_float": {
+      "expected": 4683398365814194176,
+      "ticks": {
+        "interpreter-after": [
+          99351,
+          99814,
+          99896,
+          98615,
+          99435,
+          98900,
+          99900
+        ],
+        "interpreter-before": [
+          253441,
+          251757,
+          258661,
+          251606,
+          249031,
+          252489,
+          251441
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2427.6123,
+        "interpreter-before": 6146.4111
+      }
+    },
+    "ushort.to_double": {
+      "expected": 4683398365814194176,
+      "ticks": {
+        "interpreter-after": [
+          99946,
+          105735,
+          97856,
+          98079,
+          99220,
+          98647,
+          99817
+        ],
+        "interpreter-before": [
+          251478,
+          248895,
+          250647,
+          250855,
+          251438,
+          250550,
+          250363
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2422.3633,
+        "interpreter-before": 6119.3115
+      }
+    },
+    "ushort.to_char": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          95671,
+          101032,
+          93351,
+          94631,
+          94625,
+          94263,
+          96659
+        ],
+        "interpreter-before": [
+          248960,
+          247853,
+          247821,
+          248891,
+          248005,
+          248375,
+          247334
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2310.3271,
+        "interpreter-before": 6054.8096
+      }
+    },
+    "int.add": {
+      "expected": 30024,
+      "ticks": {
+        "interpreter-after": [
+          113274,
+          119040,
+          111813,
+          112575,
+          111145,
+          111791,
+          113731
+        ],
+        "interpreter-before": [
+          272851,
+          270771,
+          271645,
+          272844,
+          272792,
+          271771,
+          272005
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2748.4131,
+        "interpreter-before": 6640.7471
+      }
+    },
+    "int.sub": {
+      "expected": -40072,
+      "ticks": {
+        "interpreter-after": [
+          112574,
+          121570,
+          110099,
+          111779,
+          110660,
+          111441,
+          112492
+        ],
+        "interpreter-before": [
+          274990,
+          269786,
+          274860,
+          270701,
+          271022,
+          269400,
+          272223
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2728.9795,
+        "interpreter-before": 6616.748
+      }
+    },
+    "int.mul": {
+      "expected": -41084,
+      "ticks": {
+        "interpreter-after": [
+          114840,
+          124575,
+          111126,
+          111514,
+          111192,
+          111017,
+          114712
+        ],
+        "interpreter-before": [
+          277354,
+          270160,
+          271895,
+          270707,
+          272511,
+          269987,
+          271608
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2722.5098,
+        "interpreter-before": 6631.0547
+      }
+    },
+    "int.div": {
+      "expected": -1344,
+      "ticks": {
+        "interpreter-after": [
+          114173,
+          119955,
+          110014,
+          111945,
+          109933,
+          111392,
+          113466
+        ],
+        "interpreter-before": [
+          278530,
+          270001,
+          272716,
+          270348,
+          271042,
+          271804,
+          271731
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2733.0322,
+        "interpreter-before": 6634.0576
+      }
+    },
+    "int.eq": {
+      "expected": 68,
+      "ticks": {
+        "interpreter-after": [
+          119099,
+          124505,
+          115143,
+          116095,
+          115271,
+          115689,
+          118628
+        ],
+        "interpreter-before": [
+          300966,
+          293235,
+          294530,
+          295635,
+          295298,
+          294252,
+          294016
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2834.3506,
+        "interpreter-before": 7190.6738
+      }
+    },
+    "int.ne": {
+      "expected": 4028,
+      "ticks": {
+        "interpreter-after": [
+          116914,
+          124253,
+          116126,
+          116327,
+          115184,
+          115759,
+          118819
+        ],
+        "interpreter-before": [
+          296989,
+          292065,
+          293161,
+          294500,
+          294457,
+          295094,
+          294017
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2840.0146,
+        "interpreter-before": 7188.8916
+      }
+    },
+    "int.lt": {
+      "expected": 2652,
+      "ticks": {
+        "interpreter-after": [
+          120414,
+          123718,
+          114613,
+          114514,
+          115731,
+          115559,
+          117859
+        ],
+        "interpreter-before": [
+          299445,
+          293416,
+          293752,
+          290347,
+          292662,
+          293751,
+          294261
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2825.4639,
+        "interpreter-before": 7171.6553
+      }
+    },
+    "int.le": {
+      "expected": 2720,
+      "ticks": {
+        "interpreter-after": [
+          119776,
+          128553,
+          115322,
+          116175,
+          115521,
+          116264,
+          119130
+        ],
+        "interpreter-before": [
+          298064,
+          294259,
+          294745,
+          295265,
+          295535,
+          295966,
+          295633
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2838.4766,
+        "interpreter-before": 7215.21
+      }
+    },
+    "int.gt": {
+      "expected": 1376,
+      "ticks": {
+        "interpreter-after": [
+          119467,
+          128736,
+          115404,
+          115071,
+          116106,
+          115951,
+          117674
+        ],
+        "interpreter-before": [
+          293865,
+          293937,
+          293406,
+          293900,
+          295146,
+          294019,
+          295116
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2834.6191,
+        "interpreter-before": 7176.1963
+      }
+    },
+    "int.ge": {
+      "expected": 1444,
+      "ticks": {
+        "interpreter-after": [
+          119646,
+          123884,
+          115786,
+          116069,
+          115082,
+          117350,
+          119022
+        ],
+        "interpreter-before": [
+          297193,
+          294275,
+          292884,
+          294944,
+          296274,
+          296266,
+          295958
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2864.9902,
+        "interpreter-before": 7225.5371
+      }
+    },
+    "int.neg": {
+      "expected": 5024,
+      "ticks": {
+        "interpreter-after": [
+          97548,
+          102947,
+          95737,
+          96109,
+          95437,
+          97381,
+          97522
+        ],
+        "interpreter-before": [
+          230635,
+          229184,
+          230276,
+          227838,
+          230005,
+          229524,
+          228687
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2377.4658,
+        "interpreter-before": 5603.6133
+      }
+    },
+    "int.rem": {
+      "expected": -756,
+      "ticks": {
+        "interpreter-after": [
+          112795,
+          118367,
+          111295,
+          111272,
+          110863,
+          111749,
+          113380
+        ],
+        "interpreter-before": [
+          276495,
+          270264,
+          273665,
+          269209,
+          275107,
+          272241,
+          270149
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2728.2471,
+        "interpreter-before": 6646.5088
+      }
+    },
+    "int.and": {
+      "expected": 17492,
+      "ticks": {
+        "interpreter-after": [
+          113480,
+          118948,
+          110699,
+          110885,
+          110857,
+          112680,
+          113565
+        ],
+        "interpreter-before": [
+          273174,
+          269028,
+          273632,
+          269927,
+          271679,
+          271272,
+          270714
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2750.9766,
+        "interpreter-before": 6622.8516
+      }
+    },
+    "int.or": {
+      "expected": 12532,
+      "ticks": {
+        "interpreter-after": [
+          114765,
+          123636,
+          110951,
+          111458,
+          111236,
+          111567,
+          113715
+        ],
+        "interpreter-before": [
+          274714,
+          269066,
+          272549,
+          268688,
+          271886,
+          271023,
+          271512
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2723.8037,
+        "interpreter-before": 6628.7109
+      }
+    },
+    "int.xor": {
+      "expected": -4960,
+      "ticks": {
+        "interpreter-after": [
+          114181,
+          111139,
+          110710,
+          111957,
+          110873,
+          109982,
+          111273
+        ],
+        "interpreter-before": [
+          271627,
+          271875,
+          273144,
+          277490,
+          272222,
+          270717,
+          270448
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2713.3545,
+        "interpreter-before": 6637.5732
+      }
+    },
+    "int.not_low_byte": {
+      "expected": 506784,
+      "ticks": {
+        "interpreter-after": [
+          115944,
+          114564,
+          114909,
+          116409,
+          112951,
+          113768,
+          115232
+        ],
+        "interpreter-before": [
+          309100,
+          305539,
+          305495,
+          306967,
+          307011,
+          301755,
+          303030
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2805.3955,
+        "interpreter-before": 7459.4482
+      }
+    },
+    "int.shl": {
+      "expected": -154072,
+      "ticks": {
+        "interpreter-after": [
+          123879,
+          122515,
+          122152,
+          120763,
+          121042,
+          120383,
+          121815
+        ],
+        "interpreter-before": [
+          301562,
+          300545,
+          302578,
+          305266,
+          302604,
+          300379,
+          298852
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2973.999,
+        "interpreter-before": 7362.3535
+      }
+    },
+    "int.shr": {
+      "expected": -2492,
+      "ticks": {
+        "interpreter-after": [
+          124452,
+          124042,
+          119388,
+          121889,
+          120661,
+          121931,
+          122593
+        ],
+        "interpreter-before": [
+          299881,
+          301290,
+          303301,
+          303603,
+          300875,
+          301539,
+          298092
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2976.8311,
+        "interpreter-before": 7355.7129
+      }
+    },
+    "int.to_byte": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          95367,
+          95278,
+          93263,
+          95004,
+          93194,
+          93086,
+          93908
+        ],
+        "interpreter-before": [
+          248639,
+          248767,
+          249278,
+          248667,
+          248623,
+          247035,
+          245630
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2292.6758,
+        "interpreter-before": 6070.2881
+      }
+    },
+    "int.to_short": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          95158,
+          93287,
+          92206,
+          94156,
+          92528,
+          93964,
+          93549
+        ],
+        "interpreter-before": [
+          247085,
+          247805,
+          248123,
+          246235,
+          248463,
+          244274,
+          247315
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2283.9111,
+        "interpreter-before": 6037.9639
+      }
+    },
+    "int.to_ushort": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          95586,
+          92594,
+          92574,
+          95330,
+          93012,
+          93360,
+          95712
+        ],
+        "interpreter-before": [
+          246125,
+          247722,
+          248202,
+          247104,
+          248389,
+          246859,
+          245241
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2279.2969,
+        "interpreter-before": 6032.8125
+      }
+    },
+    "int.to_int": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          96062,
+          92851,
+          93530,
+          94057,
+          92827,
+          93755,
+          95320
+        ],
+        "interpreter-before": [
+          245191,
+          246527,
+          247890,
+          244593,
+          245691,
+          243779,
+          243392
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2288.9404,
+        "interpreter-before": 5986.1084
+      }
+    },
+    "int.to_uint": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          95930,
+          93545,
+          93362,
+          94278,
+          93213,
+          93933,
+          94631
+        ],
+        "interpreter-before": [
+          247769,
+          248919,
+          248721,
+          247757,
+          248364,
+          247367,
+          246781
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2293.2861,
+        "interpreter-before": 6049.0479
+      }
+    },
+    "int.to_long": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          95511,
+          93703,
+          93359,
+          94392,
+          92899,
+          94319,
+          94838
+        ],
+        "interpreter-before": [
+          247428,
+          246548,
+          248503,
+          246125,
+          247335,
+          245221,
+          242830
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2302.71,
+        "interpreter-before": 6019.2383
+      }
+    },
+    "int.to_ulong": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          95465,
+          92768,
+          93899,
+          94917,
+          93358,
+          93923,
+          94778
+        ],
+        "interpreter-before": [
+          248020,
+          248827,
+          248417,
+          246118,
+          247805,
+          245500,
+          245293
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2293.042,
+        "interpreter-before": 6049.9268
+      }
+    },
+    "int.to_float": {
+      "expected": 4683398365814194176,
+      "ticks": {
+        "interpreter-after": [
+          99536,
+          97221,
+          97152,
+          98985,
+          97646,
+          98301,
+          100305
+        ],
+        "interpreter-before": [
+          251908,
+          251390,
+          254007,
+          250216,
+          252141,
+          249327,
+          249752
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2399.9268,
+        "interpreter-before": 6137.4512
+      }
+    },
+    "int.to_double": {
+      "expected": 4683398365814194176,
+      "ticks": {
+        "interpreter-after": [
+          99304,
+          97070,
+          97140,
+          98702,
+          97221,
+          97237,
+          99235
+        ],
+        "interpreter-before": [
+          250792,
+          250967,
+          253750,
+          249707,
+          253327,
+          249576,
+          249888
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2373.9502,
+        "interpreter-before": 6122.8516
+      }
+    },
+    "int.to_char": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          95066,
+          92961,
+          93357,
+          94378,
+          92986,
+          93379,
+          94668
+        ],
+        "interpreter-before": [
+          247886,
+          248023,
+          248536,
+          247337,
+          248740,
+          247827,
+          245562
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2279.7607,
+        "interpreter-before": 6051.9043
+      }
+    },
+    "uint.add": {
+      "expected": 161096,
+      "ticks": {
+        "interpreter-after": [
+          117692,
+          113014,
+          113110,
+          114584,
+          113415,
+          112998,
+          116096
+        ],
+        "interpreter-before": [
+          277840,
+          278624,
+          279644,
+          280176,
+          279196,
+          276213,
+          274579
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2768.9209,
+        "interpreter-before": 6802.3438
+      }
+    },
+    "uint.sub": {
+      "expected": 156536,
+      "ticks": {
+        "interpreter-after": [
+          115107,
+          113864,
+          113379,
+          115918,
+          113571,
+          114817,
+          115897
+        ],
+        "interpreter-before": [
+          275694,
+          277639,
+          284078,
+          279921,
+          281289,
+          278226,
+          275955
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2803.1494,
+        "interpreter-before": 6792.627
+      }
+    },
+    "uint.mul": {
+      "expected": 1080452,
+      "ticks": {
+        "interpreter-after": [
+          113035,
+          113810,
+          114837,
+          112332,
+          113642,
+          113695,
+          113903
+        ],
+        "interpreter-before": [
+          285430,
+          282834,
+          279636,
+          282475,
+          280580,
+          282602,
+          279747
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2775.7568,
+        "interpreter-before": 6896.3623
+      }
+    },
+    "uint.div": {
+      "expected": 24268,
+      "ticks": {
+        "interpreter-after": [
+          115543,
+          115463,
+          114171,
+          115335,
+          114791,
+          115527,
+          112660
+        ],
+        "interpreter-before": [
+          286000,
+          281809,
+          278327,
+          278822,
+          279432,
+          284641,
+          280068
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2815.7959,
+        "interpreter-before": 6837.5977
+      }
+    },
+    "uint.eq": {
+      "expected": 44,
+      "ticks": {
+        "interpreter-after": [
+          117027,
+          123044,
+          118274,
+          118682,
+          117782,
+          115815,
+          116853
+        ],
+        "interpreter-before": [
+          311022,
+          306510,
+          299483,
+          306027,
+          303452,
+          308474,
+          302270
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2875.5371,
+        "interpreter-before": 7471.3623
+      }
+    },
+    "uint.ne": {
+      "expected": 4052,
+      "ticks": {
+        "interpreter-after": [
+          117669,
+          120102,
+          118612,
+          118779,
+          118818,
+          116420,
+          118026
+        ],
+        "interpreter-before": [
+          309317,
+          305000,
+          303836,
+          304142,
+          305955,
+          308913,
+          303798
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2895.8008,
+        "interpreter-before": 7446.2891
+      }
+    },
+    "uint.lt": {
+      "expected": 584,
+      "ticks": {
+        "interpreter-after": [
+          117477,
+          119236,
+          118837,
+          119083,
+          118942,
+          117944,
+          117449
+        ],
+        "interpreter-before": [
+          308849,
+          306208,
+          302904,
+          302704,
+          304745,
+          307744,
+          303087
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2901.2939,
+        "interpreter-before": 7440.0635
+      }
+    },
+    "uint.le": {
+      "expected": 628,
+      "ticks": {
+        "interpreter-after": [
+          118538,
+          120055,
+          119819,
+          118532,
+          119155,
+          118870,
+          119481
+        ],
+        "interpreter-before": [
+          310933,
+          305461,
+          302373,
+          304271,
+          304661,
+          308448,
+          302906
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2909.0576,
+        "interpreter-before": 7438.0127
+      }
+    },
+    "uint.gt": {
+      "expected": 3468,
+      "ticks": {
+        "interpreter-after": [
+          118979,
+          119758,
+          118872,
+          118999,
+          119152,
+          124929,
+          119846
+        ],
+        "interpreter-before": [
+          309882,
+          306287,
+          301666,
+          315634,
+          304067,
+          306789,
+          303758
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2908.9844,
+        "interpreter-before": 7477.71
+      }
+    },
+    "uint.ge": {
+      "expected": 3512,
+      "ticks": {
+        "interpreter-after": [
+          118871,
+          120606,
+          119645,
+          119659,
+          118596,
+          118704,
+          119086
+        ],
+        "interpreter-before": [
+          314493,
+          305634,
+          304844,
+          302772,
+          304607,
+          310614,
+          304736
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2907.373,
+        "interpreter-before": 7442.4805
+      }
+    },
+    "uint.rem": {
+      "expected": 15684,
+      "ticks": {
+        "interpreter-after": [
+          112383,
+          114590,
+          114668,
+          115085,
+          115019,
+          114207,
+          113633
+        ],
+        "interpreter-before": [
+          284287,
+          282123,
+          277134,
+          277172,
+          278409,
+          283396,
+          278039
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2797.6074,
+        "interpreter-before": 6797.0947
+      }
+    },
+    "uint.and": {
+      "expected": 17492,
+      "ticks": {
+        "interpreter-after": [
+          113942,
+          114655,
+          115097,
+          114889,
+          115103,
+          113830,
+          114158
+        ],
+        "interpreter-before": [
+          284312,
+          281033,
+          277032,
+          279343,
+          278764,
+          284191,
+          279941
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2799.1943,
+        "interpreter-before": 6834.4971
+      }
+    },
+    "uint.or": {
+      "expected": 143604,
+      "ticks": {
+        "interpreter-after": [
+          114105,
+          114654,
+          114580,
+          114330,
+          114895,
+          123280,
+          114412
+        ],
+        "interpreter-before": [
+          286159,
+          282652,
+          276719,
+          277427,
+          277960,
+          286799,
+          279180
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2797.3633,
+        "interpreter-before": 6815.918
+      }
+    },
+    "uint.xor": {
+      "expected": 126112,
+      "ticks": {
+        "interpreter-after": [
+          112851,
+          114252,
+          115502,
+          114005,
+          115296,
+          113709,
+          114031
+        ],
+        "interpreter-before": [
+          287428,
+          282633,
+          275786,
+          277484,
+          279650,
+          285895,
+          278629
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2783.96,
+        "interpreter-before": 6827.3926
+      }
+    },
+    "uint.not_low_byte": {
+      "expected": 918432,
+      "ticks": {
+        "interpreter-after": [
+          112644,
+          115443,
+          114469,
+          113225,
+          112908,
+          113422,
+          113294
+        ],
+        "interpreter-before": [
+          294815,
+          292356,
+          288299,
+          292084,
+          290561,
+          294876,
+          290134
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2765.9668,
+        "interpreter-before": 7130.957
+      }
+    },
+    "uint.shl": {
+      "expected": 3832104,
+      "ticks": {
+        "interpreter-after": [
+          122626,
+          125053,
+          123291,
+          123860,
+          123023,
+          123455,
+          123922
+        ],
+        "interpreter-before": [
+          315982,
+          311693,
+          308813,
+          307923,
+          310808,
+          316093,
+          309455
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 3014.0381,
+        "interpreter-before": 7588.0859
+      }
+    },
+    "uint.shr": {
+      "expected": 31832,
+      "ticks": {
+        "interpreter-after": [
+          123511,
+          124243,
+          124426,
+          124030,
+          123580,
+          124021,
+          123674
+        ],
+        "interpreter-before": [
+          316075,
+          312121,
+          308013,
+          308705,
+          310499,
+          314278,
+          309419
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 3027.8564,
+        "interpreter-before": 7580.542
+      }
+    },
+    "uint.to_byte": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          94114,
+          95026,
+          95450,
+          95389,
+          94338,
+          94197,
+          93996
+        ],
+        "interpreter-before": [
+          257421,
+          254044,
+          248359,
+          253420,
+          252624,
+          256232,
+          249173
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2303.1738,
+        "interpreter-before": 6187.0117
+      }
+    },
+    "uint.to_short": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-before": [
+          249822,
+          249781,
+          248888,
+          249285,
+          252169,
+          303278,
+          248005
+        ],
+        "interpreter-after": [
+          94520,
+          94388,
+          94120,
+          94917,
+          94628,
+          94272,
+          93765
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6098.1689,
+        "interpreter-after": 2304.3945
+      }
+    },
+    "uint.to_ushort": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-before": [
+          247808,
+          247651,
+          247498,
+          249920,
+          251048,
+          304017,
+          248565
+        ],
+        "interpreter-after": [
+          94181,
+          94543,
+          95175,
+          95401,
+          94522,
+          93948,
+          92867
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6068.4814,
+        "interpreter-after": 2307.666
+      }
+    },
+    "uint.to_int": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-before": [
+          247446,
+          248626,
+          249382,
+          249034,
+          250666,
+          302129,
+          247246
+        ],
+        "interpreter-after": [
+          92490,
+          95522,
+          94214,
+          94895,
+          93934,
+          94096,
+          94995
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6079.9316,
+        "interpreter-after": 2300.1465
+      }
+    },
+    "uint.to_uint": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-before": [
+          248045,
+          249651,
+          249120,
+          249975,
+          252518,
+          305809,
+          248806
+        ],
+        "interpreter-after": [
+          93387,
+          95745,
+          94170,
+          94283,
+          94420,
+          94222,
+          95333
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6094.9951,
+        "interpreter-after": 2301.8311
+      }
+    },
+    "uint.to_long": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-before": [
+          248890,
+          247526,
+          248057,
+          249184,
+          250700,
+          303899,
+          247965
+        ],
+        "interpreter-after": [
+          95010,
+          95811,
+          95647,
+          95868,
+          95404,
+          95210,
+          95044
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6076.416,
+        "interpreter-after": 2329.1992
+      }
+    },
+    "uint.to_ulong": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-before": [
+          248224,
+          248941,
+          248212,
+          249956,
+          252487,
+          303014,
+          247554
+        ],
+        "interpreter-after": [
+          92065,
+          95650,
+          95123,
+          95646,
+          97664,
+          95913,
+          94431
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6077.6611,
+        "interpreter-after": 2335.1074
+      }
+    },
+    "uint.to_float": {
+      "expected": 4683398365814194176,
+      "ticks": {
+        "interpreter-before": [
+          252417,
+          253598,
+          253391,
+          255331,
+          258057,
+          305067,
+          251398
+        ],
+        "interpreter-after": [
+          98232,
+          99015,
+          100256,
+          99955,
+          99821,
+          100108,
+          99616
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6191.3574,
+        "interpreter-after": 2437.0361
+      }
+    },
+    "uint.to_double": {
+      "expected": 4683398365814194176,
+      "ticks": {
+        "interpreter-before": [
+          252035,
+          251421,
+          252482,
+          254844,
+          256982,
+          300813,
+          250626
+        ],
+        "interpreter-after": [
+          98453,
+          99353,
+          100445,
+          99113,
+          99322,
+          99850,
+          98965
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6164.1113,
+        "interpreter-after": 2424.8535
+      }
+    },
+    "uint.to_char": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-before": [
+          248237,
+          246063,
+          247891,
+          250701,
+          251285,
+          300859,
+          248311
+        ],
+        "interpreter-after": [
+          93852,
+          94341,
+          94759,
+          94533,
+          95941,
+          94768,
+          94947
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6062.2803,
+        "interpreter-after": 2313.4521
+      }
+    },
+    "long.add": {
+      "expected": 30024,
+      "ticks": {
+        "interpreter-before": [
+          273801,
+          272810,
+          273919,
+          275333,
+          277731,
+          338421,
+          273098
+        ],
+        "interpreter-after": [
+          110975,
+          112410,
+          112369,
+          112426,
+          113645,
+          110400,
+          111472
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6687.4756,
+        "interpreter-after": 2743.3838
+      }
+    },
+    "long.sub": {
+      "expected": -40072,
+      "ticks": {
+        "interpreter-before": [
+          274341,
+          272810,
+          274155,
+          276083,
+          277112,
+          338723,
+          276154
+        ],
+        "interpreter-after": [
+          110301,
+          112593,
+          112183,
+          111167,
+          111802,
+          110449,
+          110911
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6740.3076,
+        "interpreter-after": 2714.0381
+      }
+    },
+    "long.mul": {
+      "expected": -41084,
+      "ticks": {
+        "interpreter-before": [
+          271638,
+          272699,
+          272471,
+          277695,
+          277110,
+          339315,
+          273929
+        ],
+        "interpreter-after": [
+          108137,
+          111602,
+          112892,
+          111640,
+          112142,
+          110845,
+          111717
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6687.7197,
+        "interpreter-after": 2725.5859
+      }
+    },
+    "long.div": {
+      "expected": -1344,
+      "ticks": {
+        "interpreter-before": [
+          272247,
+          273085,
+          275799,
+          277562,
+          275678,
+          339529,
+          272812
+        ],
+        "interpreter-after": [
+          109222,
+          112380,
+          112623,
+          111719,
+          112038,
+          121976,
+          111574
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6730.4199,
+        "interpreter-after": 2735.3027
+      }
+    },
+    "long.eq": {
+      "expected": 68,
+      "ticks": {
+        "interpreter-before": [
+          296450,
+          296852,
+          298584,
+          302869,
+          301147,
+          366926,
+          298186
+        ],
+        "interpreter-after": [
+          113881,
+          116586,
+          117180,
+          116787,
+          116760,
+          115513,
+          116215
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 7289.6484,
+        "interpreter-after": 2846.3379
+      }
+    },
+    "long.ne": {
+      "expected": 4028,
+      "ticks": {
+        "interpreter-before": [
+          296863,
+          294834,
+          298479,
+          302978,
+          305013,
+          366550,
+          297917
+        ],
+        "interpreter-after": [
+          114298,
+          118265,
+          117927,
+          116161,
+          117567,
+          116358,
+          116435
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 7287.085,
+        "interpreter-after": 2842.6514
+      }
+    },
+    "long.lt": {
+      "expected": 2652,
+      "ticks": {
+        "interpreter-before": [
+          295867,
+          295671,
+          298119,
+          302702,
+          299552,
+          366372,
+          296093
+        ],
+        "interpreter-after": [
+          113933,
+          116755,
+          117001,
+          116687,
+          116896,
+          115620,
+          116887
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 7278.2959,
+        "interpreter-after": 2850.4639
+      }
+    },
+    "long.le": {
+      "expected": 2720,
+      "ticks": {
+        "interpreter-before": [
+          300407,
+          300081,
+          298281,
+          300298,
+          299039,
+          299321,
+          300635
+        ],
+        "interpreter-after": [
+          117649,
+          116670,
+          123903,
+          117093,
+          115895,
+          116222,
+          116626
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 7326.1963,
+        "interpreter-after": 2848.3887
+      }
+    },
+    "long.gt": {
+      "expected": 1376,
+      "ticks": {
+        "interpreter-before": [
+          299966,
+          296554,
+          300125,
+          300661,
+          298304,
+          296962,
+          298008
+        ],
+        "interpreter-after": [
+          118246,
+          116802,
+          119573,
+          117982,
+          119013,
+          115821,
+          115854
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 7282.8125,
+        "interpreter-after": 2880.4199
+      }
+    },
+    "long.ge": {
+      "expected": 1444,
+      "ticks": {
+        "interpreter-before": [
+          301102,
+          300035,
+          299497,
+          299954,
+          298937,
+          310384,
+          298452
+        ],
+        "interpreter-after": [
+          117457,
+          117479,
+          119208,
+          115792,
+          116779,
+          115120,
+          117662
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 7323.0957,
+        "interpreter-after": 2867.6025
+      }
+    },
+    "long.neg": {
+      "expected": 5024,
+      "ticks": {
+        "interpreter-before": [
+          234218,
+          231342,
+          231767,
+          233334,
+          232221,
+          233268,
+          231511
+        ],
+        "interpreter-after": [
+          96491,
+          96593,
+          97559,
+          96347,
+          95481,
+          94370,
+          95428
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 5669.458,
+        "interpreter-after": 2352.2217
+      }
+    },
+    "long.rem": {
+      "expected": -756,
+      "ticks": {
+        "interpreter-before": [
+          276421,
+          276059,
+          273927,
+          275352,
+          274863,
+          282699,
+          275220
+        ],
+        "interpreter-after": [
+          111462,
+          112086,
+          113044,
+          111001,
+          110736,
+          112190,
+          111763
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6722.4609,
+        "interpreter-after": 2728.5889
+      }
+    },
+    "long.and": {
+      "expected": 17492,
+      "ticks": {
+        "interpreter-before": [
+          276386,
+          274790,
+          274331,
+          274528,
+          272329,
+          273329,
+          272437
+        ],
+        "interpreter-after": [
+          110966,
+          111841,
+          122086,
+          110628,
+          111488,
+          111273,
+          110641
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6697.5342,
+        "interpreter-after": 2716.626
+      }
+    },
+    "long.or": {
+      "expected": 12532,
+      "ticks": {
+        "interpreter-before": [
+          278347,
+          273121,
+          275547,
+          272819,
+          274164,
+          273763,
+          274644
+        ],
+        "interpreter-after": [
+          111847,
+          111832,
+          113270,
+          112998,
+          111651,
+          111270,
+          111096
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6693.457,
+        "interpreter-after": 2730.2734
+      }
+    },
+    "long.xor": {
+      "expected": -4960,
+      "ticks": {
+        "interpreter-before": [
+          277223,
+          275256,
+          274112,
+          274998,
+          273433,
+          274717,
+          274241
+        ],
+        "interpreter-after": [
+          111927,
+          112113,
+          113049,
+          111073,
+          112000,
+          111070,
+          110780
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6706.958,
+        "interpreter-after": 2732.5928
+      }
+    },
+    "long.not_low_byte": {
+      "expected": 506784,
+      "ticks": {
+        "interpreter-before": [
+          311668,
+          305370,
+          307227,
+          306956,
+          306211,
+          304278,
+          306921
+        ],
+        "interpreter-after": [
+          115124,
+          114851,
+          116485,
+          113710,
+          115550,
+          113822,
+          113992
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 7493.1885,
+        "interpreter-after": 2803.9795
+      }
+    },
+    "long.shl": {
+      "expected": -154072,
+      "ticks": {
+        "interpreter-before": [
+          306768,
+          304825,
+          306778,
+          304998,
+          305767,
+          303850,
+          306031
+        ],
+        "interpreter-after": [
+          122344,
+          121852,
+          123197,
+          120402,
+          121819,
+          120853,
+          122017
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 7465.0146,
+        "interpreter-after": 2974.9023
+      }
+    },
+    "long.shr": {
+      "expected": -2492,
+      "ticks": {
+        "interpreter-before": [
+          309284,
+          305026,
+          306698,
+          305789,
+          304092,
+          305371,
+          306481
+        ],
+        "interpreter-after": [
+          123495,
+          120504,
+          123490,
+          121031,
+          121901,
+          121372,
+          121294
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 7465.5518,
+        "interpreter-after": 2963.1836
+      }
+    },
+    "long.to_byte": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-before": [
+          248566,
+          248907,
+          248724,
+          248285,
+          248587,
+          247969,
+          246831
+        ],
+        "interpreter-after": [
+          93638,
+          92574,
+          94997,
+          93229,
+          93353,
+          92693,
+          92924
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6068.5059,
+        "interpreter-after": 2276.0986
+      }
+    },
+    "long.to_short": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-before": [
+          249042,
+          245255,
+          247148,
+          245931,
+          246980,
+          245724,
+          247110
+        ],
+        "interpreter-after": [
+          93286,
+          92681,
+          93787,
+          93232,
+          92837,
+          92725,
+          92504
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6029.7852,
+        "interpreter-after": 2266.5283
+      }
+    },
+    "long.to_ushort": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-before": [
+          248626,
+          247541,
+          247491,
+          248340,
+          246913,
+          245249,
+          247096
+        ],
+        "interpreter-after": [
+          94123,
+          92713,
+          94188,
+          93601,
+          93809,
+          92989,
+          93443
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6042.2607,
+        "interpreter-after": 2285.1807
+      }
+    },
+    "long.to_int": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-before": [
+          247513,
+          246832,
+          246545,
+          247570,
+          245951,
+          245521,
+          246634
+        ],
+        "interpreter-after": [
+          93219,
+          92521,
+          93679,
+          92029,
+          92217,
+          92523,
+          92959
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6021.3379,
+        "interpreter-after": 2258.8623
+      }
+    },
+    "long.to_uint": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-before": [
+          249247,
+          249346,
+          249049,
+          250472,
+          248355,
+          247370,
+          248024
+        ],
+        "interpreter-after": [
+          93615,
+          93691,
+          96103,
+          93064,
+          93470,
+          93502,
+          95512
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6080.2979,
+        "interpreter-after": 2285.5225
+      }
+    },
+    "long.to_long": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-before": [
+          247882,
+          251816,
+          251863,
+          247830,
+          249020,
+          248413,
+          251499
+        ],
+        "interpreter-after": [
+          94373,
+          92792,
+          93689,
+          93739,
+          93619,
+          93947,
+          94312
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6079.5898,
+        "interpreter-after": 2288.5498
+      }
+    },
+    "long.to_ulong": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-before": [
+          249141,
+          314394,
+          252123,
+          251439,
+          250966,
+          251210,
+          250838
+        ],
+        "interpreter-after": [
+          96547,
+          93992,
+          93718,
+          94044,
+          95386,
+          93709,
+          96399
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6133.0566,
+        "interpreter-after": 2295.9961
+      }
+    },
+    "long.to_float": {
+      "expected": 4683398365814194176,
+      "ticks": {
+        "interpreter-before": [
+          250224,
+          257885,
+          256276,
+          253094,
+          253767,
+          257940,
+          254000
+        ],
+        "interpreter-after": [
+          98409,
+          97881,
+          98055,
+          99481,
+          98633,
+          98163,
+          98874
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6201.1719,
+        "interpreter-after": 2402.5635
+      }
+    },
+    "long.to_double": {
+      "expected": 4683398365814194176,
+      "ticks": {
+        "interpreter-before": [
+          250907,
+          252490,
+          255069,
+          252845,
+          255402,
+          252882,
+          256053
+        ],
+        "interpreter-after": [
+          98142,
+          97266,
+          98423,
+          97903,
+          97973,
+          99138,
+          98787
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6173.877,
+        "interpreter-after": 2396.0449
+      }
+    },
+    "long.to_char": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-before": [
+          248352,
+          248795,
+          250019,
+          248030,
+          248546,
+          252237,
+          250714
+        ],
+        "interpreter-after": [
+          95054,
+          93603,
+          93815,
+          94524,
+          94563,
+          94294,
+          95097
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6074.0967,
+        "interpreter-after": 2307.7148
+      }
+    },
+    "ulong.add": {
+      "expected": 161096,
+      "ticks": {
+        "interpreter-before": [
+          278189,
+          278394,
+          281736,
+          277594,
+          275988,
+          282062,
+          278403
+        ],
+        "interpreter-after": [
+          113762,
+          113879,
+          114664,
+          115223,
+          114830,
+          114044,
+          115235
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6796.7285,
+        "interpreter-after": 2799.4141
+      }
+    },
+    "ulong.sub": {
+      "expected": 156536,
+      "ticks": {
+        "interpreter-before": [
+          278031,
+          277403,
+          278634,
+          276599,
+          277830,
+          280384,
+          279846
+        ],
+        "interpreter-after": [
+          115055,
+          114608,
+          114543,
+          113822,
+          114418,
+          113487,
+          115273
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6787.8662,
+        "interpreter-after": 2796.46
+      }
+    },
+    "ulong.mul": {
+      "expected": 1080452,
+      "ticks": {
+        "interpreter-before": [
+          276163,
+          276875,
+          280682,
+          275007,
+          277626,
+          280258,
+          280915
+        ],
+        "interpreter-after": [
+          115639,
+          115094,
+          114935,
+          114986,
+          126003,
+          116672,
+          115405
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6777.9785,
+        "interpreter-after": 2817.5049
+      }
+    },
+    "ulong.div": {
+      "expected": 24268,
+      "ticks": {
+        "interpreter-before": [
+          277762,
+          276575,
+          281427,
+          277749,
+          277077,
+          284040,
+          311338
+        ],
+        "interpreter-after": [
+          115185,
+          116114,
+          115144,
+          114174,
+          112975,
+          115351,
+          116726
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6781.2988,
+        "interpreter-after": 2812.1338
+      }
+    },
+    "ulong.eq": {
+      "expected": 44,
+      "ticks": {
+        "interpreter-before": [
+          300431,
+          300286,
+          302549,
+          300676,
+          301099,
+          303155,
+          303720
+        ],
+        "interpreter-after": [
+          118876,
+          119660,
+          119114,
+          118589,
+          119440,
+          123309,
+          119395
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 7351.0498,
+        "interpreter-after": 2914.917
+      }
+    },
+    "ulong.ne": {
+      "expected": 4052,
+      "ticks": {
+        "interpreter-before": [
+          299754,
+          300850,
+          302607,
+          300191,
+          301773,
+          303428,
+          303145
+        ],
+        "interpreter-after": [
+          119209,
+          119439,
+          118648,
+          118644,
+          119064,
+          117494,
+          119840
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 7367.5049,
+        "interpreter-after": 2906.8359
+      }
+    },
+    "ulong.lt": {
+      "expected": 584,
+      "ticks": {
+        "interpreter-before": [
+          300045,
+          300770,
+          303751,
+          301221,
+          301155,
+          302554,
+          301471
+        ],
+        "interpreter-after": [
+          120607,
+          119528,
+          119319,
+          119573,
+          120402,
+          118873,
+          118669
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 7354.0283,
+        "interpreter-after": 2918.1641
+      }
+    },
+    "ulong.le": {
+      "expected": 628,
+      "ticks": {
+        "interpreter-before": [
+          300677,
+          302106,
+          302820,
+          300252,
+          300403,
+          303288,
+          305668
+        ],
+        "interpreter-after": [
+          119081,
+          118697,
+          119438,
+          119023,
+          120267,
+          119637,
+          119544
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 7375.6348,
+        "interpreter-after": 2915.9668
+      }
+    },
+    "ulong.gt": {
+      "expected": 3468,
+      "ticks": {
+        "interpreter-before": [
+          300025,
+          319451,
+          302381,
+          299885,
+          302151,
+          305923,
+          302203
+        ],
+        "interpreter-after": [
+          119978,
+          119355,
+          118558,
+          119356,
+          121020,
+          119008,
+          118366
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 7378.0029,
+        "interpreter-after": 2913.9404
+      }
+    },
+    "ulong.ge": {
+      "expected": 3512,
+      "ticks": {
+        "interpreter-before": [
+          301893,
+          300651,
+          303617,
+          300391,
+          300189,
+          307667,
+          304018
+        ],
+        "interpreter-after": [
+          119792,
+          118820,
+          118941,
+          119201,
+          119785,
+          118339,
+          118657
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 7370.4346,
+        "interpreter-after": 2903.833
+      }
+    },
+    "ulong.rem": {
+      "expected": 15684,
+      "ticks": {
+        "interpreter-before": [
+          279264,
+          276781,
+          280775,
+          276259,
+          276975,
+          281414,
+          278871
+        ],
+        "interpreter-after": [
+          115123,
+          116021,
+          115173,
+          115796,
+          121254,
+          116307,
+          116734
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6808.374,
+        "interpreter-after": 2832.5439
+      }
+    },
+    "ulong.and": {
+      "expected": 17492,
+      "ticks": {
+        "interpreter-after": [
+          113825,
+          115017,
+          113675,
+          113618,
+          114590,
+          114076,
+          113558
+        ],
+        "interpreter-before": [
+          278886,
+          278986,
+          282110,
+          280899,
+          279835,
+          276354,
+          278135
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2778.9307,
+        "interpreter-before": 6811.1816
+      }
+    },
+    "ulong.or": {
+      "expected": 143604,
+      "ticks": {
+        "interpreter-after": [
+          115833,
+          119140,
+          115548,
+          114114,
+          114186,
+          116066,
+          115810
+        ],
+        "interpreter-before": [
+          277362,
+          277383,
+          282652,
+          277829,
+          278999,
+          278289,
+          276675
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2827.3926,
+        "interpreter-before": 6782.9346
+      }
+    },
+    "ulong.xor": {
+      "expected": 126112,
+      "ticks": {
+        "interpreter-after": [
+          114666,
+          116263,
+          115161,
+          113534,
+          113903,
+          115754,
+          114444
+        ],
+        "interpreter-before": [
+          275837,
+          277073,
+          280717,
+          279811,
+          278986,
+          277575,
+          275931
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2799.4629,
+        "interpreter-before": 6776.7334
+      }
+    },
+    "ulong.not_low_byte": {
+      "expected": 918432,
+      "ticks": {
+        "interpreter-after": [
+          113965,
+          115177,
+          112642,
+          113077,
+          114393,
+          113445,
+          114963
+        ],
+        "interpreter-before": [
+          291762,
+          287718,
+          293872,
+          293680,
+          291535,
+          288624,
+          290018
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2782.3486,
+        "interpreter-before": 7117.5537
+      }
+    },
+    "ulong.shl": {
+      "expected": 3832104,
+      "ticks": {
+        "interpreter-after": [
+          123640,
+          125645,
+          124009,
+          123235,
+          122440,
+          124772,
+          124157
+        ],
+        "interpreter-before": [
+          303882,
+          305127,
+          307405,
+          305696,
+          308593,
+          308405,
+          306098
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 3027.5635,
+        "interpreter-before": 7473.0957
+      }
+    },
+    "ulong.shr": {
+      "expected": 31832,
+      "ticks": {
+        "interpreter-after": [
+          124284,
+          126256,
+          123996,
+          123788,
+          124008,
+          124017,
+          123839
+        ],
+        "interpreter-before": [
+          307797,
+          306313,
+          305547,
+          312166,
+          308373,
+          310793,
+          305747
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 3027.5391,
+        "interpreter-before": 7514.5752
+      }
+    },
+    "ulong.to_byte": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          95328,
+          95101,
+          94409,
+          95026,
+          94964,
+          95833,
+          94899
+        ],
+        "interpreter-before": [
+          251281,
+          251112,
+          250533,
+          252117,
+          251872,
+          250098,
+          248329
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2319.9707,
+        "interpreter-before": 6130.6641
+      }
+    },
+    "ulong.to_short": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          94476,
+          95995,
+          94576,
+          94466,
+          95449,
+          95706,
+          94876
+        ],
+        "interpreter-before": [
+          251606,
+          249912,
+          250870,
+          251826,
+          250551,
+          247900,
+          247756
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2316.3086,
+        "interpreter-before": 6116.9678
+      }
+    },
+    "ulong.to_ushort": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          95940,
+          97634,
+          95020,
+          94061,
+          95365,
+          95489,
+          95889
+        ],
+        "interpreter-before": [
+          249427,
+          250067,
+          249729,
+          250210,
+          250120,
+          248457,
+          248382
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2331.2744,
+        "interpreter-before": 6096.8994
+      }
+    },
+    "ulong.to_int": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          94710,
+          94063,
+          94012,
+          94338,
+          94968,
+          94796,
+          96015
+        ],
+        "interpreter-before": [
+          250396,
+          248252,
+          249661,
+          248368,
+          249315,
+          247490,
+          247778
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2312.2559,
+        "interpreter-before": 6063.6719
+      }
+    },
+    "ulong.to_uint": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          95548,
+          95289,
+          94848,
+          95376,
+          94046,
+          95584,
+          96294
+        ],
+        "interpreter-before": [
+          251364,
+          250660,
+          250369,
+          250538,
+          248764,
+          250359,
+          249992
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2328.5156,
+        "interpreter-before": 6112.5244
+      }
+    },
+    "ulong.to_long": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          97513,
+          97527,
+          94713,
+          98790,
+          97690,
+          95094,
+          94657
+        ],
+        "interpreter-before": [
+          249964,
+          250216,
+          251644,
+          251333,
+          250873,
+          249692,
+          249077
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2380.6885,
+        "interpreter-before": 6108.7891
+      }
+    },
+    "ulong.to_ulong": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          94674,
+          94650,
+          104053,
+          93929,
+          97402,
+          95058,
+          95014
+        ],
+        "interpreter-before": [
+          247215,
+          249354,
+          250866,
+          251439,
+          250536,
+          249030,
+          249224
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2319.6777,
+        "interpreter-before": 6087.7441
+      }
+    },
+    "ulong.to_float": {
+      "expected": 4683398365814194176,
+      "ticks": {
+        "interpreter-after": [
+          99365,
+          99056,
+          99681,
+          99744,
+          99807,
+          98645,
+          98262
+        ],
+        "interpreter-before": [
+          252954,
+          253942,
+          257817,
+          256584,
+          254926,
+          255636,
+          252979
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2425.9033,
+        "interpreter-before": 6223.7793
+      }
+    },
+    "ulong.to_double": {
+      "expected": 4683398365814194176,
+      "ticks": {
+        "interpreter-after": [
+          99125,
+          99658,
+          98885,
+          99073,
+          99622,
+          98664,
+          98399
+        ],
+        "interpreter-before": [
+          254618,
+          253452,
+          255348,
+          254247,
+          262405,
+          252492,
+          253840
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2418.7744,
+        "interpreter-before": 6207.2021
+      }
+    },
+    "ulong.to_char": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          95261,
+          94463,
+          94548,
+          94090,
+          96042,
+          94733,
+          93998
+        ],
+        "interpreter-before": [
+          249526,
+          247897,
+          254349,
+          251244,
+          257019,
+          248598,
+          249023
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2308.3008,
+        "interpreter-before": 6091.9434
+      }
+    },
+    "float.add": {
+      "expected": 4667108001537064960,
+      "ticks": {
+        "interpreter-after": [
+          118179,
+          118110,
+          117382,
+          117271,
+          123566,
+          116991,
+          116972
+        ],
+        "interpreter-before": [
+          286642,
+          284422,
+          287767,
+          293065,
+          283224,
+          282539,
+          283151
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2865.7715,
+        "interpreter-before": 6943.8965
+      }
+    },
+    "float.sub": {
+      "expected": 13894804417623883776,
+      "ticks": {
+        "interpreter-after": [
+          119419,
+          119411,
+          119080,
+          119944,
+          124928,
+          118937,
+          120982
+        ],
+        "interpreter-before": [
+          292170,
+          282389,
+          282859,
+          289678,
+          280010,
+          281660,
+          281306
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2915.5029,
+        "interpreter-before": 6894.2627
+      }
+    },
+    "float.mul": {
+      "expected": 13886686723276013568,
+      "ticks": {
+        "interpreter-after": [
+          119359,
+          118450,
+          118142,
+          117671,
+          122783,
+          118542,
+          119378
+        ],
+        "interpreter-before": [
+          284350,
+          281862,
+          284431,
+          291042,
+          281728,
+          280293,
+          281156
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2894.0918,
+        "interpreter-before": 6881.3965
+      }
+    },
+    "float.div": {
+      "expected": 13882851626718330880,
+      "ticks": {
+        "interpreter-after": [
+          117962,
+          118818,
+          118896,
+          118073,
+          124163,
+          118202,
+          119707
+        ],
+        "interpreter-before": [
+          282105,
+          281217,
+          282634,
+          289571,
+          280444,
+          280490,
+          280445
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2900.8301,
+        "interpreter-before": 6865.6494
+      }
+    },
+    "float.eq": {
+      "expected": 68,
+      "ticks": {
+        "interpreter-after": [
+          121071,
+          120847,
+          119702,
+          119268,
+          124922,
+          119706,
+          121495
+        ],
+        "interpreter-before": [
+          302495,
+          300063,
+          304422,
+          312911,
+          305270,
+          303796,
+          304777
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2950.3662,
+        "interpreter-before": 7432.1777
+      }
+    },
+    "float.ne": {
+      "expected": 4028,
+      "ticks": {
+        "interpreter-after": [
+          121396,
+          121567,
+          120434,
+          120807,
+          125227,
+          121000,
+          122078
+        ],
+        "interpreter-before": [
+          303458,
+          299975,
+          304185,
+          314233,
+          303649,
+          307734,
+          304903
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2963.7695,
+        "interpreter-before": 7426.3916
+      }
+    },
+    "float.lt": {
+      "expected": 2364,
+      "ticks": {
+        "interpreter-after": [
+          122068,
+          122188,
+          120960,
+          121120,
+          125453,
+          121835,
+          121731
+        ],
+        "interpreter-before": [
+          304468,
+          301106,
+          305194,
+          311719,
+          304521,
+          302879,
+          303161
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2974.4873,
+        "interpreter-before": 7433.3008
+      }
+    },
+    "float.le": {
+      "expected": 2432,
+      "ticks": {
+        "interpreter-after": [
+          121972,
+          121571,
+          121193,
+          121020,
+          125792,
+          120912,
+          121452
+        ],
+        "interpreter-before": [
+          305207,
+          299490,
+          304742,
+          312242,
+          304704,
+          300380,
+          304262
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2965.1367,
+        "interpreter-before": 7439.0625
+      }
+    },
+    "float.gt": {
+      "expected": 1664,
+      "ticks": {
+        "interpreter-after": [
+          122217,
+          121472,
+          121058,
+          120462,
+          125232,
+          120927,
+          122097
+        ],
+        "interpreter-before": [
+          306605,
+          301989,
+          306713,
+          313419,
+          305019,
+          303212,
+          301325
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2965.625,
+        "interpreter-before": 7446.7529
+      }
+    },
+    "float.ge": {
+      "expected": 1732,
+      "ticks": {
+        "interpreter-after": [
+          122221,
+          120074,
+          120994,
+          120630,
+          126607,
+          123044,
+          121639
+        ],
+        "interpreter-before": [
+          303451,
+          302319,
+          305170,
+          312334,
+          304148,
+          301497,
+          302041
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2969.7021,
+        "interpreter-before": 7408.4717
+      }
+    },
+    "float.neg": {
+      "expected": 4662245961119039488,
+      "ticks": {
+        "interpreter-after": [
+          102031,
+          101210,
+          101841,
+          101056,
+          104253,
+          101134,
+          102076
+        ],
+        "interpreter-before": [
+          242610,
+          236591,
+          240201,
+          245048,
+          239351,
+          236226,
+          235448
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2486.3525,
+        "interpreter-before": 5843.5303
+      }
+    },
+    "float.to_byte": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          97455,
+          97337,
+          96871,
+          97123,
+          100479,
+          98558,
+          97718
+        ],
+        "interpreter-before": [
+          255677,
+          252751,
+          255309,
+          260491,
+          252701,
+          255009,
+          258181
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2379.2725,
+        "interpreter-before": 6233.1299
+      }
+    },
+    "float.to_short": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          98129,
+          97267,
+          96821,
+          96727,
+          99835,
+          97422,
+          97124
+        ],
+        "interpreter-before": [
+          254048,
+          251639,
+          254884,
+          261468,
+          251451,
+          253345,
+          252635
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2374.6826,
+        "interpreter-before": 6185.1807
+      }
+    },
+    "float.to_ushort": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          120833,
+          98115,
+          97754,
+          97734,
+          99923,
+          97286,
+          99525
+        ],
+        "interpreter-before": [
+          254472,
+          251680,
+          254379,
+          259655,
+          253632,
+          252076,
+          252108
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2395.3857,
+        "interpreter-before": 6192.1875
+      }
+    },
+    "float.to_int": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          98329,
+          97520,
+          97279,
+          96023,
+          99734,
+          97448,
+          98422
+        ],
+        "interpreter-before": [
+          255781,
+          248640,
+          253808,
+          260315,
+          253693,
+          251179,
+          252301
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2380.8594,
+        "interpreter-before": 6193.6768
+      }
+    },
+    "float.to_uint": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          98426,
+          97401,
+          98824,
+          97263,
+          100450,
+          97649,
+          99886
+        ],
+        "interpreter-before": [
+          256859,
+          252454,
+          255266,
+          262029,
+          253514,
+          252938,
+          257961
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2402.9785,
+        "interpreter-before": 6232.0801
+      }
+    },
+    "float.to_long": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          96668,
+          97075,
+          96969,
+          99460,
+          97395,
+          98733,
+          103416
+        ],
+        "interpreter-before": [
+          304426,
+          280939,
+          258324,
+          509405,
+          257585,
+          251503,
+          255641
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2377.8076,
+        "interpreter-before": 6306.7383
+      }
+    },
+    "float.to_ulong": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          98642,
+          122965,
+          98474,
+          164133,
+          98065,
+          100134,
+          100482
+        ],
+        "interpreter-before": [
+          273811,
+          263724,
+          260772,
+          377470,
+          258168,
+          265825,
+          283659
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2444.6777,
+        "interpreter-before": 6489.8682
+      }
+    },
+    "float.to_float": {
+      "expected": 4683539103302549504,
+      "ticks": {
+        "interpreter-after": [
+          98970,
+          101292,
+          99567,
+          100197,
+          100598,
+          140677,
+          99009
+        ],
+        "interpreter-before": [
+          258590,
+          296743,
+          263310,
+          257500,
+          262780,
+          262282,
+          264536
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2446.2158,
+        "interpreter-before": 6415.5273
+      }
+    },
+    "float.to_double": {
+      "expected": 4683539103302549504,
+      "ticks": {
+        "interpreter-after": [
+          101030,
+          101775,
+          100746,
+          100991,
+          101733,
+          101242,
+          101125
+        ],
+        "interpreter-before": [
+          256966,
+          256723,
+          297224,
+          254476,
+          259973,
+          257712,
+          255306
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2468.8721,
+        "interpreter-before": 6273.584
+      }
+    },
+    "double.add": {
+      "expected": 4667108001537064960,
+      "ticks": {
+        "interpreter-after": [
+          115540,
+          118430,
+          117224,
+          118261,
+          118162,
+          118911,
+          116993
+        ],
+        "interpreter-before": [
+          280390,
+          281517,
+          347568,
+          281455,
+          284631,
+          278522,
+          284102
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2884.8145,
+        "interpreter-before": 6872.9736
+      }
+    },
+    "double.sub": {
+      "expected": 13894804417623883776,
+      "ticks": {
+        "interpreter-after": [
+          115485,
+          119159,
+          117752,
+          118510,
+          205769,
+          118930,
+          117879
+        ],
+        "interpreter-before": [
+          279488,
+          279321,
+          286746,
+          280417,
+          284370,
+          292781,
+          553917
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2893.3105,
+        "interpreter-before": 6942.627
+      }
+    },
+    "double.mul": {
+      "expected": 13886686723276013568,
+      "ticks": {
+        "interpreter-after": [
+          117389,
+          119095,
+          116795,
+          117877,
+          240802,
+          119201,
+          122847
+        ],
+        "interpreter-before": [
+          280934,
+          278691,
+          287748,
+          297897,
+          284353,
+          282208,
+          549282
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2907.5928,
+        "interpreter-before": 6942.2119
+      }
+    },
+    "double.div": {
+      "expected": 13882851626718330880,
+      "ticks": {
+        "interpreter-after": [
+          117203,
+          143122,
+          117619,
+          118581,
+          238884,
+          119038,
+          117401
+        ],
+        "interpreter-before": [
+          279607,
+          279873,
+          293312,
+          278861,
+          284919,
+          282353,
+          545579
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2895.0439,
+        "interpreter-before": 6893.3838
+      }
+    },
+    "double.eq": {
+      "expected": 68,
+      "ticks": {
+        "interpreter-after": [
+          120026,
+          120862,
+          119959,
+          120636,
+          240474,
+          120954,
+          238234
+        ],
+        "interpreter-before": [
+          304763,
+          339413,
+          407471,
+          302322,
+          306845,
+          306735,
+          575425
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2950.7324,
+        "interpreter-before": 7491.333
+      }
+    },
+    "double.ne": {
+      "expected": 4028,
+      "ticks": {
+        "interpreter-after": [
+          120397,
+          121631,
+          120972,
+          121517,
+          235010,
+          120617,
+          251253
+        ],
+        "interpreter-before": [
+          302867,
+          406432,
+          305991,
+          302497,
+          304994,
+          301775,
+          548305
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2966.7236,
+        "interpreter-before": 7446.1426
+      }
+    },
+    "double.lt": {
+      "expected": 2364,
+      "ticks": {
+        "interpreter-after": [
+          122269,
+          122290,
+          121881,
+          122142,
+          231784,
+          122738,
+          228618
+        ],
+        "interpreter-before": [
+          304277,
+          449051,
+          306536,
+          305392,
+          358081,
+          303081,
+          366311
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2985.5957,
+        "interpreter-before": 7483.7891
+      }
+    },
+    "double.le": {
+      "expected": 2432,
+      "ticks": {
+        "interpreter-after": [
+          121287,
+          121607,
+          121772,
+          122239,
+          244654,
+          123010,
+          252794
+        ],
+        "interpreter-before": [
+          302670,
+          302044,
+          305556,
+          303172,
+          308985,
+          310651,
+          304938
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2984.3506,
+        "interpreter-before": 7444.7754
+      }
+    },
+    "double.gt": {
+      "expected": 1664,
+      "ticks": {
+        "interpreter-after": [
+          121682,
+          121819,
+          123287,
+          122796,
+          243648,
+          122297,
+          228754
+        ],
+        "interpreter-before": [
+          302178,
+          362061,
+          304815,
+          301156,
+          307854,
+          301808,
+          372992
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2997.9492,
+        "interpreter-before": 7441.7725
+      }
+    },
+    "double.ge": {
+      "expected": 1732,
+      "ticks": {
+        "interpreter-after": [
+          122047,
+          169678,
+          126449,
+          122374,
+          246236,
+          122752,
+          228530
+        ],
+        "interpreter-before": [
+          304754,
+          360273,
+          304768,
+          304233,
+          307974,
+          302933,
+          385526
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 3087.1338,
+        "interpreter-before": 7440.625
+      }
+    },
+    "double.neg": {
+      "expected": 4662245961119039488,
+      "ticks": {
+        "interpreter-after": [
+          99696,
+          102048,
+          201743,
+          101337,
+          100876,
+          100717,
+          159302
+        ],
+        "interpreter-before": [
+          238153,
+          236196,
+          237087,
+          232787,
+          238805,
+          232149,
+          243181
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2474.0479,
+        "interpreter-before": 5788.2568
+      }
+    },
+    "double.to_byte": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          96027,
+          96920,
+          194707,
+          97882,
+          146419,
+          97103,
+          96757
+        ],
+        "interpreter-before": [
+          276931,
+          469781,
+          254991,
+          258934,
+          258350,
+          252194,
+          257300
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2370.6787,
+        "interpreter-before": 6307.373
+      }
+    },
+    "double.to_short": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          96543,
+          97299,
+          97951,
+          97172,
+          96931,
+          97427,
+          97642
+        ],
+        "interpreter-before": [
+          255104,
+          251929,
+          256660,
+          254472,
+          253887,
+          261597,
+          256606
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2375.4639,
+        "interpreter-before": 6228.125
+      }
+    },
+    "double.to_ushort": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          99015,
+          98422,
+          99199,
+          98244,
+          98529,
+          98171,
+          99331
+        ],
+        "interpreter-before": [
+          254704,
+          252563,
+          256831,
+          255121,
+          253155,
+          345230,
+          370292
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2405.4932,
+        "interpreter-before": 6228.54
+      }
+    },
+    "double.to_int": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          97824,
+          97324,
+          97261,
+          97226,
+          97662,
+          97224,
+          98126
+        ],
+        "interpreter-before": [
+          252129,
+          251917,
+          255193,
+          252689,
+          253241,
+          257630,
+          256413
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2376.0742,
+        "interpreter-before": 6182.6416
+      }
+    },
+    "double.to_uint": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          99038,
+          96852,
+          99074,
+          97802,
+          98918,
+          98155,
+          97929
+        ],
+        "interpreter-before": [
+          254993,
+          254263,
+          257531,
+          257275,
+          254130,
+          257618,
+          419304
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2396.3623,
+        "interpreter-before": 6281.1279
+      }
+    },
+    "double.to_long": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          98636,
+          97744,
+          97777,
+          97022,
+          98260,
+          98933,
+          98373
+        ],
+        "interpreter-before": [
+          254223,
+          253386,
+          256736,
+          258197,
+          253896,
+          259776,
+          260572
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2398.9258,
+        "interpreter-before": 6267.9688
+      }
+    },
+    "double.to_ulong": {
+      "expected": 126048,
+      "ticks": {
+        "interpreter-after": [
+          99170,
+          97242,
+          96916,
+          97442,
+          99057,
+          99417,
+          97880
+        ],
+        "interpreter-before": [
+          254762,
+          252544,
+          255954,
+          255582,
+          253335,
+          258775,
+          257869
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2389.6484,
+        "interpreter-before": 6239.7949
+      }
+    },
+    "double.to_float": {
+      "expected": 4683539103302549504,
+      "ticks": {
+        "interpreter-after": [
+          101844,
+          101104,
+          100277,
+          100843,
+          101105,
+          101352,
+          100650
+        ],
+        "interpreter-before": [
+          256543,
+          256158,
+          259642,
+          260035,
+          259292,
+          262026,
+          407347
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2468.3594,
+        "interpreter-before": 6338.916
+      }
+    },
+    "double.to_double": {
+      "expected": 4683539103302549504,
+      "ticks": {
+        "interpreter-after": [
+          99982,
+          100375,
+          100501,
+          100746,
+          100991,
+          112919,
+          100470
+        ],
+        "interpreter-before": [
+          255536,
+          256313,
+          258285,
+          256987,
+          256485,
+          258992,
+          258559
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2453.6377,
+        "interpreter-before": 6274.0967
+      }
+    },
+    "int.logical_and": {
+      "expected": 948,
+      "ticks": {
+        "interpreter-after": [
+          124149,
+          124752,
+          124377,
+          124442,
+          124040,
+          128786,
+          123475
+        ],
+        "interpreter-before": [
+          306383,
+          303957,
+          307315,
+          310755,
+          305156,
+          311098,
+          308001
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 3036.5479,
+        "interpreter-before": 7502.8076
+      }
+    },
+    "int.logical_or": {
+      "expected": 3016,
+      "ticks": {
+        "interpreter-after": [
+          125952,
+          125243,
+          125315,
+          125877,
+          125136,
+          151198,
+          123090
+        ],
+        "interpreter-before": [
+          309111,
+          305118,
+          308493,
+          311911,
+          306386,
+          311809,
+          305768
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 3059.4482,
+        "interpreter-before": 7531.5674
+      }
+    },
+    "int.logical_not": {
+      "expected": 2196,
+      "ticks": {
+        "interpreter-after": [
+          118539,
+          120208,
+          118589,
+          119540,
+          119990,
+          121926,
+          118447
+        ],
+        "interpreter-before": [
+          300856,
+          298872,
+          300855,
+          303446,
+          298516,
+          306892,
+          300352
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2918.457,
+        "interpreter-before": 7345.0928
+      }
+    },
+    "int.select": {
+      "expected": 51276,
+      "ticks": {
+        "interpreter-after": [
+          117534,
+          116478,
+          116508,
+          117317,
+          118725,
+          141320,
+          115896
+        ],
+        "interpreter-before": [
+          299267,
+          297691,
+          299537,
+          303128,
+          302519,
+          305343,
+          298249
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 2864.1846,
+        "interpreter-before": 7312.915
+      }
+    },
+    "loop.for": {
+      "expected": 133545312,
+      "ticks": {
+        "interpreter-after": [
+          43774,
+          43341,
+          42842,
+          42886,
+          43301,
+          43100,
+          43351
+        ],
+        "interpreter-before": [
+          115294,
+          113635,
+          114828,
+          115441,
+          114927,
+          119132,
+          114345
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 1057.1533,
+        "interpreter-before": 2805.835
+      }
+    },
+    "loop.while": {
+      "expected": 133545312,
+      "ticks": {
+        "interpreter-after": [
+          49912,
+          48622,
+          48628,
+          48613,
+          49175,
+          53445,
+          48956
+        ],
+        "interpreter-before": [
+          120062,
+          119350,
+          121491,
+          123856,
+          128564,
+          122808,
+          119272
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 1195.2148,
+        "interpreter-before": 2966.0889
+      }
+    },
+    "loop.prefix_inc": {
+      "expected": 133545312,
+      "ticks": {
+        "interpreter-after": [
+          41622,
+          41466,
+          41162,
+          41003,
+          41847,
+          41294,
+          41918
+        ],
+        "interpreter-before": [
+          112963,
+          111602,
+          113031,
+          118217,
+          112837,
+          118104,
+          112058
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 1012.3535,
+        "interpreter-before": 2757.8857
+      }
+    },
+    "loop.postfix_inc": {
+      "expected": 133545312,
+      "ticks": {
+        "interpreter-after": [
+          41680,
+          41074,
+          41129,
+          41058,
+          41812,
+          41153,
+          41559
+        ],
+        "interpreter-before": [
+          111191,
+          110577,
+          112025,
+          112983,
+          110334,
+          120680,
+          110337
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-after": 1004.7119,
+        "interpreter-before": 2714.624
+      }
+    },
+    "loop.prefix_dec": {
+      "expected": 133545312,
+      "ticks": {
+        "interpreter-before": [
+          111493,
+          112013,
+          113987,
+          112332,
+          111374,
+          114494,
+          111138
+        ],
+        "interpreter-after": [
+          41147,
+          41120,
+          41552,
+          41336,
+          41995,
+          41264,
+          41036
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 2734.6924,
+        "interpreter-after": 1007.4219
+      }
+    },
+    "loop.postfix_dec": {
+      "expected": 133545312,
+      "ticks": {
+        "interpreter-before": [
+          111246,
+          111713,
+          111711,
+          112363,
+          111060,
+          114103,
+          111416
+        ],
+        "interpreter-after": [
+          41982,
+          42281,
+          42481,
+          42211,
+          43214,
+          42292,
+          41991
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 2727.3193,
+        "interpreter-after": 1032.251
+      }
+    },
+    "loop.foreach": {
+      "expected": 133545312,
+      "ticks": {
+        "interpreter-before": [
+          68206,
+          67220,
+          68598,
+          67287,
+          69225,
+          68509,
+          67451
+        ],
+        "interpreter-after": [
+          23291,
+          23532,
+          23535,
+          24035,
+          23290,
+          23414,
+          23351
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 1665.1855,
+        "interpreter-after": 571.6309
+      }
+    },
+    "loop.local_copy": {
+      "expected": 133545312,
+      "ticks": {
+        "interpreter-before": [
+          177813,
+          179220,
+          179710,
+          179188,
+          178173,
+          181661,
+          178034
+        ],
+        "interpreter-after": [
+          65341,
+          65726,
+          67239,
+          66062,
+          67058,
+          66893,
+          65964
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 4374.707,
+        "interpreter-after": 1612.8418
+      }
+    },
+    "access.array_write_read": {
+      "expected": 100763611,
+      "ticks": {
+        "interpreter-before": [
+          261984,
+          262545,
+          264845,
+          265098,
+          262391,
+          267908,
+          262528
+        ],
+        "interpreter-after": [
+          113864,
+          115560,
+          117493,
+          115551,
+          115575,
+          116362,
+          115231
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 6409.79,
+        "interpreter-after": 2821.2891
+      }
+    },
+    "copy.struct_8B": {
+      "expected": 66644132,
+      "ticks": {
+        "interpreter-before": [
+          294133,
+          294027,
+          295506,
+          298311,
+          295444,
+          302518,
+          294358
+        ],
+        "interpreter-after": [
+          164903,
+          163484,
+          165595,
+          164738,
+          163088,
+          165587,
+          161990
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 7212.9883,
+        "interpreter-after": 4021.9238
+      }
+    },
+    "copy.struct_48B": {
+      "expected": 399965282,
+      "ticks": {
+        "interpreter-before": [
+          478136,
+          468869,
+          469741,
+          479659,
+          475008,
+          477072,
+          475931
+        ],
+        "interpreter-after": [
+          330581,
+          316272,
+          329049,
+          326661,
+          319380,
+          320501,
+          316420
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 11619.4092,
+        "interpreter-after": 7824.7314
+      }
+    },
+    "bool.eq": {
+      "expected": 1976,
+      "ticks": {
+        "interpreter-before": [
+          211918,
+          213058,
+          212600,
+          212870,
+          210878,
+          217548,
+          210392
+        ],
+        "interpreter-after": [
+          94415,
+          94063,
+          94339,
+          93241,
+          93222,
+          94319,
+          95298
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 5190.4297,
+        "interpreter-after": 2302.71
+      }
+    },
+    "bool.ne": {
+      "expected": 2120,
+      "ticks": {
+        "interpreter-before": [
+          211952,
+          211094,
+          211983,
+          212953,
+          212711,
+          218280,
+          210575
+        ],
+        "interpreter-after": [
+          94525,
+          94391,
+          94361,
+          94169,
+          95190,
+          94623,
+          92338
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 5175.3662,
+        "interpreter-after": 2304.4678
+      }
+    },
+    "char.eq": {
+      "expected": 32,
+      "ticks": {
+        "interpreter-before": [
+          211416,
+          212275,
+          210700,
+          212533,
+          212706,
+          218988,
+          209659
+        ],
+        "interpreter-after": [
+          95617,
+          95320,
+          94295,
+          94775,
+          93854,
+          94836,
+          94825
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 5182.4951,
+        "interpreter-after": 2315.0635
+      }
+    },
+    "char.ne": {
+      "expected": 4064,
+      "ticks": {
+        "interpreter-before": [
+          212046,
+          234029,
+          210166,
+          219956,
+          212055,
+          217733,
+          212509
+        ],
+        "interpreter-after": [
+          94891,
+          94456,
+          94134,
+          95716,
+          94622,
+          94455,
+          95429
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 5188.208,
+        "interpreter-after": 2310.1074
+      }
+    },
+    "double.to_ulong_full_range": {
+      "expected": 133545312,
+      "ticks": {
+        "interpreter-before": [
+          176340,
+          179979,
+          177412,
+          178415,
+          175344,
+          181693,
+          175924
+        ],
+        "interpreter-after": [
+          65585,
+          65099,
+          65263,
+          79096,
+          65342,
+          64558,
+          65277
+        ]
+      },
+      "median_ns_per_iteration": {
+        "interpreter-before": 4331.3477,
+        "interpreter-after": 1593.6768
+      }
+    }
+  }
+}

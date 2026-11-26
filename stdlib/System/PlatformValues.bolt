@@ -1,0 +1,144 @@
+import System
+import System.Text.Json.Internal
+namespace Bolt.Runtime;
+
+struct JsonMember {
+public:
+    string key;
+    int child;
+}
+struct JsonNode {
+public:
+    int kind;
+    ulong bits;
+    string text;
+    Buffer<int> children;
+    Buffer<JsonMember> members;
+}
+
+struct JsonArena {
+public:
+    Buffer<JsonNode> nodes;
+    int root = -1;
+}
+
+// Nodes are addressed by index so growing the arena during a recursive encode
+// never invalidates a parent. Object keys use the same ordinal order as BJS1.
+public class ValueTree {
+private:
+    // Capture cells share one stable allocation across value copies.
+    ICaptureCell<JsonArena> owner;
+    JsonArena* arena;
+    static void Validate(const string& text) {
+        try { int scalars = text.Length; }
+        catch (Exception& error) { throw JsonException(error.Message); }
+    }
+    int Append(int kind, ulong bits, const string& text) {
+        JsonNode value; value.kind = kind; value.bits = bits; value.text = text;
+        int index = arena->nodes.Length; arena->nodes.Add(value); return index;
+    }
+    [ReadOnly] void Check(int node) {
+        if (node < 0 || node >= arena->nodes.Length) throw JsonException("Invalid value-tree node.");
+    }
+    [ReadOnly] void Expect(int node, int kind) {
+        if (Kind(node) != kind) throw JsonException("Unexpected JSON value type.");
+    }
+    [ReadOnly] int LowerBound(int node, const string& key) {
+        int lo = 0, hi = arena->nodes[node].members.Length;
+        while (lo < hi) {
+            int mid = lo + (hi-lo)/2;
+            if (arena->nodes[node].members[mid].key.CompareTo(key) < 0) lo = mid+1; else hi = mid;
+        }
+        return lo;
+    }
+    int Encode<T>(const T& value, int depth) { throw JsonException(); }
+    [ReadOnly] T Decode<T>(int node, int depth) { throw JsonException(); }
+    [ReadOnly] double NumberValue(int node) {
+        int k = Kind(node);
+        if (k == 2) return (double)Integer(node);
+        if (k == 3) return (double)Natural(node);
+        return Floating(node);
+    }
+public:
+    ValueTree() : owner(ClosureStorage.Create<JsonArena>(JsonArena())) {
+        arena = &owner.Get();
+    }
+    int Null() { return Append(0,0ul,""); }
+    int Bool(bool value) { return Append(1,value ? 1ul : 0ul,""); }
+    int Signed(long value) { return Append(2,Reinterpret<ulong>(value),""); }
+    int Unsigned(ulong value) { return Append(3,value,""); }
+    int Real(double value) {
+        ulong bits = Reinterpret<ulong>(value);
+        if (((bits >> 52) & 2047ul) == 2047ul) throw JsonException("Non-finite JSON number.");
+        return Append(4,bits,"");
+    }
+    int Text(const string& value) { Validate(value); return Append(5,0ul,value); }
+    int Array() { return Append(6,0ul,""); }
+    int Object() { return Append(7,0ul,""); }
+    void Add(int parent, int child) {
+        Check(child); Expect(parent,6); arena->nodes[parent].children.Add(child);
+    }
+    void Put(int parent, const string& key, int child) {
+        Check(child); Expect(parent,7); Validate(key); int i = LowerBound(parent,key);
+        if (i < arena->nodes[parent].members.Length && arena->nodes[parent].members[i].key == key)
+            throw JsonException("Duplicate JSON object key: " + key);
+        JsonMember member; member.key = key; member.child = child;
+        arena->nodes[parent].members.Insert(i,member);
+    }
+    void SetRoot(int node) { Check(node); arena->root = node; }
+    [ReadOnly] int Root() { Check(arena->root); return arena->root; }
+    [ReadOnly] int Kind(int node) { Check(node); return arena->nodes[node].kind; }
+    [ReadOnly] bool Boolean(int node) { Expect(node,1); return arena->nodes[node].bits != 0ul; }
+    [ReadOnly] long Integer(int node) { Expect(node,2); return Reinterpret<long>(arena->nodes[node].bits); }
+    [ReadOnly] ulong Natural(int node) { Expect(node,3); return arena->nodes[node].bits; }
+    [ReadOnly] double Floating(int node) { Expect(node,4); return Reinterpret<double>(arena->nodes[node].bits); }
+    [ReadOnly] string String(int node) { Expect(node,5); return arena->nodes[node].text; }
+    [ReadOnly] int Count(int node) {
+        int k = Kind(node); if (k != 6 && k != 7) throw JsonException("Expected a JSON container.");
+        return k == 6 ? arena->nodes[node].children.Length : arena->nodes[node].members.Length;
+    }
+    [ReadOnly] int Child(int node, int index) {
+        Expect(node,6);
+        if (index < 0 || index >= Count(node)) throw JsonException("Invalid JSON child index.");
+        return arena->nodes[node].children[index];
+    }
+    [ReadOnly] string[] Keys(int node) {
+        Expect(node,7);
+        string[] keys = new string[arena->nodes[node].members.Length];
+        for (int i=0; i<keys.Length; i++) keys[i] = arena->nodes[node].members[i].key;
+        return keys;
+    }
+    [ReadOnly] int Find(int node, const string& key) {
+        Expect(node,7); int i = LowerBound(node,key);
+        if (i < arena->nodes[node].members.Length && arena->nodes[node].members[i].key == key) return arena->nodes[node].members[i].child;
+        return -1;
+    }
+    [ReadOnly] int Member(int node, const string& key) {
+        int child = Find(node,key);
+        if (child < 0) throw JsonException("Unknown JSON member.");
+        return child;
+    }
+    int NumberBytes(const byte[]& bytes, int offset, int count, bool real, bool negative) {
+        if (offset < 0 || count <= 0 || offset > bytes.Length-count) throw JsonException("Invalid numeric byte span.");
+        if (real) return Real(JsonDecimal.Parse(bytes,offset,offset+count,negative));
+        ulong limit = negative ? 9223372036854775808ul : ulong.MaxValue, n = 0ul;
+        for (int i = negative ? offset+1 : offset; i < offset+count; i++) {
+            int digit = (int)bytes[i]-48;
+            if (digit < 0 || digit > 9 || n > (limit-(ulong)digit)/10ul)
+                throw JsonException("JSON integer is outside the 64-bit range.");
+            n = n*10ul + (ulong)digit;
+        }
+        if (!negative) return Unsigned(n);
+        return Signed(n == 9223372036854775808ul ? long.MinValue : -(long)n);
+    }
+    [ReadOnly] string NumberText(int node) {
+        int kind = Kind(node);
+        if (kind == 2) return (string)Integer(node);
+        if (kind == 3) return (string)Natural(node);
+        return FloatFormatting.Format(Floating(node),17);
+    }
+    static ValueTree FromObject<T>(const T& value) {
+        ValueTree tree; int node = tree.Encode<T>(value,0); tree.SetRoot(node); return tree;
+    }
+    [ReadOnly] T ToObject<T>() { return Decode<T>(Root(),0); }
+}

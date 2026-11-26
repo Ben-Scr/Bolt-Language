@@ -1,0 +1,17 @@
+import System.Threading
+
+static class Program {
+public:
+    int Main() {
+        Atomic<long> counter;
+        long sum = 0l;
+        for (int i = 0; i < 8000000; i++) {
+            long next = counter.Add(1l);
+            long loaded = counter.Load();
+            if (loaded != next) return 1;
+            sum += loaded;
+        }
+        Print(sum);
+        return 0;
+    }
+}

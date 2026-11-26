@@ -1,0 +1,50 @@
+import System
+import System.Memory
+
+static class Program {
+public:
+    int Probe(byte* dst, byte* src, ulong copied, byte* edit, byte value,
+              byte* left, byte* right, ulong compared) {
+        Memory.Copy(dst, src, copied);
+        *edit = value;
+        return Memory.Compare(left, right, compared);
+    }
+
+    int Equal(byte* dst, byte* src, ulong copied, ulong compared) {
+        Memory.Copy(dst, src, copied);
+        return Memory.Compare(dst, src, compared);
+    }
+
+    byte Change(byte* p) { p[0] = (byte)200; return (byte)0; }
+
+    int Main() {
+        byte[] x = [(byte)12, (byte)100, (byte)121, (byte)31, (byte)14];
+        byte[] y = [(byte)12, (byte)100, (byte)121, (byte)35, (byte)14];
+        byte[] z = [(byte)0, (byte)1, (byte)2, (byte)3];
+        byte* a = &x[0];
+        byte* b = &y[0];
+        byte* c = &z[0];
+        if (Probe(b, a, 3ul, &b[1], (byte)255, a, b, 3ul) != -1) return 1;
+        if (Probe(b, a, 3ul, &a[0], (byte)205, a, b, 3ul) != 1) return 2;
+        if (Probe(b, a, 3ul, &a[2], (byte)4, b, a, 3ul) != 1) return 3;
+        if (Probe(b, a, 3ul, &b[2], (byte)201, b, a, 2ul) != 0) return 4;
+        if (Probe(b, a, 3ul, c, (byte)11, b, a, 3ul) != 0) return 5;
+        if (Probe(b, a, 3ul, c, (byte)11, a, c, 3ul) != 1) return 6;
+        if (Equal(b, a, 3ul, 4ul) != 1) return 7;
+        if (Equal(null, null, 0ul, 0ul) != 0) return 8;
+        if (Probe(b, a, 0ul, c, (byte)11, null, null, 0ul) != 0) return 9;
+        bool failed = false;
+        try { Equal(&a[1], a, 2ul, 1ul); }
+        catch (Exception e) { failed = true; }
+        if (!failed) return 10;
+        Memory.Copy(b, a, 3ul);
+        b[2] = Change(b);
+        int sign = Memory.Compare(a, b, 3ul);
+        if (sign != 1) return 11;
+        failed = false;
+        try { Probe(b, a, 0ul, c, (byte)11, null, null, 1ul); }
+        catch (Exception e) { failed = true; }
+        if (!failed) return 12;
+        return 0;
+    }
+}

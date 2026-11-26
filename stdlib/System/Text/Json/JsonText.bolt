@@ -1,0 +1,186 @@
+import System
+import System.Collections.Generic
+import Bolt.Runtime
+namespace System.Text.Json.Internal;
+
+// Wire grammar and escaping are ordinary Bolt, shared by every Json<T> call.
+// Input is walked as bytes, not repeated linear UTF-8 scalar indexing.
+public static class JsonText
+{
+private:
+    void Fail(int position) { throw JsonException("Invalid JSON at byte " + position); }
+    void Depth(int depth) { if (depth > 96) throw JsonException("JSON nesting exceeds 96 levels."); }
+    void Space(const byte[]& data, int& p)
+    { while (p < data.Length && (data[p] == 32 || data[p] == 9 || data[p] == 10 || data[p] == 13)) p++; }
+    bool Take(const byte[]& data, int& p, int c)
+    { Space(data, p); if (p < data.Length && data[p] == c) { p++; return true; } return false; }
+    int Byte(const byte[]& data, int& p)
+    { if (p >= data.Length) Fail(p); return data[p++]; }
+    int Hex4(const byte[]& data, int& p)
+    {
+        int value = 0;
+        for (int i = 0; i < 4; i++)
+        {
+            int c = Byte(data, p), digit = 0;
+            if (c >= 48 && c <= 57) digit = c - 48;
+            elif (c >= 65 && c <= 70) digit = c - 65 + 10;
+            elif (c >= 97 && c <= 102) digit = c - 97 + 10;
+            else Fail(p - 1);
+            value = value * 16 + digit;
+        }
+        return value;
+    }
+    string ReadString(const byte[]& data, int& p)
+    {
+        if (!Take(data, p, 34)) Fail(p);
+        List<byte> out;
+        while (p < data.Length)
+        {
+            int c = Byte(data, p);
+            if (c == 34) return string.FromUtf8(out.ToArray());
+            if (c < 32) Fail(p - 1);
+            if (c != 92) { out.Add((byte)c); continue; }
+            c = Byte(data, p);
+            if (c == 34 || c == 92 || c == 47) out.Add((byte)c);
+            elif (c == 98) out.Add((byte)8);
+            elif (c == 102) out.Add((byte)12);
+            elif (c == 110) out.Add((byte)10);
+            elif (c == 114) out.Add((byte)13);
+            elif (c == 116) out.Add((byte)9);
+            elif (c == 117)
+            {
+                int scalar = Hex4(data, p);
+                if (scalar >= 55296 && scalar <= 56319)
+                {
+                    if (Byte(data, p) != 92 || Byte(data, p) != 117) Fail(p);
+                    int low = Hex4(data, p);
+                    if (low < 56320 || low > 57343) Fail(p);
+                    scalar = 65536 + (scalar - 55296) * 1024 + low - 56320;
+                }
+                elif (scalar >= 56320 && scalar <= 57343) Fail(p);
+                string encoded = (string)(char)scalar;
+                out.AddRange(encoded.ToUtf8());
+            }
+            else Fail(p - 1);
+        }
+        Fail(p); return "";
+    }
+    bool Digit(const byte[]& data, int p) { return p < data.Length && data[p] >= 48 && data[p] <= 57; }
+    void Literal(const byte[]& data, int& p, const string& text)
+    {
+        byte[] wanted = text.ToUtf8();
+        for (int i = 0; i < wanted.Length; i++) if (Byte(data, p) != wanted[i]) Fail(p - 1);
+    }
+    int Number(const byte[]& data, int& p, ValueTree& tree)
+    {
+        int start = p;
+        bool negative = p < data.Length && data[p] == 45;
+        if (negative) p++;
+        if (!Digit(data, p)) Fail(p);
+        if (data[p] == 48) p++;
+        else { while (Digit(data, p)) p++; }
+        bool real = false;
+        if (p < data.Length && data[p] == 46)
+        { real = true; p++; if (!Digit(data, p)) Fail(p); while (Digit(data, p)) p++; }
+        if (p < data.Length && (data[p] == 101 || data[p] == 69))
+        {
+            real = true; p++;
+            if (p < data.Length && (data[p] == 43 || data[p] == 45)) p++;
+            if (!Digit(data, p)) Fail(p);
+            while (Digit(data, p)) p++;
+        }
+        return tree.NumberBytes(data, start, p - start, real, negative);
+    }
+    int Value(const byte[]& data, int& p, ValueTree& tree, int depth)
+    {
+        Depth(depth); Space(data, p);
+        if (p == data.Length) Fail(p);
+        int c = data[p];
+        if (c == 34) return tree.Text(ReadString(data, p));
+        if (c == 110) { Literal(data, p, "null"); return tree.Null(); }
+        if (c == 116) { Literal(data, p, "true"); return tree.Bool(true); }
+        if (c == 102) { Literal(data, p, "false"); return tree.Bool(false); }
+        if (c == 91)
+        {
+            p++; int array = tree.Array();
+            if (Take(data, p, 93)) return array;
+            while (true)
+            {
+                int child = Value(data, p, tree, depth + 1); tree.Add(array, child);
+                if (Take(data, p, 93)) return array;
+                if (!Take(data, p, 44)) Fail(p);
+            }
+        }
+        if (c == 123)
+        {
+            p++; int object = tree.Object();
+            if (Take(data, p, 125)) return object;
+            while (true)
+            {
+                string key = ReadString(data, p);
+                if (!Take(data, p, 58)) Fail(p);
+                int child = Value(data, p, tree, depth + 1); tree.Put(object, key, child);
+                if (Take(data, p, 125)) return object;
+                if (!Take(data, p, 44)) Fail(p);
+            }
+        }
+        return Number(data, p, tree);
+    }
+    void Quoted(const string& text, List<byte>& output)
+    {
+        byte[] bytes = text.ToUtf8();
+        output.Add((byte)34);
+        for (int i = 0; i < bytes.Length; i++)
+        {
+            int c = bytes[i];
+            if (c == 34 || c == 92) { output.Add((byte)92); output.Add((byte)c); }
+            elif (c < 32)
+            {
+                output.Add((byte)92); output.Add((byte)117); output.Add((byte)48); output.Add((byte)48);
+                int high = c / 16, low = c % 16;
+                output.Add((byte)(high < 10 ? 48 + high : 87 + high));
+                output.Add((byte)(low < 10 ? 48 + low : 87 + low));
+            }
+            else output.Add((byte)c);
+        }
+        output.Add((byte)34);
+    }
+    void Write(const ValueTree& tree, int node, List<byte>& output, int depth)
+    {
+        Depth(depth); int kind = tree.Kind(node);
+        if (kind == 0) output.AddRange("null".ToUtf8());
+        elif (kind == 1) output.AddRange((tree.Boolean(node) ? "true" : "false").ToUtf8());
+        elif (kind >= 2 && kind <= 4) output.AddRange(tree.NumberText(node).ToUtf8());
+        elif (kind == 5) Quoted(tree.String(node), output);
+        elif (kind == 6)
+        {
+            output.Add((byte)91);
+            int count = tree.Count(node);
+            for (int i = 0; i < count; i++)
+            { if (i > 0) output.Add((byte)44); Write(tree, tree.Child(node, i), output, depth + 1); }
+            output.Add((byte)93);
+        }
+        else
+        {
+            output.Add((byte)123);
+            string[] keys = tree.Keys(node);
+            for (int i = 0; i < keys.Length; i++)
+            {
+                if (i > 0) output.Add((byte)44);
+                Quoted(keys[i], output); output.Add((byte)58);
+                Write(tree, tree.Member(node, keys[i]), output, depth + 1);
+            }
+            output.Add((byte)125);
+        }
+    }
+public:
+    ValueTree Parse(const byte[]& data)
+    {
+        ValueTree result; int p = 0;
+        int root = Value(data, p, result, 0); result.SetRoot(root); Space(data, p);
+        if (p != data.Length) Fail(p);
+        return result;
+    }
+    byte[] Encode(const ValueTree& tree)
+    { List<byte> bytes; Write(tree, tree.Root(), bytes, 0); return bytes.ToArray(); }
+}

@@ -1,0 +1,5 @@
+
+
+static class Program { public: void Main() {
+Runtime.ExecuteProgram("import System.Collections.Generic\n class Box<T>{public:T X;Box(T x){X=x;}} static class Program{public:void Main(){Box<int> b=Box<int>(8);int& x=b.X;x++;List<int> l;l.Add(x);Console.WriteLine(l[0]);}}");
+} }

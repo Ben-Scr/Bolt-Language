@@ -1,0 +1,23 @@
+namespace Bolt.Runtime;
+#if Web || Android || IOS
+public static class ThreadOps {
+public:
+    void Yield(){Bolt.Runtime.Threading.RegistryYield();}
+    void Sleep(int milliseconds){
+        if(milliseconds<0)Failure.Range("Sleep duration must be non-negative.");
+        if(milliseconds==0){Yield();return;}
+        Bolt.Runtime.Threading.TimeSample duration, remaining;
+        duration.Seconds=milliseconds/1000;
+        duration.Nanoseconds=(milliseconds%1000)*1000000;
+        while(Bolt.Runtime.Threading.Sleep((void*)&duration,(void*)&remaining)!=0){
+#ifdef Web
+            int interrupted=27;
+#else
+            int interrupted=4;
+#endif
+            if(*Bolt.Runtime.Threading.Errno()!=interrupted)Failure.InvalidOperation("nanosleep failed.");
+            duration=remaining;
+        }
+    }
+}
+#endif

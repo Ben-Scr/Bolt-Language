@@ -1,0 +1,95 @@
+import System
+namespace System.Security.Cryptography;
+
+// Cryptographically secure random bytes obtained directly from the host OS.
+// The operating system owns entropy collection and DRBG state; Bolt only
+// validates buffers and forwards them to the native OS C ABI.
+public static class RandomNumberGenerator
+{
+private:
+    static void FillPointer(byte* buffer, ulong length)
+    {
+        if (length == 0ul) return;
+        if (buffer == null) throw ArgumentNullException("Random byte buffer cannot be null.");
+
+#ifdef Windows
+        // BCryptGenRandom takes ULONG, so split very large Bolt arrays into
+        // independently generated chunks. BCRYPT_USE_SYSTEM_PREFERRED_RNG = 2.
+        ulong offset = 0ul;
+        while (offset < length)
+        {
+            ulong remaining = length - offset;
+            uint amount = remaining > 4294967295ul ? 4294967295u : (uint)remaining;
+            int status = Bolt.Runtime.Windows.BCryptGenRandom(null, &buffer[offset], amount, 2u);
+            if (status < 0) throw IOException("BCryptGenRandom failed.");
+            offset += (ulong)amount;
+        }
+#endif
+
+#ifdef Linux
+        // A blocking getrandom call may return fewer bytes than requested.
+        // Retry EINTR (errno 4) and continue until the entire buffer is filled.
+        ulong offset = 0ul;
+        while (offset < length)
+        {
+            long received = Bolt.Runtime.Linux.GetRandom(&buffer[offset], length - offset, 0u);
+            if (received > 0l)
+            {
+                offset += (ulong)received;
+                continue;
+            }
+            if (received == 0l) throw IOException("getrandom returned no random data.");
+            int* error = Bolt.Runtime.Linux.ErrnoLocation();
+            if (error != null && *error == 4) continue;
+            throw IOException("getrandom failed.");
+        }
+#endif
+
+#ifdef Web
+        if (Bolt.Runtime.RandomApi.Fill(buffer, length) != 0)
+            throw IOException("Web Crypto could not fill the random buffer.");
+#elif Android || IOS
+#if ARM32 || X86
+        Bolt.Runtime.RandomApi.Fill(buffer, (uint)length);
+#else
+        Bolt.Runtime.RandomApi.Fill(buffer, length);
+#endif
+#endif
+
+#if MacOS || FreeBSD
+        Bolt.Runtime.MacOS.Arc4RandomBuffer(buffer, length);
+#endif
+    }
+
+public:
+    // Fill an existing array with cryptographically secure random bytes.
+    void Fill(byte[]& values)
+    {
+        if (values.Length == 0) return;
+        FillPointer(&values[0], (ulong)values.Length);
+    }
+
+    // Allocate and return exactly count cryptographically secure random bytes.
+    byte[] GetBytes(int count)
+    {
+        if (count < 0) throw ArgumentOutOfRangeException("Random byte count cannot be negative.");
+        byte[] values = new byte[count];
+        Fill(values);
+        return values;
+    }
+
+    // Obtain a single cryptographically secure random byte without allocating.
+    byte GetByte()
+    {
+        byte value = (byte)0;
+        FillPointer(&value, 1ul);
+        return value;
+    }
+
+    ulong GetUInt64()
+    {
+        ulong value = 0ul;
+        FillPointer((byte*)&value, 8ul);
+        return value;
+    }
+}

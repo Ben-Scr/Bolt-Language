@@ -1,0 +1,16 @@
+import System.IO
+
+static class Program {
+public:
+    void Main() {
+        string text = "0123456789abcdef0123456789abcdefÖ\0\n";
+        for (int i = 0; i < 12; i++) text += text;
+        File.WriteAllText("text.bin", text);
+        long sum = 0l;
+        for (int i = 0; i < 256; i++) {
+            string content = File.ReadAllText("text.bin");
+            sum += content.ByteLength + (int)content[0];
+        }
+        Print(sum);
+    }
+}

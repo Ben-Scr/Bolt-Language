@@ -1,0 +1,5 @@
+
+
+static class Program {public: void Main(){
+int start=2;int end=9;Print($"{start}-{end}");Print($"{{{start+1}}}");Print($"{"a"+"b"}:{(int)2.9}");Print($"{$"inner{end}"}end");Print($"");
+}}

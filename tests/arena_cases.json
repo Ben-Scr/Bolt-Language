@@ -1,0 +1,41 @@
+[
+  {
+    "name": "arena-owned-storage",
+    "file": "tests/arena_interpreter/ownership.bolt",
+    "stdout": "true\ntrue\ntrue\ntrue\ntrue\na title replaced after construction\n42\n40\ndictionary value\nqueue value\ntrue\nboxed text\n17\na title replaced after construction\n40\n17\ntrue\n40\n"
+  },
+  {
+    "name": "arena-reuse-return",
+    "file": "tests/arena_interpreter/reuse-return.bolt",
+    "stdout": "survived return\nsurvived return\ntrue\ntrue\n"
+  },
+  {
+    "name": "arena-delete-root",
+    "file": "tests/arena_interpreter/delete-root.bolt",
+    "stdout": "",
+    "error": "arena allocation"
+  },
+  {
+    "name": "arena-disposed",
+    "file": "tests/arena_interpreter/disposed.bolt",
+    "stdout": "",
+    "error": "arena has been disposed"
+  },
+  {
+    "name": "arena-exhaustion-order",
+    "file": "tests/arena_interpreter/exhaustion-order.bolt",
+    "stdout": "argument\n",
+    "error": "arena capacity exhausted"
+  },
+  {
+    "name": "arena-constructor-failure",
+    "file": "tests/arena_interpreter/constructor-failure.bolt",
+    "stdout": "before failure\n",
+    "error": "division by zero"
+  },
+  {
+    "name": "arena-example",
+    "file": "examples/ArenasProject",
+    "stdout": "Example report: 5 rows\nRow 4\n1\n4\n9\nBacking retained for reuse: 1024 bytes\nOccupied after reset: 0 bytes\n"
+  }
+]

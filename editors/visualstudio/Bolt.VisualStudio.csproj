@@ -1,0 +1,67 @@
+<Project ToolsVersion="Current" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
+    <Platform>AnyCPU</Platform>
+    <ProjectGuid>{64C4E9A7-D744-42F6-BA20-491C9E0A51A3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AssemblyName>Bolt.VisualStudio</AssemblyName>
+    <RootNamespace>Bolt.VisualStudio</RootNamespace>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <LangVersion>latest</LangVersion>
+    <OutputPath>..\..\build\visualstudio\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <GeneratePkgDefFile>true</GeneratePkgDefFile>
+    <RegisterWithCodebase>true</RegisterWithCodebase>
+    <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
+    <IncludeDebugSymbolsInVSIXContainer>false</IncludeDebugSymbolsInVSIXContainer>
+    <DeployExtension>false</DeployExtension>
+    <CreateVsixContainer>true</CreateVsixContainer>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+    <NodeDirectory Condition="'$(NodeDirectory)' == ''">$(VSInstallDir)MSBuild\Microsoft\VisualStudio\NodeJs</NodeDirectory>
+    <AdapterDir>$(MSBuildProjectDirectory)\obj\adapter</AdapterDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.14.40265" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.VisualStudio.LanguageServer.Client" Version="17.14.60" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.14.2120" PrivateAssets="all" />
+    <Compile Include="*.cs" />
+    <EmbeddedResource Include="VSPackage.resx"><ManifestResourceName>VSPackage</ManifestResourceName></EmbeddedResource>
+    <Reference Include="System;System.Core;System.Design;System.ComponentModel.Composition;System.Windows.Forms;System.Drawing;Microsoft.VisualBasic;PresentationCore;PresentationFramework;WindowsBase;System.Xaml" />
+    <None Include="source.extension.vsixmanifest"><SubType>Designer</SubType></None>
+    <VSCTCompile Include="Bolt.vsct"><ResourceName>Menus.ctmenu</ResourceName></VSCTCompile>
+    <Content Include="BoltEditor.pkgdef;Bolt.imagemanifest"><IncludeInVSIX>true</IncludeInVSIX></Content>
+    <Content Include="$(AdapterDir)\BoltProject.zip"><Link>ProjectTemplates\BoltProject.zip</Link><IncludeInVSIX>true</IncludeInVSIX></Content>
+    <Content Include="$(AdapterDir)\BoltClass.zip"><Link>ItemTemplates\BoltClass.zip</Link><IncludeInVSIX>true</IncludeInVSIX></Content>
+    <Content Include="..\vscode\media\bolt.png"><Link>Resources\bolt.png</Link><IncludeInVSIX>true</IncludeInVSIX></Content>
+    <Content Include="..\vscode\language-configuration.json"><Link>Grammars\language-configuration.json</Link><IncludeInVSIX>true</IncludeInVSIX></Content>
+    <Content Include="$(AdapterDir)\bolt.tmLanguage.json"><Link>Grammars\bolt.tmLanguage.json</Link><IncludeInVSIX>true</IncludeInVSIX></Content>
+    <Content Include="$(AdapterDir)\bolt-file.png"><Link>Resources\bolt-file.png</Link><IncludeInVSIX>true</IncludeInVSIX></Content>
+    <Content Include="$(AdapterDir)\adapter.cjs"><Link>Server\adapter.cjs</Link><IncludeInVSIX>true</IncludeInVSIX></Content>
+    <Content Include="$(NodeDirectory)\node.exe;$(NodeDirectory)\LICENSE"><Link>Server\%(Filename)%(Extension)</Link><IncludeInVSIX>true</IncludeInVSIX></Content>
+    <Content Include="..\vscode\node_modules\vscode-jsonrpc\License.txt"><Link>Server\jsonrpc\License.txt</Link><IncludeInVSIX>true</IncludeInVSIX></Content>
+    <Content Include="..\vscode\node_modules\vscode-languageserver-types\License.txt"><Link>Server\lsp-types\License.txt</Link><IncludeInVSIX>true</IncludeInVSIX></Content>
+    <Content Include="..\..\LICENSE"><Link>LICENSE</Link><IncludeInVSIX>true</IncludeInVSIX></Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="Exists('$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets')" />
+  <!-- The VSSDK can reuse the old manifest when only the Identity version changes. -->
+  <Target Name="RefreshChangedVsixManifest" BeforeTargets="DetokenizeVsixManifestFile"
+          Inputs="source.extension.vsixmanifest" Outputs="$(IntermediateVsixManifest)">
+    <Delete Files="$(IntermediateVsixManifest)" />
+  </Target>
+  <Target Name="BundleEditor" BeforeTargets="PrepareForBuild">
+    <Exec Command="&quot;$(NodeDirectory)\node.exe&quot; bundle.cjs" />
+    <ItemGroup>
+      <ProjectTemplateFile Include="Templates\Project\**\*" />
+      <ItemTemplateFile Include="Templates\Item\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(ProjectTemplateFile)" DestinationFolder="$(AdapterDir)\Project\%(RecursiveDir)" />
+    <Copy SourceFiles="@(ItemTemplateFile)" DestinationFolder="$(AdapterDir)\Item\%(RecursiveDir)" />
+    <Copy SourceFiles="$(AdapterDir)\bolt-file.png" DestinationFolder="$(AdapterDir)\Project" />
+    <Copy SourceFiles="$(AdapterDir)\bolt-file.png" DestinationFolder="$(AdapterDir)\Item" />
+    <ZipDirectory SourceDirectory="$(AdapterDir)\Project" DestinationFile="$(AdapterDir)\BoltProject.zip" Overwrite="true" />
+    <ZipDirectory SourceDirectory="$(AdapterDir)\Item" DestinationFile="$(AdapterDir)\BoltClass.zip" Overwrite="true" />
+  </Target>
+</Project>

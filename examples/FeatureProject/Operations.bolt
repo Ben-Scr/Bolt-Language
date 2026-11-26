@@ -1,0 +1,23 @@
+import Type
+import Demo.Constraints
+
+namespace Demo.Utilities;
+
+public static class Operations
+{
+public:
+    T Sum<T>(T a, T b) : Scalar
+    {
+        return a + b;
+    }
+
+    void Add(int& value, int amount)
+    {
+        value += amount;
+    }
+
+    void ShowTypes<T...>()
+    {
+        Console.WriteLine(Type.Name<T>());
+    }
+}

@@ -1,0 +1,5 @@
+
+void Bad(const int& x){x++;}
+static class Program { public: void Main() {
+
+} }

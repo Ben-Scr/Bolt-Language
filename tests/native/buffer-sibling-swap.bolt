@@ -1,0 +1,70 @@
+import System
+import Bolt.Runtime
+
+public class Buffers {
+public:
+    Buffer<int> Left, Right;
+    void Exchange() { Left.Swap(Right); }
+    void Same() { Left.Swap(Left); }
+    void With(Buffer<int>& other) { Left.Swap(other); }
+    bool InvalidatesSelf() {
+        int visits = 0;
+        try {
+            for (int value : Left) { visits++; Same(); }
+        } catch (InvalidOperationException& error) {
+            return visits == 1 && error.Message.Contains("modified");
+        }
+        return false;
+    }
+    bool InvalidatesLeft() {
+        int visits = 0;
+        try {
+            for (int value : Left) { visits++; Exchange(); }
+        } catch (InvalidOperationException& error) {
+            return visits == 1 && error.Message.Contains("modified");
+        }
+        return false;
+    }
+    bool InvalidatesRight() {
+        int visits = 0;
+        try {
+            for (int value : Right) { visits++; Exchange(); }
+        } catch (InvalidOperationException& error) {
+            return visits == 1 && error.Message.Contains("modified");
+        }
+        return false;
+    }
+}
+static class Program {
+public:
+    int Main() {
+        Buffers pair;
+        pair.Exchange();
+        if (pair.Left.Length != 0 || pair.Right.Length != 0) return 1;
+        pair.Left.Reserve(16); pair.Right.Reserve(3);
+        pair.Left.Add(7); pair.Left.Add(9); pair.Right.Add(23);
+        pair.Exchange();
+        if (pair.Left.Length != 1 || pair.Left[0] != 23 || pair.Right.Length != 2 ||
+            pair.Right[1] != 9 || pair.Left.Capacity != 3 || pair.Right.Capacity != 16) return 2;
+        pair.Same();
+        if (pair.Left[0] != 23 || pair.Left.Length != 1) return 3;
+        if (!pair.InvalidatesLeft() || pair.Left[0] != 7 || pair.Right[0] != 23) return 4;
+        if (!pair.InvalidatesSelf() || pair.Left.Length != 2 || pair.Left.Capacity != 16 ||
+            pair.Left[0] != 7 || pair.Left[1] != 9) return 6;
+        if (!pair.InvalidatesRight() || pair.Left[0] != 23 || pair.Right[0] != 7) return 5;
+        Buffer<int> unrelated; unrelated.Add(4); unrelated.Add(6);
+        int total = 0;
+        for (int value : unrelated) { total += value; pair.Exchange(); }
+        if (total != 10 || pair.Left[0] != 23) return 7;
+
+        Arena region = Arena.Fixed(131072);
+        Buffers* local = new(region) Buffers();
+        local->Left.Add(41); local->Right.Add(43); local->Exchange();
+        if (local->Left[0] != 43 || local->Right[0] != 41) return 8;
+        pair.With(local->Left);
+        if (pair.Left[0] != 43 || local->Left[0] != 23) return 9;
+        region.Reset();
+        if (pair.Left[0] != 43 || pair.Right[1] != 9) return 10;
+        Print("sibling swap OK"); return 0;
+    }
+}

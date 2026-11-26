@@ -1,0 +1,5 @@
+import System.Collections.Generic
+
+static class Program { public: void Main() {
+Dictionary<int,int> d; Console.WriteLine(d[1]);
+} }

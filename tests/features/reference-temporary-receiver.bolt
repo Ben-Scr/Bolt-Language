@@ -1,0 +1,2 @@
+class Cell{public:int X;int& Get(){return X;}}
+static class Program{public:void Main(){int& r=Cell().Get();}}

@@ -1,0 +1,31 @@
+import System
+import System.IO
+import System.Threading
+import System.Diagnostics
+
+public static class Program
+{
+public:
+    void Main()
+    {
+        Console.Clear();
+        Stopwatch watch = Stopwatch.StartNew();
+        Thread.Sleep(10);
+        watch.Pause();
+        Console.WriteLine(watch);
+        Print($"Elapsed: {watch} ms");
+
+        int number = 0;
+        if (Converter.TryTo<int>(" 42 ", number)) Print(number);
+
+        MemoryStream memory;
+        StreamWriter writer = StreamWriter(memory, true);
+        writer.WriteLine("Written by the source StreamWriter.");
+        writer.Close();
+        memory.Seek(0l, SeekOrigin.Begin);
+        StreamReader reader = StreamReader(memory, true);
+        Print(reader.ReadToEnd());
+        reader.Close();
+        memory.Close();
+    }
+}

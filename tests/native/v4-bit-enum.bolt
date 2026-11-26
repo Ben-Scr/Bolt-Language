@@ -1,0 +1,1 @@
+enum E:ushort {All=65535} static class Program {public:void Main(){short n=Reinterpret<short>(E.All);E e=Reinterpret<E>(n);Print(n);Print(e);}}

@@ -1,0 +1,1128 @@
+#ifdef BoltStandaloneCore
+namespace Bolt.Runtime;
+
+// Private bootstrap ABI, compiled into the application. A string slot owns a
+// header [data, byte length, reference count, cached hash] followed by immutable UTF-8.
+// An array owns [data, count, capacity], dimensions, then its elements.
+// Type descriptors hold kind, size, element, base, name and rank or field count.
+static class StandaloneCore
+{
+public:
+    byte* Allocate(ulong bytes) {
+#ifdef Windows
+        return (byte*)Bolt.Runtime.Windows.HeapAlloc(Bolt.Runtime.Windows.GetProcessHeap(),8u,bytes);
+#else
+        return Bolt.Runtime.StandalonePosix.AllocateZeroed(1ul,bytes);
+#endif
+    }
+    void Free(byte* p) {
+        if(p==null)return;
+#ifdef Windows
+        Bolt.Runtime.Windows.HeapFree(Bolt.Runtime.Windows.GetProcessHeap(),0u,p);
+#elif Linux
+        Bolt.Runtime.Linux.Free(p);
+#else
+        Bolt.Runtime.MacOS.Free(p);
+#endif
+    }
+    // New allocations are registered by address. Validate delete without
+    // reading freed or foreign storage. Workers share the root registry.
+    // Nodes store the bucket link, descriptor and allocation-order links.
+    // The root appends new objects so shutdown visits parents before allocations
+    // made by their constructors. Child contexts never own this table.
+    byte* HeapRoot(byte* ctx) { byte* root=Ptr(ctx,192ul);return root==null ? ctx : root; }
+    ulong HeapBucket(byte* p) { return 240ul+8ul*((Word((byte*)&p,0ul)>>4)&255ul); }
+    void HeapLock(byte* root) { while(AtomicOps.Cas(*((ulong*)&root[216ul]),0ul,1ul)!=0ul){} }
+    void HeapUnlock(byte* root) { AtomicOps.Cas(*((ulong*)&root[216ul]),1ul,0ul); }
+    byte* br_new(byte* ctx,byte* site,byte* type) {
+        ulong size=Word(type,8ul);
+        if(size>ulong.MaxValue-32ul){OutOfMemory(ctx,site);return null;}
+        byte* node=Allocate(32ul+size);
+        if(node==null){OutOfMemory(ctx,site);return null;}
+        byte* value=&node[32ul],root=HeapRoot(ctx);ulong bucket=HeapBucket(value);
+        Put(node,8ul,type);
+        HeapLock(root);
+        Put(node,0ul,Ptr(root,bucket));Put(root,bucket,node);
+        byte* tail=Ptr(root,232ul);Put(node,16ul,tail);
+        if(tail==null)Put(root,224ul,node);else Put(tail,24ul,node);
+        Put(root,232ul,node);HeapUnlock(root);
+        return value;
+    }
+    byte* UnlinkAllocation(byte* ctx,byte* value) {
+        byte* root=HeapRoot(ctx),link=&root[HeapBucket(value)];
+        HeapLock(root);
+        byte* node=Ptr(link,0ul);
+        while(node!=null && &node[32ul]!=value){link=node;node=Ptr(link,0ul);}
+        if(node!=null){
+            Put(link,0ul,Ptr(node,0ul));
+            byte* previous=Ptr(node,16ul),next=Ptr(node,24ul);
+            if(previous==null)Put(root,224ul,next);else Put(previous,24ul,next);
+            if(next==null)Put(root,232ul,previous);else Put(next,16ul,previous);
+        }
+        HeapUnlock(root);return node;
+    }
+    void AbandonCopy(byte* ctx,byte* value) { Free(UnlinkAllocation(ctx,value)); }
+    void br_new_failed(byte* ctx,byte* type,byte* value) {
+        byte* node=UnlinkAllocation(ctx,value);
+        DropIncomplete(type,value);Free(node);
+    }
+    void br_delete(byte* ctx,byte* site,byte* value) {
+        if(value==null)return;
+        byte* node=UnlinkAllocation(ctx,value);
+        if(node==null){TypedMemory.InvalidDelete();return;}
+        br_drop(Ptr(node,8ul),value);Free(node);
+    }
+    bool ReclaimAllocation(byte* ctx) {
+        byte* first=Ptr(ctx,224ul);
+        if(first==null){ReleaseStructBorrows(ctx);return false;}
+        br_delete(ctx,null,&first[32ul]);return true;
+    }
+    void br_arena_failed(byte* ctx,byte* slot,byte* type,byte* value) {
+        Region* state=(Region*)Ptr(slot,0ul);
+        RegionRoot** link=&state->Roots;
+        while(*link!=null && (*link)->Value!=value)link=&(*link)->Next;
+        if(*link!=null){RegionRoot* root=*link;*link=root->Next;Free((byte*)root);}
+        DropIncomplete(type,value);
+    }
+    // Active arenas are local to this execution. Locate the region containing
+    // a destination field to allocate its owned string, box or buffer there.
+    Region* RegionOf(byte* ctx,byte* slot) {
+        if(ctx==null || slot==null)return null;
+        Region* region=(Region*)Ptr(ctx,176ul);
+        ulong address=Word((byte*)&slot,0ul);
+        while(region!=null){
+            RegionBlock* block=region->First;
+            while(block!=null){
+                ulong start=Word((byte*)&block,0ul)+(ulong)sizeof(RegionBlock);
+                if(address>=start && address-start<block->Capacity)return region;
+                block=block->Next;
+            }
+            region=region->Next;
+        }
+        return null;
+    }
+    byte* Storage(Region* region,ulong size) {
+        if(region==null)return Allocate(size);
+        return NativeArena.Reserve(region,size);
+    }
+    void FreeStorage(byte* storage) {
+        if(storage!=null && RegionOf(ExecutionMemory.Context(),storage)==null)Free(storage);
+    }
+    void br_arena_create(byte* ctx,byte* site,byte* slot,ulong initial,ulong maximum,int grow) {
+        Region* region=NativeArena.Create(initial,maximum,grow);
+        if(region!=null){region->Next=(Region*)Ptr(ctx,176ul);Put(ctx,176ul,(byte*)region);}
+        Put(slot,0ul,(byte*)region);
+    }
+    byte* br_arena_new(byte* ctx,byte* site,byte* slot,byte* type) {
+        return NativeArena.Allocate((Region*)Ptr(slot,0ul),Word(type,8ul),type);
+    }
+    void br_arena_action(byte* ctx,byte* site,byte* slot,int dispose) {
+        Region* state=(Region*)Ptr(slot,0ul);
+        if(!NativeArena.Begin(state,dispose))return;
+        while(state->Roots!=null){
+            RegionRoot* root=state->Roots;state->Roots=root->Next;
+            br_drop(root->Descriptor,root->Value);Free((byte*)root);
+        }
+        NativeArena.End(state,dispose);
+        if(dispose!=0){
+            Region** link=(Region**)&ctx[176ul];
+            while(*link!=null && *link!=state)link=&(*link)->Next;
+            if(*link!=null)*link=state->Next;
+        }
+    }
+    ulong br_arena_stat(byte* ctx,byte* site,byte* slot,int property) {
+        return NativeArena.Stat((Region*)Ptr(slot,0ul),property);
+    }
+    // Child executions share immutable descriptors and the root join registry.
+    byte* br_context_registry(byte* ctx) {
+        byte* root=Ptr(ctx,192ul);return root==null ? &ctx[200ul] : &root[200ul];
+    }
+    byte* br_context_child(byte* parent) {
+        byte* child=Allocate(216ul);
+        if(child!=null){
+            // The reachable storage kernels use the same CPU features on every thread.
+            *((uint*)&child[4ul])=*((uint*)&parent[4ul]);
+            Bytes(&child[56ul],&parent[56ul],40ul);Put(child,168ul,Ptr(parent,168ul));
+            byte* root=Ptr(parent,192ul);Put(child,192ul,root==null ? parent : root);
+        }
+        return child;
+    }
+    byte* br_context_activate(byte* ctx){return null;}
+    ulong br_type_size(byte* type){return Word(type,8ul);}
+    void br_destroy(byte* ctx){DisposeError(Ptr(ctx,40ul));Free(ctx);}
+    byte* Ptr(byte* p, ulong at) { return *((byte**)&p[at]); }
+    void Put(byte* p, ulong at, byte* v) { *((byte**)&p[at])=v; }
+    ulong Word(byte* p, ulong at) { return *((ulong*)&p[at]); }
+    void WordSet(byte* p, ulong at, ulong v) { *((ulong*)&p[at])=v; }
+    void Bytes(byte* to, byte* from, ulong n) { for(ulong i=0ul;i<n;i++)to[i]=from[i]; }
+    void Zero(byte* to, ulong n) { for(ulong i=0ul;i<n;i++)to[i]=0; }
+    ulong CLength(byte* p) { ulong n=0ul; if(p!=null)while(p[n]!=0)n++;return n; }
+    // Only read whole words inside the range. The decoder still validates
+    // every non-ASCII scalar and stops at the first malformed sequence.
+    ulong AsciiEnd(byte* data, ulong at, ulong limit) {
+        while (limit - at >= 8ul && (Word(data, at) & 9259542123273814144ul) == 0ul)
+            at += 8ul;
+        while (at < limit && data[at] < 128) at++;
+        return at;
+    }
+    ulong ScalarCount(byte* data, ulong length) {
+        ulong at = 0ul, count = 0ul;
+        while (at < length) {
+            if (data[at] < 128) {
+                ulong next = AsciiEnd(data, at, length);
+                count += next - at;
+                at = next;
+            } else {
+                if (ReadScalar(data, length, at) == uint.MaxValue) return ulong.MaxValue;
+                count++;
+            }
+        }
+        return count;
+    }
+    // Returns uint.MaxValue for malformed UTF-8. Advance the cursor only on success.
+    uint ReadScalar(byte* data,ulong length,ulong& cursor) {
+        ulong i=cursor;if(i>=length)return uint.MaxValue;
+        uint first=(uint)data[i++];
+        if(first<128u){cursor=i;return first;}
+        if(first<194u || first>244u)return uint.MaxValue;
+        uint tails=first<224u ? 1u : (first<240u ? 2u : 3u);
+        if((ulong)tails>length-i)return uint.MaxValue;
+        uint scalar=first & (tails==1u ? 31u : (tails==2u ? 15u : 7u));
+        for(uint j=0u;j<tails;j++){
+            uint next=(uint)data[i++];
+            if((next&192u)!=128u)return uint.MaxValue;
+            scalar=(scalar<<6)|(next&63u);
+        }
+        if((tails==2u && scalar<2048u) || (tails==3u && scalar<65536u) ||
+           (scalar>=55296u && scalar<=57343u) || scalar>1114111u)return uint.MaxValue;
+        cursor=i;return scalar;
+    }
+    ulong HashBytes(ulong hash,byte* data,ulong n) {
+        for(ulong i=0ul;i<n;i++)hash=(hash^(ulong)data[i])*1099511628211ul;
+        return hash;
+    }
+    ulong HashText(byte* slot) {
+        byte* header=Ptr(slot,0ul);
+        if(header==null)return 14695981039346656037ul;
+        // Zero means uncomputed. MaxValue permanently disables caching once a
+        // writable native pointer has escaped. Both remain valid hash results.
+        ulong& cache=*((ulong*)&header[24ul]);
+        ulong cached=AtomicOps.Add(cache,0ul);
+        if(cached!=0ul && cached!=ulong.MaxValue)return cached;
+        byte* data=Ptr(header,0ul);
+        ulong hash=HashBytes(14695981039346656037ul,data,Word(header,8ul));
+        if(cached==0ul && hash!=ulong.MaxValue)AtomicOps.Cas(cache,0ul,hash);
+        return hash;
+    }
+    void WriteError(byte* data, ulong size) {
+        if(size==0ul)return;
+#ifdef Windows
+        uint done=0u;
+        Bolt.Runtime.Windows.WriteFile(Bolt.Runtime.Windows.GetStdHandle(4294967284u),data,(uint)size,&done,null);
+#elif Linux
+        Bolt.Runtime.Linux.Write(2,data,size);
+#else
+        Bolt.Runtime.MacOS.Write(2,data,size);
+#endif
+    }
+
+    // Execution-state offsets 40 and 48 are the pending record and stack of catches.
+    // The compact record contains the standard exception prefix at 16. Exceptions
+    // with user fields own a full typed value at 48. Both expose the same prefix.
+    void ReleaseText(byte* p) {
+        if(p==null)return;
+        ulong refs=AtomicOps.Add(*((ulong*)&p[16ul]),ulong.MaxValue);
+        if((refs&9223372036854775807ul)==1ul)FreeStorage(p);
+    }
+    void AssignText(byte* ctx,byte* site,byte* dest,byte* header) {
+        AssignRegionText(ctx,site,dest,header,RegionOf(ctx,dest));
+    }
+    void AssignRegionText(byte* ctx,byte* site,byte* dest,byte* header,Region* region) {
+        if(header!=null && (region!=null || (AtomicOps.Add(*((ulong*)&header[16ul]),0ul)>>63)!=0ul)){
+            MakeString(ctx,site,dest,Ptr(header,0ul),Word(header,8ul),region);return;
+        }
+        if(header!=null)AtomicOps.Add(*((ulong*)&header[16ul]),1ul);
+        ReleaseText(Ptr(dest,0ul)); Put(dest,0ul,header);
+    }
+    byte* NewText(ulong size,Region* region) {
+        if(size==0ul || size>ulong.MaxValue-33ul)return null;
+        byte* p=Storage(region,33ul+size);
+        if(p!=null) { Put(p,0ul,&p[32ul]); WordSet(p,24ul,0ul); WordSet(p,8ul,size); WordSet(p,16ul,region==null ? 1ul : 9223372036854775809ul); }
+        return p;
+    }
+    void DisposeError(byte* e) {
+        if(e==null)return;
+        byte* payload=Ptr(e,48ul);
+        if(payload!=null){br_drop(Ptr(e,8ul),payload);Free(payload);}
+        else {ReleaseText(Ptr(e,24ul));ReleaseText(Ptr(e,40ul));}
+        if(Word(e,56ul)==0ul)Free(e);else Zero(e,64ul);
+    }
+    byte* ErrorValue(byte* e) {
+        byte* payload=Ptr(e,48ul);return payload==null ? &e[16ul] : payload;
+    }
+    void Error(byte* ctx,byte* site,byte* type,byte* message) {
+        if(*((int*)ctx)!=0)return;
+        byte* e=Allocate(64ul);
+        if(e==null && Word(ctx,152ul)==0ul) {e=&ctx[96ul];WordSet(e,56ul,1ul);}
+        if(e!=null) { Put(e,8ul,type);Put(e,16ul,type);AssignText(ctx,site,&e[24ul],message);Put(e,32ul,site);
+            if(*((int*)ctx)!=0){DisposeError(e);return;} }
+        Put(ctx,40ul,e);*((int*)ctx)=1;
+    }
+    void OutOfMemory(byte* ctx,byte* site) { Error(ctx,site,Ptr(ctx,56ul),null); }
+    void Bounds(byte* ctx,byte* site) {
+        byte* type=Ptr(ctx,64ul);CheckedFailure(ctx,site,type,Ptr(type,48ul));
+    }
+    void br_string(byte* ctx,byte* site,byte* dest,byte* data,ulong size) {
+        MakeString(ctx,site,dest,data,size,RegionOf(ctx,dest));
+    }
+    void MakeString(byte* ctx,byte* site,byte* dest,byte* data,ulong size,Region* region) {
+        if(size!=0ul && data==null){
+            byte* type=Ptr(ctx,88ul);CheckedFailure(ctx,site,type,Ptr(type,48ul));return;
+        }
+        byte* h=NewText(size,region);
+        if(size!=0ul && h==null) { OutOfMemory(ctx,site);return; }
+        if(h!=null)Bytes(Ptr(h,0ul),data,size);
+        Mutated(ctx,dest);ReleaseText(Ptr(dest,0ul));Put(dest,0ul,h);
+    }
+    byte* br_string_data(byte* slot,ulong* length) {
+        byte* h=Ptr(slot,0ul);
+        if(h==null){*length=0ul;return null;}
+        *length=Word(h,8ul);return Ptr(h,0ul);
+    }
+    // NativeString.Bytes exposes a writable borrow. Detach existing snapshots
+    // before handing out the pointer and copy future snapshots while it is live.
+    byte* ExposeText(byte* ctx,byte* site,byte* slot,ulong* length) {
+        byte* h=Ptr(slot,0ul);
+        if(h==null){*length=0ul;return null;}
+        ulong refs=AtomicOps.Add(*((ulong*)&h[16ul]),0ul);
+        if(refs>1ul && (refs>>63)==0ul){
+            byte* separate=NewText(Word(h,8ul),RegionOf(ctx,slot));
+            if(separate==null){OutOfMemory(ctx,site);*length=0ul;return null;}
+            Bytes(Ptr(separate,0ul),Ptr(h,0ul),Word(h,8ul));
+            byte* reader=Ptr(ctx,160ul);
+            while(reader!=null){
+                if(Ptr(reader,24ul)==slot && Ptr(reader,32ul)==h)Put(reader,32ul,separate);
+                reader=Ptr(reader,8ul);
+            }
+            Put(slot,0ul,separate);ReleaseText(h);h=separate;
+        }
+        ulong& cache=*((ulong*)&h[24ul]);
+        ulong previous=AtomicOps.Add(cache,0ul);
+        while(previous!=ulong.MaxValue){
+            ulong actual=AtomicOps.Cas(cache,previous,ulong.MaxValue);
+            if(actual==previous)break;
+            previous=actual;
+        }
+        WordSet(h,16ul,9223372036854775809ul);*length=Word(h,8ul);return Ptr(h,0ul);
+    }
+    void br_concat(byte* ctx,byte* site,byte* dest,byte* a,byte* b) {
+        ulong n=0ul,m=0ul;byte* x=br_string_data(a,&n),y=br_string_data(b,&m);
+        if(n==0ul){Mutated(ctx,dest);AssignText(ctx,site,dest,Ptr(b,0ul));return;}
+        if(m==0ul){Mutated(ctx,dest);AssignText(ctx,site,dest,Ptr(a,0ul));return;}
+        if(m>18446744073709551615ul-n){OutOfMemory(ctx,site);return;}
+        byte* h=NewText(n+m,RegionOf(ctx,dest));
+        if(h==null){OutOfMemory(ctx,site);return;}
+        byte* payload=Ptr(h,0ul);Bytes(payload,x,n);Bytes(&payload[n],y,m);
+        Mutated(ctx,dest);ReleaseText(Ptr(dest,0ul));Put(dest,0ul,h);
+    }
+    int TextOrder(byte* a,byte* b) {
+        ulong n=0ul,m=0ul;byte* x=br_string_data(a,&n),y=br_string_data(b,&m);
+        for(ulong i=0ul;i<n && i<m;i++){if(x[i]!=y[i])return x[i]<y[i] ? -1 : 1;}
+        return n<m ? -1 : (n>m ? 1 : 0);
+    }
+    int Compare(byte* ctx,byte* site,byte* type,byte* a,byte* b,int op) {
+        int order=TextOrder(a,b);
+        bool yes=op==0 ? order==0 : (op==1 ? order!=0 : (op==2 ? order<0 : (op==3 ? order<=0 : (op==4 ? order>0 : order>=0))));
+        return yes ? 1 : 0;
+    }
+    ulong EncodeScalar(uint c,byte* bytes) {
+        ulong n=c<128u ? 1ul : (c<2048u ? 2ul : (c<65536u ? 3ul : 4ul));
+        if(bytes==null)return n;
+        for(ulong i=n-1ul;i>0ul;i--){bytes[i]=(byte)(128u|(c&63u));c=c>>6;}
+        bytes[0]=(byte)(c|(n==1ul ? 0u : (n==2ul ? 192u : (n==3ul ? 224u : 240u))));
+        return n;
+    }
+    void Text(byte* ctx,byte* site,byte* dest,byte* type,byte* value) {
+        if(Word(type,0ul)==5ul){AssignText(ctx,site,dest,Ptr(value,0ul));return;}
+        uint storage=0u;byte* bytes=(byte*)&storage;
+        ulong n=EncodeScalar(*((uint*)value),bytes);
+        br_string(ctx,site,dest,bytes,n);
+    }
+    void PointerText(byte* ctx,byte* site,byte* dest,byte* value) {
+        ulong pointer=Word(value,0ul),digits=1ul;
+        for(ulong n=pointer;n>=16ul;n/=16ul)digits++;
+        byte* h=NewText(digits+2ul,RegionOf(ctx,dest));
+        if(h==null){OutOfMemory(ctx,site);return;}
+        byte* data=Ptr(h,0ul);
+        data[0]=48;data[1]=120;
+        for(ulong i=digits+1ul;i>1ul;i--){
+            ulong n=pointer&15ul;data[i]=(byte)(n<10ul ? 48ul+n : 87ul+n);pointer/=16ul;
+        }
+        ReleaseText(Ptr(dest,0ul));Put(dest,0ul,h);
+    }
+    void IntegerText(byte* ctx,byte* site,byte* dest,byte* type,byte* value) {
+        ulong width=Word(type,8ul), magnitude=0ul;
+        for(ulong i=0ul;i<width;i++)magnitude|=((ulong)value[i])<<(int)(8ul*i);
+        bool negative=Word(type,0ul)==1ul && (value[width-1ul]&128)!=0;
+        if(negative) {
+            ulong mask=18446744073709551615ul;
+            if(width<8ul)mask=(1ul<<(int)(8ul*width))-1ul;
+            magnitude=(mask^magnitude)+1ul;
+        }
+        ulong count=(ulong)DecimalDigits.Count(magnitude);
+        if(negative)count++;
+        byte* h=NewText(count,RegionOf(ctx,dest));
+        if(h==null){OutOfMemory(ctx,site);return;}
+        byte* data=Ptr(h,0ul);
+        ulong end=count;
+        while(magnitude>=100ul){
+            uint pair=(uint)(magnitude%100ul);
+            magnitude/=100ul;
+            data[--end]=(byte)(48u+pair%10u);
+            data[--end]=(byte)(48u+pair/10u);
+        }
+        if(magnitude>=10ul){
+            data[--end]=(byte)(48ul+magnitude%10ul);
+            magnitude/=10ul;
+        }
+        data[--end]=(byte)(48ul+magnitude);
+        if(negative)data[0]=45;
+        ReleaseText(Ptr(dest,0ul));Put(dest,0ul,h);
+    }
+    int br_count(byte* ctx,byte* site,byte* type,byte* slot) {
+        byte* h=Ptr(slot,0ul);if(h==null)return 0;
+        ulong n=Word(h,8ul);
+        if(Word(type,0ul)==5ul) {
+            n=ScalarCount(Ptr(h,0ul),n);
+            if(n==ulong.MaxValue){
+                byte* ex=Ptr(ctx,168ul);CheckedFailure(ctx,site,ex,Ptr(ex,48ul));return 0;
+            }
+        }
+        if(n>2147483647ul){Error(ctx,site,Ptr(ctx,72ul),null);return 0;}
+        return (int)n;
+    }
+    bool HasExceptionBase(byte* type) {
+        while(type!=null){if(Word(type,0ul)==15ul)return true;type=Ptr(type,24ul);}
+        return false;
+    }
+    void CopyException(byte* ctx,byte* site,byte* type,byte* dest,byte* source) {
+        Put(dest,0ul,type);AssignText(ctx,site,&dest[8ul],Ptr(source,8ul));
+        Put(dest,16ul,Ptr(source,16ul));AssignText(ctx,site,&dest[24ul],Ptr(source,24ul));
+    }
+#if Windows || MacOS || FreeBSD || (Linux && (X64 || ARM64 || RISCV64))
+    void CloseStream(Bolt.Runtime.IO.StreamState* state) {
+        if(state==null || state->Closed)return;
+        state->Closed=true;
+        if(state->File){
+#ifdef Windows
+            Bolt.Runtime.StandaloneWindows.Close(state->Handle);
+#else
+            Bolt.Runtime.ProcessApi.Close(state->Descriptor);
+#endif
+        }
+    }
+    void ReleaseStream(Bolt.Runtime.IO.StreamState* state) {
+        if(state==null)return;
+        if(AtomicOps.Add(state->References,ulong.MaxValue)!=1ul)return;
+        if(state->Parent!=null){
+            if(state->OwnsParent)CloseStream(state->Parent);
+            ReleaseStream(state->Parent);
+        }
+        CloseStream(state);
+        Free(state->Data);
+        Free((byte*)state);
+    }
+#endif
+    // Capture cells share their mutable payload. Ordinary delegate boxes copy
+    // the closure value, which in turn retains each captured cell.
+    void ReleaseBox(byte* box) {
+        if(box!=null && AtomicOps.Add(*(ulong*)box,ulong.MaxValue)==1ul){
+            br_drop(Ptr(box,8ul),&box[16ul]);FreeStorage(box);
+        }
+    }
+    void br_box(byte* ctx,byte* site,byte* target,byte* dest,byte* source,byte* value) {
+        BoxInto(ctx,site,target,dest,source,value,RegionOf(ctx,dest));
+    }
+    // Headerless structs keep their native layout. An interface pointer or
+    // reference to one uses a stable [descriptor, original address] view.
+    // Intern the pair so copies and returned borrows keep the same identity.
+    byte* BorrowStruct(byte* ctx,byte* site,byte* type,byte* value) {
+        if(value==null)return null;
+        byte* root=HeapRoot(ctx);
+        HeapLock(root);
+        byte* table=Ptr(root,2288ul);
+        if(table==null){table=Allocate(2048ul);Put(root,2288ul,table);}
+        byte* view=null;
+        if(table!=null){
+            ulong bucket=HeapBucket(value)-240ul;
+            view=Ptr(table,bucket);
+            while(view!=null && (Ptr(view,0ul)!=type || Ptr(view,8ul)!=value))view=Ptr(view,16ul);
+            if(view==null){
+                view=Allocate(24ul);
+                if(view!=null){
+                    Put(view,0ul,type);Put(view,8ul,value);Put(view,16ul,Ptr(table,bucket));Put(table,bucket,view);
+                }
+            }
+        }
+        HeapUnlock(root);
+        if(view==null)OutOfMemory(ctx,site);
+        return view;
+    }
+    void ReleaseStructBorrows(byte* root) {
+        byte* table=Ptr(root,2288ul);
+        if(table==null)return;
+        for(ulong bucket=0ul;bucket<2048ul;bucket+=8ul){
+            byte* view=Ptr(table,bucket);
+            while(view!=null){byte* next=Ptr(view,16ul);Free(view);view=next;}
+        }
+        Free(table);Put(root,2288ul,null);
+    }
+    void BoxInto(byte* ctx,byte* site,byte* target,byte* dest,byte* source,byte* value,Region* region) {
+        byte* box=null;
+        // An interface borrow can address a class directly, including a derived
+        // class viewed through its base. Preserve that concrete value on a copy.
+        if((Word(source,0ul)==7ul || Word(source,0ul)==13ul || Word(source,0ul)==15ul) && Ptr(value,0ul)!=null){
+            source=Ptr(value,0ul);
+            if(Word(source,0ul)==19ul)value=Ptr(value,8ul);
+        }
+        if(Word(source,0ul)==13ul){
+            box=Ptr(value,8ul);
+            if(box==null || (source==target && Word(target,40ul)!=0ul)){
+                if(box!=null)AtomicOps.Add(*(ulong*)box,1ul);
+                ReleaseBox(Ptr(dest,8ul));Put(dest,0ul,target);Put(dest,8ul,box);return;
+            }
+            source=Ptr(box,8ul);value=&box[16ul];
+        }
+        ulong size=Word(source,8ul);
+        if(size>ulong.MaxValue-16ul){OutOfMemory(ctx,site);return;}
+        box=Storage(Word(target,40ul)==0ul ? region : null,16ul+size);
+        if(box==null){OutOfMemory(ctx,site);return;}
+        WordSet(box,0ul,1ul);Put(box,8ul,source);
+        CopyInto(ctx,site,source,&box[16ul],value,RegionOf(ctx,box),true);
+        if(*(int*)ctx!=0){
+            // A failed record copy already unwound its constructed fields.
+            ulong kind=Word(source,0ul);
+            if(kind!=7ul && kind!=19ul)br_drop(source,&box[16ul]);
+            FreeStorage(box);return;
+        }
+        ReleaseBox(Ptr(dest,8ul));Put(dest,0ul,target);Put(dest,8ul,box);
+    }
+    byte* br_unbox(byte* ctx,byte* site,byte* receiver) {
+        if(receiver!=null && Ptr(receiver,0ul)!=null){
+            ulong kind=Word(Ptr(receiver,0ul),0ul);
+            if(kind==19ul)return Ptr(receiver,8ul);
+            if(kind!=13ul)return receiver;
+            byte* box=Ptr(receiver,8ul);
+            if(box!=null)return &box[16ul];
+        }
+        Error(ctx,site,Ptr(ctx,80ul),null);return null;
+    }
+    // Called on a receiver already checked by br_unbox.
+    byte* ReceiverType(byte* receiver) {
+        byte* type=Ptr(receiver,0ul);
+        return Word(type,0ul)==13ul ? Ptr(Ptr(receiver,8ul),8ul) : type;
+    }
+    byte* ConcretePointer(byte* ctx,byte* site,byte* receiver) {
+        return receiver==null ? null : br_unbox(ctx,site,receiver);
+    }
+    // Lowering binds this bootstrap operation to the typed Bolt function
+    // pointer in an immutable record descriptor.
+private:
+    void InvokeLifetime(byte* routine,byte* value) {}
+    bool InvokeEquality(byte* routine,byte* a,byte* b) {return false;}
+    ulong InvokeHash(byte* routine,byte* value) {return 0ul;}
+    ulong ZeroHash(byte* value) {return 0ul;}
+public:
+    void RunDestructor(byte* routine,byte* slot) {
+        if(routine==null)return;
+        byte* ctx=ExecutionMemory.Context();
+        byte* saved=Ptr(ctx,40ul);int failed=*((int*)ctx);
+        Put(ctx,40ul,null);*((int*)ctx)=0;
+        InvokeLifetime(routine,slot);
+        if(*((int*)ctx)!=0){Finish(ctx,1);ThreadKernel.Fatal();}
+        Put(ctx,40ul,saved);*((int*)ctx)=failed;
+    }
+    void DropFields(byte* type,byte* slot,ulong fields,ulong inherited) {
+        for(ulong i=fields;i>inherited;i--){
+            ulong field=48ul+(i-1ul)*16ul;
+            br_drop(Ptr(type,field+8ul),&slot[Word(type,field)]);
+        }
+    }
+    void DropIncomplete(byte* type,byte* slot) {
+        if(Word(type,0ul)==19ul)DropFields(type,slot,Word(type,40ul),0ul);
+        else br_drop(type,slot);
+    }
+    void DropRecord(byte* type,byte* slot,byte* ready) {
+        ulong fields=Word(type,40ul),tail=48ul+16ul*fields;
+        byte* base=Ptr(type,24ul);
+        if(Word(type,0ul)==19ul)RunDestructor(Ptr(type,tail+8ul),slot);
+        else {
+            Put(slot,0ul,type);
+            byte* level=ready;
+            while(level!=null && level!=type)level=Ptr(level,24ul);
+            if(level!=null)RunDestructor(Ptr(type,tail+8ul),slot);
+        }
+        ulong inherited=base==null ? 0ul : Word(base,40ul);
+        DropFields(type,slot,fields,inherited);
+        if(base!=null && Word(base,0ul)==7ul)DropRecord(base,slot,ready);
+    }
+    void ReleaseShared(byte* cell) {
+        if(cell!=null && AtomicOps.Add(*((ulong*)cell),ulong.MaxValue)==1ul)
+            br_delete(ExecutionMemory.Context(),null,cell);
+    }
+    void br_drop(byte* type,byte* slot) {
+        ulong k=Word(type,0ul),size=Word(type,8ul);
+#if Windows || MacOS || FreeBSD || (Linux && (X64 || ARM64 || RISCV64))
+        if(k==20ul) ReleaseStream((Bolt.Runtime.IO.StreamState*)Ptr(slot,8ul));
+#endif
+#if Windows || Linux || MacOS || FreeBSD
+        if(k==22ul)SystemLifetime.Release((SystemState*)Ptr(slot,8ul));
+#endif
+        if(k==24ul)ReleaseShared(Ptr(slot,8ul));
+        if(k==14ul && Ptr(slot,0ul)!=null){
+            byte* ctx=ExecutionMemory.Context(),saved=Ptr(ctx,40ul);int failed=*((int*)ctx);
+            Put(ctx,40ul,null);*((int*)ctx)=0;
+            br_arena_action(ctx,null,slot,1);
+            if(*((int*)ctx)!=0){Finish(ctx,1);ThreadKernel.Fatal();}
+            Put(ctx,40ul,saved);*((int*)ctx)=failed;Free(Ptr(slot,0ul));
+        }
+        if(k==13ul)ReleaseBox(Ptr(slot,8ul));
+        if(k==23ul)ThreadKernel.Release((ThreadResource*)Ptr(slot,0ul));
+        if(k==5ul)ReleaseText(Ptr(slot,0ul));
+        if(k==15ul || (k==7ul && HasExceptionBase(type))){
+            ReleaseText(Ptr(slot,8ul));ReleaseText(Ptr(slot,24ul));
+        }
+        if(k==17ul && slot[0]!=0)br_drop(Ptr(type,16ul),&slot[8ul]);
+        else if(k==18ul)DisposeError(Ptr(slot,0ul));
+        else if(k==16ul)EndRange(Ptr(slot,0ul));
+        else if(k==7ul || k==19ul) {
+            ulong marker=Word(type,48ul+16ul*Word(type,40ul));
+            DropRecord(type,slot,marker==ulong.MaxValue ? null : Ptr(slot,marker));
+        }
+        else if(k==8ul || k==9ul) {
+            byte* h=Ptr(slot,0ul);
+            if(h!=null){
+                byte* element=Ptr(type,16ul),data=Ptr(h,0ul);ulong stride=Word(element,8ul);
+                ulong kind=Word(element,0ul);
+                if(kind==5ul || kind>=7ul)
+                    for(ulong i=0ul;i<Word(h,8ul);i++)br_drop(element,&data[i*stride]);
+                FreeStorage(h);
+            }
+        }
+        Zero(slot,size);
+    }
+    void br_reset(byte* type,byte* slot) {br_drop(type,slot);}
+    void Take(byte* ctx,byte* type,byte* dest,byte* source) {
+        if(dest==source)return;
+        if(RegionOf(ctx,dest)!=RegionOf(ctx,source)){
+            br_copy(ctx,null,type,dest,source);
+            if(*((int*)ctx)==0)br_drop(type,source);
+            return;
+        }
+        MovePrepared(ctx,type,dest,source);
+    }
+    void MovePrepared(byte* ctx,byte* type,byte* dest,byte* source) {
+        if(dest==source)return;
+        Mutated(ctx,dest);
+        br_drop(type,dest);ulong size=Word(type,8ul);Bytes(dest,source,size);Zero(source,size);
+    }
+    void br_array_shape(byte* ctx,byte* site,byte* type,byte* dest,ulong* dims,ulong rank,int initialize) {
+        ArrayInto(ctx,site,type,dest,dims,rank,RegionOf(ctx,dest));
+    }
+    void ArrayInto(byte* ctx,byte* site,byte* type,byte* dest,ulong* dims,ulong rank,Region* region) {
+        byte* element=Ptr(type,16ul);ulong stride=Word(element,8ul),count=1ul;
+        for(ulong i=0ul;i<rank;i++)if(dims[i]==0ul)count=0ul;
+        if(count!=0ul)for(ulong i=0ul;i<rank;i++){
+            if(count>9223372036854775807ul/dims[i]){Error(ctx,site,Ptr(ctx,72ul),null);return;}
+            count*=dims[i];
+        }
+        ulong prefix=24ul+8ul*rank;
+        if(stride==0ul || count>(9223372036854775807ul-prefix)/stride){Error(ctx,site,Ptr(ctx,72ul),null);return;}
+        byte* h=Storage(region,prefix+count*stride);
+        if(h==null){OutOfMemory(ctx,site);return;}
+        Put(h,0ul,&h[prefix]);WordSet(h,8ul,count);WordSet(h,16ul,count);
+        Bytes(&h[24ul],(byte*)dims,rank*8ul);
+        Mutated(ctx,dest);br_drop(type,dest);Put(dest,0ul,h);
+    }
+    void br_array(byte* ctx,byte* site,byte* type,byte* dest,ulong count,int initialize) {
+        br_array_shape(ctx,site,type,dest,&count,1ul,initialize);
+    }
+    int br_array_length(byte* ctx,byte* site,byte* type,byte* slot,long dimension) {
+        if(dimension<0l || (ulong)dimension>=Word(type,40ul)){Bounds(ctx,site);return 0;}
+        byte* h=Ptr(slot,0ul);ulong size=h==null ? 0ul : Word(h,24ul+8ul*(ulong)dimension);
+        if(size>2147483647ul){Error(ctx,site,Ptr(ctx,72ul),null);return 0;}
+        return (int)size;
+    }
+    byte* br_index(byte* ctx,byte* site,byte* type,byte* slot,long index) {
+        byte* h=Ptr(slot,0ul);
+        if(h==null || (ulong)index>=Word(h,8ul)){Bounds(ctx,site);return null;}
+        byte* data=Ptr(h,0ul);return &data[(ulong)index*Word(Ptr(type,16ul),8ul)];
+    }
+    byte* br_array_index(byte* ctx,byte* site,byte* type,byte* slot,long* indices,ulong rank) {
+        byte* h=Ptr(slot,0ul);if(h==null || rank!=Word(type,40ul)){Bounds(ctx,site);return null;}
+        ulong index=0ul;
+        for(ulong i=0ul;i<rank;i++){
+            ulong size=Word(h,24ul+i*8ul);
+            if((ulong)indices[i]>=size){Bounds(ctx,site);return null;}
+            index=index*size+(ulong)indices[i];
+        }
+        return br_index(ctx,site,type,slot,(long)index);
+    }
+    void br_copy(byte* ctx,byte* site,byte* type,byte* dest,byte* source) {
+        CopyInto(ctx,site,type,dest,source,RegionOf(ctx,dest));
+    }
+    void CopyInto(byte* ctx,byte* site,byte* type,byte* dest,byte* source,Region* region,bool fresh=false) {
+        if(dest==source)return;
+        ulong k=Word(type,0ul);
+#if Windows || MacOS || FreeBSD || (Linux && (X64 || ARM64 || RISCV64))
+        if(k==20ul){
+            Bolt.Runtime.IO.StreamState* state=(Bolt.Runtime.IO.StreamState*)Ptr(source,8ul);
+            if(state!=null)AtomicOps.Add(state->References,1ul);
+            ReleaseStream((Bolt.Runtime.IO.StreamState*)Ptr(dest,8ul));
+            Bytes(dest,source,Word(type,8ul));return;
+        }
+#endif
+#if Windows || Linux || MacOS || FreeBSD
+        if(k==22ul){
+            SystemState* state=(SystemState*)Ptr(source,8ul);
+            if(state!=null)AtomicOps.Add(state->References,1ul);
+            SystemLifetime.Release((SystemState*)Ptr(dest,8ul));Bytes(dest,source,Word(type,8ul));return;
+        }
+#endif
+        if(k==24ul){
+            byte* cell=Ptr(source,8ul);
+            if(cell!=null)AtomicOps.Add(*((ulong*)cell),1ul);
+            ReleaseShared(Ptr(dest,8ul));Bytes(dest,source,Word(type,8ul));return;
+        }
+        if(k==13ul){BoxInto(ctx,site,type,dest,type,source,region);return;}
+        if(k==23ul){
+            ThreadResource* p=(ThreadResource*)Ptr(source,0ul);
+            ThreadKernel.Retain(p);ThreadKernel.Release((ThreadResource*)Ptr(dest,0ul));
+            Put(dest,0ul,(byte*)p);return;
+        }
+        if(k==15ul){CopyException(ctx,site,type,dest,source);return;}
+        if(k==5ul){
+            Mutated(ctx,dest);
+            AssignRegionText(ctx,site,dest,Ptr(source,0ul),region);
+            return;
+        }
+        if(k==17ul){
+            if(source[0]==0){br_drop(type,dest);return;}
+            CopyInto(ctx,site,Ptr(type,16ul),&dest[8ul],&source[8ul],region,fresh || dest[0]==0);
+            if(*((int*)ctx)==0)dest[0]=1;return;
+        }
+        if(k==7ul || k==19ul){
+            ulong size=Word(type,8ul);
+            byte* temporary=Allocate(size);
+            if(temporary==null){OutOfMemory(ctx,site);return;}
+            if(k==7ul){
+                Put(temporary,0ul,type);
+                if(HasExceptionBase(type))CopyException(ctx,site,type,temporary,source);
+            }
+            for(ulong i=0ul;i<Word(type,40ul);i++){
+                ulong field=48ul+i*16ul,offset=Word(type,field);
+                CopyInto(ctx,site,Ptr(type,field+8ul),&temporary[offset],&source[offset],region,true);
+                if(*((int*)ctx)!=0){
+                    DropFields(type,temporary,i,0ul);
+                    if(k==7ul && HasExceptionBase(type)){ReleaseText(Ptr(temporary,8ul));ReleaseText(Ptr(temporary,24ul));}
+                    Free(temporary);return;
+                }
+            }
+            ulong tail=48ul+16ul*Word(type,40ul),marker=Word(type,tail);
+            if(marker!=ulong.MaxValue)Put(temporary,marker,Ptr(source,marker));
+            byte* copy=Ptr(type,tail+16ul);
+            if(copy!=null){
+                InvokeLifetime(copy,temporary);
+                if(*((int*)ctx)!=0){br_drop(type,temporary);Free(temporary);return;}
+            }
+            if(fresh)Bytes(dest,temporary,size);else MovePrepared(ctx,type,dest,temporary);
+            Free(temporary);return;
+        }
+        if(k!=8ul && k!=9ul){Bytes(dest,source,Word(type,8ul));return;}
+        byte* h=Ptr(source,0ul), copy=null;
+        if(h!=null){
+            byte* element=Ptr(type,16ul);ulong rank=Word(type,40ul),stride=Word(element,8ul);
+            ArrayInto(ctx,site,type,(byte*)&copy,k==9ul ? (ulong*)&h[16ul] : (ulong*)&h[24ul],rank,region);
+            if(*((int*)ctx)!=0)return;
+            WordSet(copy,8ul,Word(h,8ul));
+            byte* to=Ptr(copy,0ul),from=Ptr(h,0ul);
+            ulong kind=Word(element,0ul);
+            if(kind!=5ul && kind<7ul)Bytes(to,from,stride*Word(h,8ul));
+            else for(ulong i=0ul;i<Word(h,8ul);i++){
+                CopyInto(ctx,site,element,&to[i*stride],&from[i*stride],region,true);
+                if(*((int*)ctx)!=0){WordSet(copy,8ul,i);br_drop(type,(byte*)&copy);return;}
+            }
+        }
+        Mutated(ctx,dest);br_drop(type,dest);Put(dest,0ul,copy);
+    }
+    int FindIntegerWidth<T>(byte* data, ulong count, byte* key) {
+        // A key borrowed from a packed record can be unaligned.
+        T wanted;
+        Bytes((byte*)&wanted,key,(ulong)sizeof(T));
+        T* values=(T*)data;
+        ulong i=0ul;
+        // Test eight elements together so LLVM can compare adjacent lanes.
+        // Resolve hits and the final partial group in original index order.
+        while(count-i>=8ul){
+            T* group=&values[i];
+            uint first=(group[0]==wanted ? 1u : 0u) | (group[1]==wanted ? 1u : 0u) |
+                       (group[2]==wanted ? 1u : 0u) | (group[3]==wanted ? 1u : 0u);
+            uint last=(group[4]==wanted ? 1u : 0u) | (group[5]==wanted ? 1u : 0u) |
+                      (group[6]==wanted ? 1u : 0u) | (group[7]==wanted ? 1u : 0u);
+            if((first | last)!=0u)break;
+            i+=8ul;
+        }
+        for(;i<count;i++)if(values[i]==wanted)return (int)i;
+        return -1;
+    }
+    void FindInteger(byte* type,byte* slot,byte* output,byte* key) {
+        byte* h=Ptr(slot,0ul);*((int*)output)=-1;if(h==null)return;
+        ulong count=Word(h,8ul);
+        if(count==0ul)return;
+        ulong stride=Word(Ptr(type,16ul),8ul);byte* data=Ptr(h,0ul);
+        // Standalone pointer loads are emitted with byte alignment.
+        if(stride==1ul){*((int*)output)=FindIntegerWidth<byte>(data,count,key);return;}
+        if(stride==2ul){*((int*)output)=FindIntegerWidth<ushort>(data,count,key);return;}
+        if(stride==4ul){*((int*)output)=FindIntegerWidth<uint>(data,count,key);return;}
+        if(stride==8ul){*((int*)output)=FindIntegerWidth<ulong>(data,count,key);return;}
+        for(ulong i=0ul;i<count;i++){
+            ulong n=0ul;while(n<stride && data[i*stride+n]==key[n])n++;
+            if(n==stride){*((int*)output)=(int)i;return;}
+        }
+    }
+    ulong Count(byte* h) {return h==null ? 0ul : Word(h,8ul);}
+    bool EqualValue(byte* type,byte* a,byte* b) {
+        byte* ctx=ExecutionMemory.Context();
+        if(*(int*)ctx!=0)return false;
+        ulong kind=Word(type,0ul),size=Word(type,8ul);
+        if(kind==13ul){
+            byte* left=br_unbox(ctx,null,a),right=br_unbox(ctx,null,b);
+            if(left==null || right==null)return false;
+            byte* actual=ReceiverType(a);
+            return actual==ReceiverType(b) && EqualValue(actual,left,right);
+        }
+        if(kind==5ul)return TextOrder(a,b)==0;
+        if(kind==15ul)return Ptr(a,0ul)==Ptr(b,0ul) && TextOrder(&a[8ul],&b[8ul])==0;
+        if(kind==3ul)return size==4ul ? *((float*)a)==*((float*)b) : *((double*)a)==*((double*)b);
+        if(kind==17ul)return a[0]==b[0] && (a[0]==0 || EqualValue(Ptr(type,16ul),&a[8ul],&b[8ul]));
+        if(kind==8ul || kind==9ul){
+            byte* x=Ptr(a,0ul),y=Ptr(b,0ul),element=Ptr(type,16ul);
+            if(Count(x)!=Count(y))return false;
+            if(kind==8ul)for(ulong d=0ul;d<Word(type,40ul);d++){
+                ulong xn=x==null ? 0ul : Word(x,24ul+8ul*d),yn=y==null ? 0ul : Word(y,24ul+8ul*d);
+                if(xn!=yn)return false;
+            }
+            if(Count(x)==0ul)return true;
+            ulong stride=Word(element,8ul);byte* left=Ptr(x,0ul),right=Ptr(y,0ul);
+            for(ulong i=0ul;i<Count(x);i++)if(!EqualValue(element,&left[i*stride],&right[i*stride]))return false;
+            return true;
+        }
+        if(kind==7ul || kind==19ul || kind==20ul || kind==22ul || kind==24ul){
+            byte* equal=Ptr(type,72ul+16ul*Word(type,40ul));
+            if(equal!=null)return InvokeEquality(equal,a,b);
+            for(ulong i=0ul;i<Word(type,40ul);i++){
+                ulong field=48ul+i*16ul,n=Word(type,field);
+                if(!EqualValue(Ptr(type,field+8ul),&a[n],&b[n]))return false;
+            }
+            return true;
+        }
+        for(ulong i=0ul;i<size;i++)if(a[i]!=b[i])return false;
+        return true;
+    }
+    int CompareValue(byte* type,byte* a,byte* b,int operation) {
+        return EqualValue(type,a,b)==(operation==0) ? 1 : 0;
+    }
+    ulong Mix(ulong a,ulong b) {return a^(b+2654435769ul+(a<<6)+(a>>2));}
+    ulong ValueHash(byte* type,byte* value) {
+        byte* ctx=ExecutionMemory.Context();
+        if(*(int*)ctx!=0)return 0ul;
+        ulong kind=Word(type,0ul),size=Word(type,8ul),hash=0ul;
+        if(kind==13ul){
+            byte* data=br_unbox(ctx,null,value);
+            return data==null ? 0ul : ValueHash(ReceiverType(value),data);
+        }
+        if(kind==5ul)return HashText(value);
+        if(kind==15ul){
+            byte* actual=Ptr(value,0ul);
+            if(actual==null)return 0ul;
+            // Exception equality uses the type and message; throw sites and frames
+            // can change after a copy has already been inserted into a collection.
+            byte* name=Ptr(actual,32ul);
+            ulong length=CLength(name),start=0ul;
+            for(ulong i=0ul;i<length;i++)if(name[i]==46)start=i+1ul;
+            ulong prefix=HashBytes(14695981039346656037ul,&name[start],length-start);
+            ulong count=0ul;byte* message=br_string_data(&value[8ul],&count);
+            return HashBytes(prefix,message,count);
+        }
+        if(kind==17ul)return value[0]==0 ? 25533ul : ValueHash(Ptr(type,16ul),&value[8ul])^1831565813ul;
+        if(kind==3ul && (size==4ul ? *((float*)value)==0.0f : *((double*)value)==0.0))return 0ul;
+        if(kind==7ul || kind==19ul || kind==20ul || kind==22ul || kind==24ul){
+            byte* routine=Ptr(type,80ul+16ul*Word(type,40ul));
+            if(routine!=null)return InvokeHash(routine,value);
+            for(ulong i=0ul;i<Word(type,40ul);i++){
+                ulong field=48ul+i*16ul;
+                hash=Mix(hash,ValueHash(Ptr(type,field+8ul),&value[Word(type,field)]));
+            }
+            return hash;
+        }
+        if(kind==8ul || kind==9ul){
+            byte* h=Ptr(value,0ul),element=Ptr(type,16ul);
+            if(kind==8ul && Word(type,40ul)>1ul)for(ulong i=0ul;i<Word(type,40ul);i++)
+                hash=Mix(hash,h==null ? 0ul : Word(h,24ul+8ul*i));
+            if(Count(h)>0ul){
+                byte* data=Ptr(h,0ul);ulong stride=Word(element,8ul);
+                for(ulong i=0ul;i<Count(h);i++)hash=Mix(hash,ValueHash(element,&data[i*stride]));
+            }
+            return hash;
+        }
+        for(ulong i=0ul;i<size;i++)hash=Mix(hash,(ulong)value[i]);
+        return hash;
+    }
+    byte* ReserveBuffer(byte* ctx,byte* site,byte* type,byte* slot,ulong required,bool grow) {
+        byte* h=Ptr(slot,0ul);ulong capacity=h==null ? 0ul : Word(h,16ul);
+        if(required<=capacity)return h;
+        if(required>2147483647ul){Error(ctx,site,Ptr(ctx,72ul),null);return null;}
+        if(grow){
+            ulong next=capacity*2ul;if(next<4ul)next=4ul;
+            if(next>2147483647ul)next=2147483647ul;if(required<next)required=next;
+        }
+        byte* replacement=null;ArrayInto(ctx,site,type,(byte*)&replacement,&required,1ul,RegionOf(ctx,slot));
+        if(replacement==null)return null;
+        ulong count=Count(h);WordSet(replacement,8ul,count);
+        if(count!=0ul)Bytes(Ptr(replacement,0ul),Ptr(h,0ul),count*Word(Ptr(type,16ul),8ul));
+        Mutated(ctx,slot);Put(slot,0ul,replacement);FreeStorage(h);return replacement;
+    }
+    // Stage incoming values before growth: the argument may point into this buffer.
+    void InsertBuffer(byte* ctx,byte* site,byte* type,byte* slot,ulong at,byte* input,ulong length) {
+        if(length==0ul)return;
+        ulong count=Count(Ptr(slot,0ul));
+        if(length>2147483647ul-count){Error(ctx,site,Ptr(ctx,72ul),null);return;}
+        byte* element=Ptr(type,16ul);ulong stride=Word(element,8ul);
+        byte* current=Ptr(slot,0ul);
+        if(at==count && current!=null && count+length<=Word(current,16ul)){
+            byte* data=Ptr(current,0ul);byte* tail=&data[count*stride];
+            ulong kind=Word(element,0ul);
+            if(kind!=5ul && kind<7ul)Bytes(tail,input,length*stride);
+            else for(ulong i=0ul;i<length;i++){
+                br_copy(ctx,site,element,&tail[i*stride],&input[i*stride]);
+                if(*((int*)ctx)!=0){
+                    for(ulong j=i;j>0ul;j--)br_drop(element,&tail[(j-1ul)*stride]);
+                    return;
+                }
+            }
+            WordSet(current,8ul,count+length);Mutated(ctx,slot);return;
+        }
+        byte* staged=null;br_array(ctx,site,type,(byte*)&staged,length,0);
+        if(staged==null)return;
+        byte* values=Ptr(staged,0ul);
+        for(ulong i=0ul;i<length;i++){
+            CopyInto(ctx,site,element,&values[i*stride],&input[i*stride],RegionOf(ctx,slot));
+            if(*((int*)ctx)!=0){WordSet(staged,8ul,i);br_drop(type,(byte*)&staged);return;}
+        }
+        byte* h=ReserveBuffer(ctx,site,type,slot,count+length,true);
+        if(h==null){br_drop(type,(byte*)&staged);return;}
+        byte* data=Ptr(h,0ul);
+        for(ulong i=count;i>at;i--)Bytes(&data[(i-1ul+length)*stride],&data[(i-1ul)*stride],stride);
+        Bytes(&data[at*stride],values,length*stride);
+        WordSet(h,8ul,count+length);Mutated(ctx,slot);Free(staged);
+    }
+    void br_buffer_append(byte* ctx,byte* site,byte* type,byte* slot,byte* source,int offset,int length) {
+        byte* h=Ptr(source,0ul);ulong count=Count(h);
+        if(offset<0 || length<0 || (ulong)offset>count || (ulong)length>count-(ulong)offset){Bounds(ctx,site);return;}
+        if(length==0)return;
+        ulong stride=Word(Ptr(type,16ul),8ul);byte* data=Ptr(h,0ul);
+        InsertBuffer(ctx,site,type,slot,Count(Ptr(slot,0ul)),&data[(ulong)offset*stride],(ulong)length);
+    }
+    // Opcodes follow the table in Builder::call. ToArray has the same element
+    // descriptor and one-dimensional header as a buffer, with an exact capacity.
+    void BufferAction(byte* ctx,byte* site,byte* type,byte* slot,int operation,byte* output,byte* a,byte* b) {
+        byte* h=Ptr(slot,0ul),element=Ptr(type,16ul);
+        ulong count=Count(h),stride=Word(element,8ul);
+        if(operation==6){
+            if(slot!=a && RegionOf(ctx,slot)!=RegionOf(ctx,a)){
+                byte* left=null,right=null;
+                CopyInto(ctx,site,type,(byte*)&left,a,RegionOf(ctx,slot));
+                if(*((int*)ctx)!=0)return;
+                CopyInto(ctx,site,type,(byte*)&right,slot,RegionOf(ctx,a));
+                if(*((int*)ctx)!=0){br_drop(type,(byte*)&left);return;}
+                MovePrepared(ctx,type,slot,(byte*)&left);MovePrepared(ctx,type,a,(byte*)&right);return;
+            }
+            if(slot!=a){Mutated(ctx,slot);Mutated(ctx,a);Put(slot,0ul,Ptr(a,0ul));Put(a,0ul,h);}return;
+        }
+        if(operation==7){
+            byte* copy=null;ArrayInto(ctx,site,type,(byte*)&copy,&count,1ul,RegionOf(ctx,output));
+            if(copy==null)return;
+            byte* data=Ptr(copy,0ul);
+            if(count>0ul){
+                byte* from=Ptr(h,0ul);
+                for(ulong i=0ul;i<count;i++){
+                    br_copy(ctx,site,element,&data[i*stride],&from[i*stride]);
+                    if(*((int*)ctx)!=0){WordSet(copy,8ul,i);br_drop(type,(byte*)&copy);return;}
+                }
+            }
+            Mutated(ctx,output);br_drop(type,output);Put(output,0ul,copy);return;
+        }
+        if(operation==1){InsertBuffer(ctx,site,type,slot,count,a,1ul);return;}
+        long index=operation==5 ? 0l : (long)(*((int*)a));
+        if(index<0l){Bounds(ctx,site);return;}
+        ulong at=(ulong)index;
+        if(operation==0){ReserveBuffer(ctx,site,type,slot,at,false);return;}
+        if(at>count || (operation==3 && at==count)){Bounds(ctx,site);return;}
+        if(operation==2){InsertBuffer(ctx,site,type,slot,at,b,1ul);return;}
+        if(h==null)return;
+        byte* data=Ptr(h,0ul);
+        if(operation==3){
+            br_drop(element,&data[at*stride]);
+            for(ulong i=at;i+1ul<count;i++)Bytes(&data[i*stride],&data[(i+1ul)*stride],stride);
+            Zero(&data[(count-1ul)*stride],stride);at=count-1ul;
+        } else for(ulong i=count;i>at;i--)br_drop(element,&data[(i-1ul)*stride]);
+        WordSet(h,8ul,at);Mutated(ctx,slot);
+    }
+    // Iterators borrow their source slot. A committed replacement invalidates all
+    // readers of that slot even if the original string is assigned back to it.
+    void Mutated(byte* ctx,byte* slot) {
+        if(ctx==null || Word(ctx,32ul)==0ul)return;
+        byte* r=Ptr(ctx,160ul);
+        while(r!=null){if(Ptr(r,24ul)==slot)WordSet(r,40ul,1ul);r=Ptr(r,8ul);}
+    }
+    void EndRange(byte* r) {
+        if(r==null)return;
+        byte* ctx=Ptr(r,16ul),previous=Ptr(r,0ul),next=Ptr(r,8ul);
+        if(previous==null)Put(ctx,160ul,next);else Put(previous,8ul,next);
+        if(next!=null)Put(next,0ul,previous);
+        WordSet(ctx,32ul,Word(ctx,32ul)-1ul);Free(r);
+    }
+    void br_range(byte* ctx,byte* site,byte* type,byte* source,byte* element,byte* output) {
+        byte* r=Allocate(72ul);
+        if(r==null){OutOfMemory(ctx,site);return;}
+        EndRange(Ptr(output,0ul));
+        byte* head=Ptr(ctx,160ul);
+        Put(r,8ul,head);if(head!=null)Put(head,0ul,r);Put(ctx,160ul,r);
+        Put(r,16ul,ctx);Put(r,24ul,source);Put(r,32ul,Ptr(source,0ul));Put(r,56ul,type);
+        WordSet(ctx,32ul,Word(ctx,32ul)+1ul);Put(output,0ul,r);
+    }
+    byte* br_range_next(byte* ctx,byte* site,byte* slot) {
+        byte* r=Ptr(slot,0ul),h=Ptr(r,32ul),type=Ptr(r,56ul);
+        if(Word(r,40ul)!=0ul || h!=Ptr(Ptr(r,24ul),0ul)){
+            byte* ex=Ptr(ctx,80ul);CheckedFailure(ctx,site,ex,Ptr(ex,48ul));return null;
+        }
+        ulong i=Word(r,48ul);
+        if(h==null || i>=Word(h,8ul))return null;
+        byte* data=Ptr(h,0ul);
+        if(Word(type,0ul)!=5ul){
+            WordSet(r,48ul,i+1ul);return &data[i*Word(Ptr(type,16ul),8ul)];
+        }
+        uint scalar=ReadScalar(data,Word(h,8ul),i);
+        if(scalar==uint.MaxValue){
+            byte* ex=Ptr(ctx,168ul);CheckedFailure(ctx,site,ex,Ptr(ex,48ul));return null;
+        }
+        WordSet(r,48ul,i);*((uint*)&r[64ul])=scalar;return &r[64ul];
+    }
+    void br_raise(byte* ctx,byte* site,byte* type,byte* value) {
+        byte* actual=Ptr(value,0ul);
+        if(actual==null)actual=type;
+        byte* payload=null;
+        if(Word(actual,0ul)==7ul){
+            payload=Allocate(Word(actual,8ul));
+            if(payload==null){OutOfMemory(ctx,site);return;}
+            br_copy(ctx,site,actual,payload,value);
+            if(*((int*)ctx)!=0){br_drop(actual,payload);Free(payload);return;}
+        }
+        byte* origin=Ptr(value,16ul);if(origin==null)origin=site;
+        Error(ctx,origin,actual,payload==null ? Ptr(value,8ul) : null);
+        byte* e=Ptr(ctx,40ul);
+        if(e==null){if(payload!=null){br_drop(actual,payload);Free(payload);}return;}
+        Put(e,48ul,payload);
+        byte* object=ErrorValue(e);Put(object,16ul,origin);
+        if(payload==null)AssignText(ctx,site,&object[24ul],Ptr(value,24ul));
+    }
+    int br_exception_match(byte* ctx,byte* type) {
+        if(type==null)return 1;
+        byte* e=Ptr(ctx,40ul);if(e==null)return 0;
+        byte* current=Ptr(e,8ul);
+        while(current!=null){if(current==type)return 1;current=Ptr(current,24ul);}
+        return 0;
+    }
+    byte* br_catch_begin(byte* ctx,byte* site) {
+        byte* e=Ptr(ctx,40ul);if(e==null)return null;
+        Put(e,0ul,Ptr(ctx,48ul));Put(ctx,48ul,e);Put(ctx,40ul,null);*((int*)ctx)=0;
+        return ErrorValue(e);
+    }
+    void br_catch_end(byte* ctx) {byte* e=Ptr(ctx,48ul);if(e!=null){Put(ctx,48ul,Ptr(e,0ul));DisposeError(e);}}
+    void br_rethrow(byte* ctx,byte* site) {
+        byte* e=Ptr(ctx,48ul);
+        if(e!=null)br_raise(ctx,site,Ptr(e,8ul),ErrorValue(e));
+    }
+    void br_error_suspend(byte* ctx,byte* dest) {Put(dest,0ul,Ptr(ctx,40ul));Put(ctx,40ul,null);*((int*)ctx)=0;}
+    void br_error_restore(byte* ctx,byte* dest) {
+        if(*((int*)ctx)!=0)DisposeError(Ptr(dest,0ul));
+        else {Put(ctx,40ul,Ptr(dest,0ul));*((int*)ctx)=1;}
+        Put(dest,0ul,null);
+    }
+    void CheckedFailure(byte* ctx,byte* site,byte* type,byte* message) {
+        byte* h=null;br_string(ctx,site,(byte*)&h,message,CLength(message));
+        Error(ctx,site,type,h);ReleaseText(h);
+    }
+    ulong SiteNumber(byte* site,ulong* offset) {
+        ulong n=0ul;
+        while(site[*offset]>=48 && site[*offset]<=57){n=n*10ul+(ulong)(site[*offset]-48);*offset+=1ul;}
+        if(site[*offset]==58)*offset+=1ul;
+        return n;
+    }
+    int SourceNumber(byte* object,bool column) {
+        byte* site=Ptr(object,16ul);if(site==null)return 0;
+        ulong at=0ul,line=SiteNumber(site,&at);
+        return column ? (int)SiteNumber(site,&at) : (int)line;
+    }
+    void SourceFile(byte* ctx,byte* object,byte* dest) {
+        byte* site=Ptr(object,16ul);ulong at=0ul;
+        if(site==null){AssignText(ctx,null,dest,null);return;}
+        SiteNumber(site,&at);SiteNumber(site,&at);SiteNumber(site,&at);
+        ulong length=SiteNumber(site,&at);
+        br_string(ctx,null,dest,&site[at],length);
+    }
+    void br_frame(byte* ctx,byte* site,byte* method) {
+        byte* e=Ptr(ctx,40ul);if(*((int*)ctx)==0 || e==null)return;
+        byte* stack=&ErrorValue(e)[24ul];
+        ulong previous=0ul,n=CLength(method);byte* text=br_string_data(stack,&previous);
+        ulong file=0ul,length=0ul,line=0ul,extra=0ul;
+        if(site!=null){
+            SiteNumber(site,&file);line=file-1ul;
+            SiteNumber(site,&file);SiteNumber(site,&file);length=SiteNumber(site,&file);
+            extra=5ul+length+line;
+        }
+        byte* h=NewText(previous+n+6ul+extra,RegionOf(ctx,stack));if(h==null)return;
+        byte* data=Ptr(h,0ul);Bytes(data,text,previous);
+        data[previous]=32;data[previous+1ul]=32;data[previous+2ul]=97;data[previous+3ul]=116;data[previous+4ul]=32;
+        Bytes(&data[previous+5ul],method,n);ulong at=previous+5ul+n;
+        if(site!=null){
+            data[at++]=32;data[at++]=97;data[at++]=116;data[at++]=32;
+            Bytes(&data[at],&site[file],length);at+=length;
+            data[at++]=58;Bytes(&data[at],site,line);at+=line;
+        }
+        data[at]=10;
+        ReleaseText(Ptr(stack,0ul));Put(stack,0ul,h);
+    }
+    int Finish(byte* ctx,int status) {
+        if(*((int*)ctx)==0)return status;
+        byte* e=Ptr(ctx,40ul);
+        if(e!=null) {
+            byte* object=ErrorValue(e),site=Ptr(object,16ul),source=null;byte colon=58,space=32,lf=10;
+            if(site!=null){
+                ulong at=0ul;SiteNumber(site,&at);SiteNumber(site,&at);ulong position=at;
+                SiteNumber(site,&at);ulong len=SiteNumber(site,&at);
+                WriteError(&site[at],len);WriteError(&colon,1ul);WriteError(site,position);WriteError(&space,1ul);
+                source=&site[at+len];
+            }
+            byte* t=Ptr(e,8ul);
+            if(t!=null){byte* name=Ptr(t,32ul);WriteError(name,CLength(name));}
+            WriteError(&space,1ul);
+            ulong n=0ul;byte* p=br_string_data(&object[8ul],&n);WriteError(p,n);
+            WriteError(&lf,1ul);
+            if(source!=null && source[0]!=0){WriteError(source,CLength(source));WriteError(&lf,1ul);}
+            p=br_string_data(&object[24ul],&n);WriteError(p,n);DisposeError(e);
+        }
+        return 1;
+    }
+}
+#endif

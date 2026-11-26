@@ -1,0 +1,19 @@
+// No import is required for the automatically available Print helper.
+static class Program
+{
+public:
+    string Value()
+    {
+        return (string)0;
+    }
+
+    void Main()
+    {
+        Print("Explicit value conversion: " + Value());
+        uint bits = Reinterpret<uint>(1.0f);
+        Print("Float representation: " + bits);
+        Print("Restored: " + Reinterpret<float>(bits));
+        Print("The next line is generated native code, compiled at runtime:");
+        Runtime.ExecuteJit("Print(21 * 2);");
+    }
+}

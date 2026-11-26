@@ -1,0 +1,7 @@
+
+enum Small:short {Negative=-1}
+static class Program {public: void Main(){
+int a=5;float b=0.5f;double c=1.25;bool d=true;string e="hi"; Small f=Small.Negative;
+Print(a.ToString());Print(b.ToString());Print(c.ToString());Print(d.ToString());Print(e.ToString());Print(f.ToString());
+IStringable x=(byte)255;Print(x.ToString());x=(short)-128;Print(x);x=f;Print(x);
+}}

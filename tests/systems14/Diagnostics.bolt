@@ -1,0 +1,43 @@
+import System
+import System.Diagnostics
+static class Program {public:
+ static int calls=0;
+ bool SideEffect(){calls++;return false;}
+ void CheckLimits(int skip, int maximum){
+  bool caught=false;
+  try{StackTrace.Capture(skip,maximum);}catch(ArgumentOutOfRangeException& e){caught=true;}
+  Assert.That(caught,"Expected ArgumentOutOfRangeException");
+ }
+#ifdef BoltStandaloneCore
+ string[] Nested(int depth, int skip){
+  if(depth==0)return StackTrace.Capture(skip,128);
+  string[] frames=Nested(depth-1,skip);
+  Assert.That(frames.Length<=128);
+  return frames;
+ }
+#endif
+ void Main(){
+  bool caught=false;try{Assert.That(false,"test-error");}catch(AssertionException& e){caught=true;Assert.That(e.Message=="test-error");}Assert.That(caught);
+  bool debugCaught=false;try{Debug.Assert(SideEffect(),"debug-error");}catch(AssertionException& e){debugCaught=true;}
+#ifdef Debug
+  Assert.That(debugCaught);
+#else
+  Assert.That(!debugCaught);
+#endif
+  Assert.That(calls==1);
+  string[] trace=StackTrace.Capture(0,16);Assert.That(trace.Length>0);Assert.That(StackTrace.Capture(0,0).Length==0);
+  Assert.That(trace.Length<=16 && trace[0].Length>0);
+  Assert.That(StackTrace.Capture(0,1).Length==1);
+  Assert.That(StackTrace.Capture(128,1).Length<=1);
+#ifdef BoltStandaloneCore
+  string[] full=Nested(5,0);
+  Assert.That(full.Length>=5,"Expected native caller frames.");
+  Assert.That(Nested(5,2).Length==full.Length-2,"Stack frame skip is incorrect.");
+#endif
+  CheckLimits(-1,0);CheckLimits(129,1);CheckLimits(0,-1);CheckLimits(0,129);
+  Assert.Equal(42,42);
+  bool unequal=false;try{Assert.Equal(42,43);}catch(AssertionException& e){unequal=e.Message=="Values differ.";}Assert.That(unequal);
+  if(!Debug.IsAttached)Assert.That(!Debug.Break());
+  Trace.WriteLine("TRACE14:real-stderr");Trace.WriteLine("TRACE14:Grüße\0😀");Trace.WriteLine(42);Print("DIAGNOSTICS14:passed");
+ }
+}

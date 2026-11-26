@@ -1,0 +1,5 @@
+
+class Base {public:int X; Base(int x){X=x;} int Read(){return X;} } class Child : Base {public:Child(int x):base(x+1){} override int Read(){return X*2;} }
+static class Program { public: void Main() {
+Child c=Child(5); Console.WriteLine(c.X); Console.WriteLine(c.Read());
+} }

@@ -1,0 +1,9 @@
+namespace Bolt.Runtime;
+
+[Native("bolt::platform::Entropy")]
+public static class Entropy
+{
+public:
+    ulong Seed();
+    ulong* ThreadRandomState();
+}

@@ -1,0 +1,28 @@
+import System
+import System.Collections.Generic
+namespace System.Events;
+
+// Snapshot dispatch: reentrant subscription changes affect the next raise.
+public sealed class EventStorage<T...>
+{
+private:
+    System.Collections.Generic.List<System.Action<T...>> handlers;
+public:
+    EventStorage() {}
+    void Subscribe(System.Action<T...> handler) { handlers.Add(handler); }
+    void Unsubscribe(System.Action<T...> handler)
+    {
+        for (int i = handlers.Length - 1; i >= 0; i--)
+        {
+            if (handlers[i].InvocationId() == handler.InvocationId() &&
+                handlers[i].InvocationTarget() == handler.InvocationTarget())
+            { handlers.RemoveAt(i); return; }
+        }
+    }
+    void Raise(T... values)
+    {
+        if (handlers.Length == 0) return;
+        System.Collections.Generic.List<System.Action<T...>> snapshot = handlers;
+        for (int i = 0; i < snapshot.Length; i++) snapshot[i].Invoke(values...);
+    }
+}

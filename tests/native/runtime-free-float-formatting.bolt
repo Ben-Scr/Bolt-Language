@@ -1,0 +1,34 @@
+import System
+
+static class Program {
+private:
+    bool Matches<T>(T value, string expected) : FloatingPoint<T> {
+        return value.ToString() == expected && Converter.ToString<T>(value) == expected;
+    }
+    string Boxed(IStringable value) { return value.ToString(); }
+    double Next(int& calls) { calls++; return 0.125; }
+public:
+    int Main() {
+        if (!Matches(1.23456789f, "1.23457") || !Matches(1.2345678901234567, "1.23456789012346")) return 1;
+        if (!Matches(123456.5f, "123456") || !Matches(123457.5f, "123458")) return 2;
+        if (!Matches(999999.5f, "1e+06") || !Matches(999999999999999.5, "1e+15")) return 3;
+        if (!Matches(0.0001, "0.0001") || !Matches(0.00001, "1e-05")) return 4;
+        if (!Matches(0.0, "0") || !Matches(Reinterpret<float>(2147483648u), "-0")) return 5;
+        if (!Matches(float.MaxValue, "3.40282e+38") || !Matches(double.MaxValue, "1.79769313486232e+308")) return 6;
+        if (!Matches(Reinterpret<float>(1u), "1.4013e-45") || !Matches(Reinterpret<double>(1ul), "4.94065645841247e-324")) return 7;
+        if (!Matches(Reinterpret<float>(2139095040u), "inf") || !Matches(Reinterpret<double>(18442240474082181120ul), "-inf")) return 8;
+        if (!Matches(Reinterpret<float>(2143289345u), "nan") || !Matches(Reinterpret<double>(18444492273895866369ul), "-nan")) return 9;
+        double signaling = Reinterpret<double>(9218868437227405313ul);
+        double indefinite = Reinterpret<double>(18444492273895866368ul);
+#ifdef Windows
+        if (!Matches(signaling, "nan(snan)") || !Matches(indefinite, "-nan(ind)")) return 10;
+#else
+        if (!Matches(signaling, "nan") || !Matches(indefinite, "-nan")) return 10;
+#endif
+        if (!Matches(Reinterpret<float>(2139095041u), "nan")) return 11;
+        if (Boxed(123457.5f) != "123458" || Boxed(0.00001) != "1e-05") return 12;
+        int calls = 0;
+        if (Next(calls).ToString() != "0.125" || calls != 1) return 13;
+        return 0;
+    }
+}

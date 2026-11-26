@@ -1,0 +1,5 @@
+
+class Cell{} enum E:Cell{A}
+static class Program { public: void Main() {
+
+} }

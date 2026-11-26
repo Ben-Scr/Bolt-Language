@@ -1,0 +1,27 @@
+#if BoltStandaloneCore && (Windows || MacOS || FreeBSD || (Linux && (X64 || ARM64 || RISCV64)))
+import System
+import System.IO
+namespace Bolt.Runtime.IO;
+class WriterLease {
+    StreamHandle lease;
+public:
+    WriterLease() {}
+    WriterLease(Stream& stream, bool leaveOpen) {
+        if (!stream.CanWrite) throw NotSupportedException("The stream is not writable.");
+        StreamView view;
+        view.BindLease(stream, lease, leaveOpen);
+    }
+    void WriteText(const string& text) { StreamView view=StreamView(lease); view.WriteText(text); }
+    void Flush() { StreamView view=StreamView(lease); view.Flush(); }
+    void Close() {
+        if (lease.State == null || lease.State->Closed) return;
+        StreamView view=StreamView(lease);
+        view.Flush();
+        if (lease.State->OwnsParent) view.Close();
+        lease.State->Closed = true;
+        lease.State->OwnsParent = false;
+        Bolt.Runtime.StandaloneCore.ReleaseStream(lease.State->Parent);
+        lease.State->Parent = null;
+    }
+}
+#endif

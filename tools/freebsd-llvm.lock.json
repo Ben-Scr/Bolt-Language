@@ -1,0 +1,32 @@
+{
+  "llvm19-lite": {
+    "url": "https://pkg.freebsd.org/FreeBSD:14:amd64/quarterly/All/Hashed/llvm19-lite-19.1.7_4~2$7dqry9zi.pkg",
+    "sha256": "bf85d13f4efb13480061ef30427507612853a3e4d3613cdf814ca71d6f2cbffd",
+    "version": "19.1.7_4",
+    "member": "/usr/local/llvm19/lib/libLLVM.so.19.1",
+    "output": "libLLVM.so.19.1",
+    "notices": [
+      "BSD3CLAUSE",
+      "LICENSE",
+      "LLVM",
+      "LLVM2",
+      "MIT",
+      "PD",
+      "REGEX",
+      "catalog.mk"
+    ]
+  },
+  "zstd": {
+    "url": "https://pkg.freebsd.org/FreeBSD:14:amd64/quarterly/All/Hashed/zstd-1.5.7_2~2$8pq3gc9g.pkg",
+    "sha256": "e9930f2de8bba45fc4df3acec6b84837df6c2dd956cd076d173f1239c669ae95",
+    "version": "1.5.7_2",
+    "member": "/usr/local/lib/libzstd.so.1.5.7",
+    "output": "libzstd.so.1",
+    "notices": [
+      "BSD3CLAUSE",
+      "GPLv2",
+      "LICENSE",
+      "catalog.mk"
+    ]
+  }
+}

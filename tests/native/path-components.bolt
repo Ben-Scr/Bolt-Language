@@ -1,0 +1,26 @@
+import System
+import System.IO
+
+static class Program
+{
+public:
+    int Main()
+    {
+        if (Path.GetFileName("") != "" || Path.GetFileName("dir/") != "") return 1;
+        if (Path.GetDirectoryName("dir/ü😀.txt") != "dir" || Path.GetDirectoryName("dir///") != "dir") return 2;
+        if (Path.GetExtension(".env") != "" || Path.GetExtension("..") != "" || Path.GetExtension("a.") != ".") return 3;
+        if (Path.GetFileNameWithoutExtension("ä😀/x.tar.gz") != "x.tar") return 4;
+        if (Path.ChangeExtension("ä😀/.env", "txt") != "ä😀/.env.txt") return 5;
+        if (Path.Combine("dir", "") != "dir/" || Path.GetFullPath("a/../ü😀") != Path.GetFullPath("ü😀")) return 6;
+        try { Path.GetFullPath("a\0b"); return 7; } catch (ArgumentException& error) {}
+#ifdef Windows
+        if (Path.IsPathRooted("C:foo") || !Path.IsPathRooted("C:/foo") || !Path.IsPathRooted("//server")) return 8;
+        if (Path.Combine("C:/foo", "/bar") != "C:/bar" || Path.Combine("C:", "bar") != "C:bar") return 9;
+        if (Path.GetExtension("a.txt:stream") != ".txt" || Path.GetDirectoryName("//host/share") != "//host/") return 10;
+#else
+        if (!Path.IsPathRooted("/a") || Path.IsPathRooted("C:/foo") || Path.GetFileName("a\\b") != "a\\b") return 8;
+        if (Path.Combine("dir", "/bar") != "/bar" || Path.GetFullPath("/a/b/..") != "/a/") return 9;
+#endif
+        return 0;
+    }
+}

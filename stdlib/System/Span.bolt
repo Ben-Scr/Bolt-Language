@@ -1,0 +1,215 @@
+import Bolt.Runtime
+namespace System;
+
+// Borrowed contiguous storage. Copying a view copies its pointer and length.
+// The owner must outlive every view; relocation/destruction invalidates views.
+public struct Span<T>
+{
+private:
+    T* data;
+    int length = 0;
+public:
+    Span() {}
+    Span(T* pointer, int count)
+    {
+        if (count < 0) Failure.Range("Span length must be nonnegative.");
+        if (count != 0 && pointer == null) Failure.Argument("A nonempty span requires storage.");
+        data = pointer; length = count;
+    }
+    Span(T[]& values)
+    {
+        length = values.Length;
+        if (length != 0) data = &values[0];
+    }
+    Span(T[]& values, int start, int count)
+    {
+        if (start < 0 || count < 0 || start > values.Length || count > values.Length - start)
+            Failure.Range("Span range is outside the array.");
+        length = count;
+        if (count != 0) data = &values[start];
+    }
+    int Length => length;
+    static Span<T> Empty => Span<T>();
+    bool IsEmpty => length == 0;
+    T* Data => data;
+    [ReadOnly] T& this[int index]
+    {
+        get {
+            if (index < 0 || index >= length) Failure.Index("Span index is out of range.");
+            return data[index];
+        }
+    }
+    [ReadOnly] Span<T> Slice(int start)
+    {
+        if (start < 0 || start > length) Failure.Range("Span slice is out of range.");
+        return Slice(start, length - start);
+    }
+    [ReadOnly] Span<T> Slice(int start, int count)
+    {
+        if (start < 0 || count < 0 || start > length || count > length - start)
+            Failure.Range("Span slice is out of range.");
+        if (count == 0) return Span<T>();
+        return Span<T>(&data[start], count);
+    }
+    [ReadOnly] ReadOnlySpan<T> AsReadOnly() { return ReadOnlySpan<T>(data, length); }
+    [ReadOnly] implicit ReadOnlySpan<T>() { return AsReadOnly(); }
+    [ReadOnly] void CopyTo(Span<T> destination) { AsReadOnly().CopyTo(destination); }
+    [ReadOnly] bool TryCopyTo(Span<T> destination) { return AsReadOnly().TryCopyTo(destination); }
+    [ReadOnly] T[] ToArray() { return AsReadOnly().ToArray(); }
+    [ReadOnly] void Fill(const T& value)
+    {
+        // Snapshot before assigning: value can alias an element of this span.
+        T saved = value;
+        for (int i = 0; i < length; i++) data[i] = saved;
+    }
+    [ReadOnly] void Clear() { for (int i = 0; i < length; i++) data[i] = default; }
+    [ReadOnly] void Reverse()
+    {
+        for (int i = 0; i < length / 2; i++) {
+            int other = length - i - 1;
+            T saved = data[i]; data[i] = data[other]; data[other] = saved;
+        }
+    }
+    [ReadOnly] int IndexOf(const T& value) { return AsReadOnly().IndexOf(value); }
+    [ReadOnly] int LastIndexOf(const T& value) { return AsReadOnly().LastIndexOf(value); }
+    [ReadOnly] bool Contains(const T& value) { return IndexOf(value) >= 0; }
+    [ReadOnly] bool SequenceEqual(ReadOnlySpan<T> other) { return AsReadOnly().SequenceEqual(other); }
+    [ReadOnly] bool StartsWith(ReadOnlySpan<T> other) { return AsReadOnly().StartsWith(other); }
+    [ReadOnly] bool EndsWith(ReadOnlySpan<T> other) { return AsReadOnly().EndsWith(other); }
+    [ReadOnly] SpanEnumerator<T> GetEnumerator() { return SpanEnumerator<T>(this); }
+}
+
+// Bolt const qualifies bindings, not pointees. Read-only element access returns
+// a value snapshot, never a mutable reference or a public storage pointer.
+public struct ReadOnlySpan<T>
+{
+private:
+    T* data;
+    int length = 0;
+public:
+    ReadOnlySpan() {}
+    ReadOnlySpan(T* pointer, int count)
+    {
+        if (count < 0) Failure.Range("Span length must be nonnegative.");
+        if (count != 0 && pointer == null) Failure.Argument("A nonempty span requires storage.");
+        data = pointer; length = count;
+    }
+    ReadOnlySpan(T[]& values)
+    {
+        length = values.Length;
+        if (length != 0) data = &values[0];
+    }
+    ReadOnlySpan(T[]& values, int start, int count)
+    {
+        if (start < 0 || count < 0 || start > values.Length || count > values.Length - start)
+            Failure.Range("Span range is outside the array.");
+        length = count;
+        if (count != 0) data = &values[start];
+    }
+    ReadOnlySpan(Span<T> values) { data = values.Data; length = values.Length; }
+    int Length => length;
+    static ReadOnlySpan<T> Empty => ReadOnlySpan<T>();
+    bool IsEmpty => length == 0;
+    [ReadOnly] T this[int index]
+    {
+        get {
+            if (index < 0 || index >= length) Failure.Index("Span index is out of range.");
+            return data[index];
+        }
+    }
+    [ReadOnly] ReadOnlySpan<T> Slice(int start)
+    {
+        if (start < 0 || start > length) Failure.Range("Span slice is out of range.");
+        return Slice(start, length - start);
+    }
+    [ReadOnly] ReadOnlySpan<T> Slice(int start, int count)
+    {
+        if (start < 0 || count < 0 || start > length || count > length - start)
+            Failure.Range("Span slice is out of range.");
+        if (count == 0) return ReadOnlySpan<T>();
+        return ReadOnlySpan<T>(&data[start], count);
+    }
+    [ReadOnly] bool TryCopyTo(Span<T> destination)
+    {
+        if (length > destination.Length) return false;
+        // Pointer equality suffices to detect a right-shifted overlapping view.
+        bool backwards = false;
+        for (int i = 1; i < length; i++)
+            if (&data[i] == destination.Data) { backwards = true; break; }
+        if (backwards) {
+            for (int i = length; i > 0; i--) destination[i - 1] = data[i - 1];
+        } else {
+            for (int i = 0; i < length; i++) destination[i] = data[i];
+        }
+        return true;
+    }
+    [ReadOnly] void CopyTo(Span<T> destination)
+    {
+        if (!TryCopyTo(destination)) Failure.Range("Destination span is too short.");
+    }
+    [ReadOnly] T[] ToArray()
+    {
+        T[] result = new T[length];
+        for (int i = 0; i < length; i++) result[i] = data[i];
+        return result;
+    }
+    [ReadOnly] int IndexOf(const T& value)
+    {
+        for (int i = 0; i < length; i++) if (Values.Equal<T>(data[i], value)) return i;
+        return -1;
+    }
+    [ReadOnly] int LastIndexOf(const T& value)
+    {
+        for (int i = length; i > 0; i--) if (Values.Equal<T>(data[i - 1], value)) return i - 1;
+        return -1;
+    }
+    [ReadOnly] bool Contains(const T& value) { return IndexOf(value) >= 0; }
+    [ReadOnly] bool SequenceEqual(ReadOnlySpan<T> other)
+    {
+        if (length != other.Length) return false;
+        for (int i = 0; i < length; i++) if (!Values.Equal<T>(data[i], other[i])) return false;
+        return true;
+    }
+    [ReadOnly] bool StartsWith(ReadOnlySpan<T> other)
+    {
+        return other.Length <= length && Slice(0, other.Length).SequenceEqual(other);
+    }
+    [ReadOnly] bool EndsWith(ReadOnlySpan<T> other)
+    {
+        return other.Length <= length && Slice(length - other.Length).SequenceEqual(other);
+    }
+    [ReadOnly] ReadOnlySpanEnumerator<T> GetEnumerator() { return ReadOnlySpanEnumerator<T>(this); }
+}
+
+public struct SpanEnumerator<T>
+{
+private:
+    Span<T> source;
+    int index = -1;
+public:
+    SpanEnumerator(Span<T> values) { source = values; }
+    bool MoveNext() { if (index < source.Length) index++; return index < source.Length; }
+    T& Current { get { return source[index]; } }
+}
+
+public struct ReadOnlySpanEnumerator<T>
+{
+private:
+    ReadOnlySpan<T> source;
+    int index = -1;
+public:
+    ReadOnlySpanEnumerator(ReadOnlySpan<T> values) { source = values; }
+    bool MoveNext() { if (index < source.Length) index++; return index < source.Length; }
+    T Current { get { return source[index]; } }
+}
+
+public static class SpanExtensions
+{
+public:
+    Span<T> AsSpan<T>(this T[]& values) { return Span<T>(values); }
+    Span<T> AsSpan<T>(this T[]& values, int start) { return Span<T>(values).Slice(start); }
+    Span<T> AsSpan<T>(this T[]& values, int start, int count) { return Span<T>(values, start, count); }
+    ReadOnlySpan<T> AsReadOnlySpan<T>(this T[]& values) { return ReadOnlySpan<T>(values); }
+    ReadOnlySpan<T> AsReadOnlySpan<T>(this T[]& values, int start) { return ReadOnlySpan<T>(values).Slice(start); }
+    ReadOnlySpan<T> AsReadOnlySpan<T>(this T[]& values, int start, int count) { return ReadOnlySpan<T>(values, start, count); }
+}

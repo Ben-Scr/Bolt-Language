@@ -1,0 +1,429 @@
+import System
+namespace System.Numerics;
+
+// Arbitrary-precision signed integer implemented entirely in Bolt.
+// Storage uses little-endian base-1,000,000,000 limbs so every limb
+// multiplication fits in ulong without any native bigint dependency.
+public sealed class BigInteger : IStringable
+{
+private:
+    bool negative;
+    uint[] limbs;
+
+    static uint[] CopyMagnitude(const uint[]& value)
+    {
+        uint[] result = new uint[value.Length];
+        for (int i = 0; i < value.Length; i++) result[i] = value[i];
+        return result;
+    }
+
+    static uint[] TrimMagnitude(const uint[]& value)
+    {
+        int length = value.Length;
+        while (length > 0 && value[length - 1] == 0u) length--;
+        uint[] result = new uint[length];
+        for (int i = 0; i < length; i++) result[i] = value[i];
+        return result;
+    }
+
+    static BigInteger FromMagnitude(bool isNegative, const uint[]& magnitude)
+    {
+        BigInteger result;
+        result.limbs = TrimMagnitude(magnitude);
+        result.negative = isNegative && result.limbs.Length != 0;
+        return result;
+    }
+
+    static int CompareMagnitudeArrays(const uint[]& a, const uint[]& b)
+    {
+        int aLength = a.Length;
+        int bLength = b.Length;
+        while (aLength > 0 && a[aLength - 1] == 0u) aLength--;
+        while (bLength > 0 && b[bLength - 1] == 0u) bLength--;
+        if (aLength < bLength) return -1;
+        if (aLength > bLength) return 1;
+        for (int i = aLength - 1; i >= 0; i--)
+        {
+            if (a[i] < b[i]) return -1;
+            if (a[i] > b[i]) return 1;
+        }
+        return 0;
+    }
+
+    static uint[] AddMagnitudeArrays(const uint[]& a, const uint[]& b)
+    {
+        int length = a.Length > b.Length ? a.Length : b.Length;
+        uint[] result = new uint[length + 1];
+        ulong carry = 0ul;
+        for (int i = 0; i < length; i++)
+        {
+            ulong av = i < a.Length ? (ulong)a[i] : 0ul;
+            ulong bv = i < b.Length ? (ulong)b[i] : 0ul;
+            ulong sum = av + bv + carry;
+            result[i] = (uint)(sum % 1000000000ul);
+            carry = sum / 1000000000ul;
+        }
+        if (carry != 0ul) result[length] = (uint)carry;
+        return TrimMagnitude(result);
+    }
+
+    // Requires |a| >= |b|.
+    static uint[] SubtractMagnitudeArrays(const uint[]& a, const uint[]& b)
+    {
+        uint[] result = new uint[a.Length];
+        long borrow = 0l;
+        for (int i = 0; i < a.Length; i++)
+        {
+            long av = (long)a[i];
+            long bv = i < b.Length ? (long)b[i] : 0l;
+            long value = av - bv - borrow;
+            if (value < 0l)
+            {
+                value += 1000000000l;
+                borrow = 1l;
+            }
+            else borrow = 0l;
+            result[i] = (uint)value;
+        }
+        return TrimMagnitude(result);
+    }
+
+    static uint[] MultiplyMagnitudeByUInt(const uint[]& value, uint factor)
+    {
+        if (factor == 0u || value.Length == 0) return new uint[0];
+        uint[] result = new uint[value.Length + 1];
+        ulong carry = 0ul;
+        for (int i = 0; i < value.Length; i++)
+        {
+            ulong product = (ulong)value[i] * (ulong)factor + carry;
+            result[i] = (uint)(product % 1000000000ul);
+            carry = product / 1000000000ul;
+        }
+        if (carry != 0ul) result[value.Length] = (uint)carry;
+        return TrimMagnitude(result);
+    }
+
+    static uint[] MultiplyMagnitudeArrays(const uint[]& a, const uint[]& b)
+    {
+        if (a.Length == 0 || b.Length == 0) return new uint[0];
+        uint[] result = new uint[a.Length + b.Length];
+        for (int i = 0; i < a.Length; i++)
+        {
+            ulong carry = 0ul;
+            for (int j = 0; j < b.Length; j++)
+            {
+                int index = i + j;
+                ulong current = (ulong)result[index] + (ulong)a[i] * (ulong)b[j] + carry;
+                result[index] = (uint)(current % 1000000000ul);
+                carry = current / 1000000000ul;
+            }
+            result[i + b.Length] = (uint)carry;
+        }
+        return TrimMagnitude(result);
+    }
+
+    // value * BASE + lowLimb, with BASE = 1,000,000,000.
+    static uint[] ShiftBaseAndAdd(const uint[]& value, uint lowLimb)
+    {
+        if (value.Length == 0)
+        {
+            if (lowLimb == 0u) return new uint[0];
+            uint[] single = new uint[1];
+            single[0] = lowLimb;
+            return single;
+        }
+        uint[] result = new uint[value.Length + 1];
+        result[0] = lowLimb;
+        for (int i = 0; i < value.Length; i++) result[i + 1] = value[i];
+        return TrimMagnitude(result);
+    }
+
+    // Magnitude long division. Quotient digits are found with a binary search;
+    // this is deliberately simple and fully Bolt-authored rather than relying
+    // on a platform bigint routine.
+    static void DivideMagnitude(const uint[]& dividend, const uint[]& divisor,
+                                uint[]& quotient, uint[]& remainder)
+    {
+        int relation = CompareMagnitudeArrays(dividend, divisor);
+        if (relation < 0)
+        {
+            quotient = new uint[0];
+            remainder = CopyMagnitude(dividend);
+            return;
+        }
+        if (relation == 0)
+        {
+            quotient = new uint[1];
+            quotient[0] = 1u;
+            remainder = new uint[0];
+            return;
+        }
+
+        uint[] q = new uint[dividend.Length];
+        uint[] r = new uint[0];
+        for (int i = dividend.Length - 1; i >= 0; i--)
+        {
+            r = ShiftBaseAndAdd(r, dividend[i]);
+
+            long low = 0l;
+            long high = 999999999l;
+            uint best = 0u;
+            while (low <= high)
+            {
+                long middle = low + (high - low) / 2l;
+                uint[] product = MultiplyMagnitudeByUInt(divisor, (uint)middle);
+                int compare = CompareMagnitudeArrays(product, r);
+                if (compare <= 0)
+                {
+                    best = (uint)middle;
+                    low = middle + 1l;
+                }
+                else high = middle - 1l;
+            }
+
+            if (best != 0u)
+                r = SubtractMagnitudeArrays(r, MultiplyMagnitudeByUInt(divisor, best));
+            q[i] = best;
+        }
+
+        quotient = TrimMagnitude(q);
+        remainder = TrimMagnitude(r);
+    }
+
+public:
+    BigInteger()
+    {
+        negative = false;
+        limbs = new uint[0];
+    }
+
+    BigInteger(long value)
+    {
+        negative = value < 0l;
+        ulong magnitude = value < 0l ? (ulong)(-(value + 1l)) + 1ul : (ulong)value;
+        if (magnitude == 0ul)
+        {
+            negative = false;
+            limbs = new uint[0];
+            return;
+        }
+
+        uint[] temporary = new uint[3];
+        int count = 0;
+        while (magnitude != 0ul)
+        {
+            temporary[count++] = (uint)(magnitude % 1000000000ul);
+            magnitude /= 1000000000ul;
+        }
+        limbs = new uint[count];
+        for (int i = 0; i < count; i++) limbs[i] = temporary[i];
+    }
+
+    BigInteger(ulong value)
+    {
+        negative = false;
+        if (value == 0ul)
+        {
+            limbs = new uint[0];
+            return;
+        }
+
+        uint[] temporary = new uint[3];
+        int count = 0;
+        while (value != 0ul)
+        {
+            temporary[count++] = (uint)(value % 1000000000ul);
+            value /= 1000000000ul;
+        }
+        limbs = new uint[count];
+        for (int i = 0; i < count; i++) limbs[i] = temporary[i];
+    }
+
+    BigInteger(const string& value)
+    {
+        BigInteger parsed = Parse(value);
+        negative = parsed.negative;
+        limbs = CopyMagnitude(parsed.limbs);
+    }
+
+    static BigInteger Zero => BigInteger();
+    static BigInteger One => BigInteger(1l);
+
+    bool IsZero => limbs.Length == 0;
+    bool IsNegative => negative;
+    int Sign => limbs.Length == 0 ? 0 : (negative ? -1 : 1);
+
+    static bool TryParse(const string& text, BigInteger& result)
+    {
+        byte[] data = text.Trim().ToUtf8();
+        result = BigInteger();
+        if (data.Length == 0) return false;
+
+        bool isNegative = data[0] == 45;
+        int begin = isNegative || data[0] == 43 ? 1 : 0;
+        if (begin == data.Length) return false;
+        while (begin < data.Length && data[begin] == 48) begin++;
+        if (begin == data.Length) return true;
+
+        // Each group of nine decimal digits is already one base-10^9 limb.
+        uint[] magnitude = new uint[(data.Length - begin - 1) / 9 + 1];
+        int end = data.Length;
+        for (int limb = 0; limb < magnitude.Length; limb++)
+        {
+            int start = end - begin > 9 ? end - 9 : begin;
+            uint group = 0u;
+            for (int i = start; i < end; i++)
+            {
+                if (data[i] < 48 || data[i] > 57) return false;
+                group = group * 10u + (uint)(data[i] - 48);
+            }
+            magnitude[limb] = group;
+            end = start;
+        }
+        result.limbs = magnitude;
+        result.negative = isNegative;
+        return true;
+    }
+
+    static BigInteger Parse(const string& text)
+    {
+        BigInteger result;
+        if (!TryParse(text, result)) throw FormatException("Invalid BigInteger value.");
+        return result;
+    }
+
+    [ReadOnly]
+    BigInteger Abs()
+    {
+        return FromMagnitude(false, limbs);
+    }
+
+    [ReadOnly]
+    BigInteger Negate()
+    {
+        return FromMagnitude(!negative, limbs);
+    }
+
+    [ReadOnly]
+    int CompareTo(const BigInteger& other)
+    {
+        if (negative != other.negative) return negative ? -1 : 1;
+        int magnitude = CompareMagnitudeArrays(limbs, other.limbs);
+        return negative ? -magnitude : magnitude;
+    }
+
+    static void DivRem(const BigInteger& dividend, const BigInteger& divisor,
+                       BigInteger& quotient, BigInteger& remainder)
+    {
+        if (divisor.limbs.Length == 0) throw DivideByZeroException("BigInteger division by zero.");
+        if (dividend.limbs.Length == 0)
+        {
+            quotient = BigInteger();
+            remainder = BigInteger();
+            return;
+        }
+
+        uint[] q;
+        uint[] r;
+        DivideMagnitude(dividend.limbs, divisor.limbs, q, r);
+        quotient = FromMagnitude(dividend.negative != divisor.negative, q);
+        remainder = FromMagnitude(dividend.negative, r);
+    }
+
+    [ReadOnly]
+    BigInteger Pow(int exponent)
+    {
+        if (exponent < 0) throw ArgumentOutOfRangeException("BigInteger exponent must be nonnegative.");
+        BigInteger result = BigInteger.One;
+        BigInteger factor = this;
+        int power = exponent;
+        while (power != 0)
+        {
+            if ((power & 1) != 0) result = result * factor;
+            power >>= 1;
+            if (power != 0) factor = factor * factor;
+        }
+        return result;
+    }
+
+    static BigInteger GreatestCommonDivisor(BigInteger a, BigInteger b)
+    {
+        a = a.Abs();
+        b = b.Abs();
+        while (!b.IsZero)
+        {
+            BigInteger remainder = a % b;
+            a = b;
+            b = remainder.Abs();
+        }
+        return a;
+    }
+
+    static BigInteger operator +(const BigInteger& a, const BigInteger& b)
+    {
+        if (a.limbs.Length == 0) return FromMagnitude(b.negative, b.limbs);
+        if (b.limbs.Length == 0) return FromMagnitude(a.negative, a.limbs);
+
+        if (a.negative == b.negative)
+            return FromMagnitude(a.negative, AddMagnitudeArrays(a.limbs, b.limbs));
+
+        int compare = CompareMagnitudeArrays(a.limbs, b.limbs);
+        if (compare == 0) return BigInteger();
+        if (compare > 0)
+            return FromMagnitude(a.negative, SubtractMagnitudeArrays(a.limbs, b.limbs));
+        return FromMagnitude(b.negative, SubtractMagnitudeArrays(b.limbs, a.limbs));
+    }
+
+    static BigInteger operator -(const BigInteger& a, const BigInteger& b)
+    {
+        return a + b.Negate();
+    }
+
+    static BigInteger operator *(const BigInteger& a, const BigInteger& b)
+    {
+        return FromMagnitude(a.negative != b.negative, MultiplyMagnitudeArrays(a.limbs, b.limbs));
+    }
+
+    static BigInteger operator /(const BigInteger& a, const BigInteger& b)
+    {
+        BigInteger quotient;
+        BigInteger remainder;
+        DivRem(a, b, quotient, remainder);
+        return quotient;
+    }
+
+    static BigInteger operator %(const BigInteger& a, const BigInteger& b)
+    {
+        BigInteger quotient;
+        BigInteger remainder;
+        DivRem(a, b, quotient, remainder);
+        return remainder;
+    }
+
+    static BigInteger operator +(const BigInteger& value) { return value; }
+    static BigInteger operator -(const BigInteger& value) { return value.Negate(); }
+
+    static bool operator ==(const BigInteger& a, const BigInteger& b)
+    {
+        if (a.negative != b.negative || a.limbs.Length != b.limbs.Length) return false;
+        for (int i = 0; i < a.limbs.Length; i++) if (a.limbs[i] != b.limbs[i]) return false;
+        return true;
+    }
+
+    static bool operator !=(const BigInteger& a, const BigInteger& b) { return !(a == b); }
+    static bool operator <(const BigInteger& a, const BigInteger& b) { return a.CompareTo(b) < 0; }
+    static bool operator >(const BigInteger& a, const BigInteger& b) { return a.CompareTo(b) > 0; }
+    static bool operator <=(const BigInteger& a, const BigInteger& b) { return a.CompareTo(b) <= 0; }
+    static bool operator >=(const BigInteger& a, const BigInteger& b) { return a.CompareTo(b) >= 0; }
+
+    [ReadOnly]
+    string ToString()
+    {
+        if (limbs.Length == 0) return "0";
+        string result = negative ? "-" : "";
+        result += (string)limbs[limbs.Length - 1];
+        for (int i = limbs.Length - 2; i >= 0; i--)
+            result += ((string)limbs[i]).PadLeft(9, '0');
+        return result;
+    }
+}

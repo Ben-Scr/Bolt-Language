@@ -1,0 +1,123 @@
+import Bolt.Runtime
+namespace System.Collections.Generic;
+
+// Real Bolt implementation. Buffer supplies only typed storage/lifetime primitives.
+[StringableElements]
+[SerializeSequence("Length", "ItemAt", "Add")]
+public sealed class List<T> : IStringable
+{
+private:
+    Bolt.Runtime.Buffer<T> storage;
+    ulong revision = 0ul;
+
+    void Changed() { revision = revision == ulong.MaxValue ? 0ul : revision + 1ul; }
+    void Ensure(int required)
+    {
+        if (required < 0) Bolt.Runtime.Failure.Range("List capacity must be nonnegative.");
+        if (required <= storage.Capacity) return;
+        long candidate = storage.Capacity == 0 ? 4 : (long)storage.Capacity * 2;
+        if (candidate < required) candidate = required;
+        if (candidate > int.MaxValue) candidate = int.MaxValue;
+        storage.Reserve((int)candidate);
+    }
+public:
+    List(int capacity = 0) { Ensure(capacity); }
+    int Length => storage.Length;
+    int Count => storage.Length;
+    int Capacity => storage.Capacity;
+    [ReadOnly] T ItemAt(int index) { return storage[index]; }
+    T& this[int index] { get { return storage[index]; } }
+
+    void Reserve(int capacity)
+    {
+        if (capacity > storage.Capacity) { Ensure(capacity); Changed(); }
+        elif (capacity < 0) Bolt.Runtime.Failure.Range("List capacity must be nonnegative.");
+    }
+    void Add(T value) { Ensure(storage.Length + 1); storage.Add(value); Changed(); }
+    void AddRange(const T[]& values) { AddRange(values, 0, values.Length); }
+    void AddRange(const T[]& values, int offset, int count)
+    {
+        if (offset < 0 || count < 0 || offset > values.Length || count > values.Length - offset)
+            Bolt.Runtime.Failure.Range("Array segment is out of range.");
+        Ensure(storage.Length + count);
+        storage.AppendRange(values, offset, count);
+        if (count != 0) Changed();
+    }
+    void AddRange(const List<T>& values)
+    {
+        int count = values.storage.Length;
+        if (count == 0) return;
+        // AppendBuffer keeps its source valid across growth, including nested lists.
+        storage.AppendBuffer(0, count, values.storage);
+        Changed();
+    }
+    void Insert(int index, T value)
+    {
+        if (index < 0 || index > storage.Length) Bolt.Runtime.Failure.Index("List insertion index is out of range.");
+        Ensure(storage.Length + 1); storage.Insert(index, value); Changed();
+    }
+    void RemoveAt(int index) { storage.RemoveAt(index); Changed(); }
+    [ReadOnly]
+    int IndexOf(const T& value)
+    {
+        for (int i = 0; i < storage.Length; i++) if (Bolt.Runtime.Values.Equal<T>(storage[i], value)) return i;
+        return -1;
+    }
+    [ReadOnly]
+    bool Contains(const T& value) { return IndexOf(value) >= 0; }
+    bool Remove(const T& value)
+    {
+        int index = IndexOf(value); if (index < 0) return false;
+        RemoveAt(index); return true;
+    }
+    void Clear() { if (storage.Length != 0) { storage.Clear(); Changed(); } }
+    [ReadOnly]
+    T[] ToArray() { return storage.ToArray(); }
+    BufferEnumerator<T> GetEnumerator() { return BufferEnumerator<T>(&storage, &revision); }
+    static bool operator ==(const List<T>& a, const List<T>& b)
+    {
+        if (a.Length != b.Length) return false;
+        for (int i = 0; i < a.Length; i++)
+            if (!Bolt.Runtime.Values.Equal<T>(a.storage[i], b.storage[i])) return false;
+        return true;
+    }
+    [ReadOnly]
+    ulong GetHashCode()
+    {
+        ulong result = 0ul;
+        for (int i = 0; i < storage.Length; i++)
+            result = Bolt.Runtime.Bits.Add64(Bolt.Runtime.Bits.Multiply64(result, 16777619ul), Bolt.Runtime.Values.Hash<T>(storage[i]));
+        return result;
+    }
+    [SnapshotReceiver]
+    string ToString() : IStringable<T>
+    {
+        // Formatting owns a snapshot: a user's formatter may modify the original list.
+        T[] values = storage.ToArray();
+        string[] pieces = new string[values.Length];
+        for (int i = 0; i < values.Length; i++) pieces[i] = Bolt.Runtime.Values.Format<T>(values[i]);
+        return "[" + string.Join(", ", pieces) + "]";
+    }
+}
+
+// Borrowing iterator. The enclosing range-for keeps its source alive.
+public struct BufferEnumerator<T>
+{
+private:
+    Bolt.Runtime.Buffer<T>* source;
+    ulong* currentRevision;
+    ulong expectedRevision;
+    int index = -1;
+public:
+    BufferEnumerator(Bolt.Runtime.Buffer<T>* values, ulong* revision)
+    {
+        source = values; currentRevision = revision; expectedRevision = *revision;
+    }
+    bool MoveNext()
+    {
+        if (*currentRevision != expectedRevision) Bolt.Runtime.Failure.InvalidOperation("Collection was modified during iteration.");
+        if (index < source->Length) index++;
+        return index < source->Length;
+    }
+    T& Current { get { return (*source)[index]; } }
+}

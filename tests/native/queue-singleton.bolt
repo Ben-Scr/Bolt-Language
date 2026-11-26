@@ -1,0 +1,64 @@
+import System.Collections.Generic
+import System
+public sealed class Frame {
+public:
+    string Label;
+    int[] Data;
+    Frame(string label, int value) {
+        Label=label; Data=new int[1]; Data[0]=value;
+    }
+}
+static class Program {
+public:
+    int Main() {
+        Queue<int> numbers(7);
+        numbers.Enqueue(10); numbers.Enqueue(20); numbers.Enqueue(30);
+        if (numbers.Dequeue()!=10 || numbers.Dequeue()!=20 || numbers.Dequeue()!=30) return 1;
+        numbers.Enqueue(51);
+        QueueEnumerator<int> seen = numbers.GetEnumerator();
+        if (!seen.MoveNext() || seen.Current!=51) return 2;
+        int[] before = numbers.ToArray();
+        Queue<int> independent = numbers;
+        if (numbers.Peek()!=51 || !numbers.Contains(51) || numbers.Contains(10)) return 3;
+        int removed=0; if (!numbers.TryDequeue(removed) || removed!=51 || numbers.Length!=0) return 4;
+        bool invalidated=false;
+        try { seen.MoveNext(); } catch (InvalidOperationException& error) { invalidated=true; }
+        if (!invalidated || independent.Dequeue()!=51 || before.Length!=1 || before[0]!=51) return 5;
+        for (int i=0;i<100;i++) {
+            numbers.Enqueue(i); if (numbers.Peek()!=i || numbers.Dequeue()!=i || numbers.Count!=0) return 6;
+            if (numbers.ToArray().Length!=0 || numbers.Contains(i)) return 7;
+        }
+        Queue<Frame> frames(1);
+        Frame original=Frame("Grün",93); frames.Enqueue(original); original.Data[0]=27;
+        Frame[] frozen=frames.ToArray(); Frame popped=frames.Dequeue();
+        if (popped.Label!="Grün" || popped.Data[0]!=93 || frozen[0].Data[0]!=93) return 8;
+        popped.Data[0]=2; if (frozen[0].Data[0]!=93 || original.Data[0]!=27) return 9;
+        bool empty=false; try { frames.Dequeue(); } catch (InvalidOperationException& error) { empty=true; }
+        if (!empty || frames.Count!=0) return 10;
+        Queue<int?> nil; nil.Enqueue(null); if (nil.Dequeue().HasValue || nil.Count!=0) return 11;
+        Queue<string> text; text.Enqueue("✓"); string saved="case";
+        if (!text.TryDequeue(saved) || saved!="✓" || text.TryDequeue(saved) || saved!="✓") return 12;
+        numbers.Enqueue(14); numbers.Enqueue(56); numbers.Enqueue(75);
+        int[] next=numbers.ToArray(); next[0]=98;
+        if (numbers.ItemAt(2)!=75 || numbers.Dequeue()!=14 || numbers.Dequeue()!=56 || numbers.Dequeue()!=75) return 13;
+        Queue<int> reserved(16);
+        reserved.Enqueue(3); reserved.Dequeue();
+        QueueEnumerator<int> old = reserved.GetEnumerator();
+        int oldCapacity = reserved.Capacity;
+        reserved.Reserve(8);
+        bool grew = false;
+        try { old.MoveNext(); } catch (InvalidOperationException& error) { grew=true; }
+        if (!grew || reserved.Capacity <= oldCapacity) return 14;
+
+        Queue<int> split(16);
+        for (int i=1;i<=4;i++) split.Enqueue(i);
+        if (split.Dequeue()!=1) return 15;
+        split.Reserve(8);
+        for (int i=2;i<=4;i++) if (split.Dequeue()!=i) return 16;
+        split.Enqueue(20); if (split.Dequeue()!=20) return 17;
+        QueueEnumerator<int> stable = split.GetEnumerator();
+        int left = split.Capacity; split.Reserve(12);
+        if (split.Capacity!=left || stable.MoveNext()) return 18;
+        Print("singleton queue OK"); return 0;
+    }
+}

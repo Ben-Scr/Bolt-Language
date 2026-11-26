@@ -1,0 +1,13 @@
+import System.Collections.Generic
+class Fail:IStringable {
+public:
+ string ToString() { int zero=0; return (string)(1/zero); }
+}
+static class Program {
+public:
+ void Main() {
+  List<Fail> values; values.Add(Fail());
+  Queue<List<Fail>> nested; nested.Enqueue(values);
+  Console.WriteLine(nested);
+ }
+}

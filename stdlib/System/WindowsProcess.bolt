@@ -1,0 +1,118 @@
+#ifdef Windows
+import System
+import System.Text
+namespace Bolt.Runtime;
+
+// Win64 ABI records passed by address. Bolt structs have C field layout.
+struct PipeSecurity {
+public:
+    uint Size;
+    void* Descriptor;
+    int Inherit;
+}
+struct StartupInfo {
+public:
+    uint Size;
+    ushort* Reserved;
+    ushort* Desktop;
+    ushort* Title;
+    uint X,Y,Width,Height,ConsoleColumns,ConsoleRows,Fill,Flags;
+    ushort ShowWindow,ReservedBytes;
+    byte* ReservedData;
+    long Input,Output,Error;
+}
+struct ExtendedStartup {
+public:
+    StartupInfo Info;
+    void* Attributes;
+}
+struct ProcessInfo {
+public:
+    long Process;
+    void* Thread;
+    uint Pid,Tid;
+}
+static class ProcessLauncher {
+    static byte[] Wide(const string& text) { return UTF16LEEncoding.GetBytes(text+"\0"); }
+    static string Quote(const string& arg) {
+        string result="\"", backslashes="";
+        for(int i=0;i<arg.Length;i++){
+            char c=arg[i];
+            if(c=='\\'){backslashes+="\\";continue;}
+            if(c=='"')result+=backslashes+"\\";
+            result+=backslashes+(string)c;backslashes="";
+        }
+        return result+backslashes+backslashes+"\"";
+    }
+    static long MakePipe(PipeHandle& parent,bool read) {
+        parent.Initialize(read);
+        ulong serial=System.Security.Cryptography.RandomNumberGenerator.GetUInt64();
+        byte[] name=Wide("\\\\.\\pipe\\Bolt-"+(string)Bolt.Runtime.ProcessApi.Pid()+"-"+(string)serial);
+        uint mode=(read?1u:2u)|1074266112u; // OVERLAPPED | FIRST_PIPE_INSTANCE
+        void* pipe=Bolt.Runtime.ProcessApi.NamedPipe((ushort*)&name[0],mode,8u,1u,65536u,65536u,0u,null);
+        long handle=*((long*)&pipe);
+        if(handle == -1l)throw IOException("Cannot create redirected pipe: "+(string)SystemCalls.Error());
+        parent.Attach(handle);
+        PipeSecurity security;security.Size=(uint)sizeof(PipeSecurity);security.Inherit=1;
+        void* inherited=Bolt.Runtime.StandaloneWindows.OpenFile((ushort*)&name[0],read?1073741824u:2147483648u,0u,&security,3u,128u,null);
+        long fd=*((long*)&inherited);
+        if(fd == -1l)throw IOException("Cannot open child pipe: "+(string)SystemCalls.Error());
+        return fd;
+    }
+public:
+    static void Start(SystemState* state,PipeHandle& input,PipeHandle& output,PipeHandle& error,
+                      string program,const string[]& args,string directory,bool redirect,const string[]& environment,bool inheritBlock) {
+        byte[] application=Wide(program);
+        if(!program.Contains('/') && !program.Contains('\\')){
+            byte[] extension=Wide(".exe");
+            uint n=Bolt.Runtime.ProcessApi.FindProgram(null,(ushort*)&application[0],(ushort*)&extension[0],0u,null,null);
+            if(n==0u)throw FileNotFoundException("Executable not found: "+program);
+            ushort[] full=new ushort[(int)n+1];
+            uint written=Bolt.Runtime.ProcessApi.FindProgram(null,(ushort*)&application[0],(ushort*)&extension[0],n+1u,&full[0],null);
+            if(written==0u || written>n)throw IOException("Executable search failed.");
+            application=Wide(SystemCalls.FromWide(&full[0],(int)written));
+        }
+        string command=Quote(program);
+        for(int i=0;i<args.Length;i++)command+=" "+Quote(args[i]);
+        byte[] line=Wide(command), cwd=Wide(directory);
+        string block="";
+        for(int i=0;i<environment.Length;i++)block+=environment[i]+"\0";
+        byte[] env=Wide(block==""?"\0":block);
+        if(directory!=""){
+            uint attributes=Bolt.Runtime.StandaloneWindows.Attributes((ushort*)&cwd[0]);
+            if(attributes==uint.MaxValue || (attributes&16u)==0u)
+                throw DirectoryNotFoundException("Child working directory does not exist: "+directory);
+        }
+        ExtendedStartup startup;
+        ProcessInfo info;
+        long[] children=new long[3];
+        byte[] attributes;
+        bool initialized=false;
+        try {
+            startup.Info.Size=redirect?(uint)sizeof(ExtendedStartup):(uint)sizeof(StartupInfo);
+            if(redirect){
+                children[0]=MakePipe(input,false);children[1]=MakePipe(output,true);children[2]=MakePipe(error,true);
+                startup.Info.Flags=256u; // STARTF_USESTDHANDLES
+                startup.Info.Input=children[0];startup.Info.Output=children[1];startup.Info.Error=children[2];
+                ulong length=0ul;
+                Bolt.Runtime.ProcessApi.InitAttributes(null,1u,0u,&length);
+                if(length==0ul || length>(ulong)int.MaxValue)throw IOException("Cannot size handle inheritance list.");
+                attributes=new byte[(int)length];
+                if(Bolt.Runtime.ProcessApi.InitAttributes(&attributes[0],1u,0u,&length)==0)throw IOException("Cannot initialize handle inheritance list.");
+                initialized=true;
+                if(Bolt.Runtime.ProcessApi.SetAttribute(&attributes[0],0u,131074ul,&children[0],24ul,null,null)==0)throw IOException("Cannot restrict child handle inheritance.");
+                startup.Attributes=&attributes[0];
+            }
+            uint flags=1024u|(redirect?524288u:0u);
+            if(Bolt.Runtime.ProcessApi.Start((ushort*)&application[0],(ushort*)&line[0],null,null,redirect?1:0,flags,
+                    inheritBlock?null:&env[0],directory==""?null:(ushort*)&cwd[0],&startup,&info)==0)
+                throw IOException("CreateProcessW failed: "+(string)SystemCalls.Error());
+            state->Descriptor=info.Process;state->Id=info.Pid;state->Open=true;
+            Bolt.Runtime.StandaloneWindows.Close(info.Thread);
+        } finally {
+            if(initialized)Bolt.Runtime.ProcessApi.DropAttributes(&attributes[0]);
+            for(int i=0;i<3;i++)if(children[i]!=0l)Bolt.Runtime.StandaloneWindows.Close(*((void**)&children[i]));
+        }
+    }
+}
+#endif

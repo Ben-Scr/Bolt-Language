@@ -1,0 +1,5 @@
+import System.Collections.Generic
+
+static class Program { public: void Main() {
+List<int> a; a.Add(3); a.Insert(0,1); a.Add(3); Console.WriteLine(a.IndexOf(3)); Console.WriteLine(a.Remove(3)); a.RemoveAt(0); Console.WriteLine(a[0]); List<int> b=a; b[0]=9; Console.WriteLine(a[0]); a.Clear(); Console.WriteLine(a.Count);
+} }

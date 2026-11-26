@@ -1,0 +1,26 @@
+import Bolt.Runtime
+
+struct Pair {
+public:
+    int X;
+    int Y;
+}
+static class Program {
+public:
+    void Main() {
+        Buffer<Pair> items;
+        items.Reserve(512);
+        int sum = 0;
+        for (int pass = 0; pass < 4096; pass++) {
+            items.Clear();
+            for (int i = 0; i < 512; i++) {
+                Pair item;
+                item.X = (i ^ pass) & 255;
+                item.Y = (i + pass) & 255;
+                items.Add(item);
+            }
+            for (int i = 0; i < items.Length; i++) sum += items[i].X + items[i].Y;
+        }
+        Print(sum);
+    }
+}

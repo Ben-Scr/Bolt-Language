@@ -1,0 +1,31 @@
+using System.IO;
+
+public static class Program {
+    public static void Main() {
+        byte[] events = File.ReadAllBytes("input.bin");
+        int items = 4096;
+        int[] stock = new int[items];
+        int[] rejected = new int[items];
+        for (int i = 0; i < items; i++) stock[i] = 24;
+        for (int pos = 0; pos < events.Length; pos += 4) {
+            int id = events[pos] | ((int)events[pos + 1] << 8);
+            int quantity = events[pos + 3];
+            if (events[pos + 2] == 0) {
+                stock[id] += quantity;
+            } else if (stock[id] >= quantity) {
+                stock[id] -= quantity;
+            } else {
+                rejected[id]++;
+            }
+        }
+        byte[] report = new byte[items * 4];
+        for (int i = 0; i < items; i++) {
+            int p = i * 4;
+            report[p] = (byte)(stock[i] & 255);
+            report[p + 1] = (byte)(stock[i] >> 8);
+            report[p + 2] = (byte)(rejected[i] & 255);
+            report[p + 3] = (byte)(rejected[i] >> 8);
+        }
+        File.WriteAllBytes("result.bin", report);
+    }
+}

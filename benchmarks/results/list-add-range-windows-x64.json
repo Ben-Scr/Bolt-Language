@@ -1,0 +1,94 @@
+{
+  "case": "list-add-range-int",
+  "measured_at_utc": "2026-11-20T15:18:25.025087+00:00",
+  "metric": "whole_process_wall_clock_including_startup",
+  "note": "Not a compile-time or isolated-kernel benchmark. Matching stdout only checks outputs, not semantic equivalence.",
+  "host": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "machine": "AMD64",
+    "processor": "AMD64 Family 25 Model 97 Stepping 2, AuthenticAMD",
+    "python": "3.13.7"
+  },
+  "warmup_runs": 3,
+  "runs": 15,
+  "min_duration_ms": 200.0,
+  "valid_duration_gate": true,
+  "baseline": {
+    "executable": "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-perf-51fc2caef1a14c44a1b31435cef08a01\\before\\program.exe",
+    "sha256": "46e4ba18033f8e9c2e7dea1357d2994e401937537e571538b3d8e944bd9058f5",
+    "arguments": [],
+    "n": 15,
+    "median_ms": 4401.9468,
+    "p95_ms": 4538.5004,
+    "min_ms": 4051.3255,
+    "max_ms": 4538.5004,
+    "raw_ms": [
+      4422.6738,
+      4297.8684,
+      4483.7624,
+      4235.2675,
+      4244.7687,
+      4456.2358,
+      4538.5004,
+      4533.4432,
+      4439.9793,
+      4499.9774,
+      4108.7191,
+      4316.1677,
+      4051.3255,
+      4401.9468,
+      4348.9327
+    ]
+  },
+  "candidate": {
+    "executable": "C:\\Users\\benso\\AppData\\Local\\Temp\\bolt-perf-51fc2caef1a14c44a1b31435cef08a01\\final\\program.exe",
+    "sha256": "cad95f94d8b592f6e91a542afee10fb0da7fc7d8a504da5480cf327c1b4a3ab0",
+    "arguments": [],
+    "n": 15,
+    "median_ms": 296.0837,
+    "p95_ms": 364.958,
+    "min_ms": 253.2961,
+    "max_ms": 364.958,
+    "raw_ms": [
+      281.2588,
+      306.4572,
+      284.5459,
+      364.958,
+      296.307,
+      292.4533,
+      296.8018,
+      286.4108,
+      296.0837,
+      301.8363,
+      283.8518,
+      328.6869,
+      253.2961,
+      304.7983,
+      277.5128
+    ]
+  },
+  "speedup_baseline_over_candidate": 14.86724,
+  "output": "4831821824",
+  "fixture": {
+    "file": "benchmarks/performance/cases/list-add-range.bolt",
+    "sha256": "ccdc21d0f1f9b88f61353b7a561ad36971571033156b2e1f52783e65e6ffe790",
+    "elements_per_append": 131072,
+    "batches": 32768,
+    "element_type": "int",
+    "destination": "reserved and reused",
+    "expected_output": "4831821824"
+  },
+  "toolchain": {
+    "baseline": "Unmodified Bolt 0.16.0 F5 built from Bolt.zip",
+    "candidate": "Local Bolt 0.16.0 F5 with bulk List<T>.AddRange",
+    "compiler_build": "MSVC 19.51.36260, CMake Release, x64",
+    "program_build_flags": [
+      "--release",
+      "--backend",
+      "llvm",
+      "--require-native"
+    ],
+    "llvm": "23.1.2",
+    "cpu": "AMD Ryzen 9 7900X"
+  }
+}

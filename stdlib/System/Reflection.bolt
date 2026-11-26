@@ -1,0 +1,98 @@
+import System
+namespace System.Reflection;
+
+static class MetadataText {
+public:
+    string[] Lines(string text) {
+        if (text.Length == 0) return [];
+        return text.Split("\n");
+    }
+}
+
+public class FieldInfo : IStringable {
+public:
+    const string Name = "";
+    const string TypeName = "";
+    const bool IsReadOnly = false;
+    const bool IsProperty = false;
+    const string[] Attributes = [];
+    FieldInfo() {}
+private:
+    FieldInfo(string name, string type, bool immutable, bool property, string attributes)
+        : Name(name), TypeName(type), IsReadOnly(immutable), IsProperty(property), Attributes(MetadataText.Lines(attributes)) {}
+public:
+    [ReadOnly] string ToString() { return TypeName + " " + Name; }
+}
+
+public class MethodInfo : IStringable {
+public:
+    const string Name = "";
+    const string ReturnType = "";
+    const bool IsStatic = false;
+    const string[] ParameterTypes = [];
+    const string[] Attributes = [];
+    MethodInfo() {}
+private:
+    MethodInfo(string name, string result, bool shared, string parameters, string attributes)
+        : Name(name), ReturnType(result), IsStatic(shared), ParameterTypes(MetadataText.Lines(parameters)), Attributes(MetadataText.Lines(attributes)) {}
+public:
+    [ReadOnly] string ToString() { return ReturnType + " " + Name + "(" + string.Join(",", ParameterTypes) + ")"; }
+}
+
+public class TypeInfo : IStringable {
+private:
+    bool initialized;
+    string name, space;
+    bool structure;
+    string[] attributes;
+    FieldInfo[] fields, properties;
+    MethodInfo[] methods;
+    [ReadOnly] void Check() {
+        if (!initialized) throw ReflectionException("This TypeInfo has not been initialized.");
+    }
+public:
+    TypeInfo() {}
+private:
+    TypeInfo(string typeName, string typeNamespace, bool isStruct, string annotations,
+             FieldInfo[] members, FieldInfo[] accessors, MethodInfo[] calls) {
+        initialized = true; name = typeName; space = typeNamespace; structure = isStruct;
+        attributes = MetadataText.Lines(annotations); fields = members; properties = accessors; methods = calls;
+    }
+public:
+    string Name { get { Check(); return name; } }
+    string Namespace { get { Check(); return space; } }
+    bool IsStruct { get { Check(); return structure; } }
+    bool IsClass { get { Check(); return !structure; } }
+    string[] Attributes { get { Check(); return attributes; } }
+    FieldInfo[] GetFields() { Check(); return fields; }
+    FieldInfo[] GetProperties() { Check(); return properties; }
+    MethodInfo[] GetMethods() { Check(); return methods; }
+    bool HasField(string key) {
+        Check(); for (FieldInfo item : fields) if (item.Name == key) return true; return false;
+    }
+    bool HasProperty(string key) {
+        Check(); for (FieldInfo item : properties) if (item.Name == key) return true; return false;
+    }
+    bool HasMethod(string key) {
+        Check(); for (MethodInfo item : methods) if (item.Name == key) return true; return false;
+    }
+    FieldInfo GetField(string key) {
+        Check(); for (FieldInfo item : fields) if (item.Name == key) return item;
+        throw ReflectionException("Field not found: " + key);
+    }
+    FieldInfo GetProperty(string key) {
+        Check(); for (FieldInfo item : properties) if (item.Name == key) return item;
+        throw ReflectionException("Property not found: " + key);
+    }
+    [ReadOnly] string ToString() { Check(); return name; }
+}
+
+// The compiler specializes each body for the receiver, field or call signature.
+public static class Reflection {
+public:
+    bool IsReflected<T>() { return false; }
+    TypeInfo GetType<T>() { throw ReflectionException(); }
+    V Get<O,V>(const O& value, string field) { throw ReflectionException(); }
+    void Set<O,V>(O& value, string field, const V& data) { throw ReflectionException(); }
+    R Invoke<R,O,T...>(O& value, string method, T... args) { throw ReflectionException(); }
+}

@@ -1,0 +1,56 @@
+import System
+import System.Collections.Generic
+
+// Example for System NumberConverter.
+static class Program
+{
+public:
+    void Main()
+    {
+        Console.WriteLine("NumberConverter - Ganzzahlen umrechnen");
+        Console.WriteLine("2 = Binaer, 8 = Oktal, 10 = Dezimal, 16 = Hexadezimal");
+        Console.WriteLine("Optional: +/- und passende Praefixe 0b, 0o, 0x.");
+        Console.WriteLine("Alle vier Darstellungen werden ausgegeben. Ende: q oder leere Eingabe.");
+
+        while (true)
+        {
+            Console.WriteLine();
+            Console.Write("Eingabebasis (2/8/10/16): ");
+            string baseInput = Console.ReadLine().Trim();
+            if (ShouldQuit(baseInput)) return;
+
+            int sourceBase = 0;
+            if (!Converter.TryTo<int>(baseInput, sourceBase) ||
+                !NumberConverter.IsSupportedBase(sourceBase))
+            {
+                Console.WriteLine("Bitte 2, 8, 10 oder 16 eingeben.");
+                continue;
+            }
+
+            Console.Write("Zahl: ");
+            string number = Console.ReadLine().Trim();
+            if (ShouldQuit(number)) return;
+
+            string binary = "", octal = "", decimal = "", hexadecimal = "", error = "";
+            if (!NumberConverter.TryConvert(number, sourceBase, 2, binary, error))
+            {
+                Console.WriteLine("Fehler: " + error);
+                continue;
+            }
+            NumberConverter.TryConvert(number, sourceBase, 8, octal, error);
+            NumberConverter.TryConvert(number, sourceBase, 10, decimal, error);
+            NumberConverter.TryConvert(number, sourceBase, 16, hexadecimal, error);
+
+            Console.WriteLine("Binaer      (2): " + binary);
+            Console.WriteLine("Dezimal    (10): " + decimal);
+            Console.WriteLine("Oktal       (8): " + octal);
+            Console.WriteLine("Hexadezimal(16): " + hexadecimal);
+        }
+    }
+
+private:
+    bool ShouldQuit(const string& input)
+    {
+        return input.Length == 0 || input.ToLower() == "q";
+    }
+}

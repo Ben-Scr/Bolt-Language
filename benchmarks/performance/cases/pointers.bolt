@@ -1,0 +1,24 @@
+static class Program
+{
+public:
+    void Main()
+    {
+        uint first = 1u, second = 7u;
+        uint* a = &first;
+        uint* b = &second;
+        for (int i = 0; i < 64000000; i++)
+        {
+            uint x = *a ^ (uint)i;
+            *a = (x << 7) | (x >> 25);
+            *b = *b ^ (*a >> 1);
+            if ((*b & 1u) != 0u)
+            {
+                uint* temp = a;
+                a = b;
+                b = temp;
+            }
+        }
+        Print(first);
+        Print(second);
+    }
+}

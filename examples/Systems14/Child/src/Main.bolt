@@ -1,0 +1,9 @@
+import System
+public static class Program {
+public:
+ int Main(string[] args){
+  for(string arg:args) Print(arg);
+  Print(Environment.GetVariable("BOLT_EXAMPLE"));
+  return 7;
+ }
+}

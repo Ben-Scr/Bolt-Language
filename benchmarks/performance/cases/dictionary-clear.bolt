@@ -1,0 +1,22 @@
+import System.Collections.Generic
+
+static class Program
+{
+public:
+    void Main(string[] args)
+    {
+        int capacity = int.Parse(args[0]);
+        int live = int.Parse(args[1]);
+        int rounds = int.Parse(args[2]);
+        Dictionary<int,int> values(capacity);
+        ulong checksum = 0ul;
+        for (int round = 0; round < rounds; round++)
+        {
+            int first = round * 17;
+            for (int i = 0; i < live; i++) values.Add(first + i, i);
+            checksum += (ulong)values[first + live - 1] + (ulong)values.Count;
+            values.Clear();
+        }
+        Print(checksum);
+    }
+}

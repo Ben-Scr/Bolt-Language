@@ -1,0 +1,5 @@
+
+int& Bad(){int x=1;return x;}
+static class Program { public: void Main() {
+
+} }

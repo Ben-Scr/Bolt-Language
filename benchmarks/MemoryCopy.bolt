@@ -1,0 +1,27 @@
+import System.Diagnostics
+import System.Memory
+
+public static class Program {
+public:
+    void Measure(int length, int iterations) {
+        byte[] source = new byte[length];
+        byte[] target = new byte[length];
+        byte* src = &source[0];
+        byte* dst = &target[0];
+        int checksum = 0;
+        Stopwatch timer = Stopwatch.StartNew();
+        for (int i = 0; i < iterations; i++) {
+            src[length - 1] = (byte)(i & 127);
+            Memory.Copy(dst, src, (ulong)length);
+            checksum += (int)dst[length - 1];
+        }
+        timer.Stop();
+        Print(checksum);
+        Print(timer.ElapsedTicks);
+    }
+    void Main() {
+        Measure(8, 524288);
+        Measure(256, 524288);
+        Measure(4096, 131072);
+    }
+}

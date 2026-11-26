@@ -1,0 +1,5 @@
+import Random
+
+static class Program { public: void Main() {
+Random.Next<int>(0);
+} }

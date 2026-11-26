@@ -1,0 +1,5 @@
+
+class Fail:IStringable {public:string ToString(){int x=0;return (string)(1/x);}}
+static class Program {public: void Main(){
+Fail f;Print(f);
+}}

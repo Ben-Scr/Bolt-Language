@@ -1,0 +1,25 @@
+import Math
+
+const T Pi<T> : FloatingPoint = Math.Pi<T>;
+const T Two<T> : Number = (T)2;
+
+static class Constants
+{
+public:
+    const T HalfPi<T> : FloatingPoint = Math.Pi<T> / (T)2;
+}
+
+static class Program
+{
+public:
+    void Main()
+    {
+        float pi = Pi<float>;
+        double halfPi = Constants.HalfPi<double>;
+        Console.WriteLine(pi);
+        Console.WriteLine(halfPi);
+        Console.WriteLine(Two<int>);
+        Console.WriteLine(Math.Tau<float>);
+        Console.WriteLine(Math.E<double>);
+    }
+}

@@ -1,0 +1,1 @@
+class Node{public:Node* Next;} static class Program{public:void Main(){Node node;Console.WriteLine(node.Next==null);}}

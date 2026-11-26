@@ -1,0 +1,28 @@
+#if BoltStandaloneCore && (Windows || MacOS || FreeBSD || (Linux && (X64 || ARM64 || RISCV64)))
+import System
+namespace Bolt.Runtime.IO;
+
+// Shared by stream copies and views. All fields are unmanaged so final release
+// can run during exception cleanup without allocating or raising another error.
+struct StreamState {
+public:
+    ulong References;
+    StreamState* Parent;
+    bool OwnsParent, File, Closed, Readable, Writable, Append;
+    byte* Data;
+    long Size, Capacity, Cursor;
+    void* Handle;
+    int Descriptor;
+}
+class StreamHandle {
+public:
+    StreamState* State;
+    void Initialize() {
+        StreamState* fresh=(StreamState*)Bolt.Runtime.StandaloneCore.Allocate((ulong)sizeof(StreamState));
+        if(fresh==null)throw OutOfMemoryException("Cannot allocate stream state.");
+        Bolt.Runtime.StandaloneCore.ReleaseStream(State);
+        State=fresh;
+        State->References=1ul;
+    }
+}
+#endif

@@ -1,0 +1,22 @@
+namespace Bolt.Runtime;
+
+// Compiler primitive: aligned typed memory, copy/move/destruction and capacity.
+// Collection policy and algorithms belong to System.Collections.Generic in Bolt.
+[Native("bolt::memory::Buffer<T>")]
+public struct Buffer<T>
+{
+public:
+    Buffer();
+    [NativeProperty("Count")] const int Length;
+    [NativeProperty("Capacity")] const int Capacity;
+    void Reserve(int capacity);
+    void Add(const T& value);
+    void AppendRange(const T[]& values, int offset, int count);
+    void AppendBuffer(int offset, int count, const Buffer<T>& source);
+    void Insert(int index, const T& value);
+    void RemoveAt(int index);
+    void Truncate(int length);
+    void Clear();
+    void Swap(Buffer<T>& other);
+    T[] ToArray();
+}

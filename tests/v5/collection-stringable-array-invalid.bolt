@@ -1,0 +1,2 @@
+import System.Collections.Generic
+static class Program { public: void Main() { List<List<int[]>> values; Print(values); } }

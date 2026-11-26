@@ -1,0 +1,16 @@
+import System.Text
+namespace Bolt.Runtime;
+
+public static class PrimitiveFormatting
+{
+public:
+    string Boolean(bool value) { return value ? "true" : "false"; }
+
+    string Character(char value)
+    {
+        int scalar = (int)value;
+        byte[] bytes = new byte[EncodingPrimitives.Utf8Length(scalar)];
+        EncodingPrimitives.WriteUtf8Scalar(scalar, bytes, 0);
+        return string.FromUtf8(bytes);
+    }
+}

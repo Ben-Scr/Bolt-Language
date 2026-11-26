@@ -1,0 +1,28 @@
+#if !(BoltStandaloneCore && (Windows || Linux || MacOS || FreeBSD))
+namespace System.Net;
+[Native("bolt::system::IPAddress")]
+public sealed class IPAddress : IStringable
+{
+public:
+    IPAddress();
+    IPAddress(string text);
+    static IPAddress Parse(string text);
+    static bool TryParse(string text, IPAddress& result);
+    string ToString();
+    [NativeProperty("IsIPv6")] const bool IsIPv6;
+    [NativeProperty("Any")] static const IPAddress Any;
+    [NativeProperty("Loopback")] static const IPAddress Loopback;
+    [NativeProperty("IPv6Any")] static const IPAddress IPv6Any;
+    [NativeProperty("IPv6Loopback")] static const IPAddress IPv6Loopback;
+}
+[Native("bolt::system::IPEndPoint")]
+public sealed class IPEndPoint : IStringable
+{
+public:
+    IPEndPoint();
+    IPEndPoint(IPAddress address, int port);
+    [NativeProperty("Address")] const IPAddress Address;
+    [NativeProperty("Port")] const int Port;
+    string ToString();
+}
+#endif

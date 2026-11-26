@@ -1,0 +1,53 @@
+import System.Collections.Generic
+public sealed class Entry {
+public:
+    static int Constructions = 0;
+    string Label;
+    int[] Values;
+    Entry(string label, int value) {
+        Constructions++;
+        Label = label;
+        Values = new int[1];
+        Values[0] = value;
+    }
+}
+public enum Shade : int { Red=2, Blue=7 }
+static class Program {
+public:
+    int Main() {
+        Queue<Entry> jobs(31);
+        jobs.Reserve(97);
+        if (Entry.Constructions != 0) return 1;
+        Entry a = Entry("A", 13);
+        Entry b = Entry("B", 19);
+        jobs.Enqueue(a); jobs.Enqueue(b);
+        a.Values[0] = 51;
+        Entry borrowed = jobs.Peek(); borrowed.Values[0] = 61;
+        if (jobs.Peek().Values[0] != 13) return 2;
+        Entry first = jobs.Dequeue();
+        if (first.Label != "A" || first.Values[0] != 13) return 3;
+        jobs.Enqueue(a);
+        Queue<Entry> copied = jobs;
+        jobs.Clear();
+        Entry[] snapshot = copied.ToArray();
+        if (snapshot.Length != 2 || snapshot[0].Label != "B" || snapshot[1].Values[0] != 51) return 4;
+        snapshot[0].Values[0] = 71;
+        if (copied.Peek().Values[0] != 19) return 5;
+        QueueEnumerator<Entry> it = copied.GetEnumerator();
+        if (!it.MoveNext() || it.Current.Label != "B") return 6;
+        if (copied.Peek().Label != "B" || !it.MoveNext() || it.Current.Label != "A") return 7;
+        if (copied.Dequeue().Label != "B" || copied.Dequeue().Values[0] != 51 || copied.Count != 0) return 8;
+        if (Entry.Constructions != 2) return 9;
+        Queue<string> text; text.Enqueue("old"); text.Enqueue("live");
+        text.Dequeue(); text.Enqueue("new");
+        string[] words = text.ToArray();
+        if (words.Length != 2 || words[0] != "live" || words[1] != "new" || text.Contains("old")) return 10;
+        Queue<int?> optional; optional.Enqueue(null); optional.Enqueue(43);
+        if (optional.Dequeue().HasValue || optional.Dequeue().Value != 43) return 11;
+        Queue<Shade> shades; shades.Enqueue(Shade.Red); shades.Enqueue(Shade.Blue);
+        if (shades.Dequeue() != Shade.Red || shades.Dequeue() != Shade.Blue) return 12;
+        int local = 57; Queue<int*> ptr; ptr.Enqueue(&local);
+        if (*ptr.Dequeue() != 57) return 13;
+        Print("managed queue OK"); return 0;
+    }
+}

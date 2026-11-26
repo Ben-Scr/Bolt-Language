@@ -1,0 +1,25 @@
+import System
+import Bolt.Runtime
+namespace System.Diagnostics;
+
+public sealed class Stopwatch : IStringable
+{
+private:
+    long accumulated = 0l, started = 0l;
+    bool running = false;
+public:
+    Stopwatch() {}
+    void Start() { accumulated = 0l; started = Bolt.Runtime.Clock.MonotonicTicks(); running = true; }
+    void Pause() { if (running) { accumulated += Bolt.Runtime.Clock.MonotonicTicks() - started; running = false; } }
+    void Stop() { Pause(); }
+    void Unpause() { if (!running) { started = Bolt.Runtime.Clock.MonotonicTicks(); running = true; } }
+    void Reset() { accumulated = 0l; started = 0l; running = false; }
+    void Restart() { Start(); }
+    static Stopwatch StartNew() { Stopwatch value; value.Start(); return value; }
+    bool IsRunning => running;
+    long ElapsedTicks => running ? accumulated + Bolt.Runtime.Clock.MonotonicTicks() - started : accumulated;
+    TimeSpan Elapsed => TimeSpan(ElapsedTicks);
+    long ElapsedMilliseconds => ElapsedTicks / 10000l;
+    [ReadOnly] string ToString() { return (string)ElapsedMilliseconds; }
+    double ElapsedSeconds => (double)ElapsedTicks / 10000000.0;
+}

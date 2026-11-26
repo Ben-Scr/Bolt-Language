@@ -1,0 +1,5 @@
+
+
+static class Program { public: void Main() {
+int* p; Console.WriteLine(p==null); int x=3; p=&x; int** q=&p; **q=5; Console.WriteLine(x);
+} }

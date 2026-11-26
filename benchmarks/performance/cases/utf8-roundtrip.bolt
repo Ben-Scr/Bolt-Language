@@ -1,0 +1,18 @@
+static class Program {
+public:
+    void Main() {
+        string text = "evt:ä/😀\n";
+        for (int i = 0; i < 12; i++) text += text;
+        ulong sum = 0ul;
+        for (int round = 0; round < 768; round++) {
+            byte[] bytes = text.ToUtf8();
+            int offset = ((round * 43) & 4095) * 12;
+            bytes[offset] = (byte)(65 + (round & 15));
+            text = string.FromUtf8(bytes);
+            sum += (ulong)text.Length + (ulong)bytes[offset];
+        }
+        byte[] final = text.ToUtf8();
+        for (int i = 0; i < final.Length; i++) sum += (ulong)final[i];
+        Print(sum);
+    }
+}

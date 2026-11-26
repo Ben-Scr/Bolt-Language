@@ -1,0 +1,57 @@
+import Bolt.Runtime
+import System.Collections.Generic
+namespace System.IO;
+
+public sealed class Pipe
+{
+private:
+    PipeHandle handle;
+    static int CheckedCount(int length, int offset, int count)
+    {
+        if (offset < 0 || offset > length) Failure.Range("Pipe offset is out of range.");
+        if (count == -1) count = length - offset;
+        if (count < 0 || count > length - offset) Failure.Range("Pipe count is out of range.");
+        return count;
+    }
+public:
+    Pipe() {}
+    Pipe(PipeHandle value) { handle = value; }
+    bool IsOpen => handle.IsOpen;
+    void Close() { handle.Close(); }
+    int Read(byte[]& bytes, int offset = 0, int count = -1, int timeout = -1)
+    {
+        count = CheckedCount(bytes.Length, offset, count);
+        return handle.Read(bytes, offset, count, timeout);
+    }
+    int Write(const byte[]& bytes, int offset = 0, int count = -1, int timeout = -1)
+    {
+        count = CheckedCount(bytes.Length, offset, count);
+        return handle.Write(bytes, offset, count, timeout);
+    }
+    void WriteAll(const byte[]& bytes)
+    {
+        int offset = 0;
+        while (offset < bytes.Length)
+        {
+            int n = Write(bytes, offset);
+            if (n <= 0) Failure.InvalidOperation("Pipe write made no progress.");
+            offset += n;
+        }
+    }
+    void WriteText(string text) { byte[] bytes = text.ToUtf8(); WriteAll(bytes); }
+    byte[] ReadAllBytes(int maximumBytes = 16777216)
+    {
+        if (maximumBytes < 0) Failure.Range("Negative output limit.");
+        List<byte> data; byte[] buffer = new byte[8192];
+        while (true)
+        {
+            int n = Read(buffer);
+            if (n == 0) break;
+            if (n < 0) Failure.InvalidOperation("Unexpected pipe timeout.");
+            if (n > maximumBytes - data.Length) Failure.Range("Pipe output exceeds the configured limit.");
+            for (int i = 0; i < n; i++) data.Add(buffer[i]);
+        }
+        return data.ToArray();
+    }
+    string ReadAllText(int maximumBytes = 16777216) { return string.FromUtf8(ReadAllBytes(maximumBytes)); }
+}

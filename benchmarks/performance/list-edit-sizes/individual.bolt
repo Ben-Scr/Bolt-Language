@@ -1,0 +1,62 @@
+import System.Collections.Generic
+import Bolt.Runtime
+
+static class Program {
+private:
+    // Batch intervals are short. On Windows use the same raw counter as C
+    // and convert the accumulated time once, after the measurement.
+    long Counter() {
+#ifdef Windows
+        long value = 0l;
+        if (Bolt.Runtime.Windows.PerformanceCounter((Bolt.Runtime.Windows.LargeInteger*)&value) == 0)
+            Failure.InvalidOperation("Cannot read the Windows performance counter.");
+        return value;
+#else
+        return Clock.MonotonicTicks();
+#endif
+    }
+    long Ticks(long delta) {
+#ifdef Windows
+        long frequency = 0l;
+        if (Bolt.Runtime.Windows.PerformanceFrequency((Bolt.Runtime.Windows.LargeInteger*)&frequency) == 0 || frequency <= 0l)
+            Failure.InvalidOperation("Cannot read the Windows counter frequency.");
+        return (delta / frequency) * 10000000l + (delta % frequency) * 10000000l / frequency;
+#else
+        return delta;
+#endif
+    }
+public:
+    void Main() {
+        int size = 64;
+        int batch = 64;
+        List<int>[] lists = new List<int>[batch];
+        int[] insertAt = new int[batch], removeAt = new int[batch];
+        for (int k = 0; k < batch; k++) {
+            lists[k].Reserve(size + 1);
+            for (int i = 0; i < size; i++) lists[k].Add(i);
+        }
+        long insertTicks = 0l, removeTicks = 0l, removed = 0l;
+        for (int round = 0; round < 4096; round++) {
+            for (int k = 0; k < batch; k++) {
+                int step = round * batch + k;
+                insertAt[k] = (step * 117 + 257) % (size + 1);
+                removeAt[k] = (step * 251 + 11) % (size + 1);
+            }
+            long start = Counter();
+            for (int k = 0; k < batch; k++) lists[k].Insert(insertAt[k], round);
+            insertTicks += Counter() - start;
+            for (int k = 0; k < batch; k++) removed += lists[k][removeAt[k]];
+            start = Counter();
+            for (int k = 0; k < batch; k++) lists[k].RemoveAt(removeAt[k]);
+            removeTicks += Counter() - start;
+        }
+        long final = 0l;
+        for (int k = 0; k < batch; k++) {
+            for (int i = 0; i < lists[k].Count; i++) final += (long)(i + 1) * lists[k][i];
+        }
+        Print(Ticks(insertTicks));
+        Print(Ticks(removeTicks));
+        Print(removed);
+        Print(final);
+    }
+}

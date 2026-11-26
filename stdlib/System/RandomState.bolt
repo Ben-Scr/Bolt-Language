@@ -1,0 +1,90 @@
+import System
+namespace Bolt.Runtime;
+
+// Store a pointer-sized word directly in the OS TLS slot. No per-thread allocation
+// survives a worker's exit. Each module owns and releases its keys.
+private sealed class RandomWord
+{
+private:
+#if MacOS || IOS
+    ulong key;
+#else
+    uint key;
+#endif
+    bool allocated;
+public:
+    RandomWord()
+    {
+#ifdef Windows
+        key = Bolt.Runtime.Tls.Allocate();
+        if (key == uint.MaxValue) throw InvalidOperationException("Could not allocate a random TLS key.");
+#else
+        if (Bolt.Runtime.Tls.Allocate(&key, null) != 0) throw InvalidOperationException("Could not allocate a random TLS key.");
+#endif
+        allocated = true;
+    }
+    ~RandomWord()
+    {
+        if (allocated) Bolt.Runtime.Tls.Release(key);
+    }
+    ulong Read()
+    {
+        void* slot = Bolt.Runtime.Tls.Get(key);
+        // All Bolt targets are little endian. Copy the representation without
+        // dereferencing the pointer stored in the OS slot.
+        ulong word = 0ul;
+        byte* source = (byte*)&slot, destination = (byte*)&word;
+        for (int i = 0; i < sizeof(void*); i++) destination[i] = source[i];
+        return word;
+    }
+    void Write(ulong word)
+    {
+        void* slot = null;
+        byte* source = (byte*)&word, destination = (byte*)&slot;
+        for (int i = 0; i < sizeof(void*); i++) destination[i] = source[i];
+#ifdef Windows
+        bool failed = Bolt.Runtime.Tls.Set(key, slot) == 0;
+#else
+        bool failed = Bolt.Runtime.Tls.Set(key, slot) != 0;
+#endif
+        if (failed) throw InvalidOperationException("Could not set the random TLS word.");
+    }
+}
+
+static class RandomState
+{
+private:
+    RandomWord low;
+#if X86 || ARM32
+    RandomWord high;
+#endif
+    RandomWord seeded;
+public:
+    ulong Get()
+    {
+#if X86 || ARM32
+        if (seeded.Read() != 0ul) return low.Read() | (high.Read() << 32);
+#else
+        ulong state = low.Read();
+        if (state != 0ul || seeded.Read() != 0ul) return state;
+#endif
+        ulong seed = System.Security.Cryptography.RandomNumberGenerator.GetUInt64();
+        Set(seed);
+        return seed;
+    }
+    void Set(ulong state)
+    {
+#if X86 || ARM32
+        // Invalidate first so a partial multiword write can never be read.
+        seeded.Write(0ul);
+        low.Write(state & 4294967295ul);
+        high.Write(state >> 32);
+        seeded.Write(1ul);
+#else
+        // Nonzero states require one atomic TLS update. A separate marker
+        // distinguishes an explicitly stored zero from a new thread's null slot.
+        low.Write(state);
+        if (state == 0ul) seeded.Write(1ul);
+#endif
+    }
+}

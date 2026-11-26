@@ -1,0 +1,5 @@
+
+class N{static N operator +(N a,N b){return a;}}
+static class Program {public: void Main(){
+
+}}

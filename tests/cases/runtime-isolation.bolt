@@ -1,0 +1,1 @@
+static class Program { public: void Main() { int outer=3;Runtime.Execute("Console.WriteLine(outer);"); } }

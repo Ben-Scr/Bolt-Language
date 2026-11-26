@@ -1,0 +1,5 @@
+import Math
+
+static class Program { public: void Main() {
+Math.Sin<int>(1);
+} }

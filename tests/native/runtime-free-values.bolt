@@ -1,0 +1,75 @@
+import System
+import System.IO
+import System.Collections.Generic
+
+struct Entry { public: string Text; }
+class Numbered {
+public:
+    static int Created;
+    int Number;
+    Numbered() { Number = ++Created; }
+}
+
+static class Program
+{
+    static string MakeText(string prefix) { return prefix + "😀\0ä"; }
+    static void Rethrow(bool& finalized) {
+        try {
+            try { throw ArgumentNullException(MakeText("missing ")); }
+            catch (ArgumentException& error) { throw; }
+        } finally { finalized = true; }
+    }
+public:
+    static int Main() {
+        string cwd=Environment.CurrentDirectory;
+        Environment.CurrentDirectory=cwd;
+        if(cwd=="" || Path.GetTempPath()=="")return 13;
+        string text = MakeText("a");
+        if (text.Length != 4 || text.ByteLength != 8 || text[1] != '😀') return 1;
+        string writable="old", before=writable;
+        ulong bytes=0ul;
+        byte* raw=Bolt.Runtime.NativeString.Bytes(writable,bytes);
+        string after=writable;
+        raw[0]=(byte)110;
+        if(bytes!=3ul || before!="old" || after!="old" || writable!="nld")return 11;
+        if ("aß".ToUpper() != "ASS" || "Ä".ToLower() != "ä" ||
+            "x".PadLeft(3,'😀') != "😀😀x" || text.ToCharArray()[2] != '\0') return 8;
+        string[] words = text.Split('\0');
+        string[] copy = words;
+        copy[0] = "changed";
+        if (words[0] != "a😀" || copy[1] != "ä") return 2;
+        string[,] grid = new string[2, 3];
+        grid[1, 2] = text;
+        string[,] backup = grid;
+        grid[1, 2] = "";
+        if (backup.GetLength(1) != 3 || backup[1, 2] != text || grid==backup) return 3;
+        grid[1,2]=text;
+        if(grid!=backup || Bolt.Runtime.Values.Hash<string[,]>(grid)!=Bolt.Runtime.Values.Hash<string[,]>(backup))return 12;
+        Entry[] entries = new Entry[2];
+        entries[0].Text = text;
+        Entry[] saved = entries;
+        entries[0].Text = "";
+        if (saved[0].Text != text) return 7;
+        Numbered[,] numbers = new Numbered[2,2];
+        Numbered[,] again = numbers;
+        if (again[1,0].Number != 3 || Numbered.Created != 4) return 9;
+        List<string> names;
+        names.Add("ü"); names.Add("z"); names.Insert(1,"😀"); names.RemoveAt(2);
+        names.AddRange(names);
+        List<string> independent=names;
+        names[0]="new";
+        if(string.Join("/",independent.ToArray())!="ü/😀/ü/😀" || names[2]!="ü")return 10;
+        bool finalized = false, caught = false;
+        try { Rethrow(finalized); }
+        catch (IOException& other) { return 4; }
+        catch (ArgumentException& error) {
+            caught = error.Message == MakeText("missing ") &&
+                error.SourceFile.EndsWith("runtime-free-values.bolt") &&
+                error.SourceLine > 0 && error.SourceColumn > 0 && error.StackTrace.Contains("Rethrow");
+        }
+        if (!finalized || !caught) return 5;
+        try { string invalid = words[20]; return 6; }
+        catch (IndexOutOfRangeException& error) {}
+        return 0;
+    }
+}

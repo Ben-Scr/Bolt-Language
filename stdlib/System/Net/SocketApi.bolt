@@ -1,0 +1,121 @@
+namespace Bolt.Runtime.NetApi;
+
+// The order of ai_addr and ai_canonname differs between glibc/musl and Winsock/BSD.
+struct AddressInfo {
+public:
+    int Flags, Family, SocketType, Protocol;
+#ifdef Windows
+    ulong Length;
+#else
+    uint Length;
+#endif
+#if Linux || Web
+    byte* Address;
+    byte* CanonicalName;
+#else
+    byte* CanonicalName;
+    byte* Address;
+#endif
+    AddressInfo* Next;
+}
+#ifdef Windows
+[Header("winsock2.h"), Native("WSAStartup")]
+extern "C" int WSAStartup(ushort version, void* data);
+[Header("winsock2.h"), Native("WSACleanup")]
+extern "C" int WSACleanup();
+[Header("winsock2.h"), Native("WSAGetLastError")]
+extern "C" int WSAGetLastError();
+[Header("winsock2.h"), Native("WSASocketW")]
+extern "C" long WSASocketW(int family, int kind, int protocol, void* info, uint group, uint flags);
+[Header("winsock2.h"), Native("closesocket")]
+extern "C" int CloseSocket(long fd);
+[Header("winsock2.h"), Native("ioctlsocket")]
+extern "C" int IoctlSocket(long fd, int command, uint* value);
+[Header("winsock2.h"), Native("WSAPoll")]
+extern "C" int WSAPoll(void* fds, uint count, int timeout);
+[Header("winsock2.h"), Native("WSARecvFrom")]
+extern "C" int WSARecvFrom(long fd, void* buffers, uint count, uint* received, uint* flags, void* address, int* size, void* operation, void* completion);
+[Header("windows.h"), Native("SetHandleInformation")]
+extern "C" int SetInheritance(void* fd, uint mask, uint flags);
+[Header("winsock2.h"), Native("bind")]
+extern "C" int BindSocket(long fd, void* address, int size);
+[Header("winsock2.h"), Native("listen")]
+extern "C" int ListenSocket(long fd, int backlog);
+[Header("winsock2.h"), Native("accept")]
+extern "C" long AcceptSocket(long fd, void* address, int* size);
+[Header("winsock2.h"), Native("connect")]
+extern "C" int ConnectSocket(long fd, void* address, int size);
+[Header("winsock2.h"), Native("shutdown")]
+extern "C" int ShutdownSocket(long fd, int direction);
+[Header("winsock2.h"), Native("getsockname")]
+extern "C" int LocalName(long fd, void* address, int* size);
+[Header("winsock2.h"), Native("getpeername")]
+extern "C" int PeerName(long fd, void* address, int* size);
+[Header("winsock2.h"), Native("setsockopt")]
+extern "C" int SetOption(long fd, int level, int option, void* value, int size);
+[Header("winsock2.h"), Native("getsockopt")]
+extern "C" int GetOption(long fd, int level, int option, void* value, int* size);
+[Header("winsock2.h"), Native("send")]
+extern "C" int SendBytes(long fd, const byte& first, int count, int flags);
+[Header("winsock2.h"), Native("recv")]
+extern "C" int ReceiveBytes(long fd, byte* data, int count, int flags);
+[Header("winsock2.h"), Native("sendto")]
+extern "C" int SendPacket(long fd, const byte& first, int count, int flags, void* address, int size);
+#else
+[Header("sys/socket.h"), Native("socket")]
+extern "C" int OpenSocket(int family, int kind, int protocol);
+[Header("sys/socket.h"), Native("recvmsg")]
+extern "C" long ReceiveMessage(int fd, void* message, int flags);
+[Header("sys/socket.h"), Native("bind")]
+extern "C" int BindSocket(int fd, void* address, int size);
+[Header("sys/socket.h"), Native("listen")]
+extern "C" int ListenSocket(int fd, int backlog);
+[Header("sys/socket.h"), Native("accept")]
+extern "C" int AcceptSocket(int fd, void* address, int* size);
+[Header("sys/socket.h"), Native("connect")]
+extern "C" int ConnectSocket(int fd, void* address, int size);
+[Header("sys/socket.h"), Native("shutdown")]
+extern "C" int ShutdownSocket(int fd, int direction);
+[Header("sys/socket.h"), Native("getsockname")]
+extern "C" int LocalName(int fd, void* address, int* size);
+[Header("sys/socket.h"), Native("getpeername")]
+extern "C" int PeerName(int fd, void* address, int* size);
+[Header("sys/socket.h"), Native("setsockopt")]
+extern "C" int SetOption(int fd, int level, int option, void* value, int size);
+[Header("sys/socket.h"), Native("getsockopt")]
+extern "C" int GetOption(int fd, int level, int option, void* value, int* size);
+[Header("sys/socket.h"), Native("send")]
+extern "C" long SendBytes(int fd, const byte& first, ulong count, int flags);
+[Header("sys/socket.h"), Native("recv")]
+extern "C" long ReceiveBytes(int fd, byte* data, ulong count, int flags);
+[Header("sys/socket.h"), Native("sendto")]
+extern "C" long SendPacket(int fd, const byte& first, ulong count, int flags, void* address, int size);
+#endif
+#ifdef Windows
+[Header("ws2tcpip.h"), Native("inet_ntop")]
+extern "C" ulong FormatAddress(int family, void* address, byte* text, ulong size);
+#elif ARM32 || X86
+[Header("arpa/inet.h"), Native("inet_ntop")]
+extern "C" uint FormatAddress(int family, void* address, byte* text, uint size);
+#else
+[Header("arpa/inet.h"), Native("inet_ntop")]
+extern "C" ulong FormatAddress(int family, void* address, byte* text, uint size);
+#endif
+#ifdef Windows
+[Header("ws2tcpip.h"), Native("inet_pton")]
+#else
+[Header("arpa/inet.h"), Native("inet_pton")]
+#endif
+extern "C" int ParseAddress(int family, byte* text, void* address);
+#ifdef Windows
+[Header("ws2tcpip.h"), Native("getaddrinfo")]
+#else
+[Header("netdb.h"), Native("getaddrinfo")]
+#endif
+extern "C" int Lookup(byte* host, byte* service, void* hints, void* result);
+#ifdef Windows
+[Header("ws2tcpip.h"), Native("freeaddrinfo")]
+#else
+[Header("netdb.h"), Native("freeaddrinfo")]
+#endif
+extern "C" void FreeAddresses(void* result);

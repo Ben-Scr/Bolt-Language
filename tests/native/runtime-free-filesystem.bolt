@@ -1,0 +1,64 @@
+import System
+import System.IO
+
+static class Program
+{
+public:
+    static int Main()
+    {
+        string tree = "Wald-ü";
+        string sub = Path.Combine(tree, "sub");
+        Directory.Create(sub);
+        Directory.Create(sub);
+        string cwd=Directory.GetCurrentDirectory();
+        Directory.SetCurrentDirectory(sub);
+        if (Directory.GetParent(Directory.GetCurrentDirectory())!=Path.Combine(cwd,tree)) return 17;
+        Directory.SetCurrentDirectory(cwd);
+        if (Directory.GetFileSystemEntries(tree).Length!=1) return 18;
+        string a = Path.Combine(tree, "a"), b = Path.Combine(sub, "b");
+        File.WriteAllText(a, "eins");
+        if (!File.Exists(a) || Directory.Exists(a) || File.Exists(tree) || !Directory.Exists(tree)) return 1;
+        if (File.GetLength(a) != 4l) return 16;
+        if (File.Exists("") || Directory.Exists("") || File.Exists(b)) return 2;
+        bool caught = false;
+        try { File.Exists(a + "\0x"); } catch (ArgumentException& e) { caught = true; }
+        if (!caught) return 3;
+        File.Copy(a, b);
+        File.WriteAllText(a, "zwei");
+        caught = false;
+        try { File.Copy(a, b); } catch (IOException& e) { caught = true; }
+        if (!caught || File.ReadAllText(b) != "eins") return 4;
+        File.Copy(a, b, true);
+        if (File.ReadAllText(b) != "zwei") return 5;
+        caught = false;
+        try { File.Copy(a, a, true); }
+        catch (IOException& e) { caught = true; }
+        catch (UnauthorizedAccessException& e) { caught = true; }
+        if (!caught || File.ReadAllText(a) != "zwei") return 6;
+        caught = false;
+        try { File.Move(a, b); } catch (IOException& e) { caught = true; }
+        if (!caught || !File.Exists(a)) return 7;
+        File.Move(a, b, true);
+        if (File.Exists(a) || File.ReadAllText(b) != "zwei") return 8;
+        File.Move(b, a);
+        File.Copy(a, b);
+        string[] files = Directory.GetFiles(tree, true);
+        if (files.Length != 2 || files[0] != a || files[1] != b) return 9;
+        if (Directory.GetDirectories(tree)[0] != sub) return 10;
+        caught = false;
+        try { Directory.Delete(tree, false); } catch (IOException& e) { caught = true; }
+        if (!caught) return 11;
+        File.Delete(a);
+        File.Delete(a);
+        Directory.Move(tree, tree + "2");
+        Directory.Delete(tree + "2");
+        if (Directory.Exists(tree + "2")) return 12;
+        if (Directory.Exists("links")) {
+            if (!Directory.Exists("links/outside")) return 13;
+            if (Directory.GetDirectories("links").Length != 1 || Directory.GetFiles("links", true).Length != 0) return 14;
+            Directory.Delete("links");
+            if (!File.Exists("keep/marker")) return 15;
+        }
+        return 0;
+    }
+}

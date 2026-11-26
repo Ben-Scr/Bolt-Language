@@ -1,0 +1,11 @@
+import Console
+import "modules/Vec2.bolt"
+static class Program {
+public:
+    void Main() {
+        Vec2 vector;
+        vector.X = 3;
+        vector.Y = 4;
+        Console.WriteLine(vector.LengthSquared());
+    }
+}

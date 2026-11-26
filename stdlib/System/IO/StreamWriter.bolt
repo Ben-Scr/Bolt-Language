@@ -1,0 +1,24 @@
+import System
+import Bolt.Runtime.IO
+namespace System.IO;
+
+// Text formatting and newline policy are source-authored; WriterLease only owns
+// a stream and borrows UTF-8 data for a raw write. Copies share the output lease.
+public class StreamWriter
+{
+private:
+    WriterLease lease;
+public:
+    StreamWriter(string path, bool append = false)
+    {
+        FileStream stream = FileStream(path, append ? FileMode.Append : FileMode.Create, FileAccess.Write);
+        lease = WriterLease(stream, false);
+    }
+    StreamWriter(Stream& stream, bool leaveOpen = false) : lease(WriterLease(stream, leaveOpen)) {}
+    void Write<T>(const T& value) : IStringable<T> { lease.WriteText((string)value); }
+    void WriteLine() { lease.WriteText("\n"); }
+    void WriteLine<T>(const T& value) : IStringable<T> { Write<T>(value); WriteLine(); }
+    void Flush() { lease.Flush(); }
+    void Close() { lease.Close(); }
+    void Dispose() { Close(); }
+}

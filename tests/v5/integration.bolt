@@ -1,0 +1,47 @@
+public interface ICounter {
+    int Add(int amount);
+    int Get();
+}
+public class Counter : ICounter, IStringable {
+public:
+    int Value;
+    Counter(int value) { Value = value; }
+    int Add(int amount) { Value += amount; return Value; }
+    int Get() { return Value; }
+    string ToString() { return $"Counter({Value})"; }
+    static Counter operator +(Counter a, Counter b) { return Counter(a.Value+b.Value); }
+    static Counter operator ++(Counter a) { return Counter(a.Value+1); }
+    static bool operator ==(Counter a, Counter b) { return a.Value == b.Value; }
+}
+T Sum<T>(T a,T b): Addable { return a+b; }
+void Show(IStringable value) { Print(value.ToString()); }
+static class Program {
+public:
+ void Main() {
+    Counter c=Counter(2);
+    ICounter& r=c;
+    Print(r.Add(3));
+    ICounter box=c;
+    Print(box.Add(4));
+    Print(c);
+    ICounter* ptr=&box;
+    box=Counter(10);
+    Print(ptr->Add(2));
+    Counter result=Sum<Counter>(c,Counter(7));
+    Print(result);
+    result+=Counter(3);
+    Print(result++);
+    Print(result);
+    Print(result==Counter(16));
+    IStringable value=42;
+    Print(value.ToString());
+    Show(c);
+    Show(0.5);
+    Show("hello");
+    Print($"{{x}}:{c}-{value}-{1+2}");
+    Print((int)0.5);
+    Print((string)0);
+    Print(Reinterpret<uint>(1.0f));
+ }
+}
+

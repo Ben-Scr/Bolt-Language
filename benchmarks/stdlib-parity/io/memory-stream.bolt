@@ -1,0 +1,25 @@
+import System.IO
+
+static class Program {
+public:
+    int Main() {
+        byte[] block = new byte[4096];
+        for (int i = 0; i < block.Length; i++) block[i] = (byte)(i & 127);
+        long sum = 0l;
+        for (int round = 0; round < 512; round++) {
+            MemoryStream stream;
+            for (int i = 0; i < 256; i++) {
+                block[0] = (byte)((round + i) & 127);
+                stream.Write(block);
+            }
+            stream.Seek(0l);
+            for (int i = 0; i < 256; i++) {
+                if (stream.Read(block) != block.Length) return 1;
+                sum += block[0] + (int)block[block.Length - 1];
+            }
+            stream.Close();
+        }
+        Print(sum);
+        return 0;
+    }
+}

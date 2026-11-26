@@ -1,0 +1,5 @@
+
+class Cell {public:int Value; int& Get(){return Value;} }
+static class Program { public: void Main() {
+Cell x; int& r=x.Get(); r=5; Console.WriteLine(x.Value);
+} }

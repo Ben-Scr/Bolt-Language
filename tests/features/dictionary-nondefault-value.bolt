@@ -1,0 +1,2 @@
+import System.Collections.Generic
+class Vector2{public:float X;Vector2(float x){X=x;}} static class Program{public:void Main(){Dictionary<string,Vector2> d;d["a"]=Vector2(3);d["a"]=Vector2(5);Console.WriteLine(d["a"].X);}}

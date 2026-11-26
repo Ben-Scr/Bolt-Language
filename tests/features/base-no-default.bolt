@@ -1,0 +1,5 @@
+
+class Base {public:Base(int x){}} class Child:Base {}
+static class Program { public: void Main() {
+Child x;
+} }

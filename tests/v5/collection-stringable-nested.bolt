@@ -1,0 +1,42 @@
+import System.Collections.Generic
+
+enum State:short { Ready=2 }
+class Label:IStringable {
+public:
+ string Text;
+ Label(string text) { Text=text; }
+ string ToString() { return $"Label({Text})"; }
+}
+interface IBox<T>:IStringable { T Get(); }
+class Box<T>:IBox<T> {
+public:
+ T Value;
+ Box(T value) { Value=value; }
+ T Get() { return Value; }
+ string ToString() { return $"Box({Value})"; }
+}
+
+static class Program {
+public:
+ void Main() {
+  List<int> numbers; numbers.Add(3); numbers.Add(1);
+  HashSet<int> set; set.Add(2); set.Add(10);
+  Dictionary<string,List<int>> map; map.Add("numbers",numbers);
+  Queue<Dictionary<string,List<int>>> nested; nested.Enqueue(map);
+  Print(map);
+  Print(nested);
+  List<HashSet<int>> sets; sets.Add(set); Print(sets);
+
+  List<IStringable> mixed;
+  mixed.Add((byte)255); mixed.Add(1.25); mixed.Add(true); mixed.Add("text");
+  mixed.Add(State.Ready); mixed.Add(Label("x")); mixed.Add(numbers); mixed.Add(map);
+  Print(mixed);
+  Queue<bool> flags; flags.Enqueue(false); flags.Enqueue(true); Print(flags);
+  HashSet<State> states; states.Add(State.Ready); Print(states);
+  Dictionary<Label,bool> labels;
+  labels.Add(Label("z"),true); labels.Add(Label("a"),false); Print(labels);
+  List<Box<int>> boxes; Print(boxes.ToString());
+  boxes.Add(Box<int>(7)); Print(boxes);
+  List<IBox<int>> interfaces; interfaces.Add(Box<int>(8)); Print(interfaces);
+ }
+}

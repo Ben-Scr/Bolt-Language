@@ -1,0 +1,37 @@
+import System
+import System.Net
+import System.Net.Sockets
+import System.Threading
+import System.Diagnostics
+public class EchoJob {public:
+ Socket Listener;int Size;
+ EchoJob(Socket listener,int size){Listener=listener;Size=size;}
+ void Run(){Socket peer=Listener.Accept();peer.SetTimeouts(5000,5000);byte[] bytes=new byte[Size];Assert.That(peer.ReceiveExactly(bytes));peer.SendAll(bytes);peer.Shutdown();peer.Close();}
+}
+static class Program {public:
+ static int checks=0;
+ void Check(bool yes){Assert.That(yes);checks++;}
+ void Echo(bool v6){
+  Socket listener=Socket.Tcp(v6);listener.SetTimeouts(5000,5000);listener.Bind(IPEndPoint(v6?IPAddress.IPv6Loopback:IPAddress.Loopback,0));listener.Listen();IPEndPoint endpoint=listener.LocalEndpoint;Check(endpoint.Port>0);
+  Thread worker=Thread.Start(EchoJob(listener,180000));Socket client=Socket.Tcp(v6);client.SetTimeouts(5000,5000);client.Connect(endpoint);
+  byte[] bytes=new byte[180000];for(int i=0;i<bytes.Length;i++)bytes[i]=(byte)(i%251);client.SendAll(bytes);byte[] answer=new byte[bytes.Length];Check(client.ReceiveExactly(answer));Check(answer[0]==(byte)0&&answer[179999]==(byte)(179999%251));
+  byte[] one=new byte[1];Check(client.Receive(one)==0);client.Close();Check(worker.Join(6000));listener.Close();
+ }
+ void Main(){
+  IPAddress parsed=IPAddress.Parse("127.0.0.1");Check(parsed.ToString()=="127.0.0.1"&&!parsed.IsIPv6);
+  Check(IPAddress.Parse("::1").IsIPv6);Check(!IPAddress.TryParse("not-an-ip",parsed));Check(Dns.Resolve("localhost").Length>0);
+  bool failed=false;try{IPEndPoint invalid=IPEndPoint(IPAddress.Loopback,65536);}catch(ArgumentOutOfRangeException& e){failed=true;}Check(failed);
+  Echo(false);
+  try{Echo(true);Print("IPV6:tested");}catch(SocketException& e){Print("IPV6:unavailable:"+e.Message);}
+  Socket recv=Socket.Udp();recv.Bind(IPEndPoint(IPAddress.Loopback,0));recv.SetTimeouts(5000,5000);Socket send=Socket.Udp();send.Bind(IPEndPoint(IPAddress.Loopback,0));
+  byte[] input=[(byte)1,(byte)2,(byte)3,(byte)4,(byte)5];Check(send.SendTo(input,recv.LocalEndpoint)==5);
+  byte[] output=new byte[3];IPEndPoint sender;bool truncated=false;Check(recv.ReceiveFrom(output,sender,truncated)==3&&truncated);Check(output[0]==(byte)1&&output[2]==(byte)3);Check(sender.Port==send.LocalEndpoint.Port);
+  byte[] empty=new byte[0];Check(send.SendTo(empty,recv.LocalEndpoint)==0);Check(recv.ReceiveFrom(output,sender,truncated)==0&&!truncated);
+  recv.SetTimeouts(1);failed=false;try{recv.ReceiveFrom(output,sender,truncated);}catch(TimeoutException& e){failed=true;}Check(failed);
+  recv.SetTimeouts(0);failed=false;try{recv.ReceiveFrom(output,sender,truncated);}catch(SocketWouldBlockException& e){failed=true;}Check(failed);
+  Socket alias=recv;recv.Close();Check(!alias.IsOpen);recv.Close();send.Close();
+  // Windows may deliver loopback connection refusal after a TCP retry interval.
+  Socket refused=Socket.Tcp();refused.Bind(IPEndPoint(IPAddress.Loopback,0));IPEndPoint closed=refused.LocalEndpoint;refused.Close();Socket connector=Socket.Tcp();connector.SetTimeouts(5000,5000);failed=false;try{connector.Connect(closed);}catch(SocketException& e){failed=true;}Check(failed);connector.Close();
+  Print("NETWORK14:"+checks);
+ }
+}

@@ -1,0 +1,19 @@
+import System
+import System.IO
+import System.Diagnostics
+
+public static class Program {
+public:
+    void Main(string[] args) {
+        // All APIs here use the precompiled native runtime on direct backends.
+        Stopwatch watch;
+        watch.Start();
+        File.WriteAllText("bolt-example.txt", "Hello from native Bolt!");
+        Print(File.ReadAllText("bolt-example.txt"));
+        Random random = Random(123);
+        Print(random.Next<int>(1, 100));
+        for (argument : args) Print(argument);
+        watch.Pause();
+        Print(watch.Elapsed.ToString());
+    }
+}

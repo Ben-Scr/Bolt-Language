@@ -1,0 +1,74 @@
+import System
+import System.IO
+import System.Diagnostics
+import System.Threading
+import System.Collections.Generic
+import Bolt.Runtime
+
+public static class Program
+{
+private:
+    int passed = 0;
+    void Check(bool condition, string name)
+    { if (!condition) Failure.InvalidOperation("Check failed: " + name); passed++; }
+public:
+    void Main()
+    {
+        Console.Clear(); // Captured stdout must not receive terminal escape codes.
+        Stopwatch watch;
+        Check(watch.ToString() == "0", "Stopwatch initial milliseconds");
+        watch.Start(); Thread.Sleep(3); watch.Pause();
+        IStringable& printable = watch;
+        Check(printable.ToString() == (string)watch.ElapsedMilliseconds, "IStringable milliseconds");
+        string paused = watch.ToString(); Thread.Sleep(1);
+        Check(watch.ToString() == paused, "paused time stays constant");
+        watch.Unpause(); Thread.Sleep(1); watch.Pause();
+        Check(watch.ElapsedMilliseconds >= 3l, "monotonic elapsed time");
+        watch.Reset(); Check(watch.ToString() == "0", "Reset formatting");
+        Thread.Sleep(0); Thread.Yield();
+        Check(Converter.ToBool(" \tTrUe\r\n"), "ASCII boolean");
+        Check(!Converter.To<bool>("FALSE"), "generic boolean");
+        Check(Converter.ToChar("😀") == '😀', "Unicode scalar");
+        Check(Converter.ToChar(" ") == ' ', "char is not trimmed");
+        Check(Converter.To<string>(" x ") == " x ", "string is not trimmed");
+        Check(Converter.ToInt16("-32768") == short.MinValue, "short min");
+        Check(Converter.ToInt16("32767") == short.MaxValue, "short max");
+        Check(Converter.ToInt("+2147483647") == int.MaxValue, "int max");
+        Check(Converter.ToInt64("-9223372036854775808") == long.MinValue, "long min");
+        Check(Converter.ToUInt8("255") == byte.MaxValue, "byte max");
+        Check(Converter.ToUInt16("65535") == ushort.MaxValue, "ushort max");
+        Check(Converter.ToUInt32("4294967295") == uint.MaxValue, "uint max");
+        Check(Converter.ToUInt64("18446744073709551615") == ulong.MaxValue, "ulong max");
+        Check(Converter.ToDouble("1.25e1") == 12.5, "double primitive");
+        Check(Converter.ToFloat("-0.5") == -0.5f, "float primitive");
+        int value = 42;
+        Check(!Converter.TryTo<int>("999999999999999999999999x", value) && value == 42, "invalid preserves output");
+        Check(!Converter.TryTo<int>("2147483648", value) && value == 42, "overflow preserves output");
+        ulong natural = 42ul;
+        Check(!Converter.TryTo<ulong>("-0", natural) && natural == 42ul, "unsigned negative zero rejected");
+        Check(Converter.TryTo<int>("-0", value) && value == 0, "signed negative zero");
+        double number = 9.0;
+        Check(!Converter.TryTo<double>("nan", number) && number == 9.0, "nonfinite text rejected");
+        Check(Converter.ToString<int>(24) == "24", "source ToString");
+        Directory.Create("migration-work/a/b"); Directory.Create("migration-work/a/b");
+        File.WriteAllText("migration-work/a/b/z.txt", "Hello Ä😀");
+        File.WriteAllText("migration-work/c.txt", "c"); File.WriteAllText("migration-work/aa.txt", "a");
+        Check(File.ReadAllText("migration-work/a/b/z.txt") == "Hello Ä😀", "UTF-8 file");
+        string[] names = Directory.GetFiles("migration-work", true);
+        Check(names.Length == 3 && string.Compare(names[0], names[1]) < 0 && string.Compare(names[1], names[2]) < 0, "sorted recursive files");
+        Check(Directory.GetDirectories("migration-work", true).Length == 2, "recursive directories");
+        Check(Directory.GetFiles("migration-work").Length == 2, "nonrecursive files");
+        Check(Directory.GetFileSystemEntries("migration-work", true).Length == 5, "all entries");
+        MemoryStream memory;
+        StreamWriter writer = StreamWriter(memory, true);
+        writer.Write<string>("value="); writer.WriteLine<int>(42); writer.Flush(); writer.Close(); writer.Close();
+        Check(string.FromUtf8(memory.ToArray()) == "value=42\n", "source StreamWriter and leaveOpen");
+        Check(memory.CanWrite, "leaveOpen preserves stream");
+        { StreamWriter fileWriter = StreamWriter("migration-work/written.txt"); fileWriter.WriteLine("line"); }
+        Check(File.ReadAllText("migration-work/written.txt") == "line\n", "writer lifetime");
+        Directory.Delete("migration-work"); Check(!Directory.Exists("migration-work"), "recursive delete");
+        // Driver optionally places a link to outside/keep.txt under this directory.
+        if (Directory.Exists("links")) { Directory.Delete("links"); Check(File.Exists("outside/keep.txt"), "directory links are not traversed"); }
+        Console.WriteLine("Core11 checks: " + passed);
+    }
+}

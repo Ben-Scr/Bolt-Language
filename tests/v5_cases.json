@@ -1,0 +1,544 @@
+[
+  {
+    "name": "v5-integration",
+    "file": "tests/v5/integration.bolt",
+    "stdout": "5\n9\nCounter(5)\n12\nCounter(12)\nCounter(15)\nCounter(16)\ntrue\n42\nCounter(5)\n0.5\nhello\n{x}:Counter(5)-42-3\n0\n0\n1065353216\n"
+  },
+  {
+    "name": "v5-interface-reference",
+    "file": "tests/v5/interface-reference.bolt",
+    "stdout": "7\n9\nCounter(9)\n"
+  },
+  {
+    "name": "v5-interface-box-copy",
+    "file": "tests/v5/interface-box-copy.bolt",
+    "stdout": "7\n4\n4\n9\n9\n"
+  },
+  {
+    "name": "v5-interface-return",
+    "file": "tests/v5/interface-return.bolt",
+    "stdout": "7\n8\n8\n"
+  },
+  {
+    "name": "v5-generic-interface",
+    "file": "tests/v5/generic-interface.bolt",
+    "stdout": "7\nHolder(9)\n12\nHolder(9)\nok\n"
+  },
+  {
+    "name": "v5-diamond-interface",
+    "file": "tests/v5/diamond-interface.bolt",
+    "stdout": "19\n19\n19\n"
+  },
+  {
+    "name": "v5-base-interface",
+    "file": "tests/v5/base-interface.bolt",
+    "stdout": "child\nchild\nparent\n"
+  },
+  {
+    "name": "v5-boxed-collections",
+    "file": "tests/v5/boxed-collections.bolt",
+    "stdout": "1\na\nCounter(7)\ntrue\n2.5\nCounter(8)\nCounter(4)\n2\n9\ntrue\nfalse\ntrue\ntrue\n2\n"
+  },
+  {
+    "name": "v5-boxed-field",
+    "file": "tests/v5/boxed-field.bolt",
+    "stdout": "",
+    "error": "interface 'System.IStringable' cannot be constructed",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-boxed-field-initialized",
+    "file": "tests/v5/boxed-field-initialized.bolt",
+    "stdout": "2\nok\n"
+  },
+  {
+    "name": "v5-stringable-primitives",
+    "file": "tests/v5/stringable-primitives.bolt",
+    "stdout": "5\n0.5\n1.25\ntrue\nhi\n-1\n255\n-128\n-1\n"
+  },
+  {
+    "name": "v5-stringable-constraint",
+    "file": "tests/v5/stringable-constraint.bolt",
+    "stdout": "5\nx\nCounter(2)\n"
+  },
+  {
+    "name": "v5-collection-stringable",
+    "file": "tests/v5/collection-stringable.bolt",
+    "stdout": "[]\n[]\n{}\n{}\n[10, 2, -1]\n[second, third]\n{-1, 10, 2}\n{a: false, z: true}\n[10, 2, -1]\n[second, third]\n{-1, 10, 2}\n{a: false, z: true}\n[10, 2, -1]\nqueue=[second, third]\nset={-1, 10, 2}; map={a: false, z: true}\nlist=[10, 2, -1]\n[10, 2, -1]\n[10, 2, -1]\n"
+  },
+  {
+    "name": "v5-collection-stringable-nested",
+    "file": "tests/v5/collection-stringable-nested.bolt",
+    "stdout": "{numbers: [3, 1]}\n[{numbers: [3, 1]}]\n[{10, 2}]\n[255, 1.25, true, text, 2, Label(x), [3, 1], {numbers: [3, 1]}]\n[false, true]\n{2}\n{Label(a): false, Label(z): true}\n[]\n[Box(7)]\n[Box(8)]\n"
+  },
+  {
+    "name": "v5-collection-stringable-interface",
+    "file": "tests/v5/collection-stringable-interface.bolt",
+    "stdout": "[4]\n{a, z}\n[true]\n{x: 5}\n[4]\n[4]\n[4]\nsaved=[4]\n{a, z}\n{a, z}\n[true]\n{x: 5}\n{x: 5}\n[4, 9]\n"
+  },
+  {
+    "name": "v5-collection-stringable-snapshot",
+    "file": "tests/v5/collection-stringable-snapshot.bolt",
+    "stdout": "[1]\n[1]\n0\n[1]\n[1]\n0\n{1}\n{1}\ntrue\n{1: 1}\n{1: 1}\ntrue\n0\n[[1]]\n[[1]]\n0\n[1]\n[1]\n0\n"
+  },
+  {
+    "name": "v5-collection-stringable-error",
+    "file": "tests/v5/collection-stringable-error.bolt",
+    "stdout": "",
+    "error": "division by zero"
+  },
+  {
+    "name": "v5-collection-stringable-list-invalid",
+    "file": "tests/v5/collection-stringable-list-invalid.bolt",
+    "stdout": "",
+    "error": "IStringable",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-collection-stringable-set-invalid",
+    "file": "tests/v5/collection-stringable-set-invalid.bolt",
+    "stdout": "",
+    "error": "IStringable<Plain>",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-collection-stringable-queue-invalid",
+    "file": "tests/v5/collection-stringable-queue-invalid.bolt",
+    "stdout": "",
+    "error": "does not satisfy concept",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-collection-stringable-key-invalid",
+    "file": "tests/v5/collection-stringable-key-invalid.bolt",
+    "stdout": "",
+    "error": "IStringable",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-collection-stringable-value-invalid",
+    "file": "tests/v5/collection-stringable-value-invalid.bolt",
+    "stdout": "",
+    "error": "IStringable",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-collection-stringable-array-invalid",
+    "file": "tests/v5/collection-stringable-array-invalid.bolt",
+    "stdout": "",
+    "error": "IStringable",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-collection-stringable-box-invalid",
+    "file": "tests/v5/collection-stringable-box-invalid.bolt",
+    "stdout": "",
+    "error": "cannot assign",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-stringable-concept",
+    "file": "tests/v5/stringable-concept.bolt",
+    "stdout": "6\nCounter(3)\n"
+  },
+  {
+    "name": "v5-string-format-snapshot",
+    "file": "tests/v5/string-format-snapshot.bolt",
+    "stdout": "1\n1\n1\n1\n0\n1\n1\n"
+  },
+  {
+    "name": "v5-interface-independent-method",
+    "file": "tests/v5/interface-independent-method.bolt",
+    "stdout": "5\nr\n"
+  },
+  {
+    "name": "v5-format-error",
+    "file": "tests/v5/format-error.bolt",
+    "stdout": "",
+    "error": "division by zero"
+  },
+  {
+    "name": "v5-interface-null",
+    "file": "tests/v5/interface-null.bolt",
+    "stdout": "",
+    "error": "null pointer dereference"
+  },
+  {
+    "name": "v5-stringable-no-opt-in",
+    "file": "tests/v5/stringable-no-opt-in.bolt",
+    "stdout": "manual\n"
+  },
+  {
+    "name": "v5-all-operators",
+    "file": "tests/v5/all-operators.bolt",
+    "stdout": "10\n4\n21\n2\n1\n7\n-7\ntrue\nfalse\ntrue\nfalse\ntrue\nfalse\ntrue\n10\n7\n21\n7\n1\n2\n2\n3\n2\n2\n1\n"
+  },
+  {
+    "name": "v5-operator-const-ref",
+    "file": "tests/v5/operator-const-ref.bolt",
+    "stdout": "5\n6\n"
+  },
+  {
+    "name": "v5-operator-mixed",
+    "file": "tests/v5/operator-mixed.bolt",
+    "stdout": "7\n8\n"
+  },
+  {
+    "name": "v5-generic-operator",
+    "file": "tests/v5/generic-operator.bolt",
+    "stdout": "5\n"
+  },
+  {
+    "name": "v5-operator-evaluate-once",
+    "file": "tests/v5/operator-evaluate-once.bolt",
+    "stdout": "Counter(2)\n1\nCounter(3)\n2\nCounter(9)\n"
+  },
+  {
+    "name": "v5-operator-evaluation-order",
+    "file": "tests/v5/operator-evaluation-order.bolt",
+    "stdout": "Counter(6)\n"
+  },
+  {
+    "name": "v5-operator-reference-return-target",
+    "file": "tests/v5/operator-reference-return-target.bolt",
+    "stdout": "Counter(2)\nCounter(3)\n"
+  },
+  {
+    "name": "v5-operator-interface-result",
+    "file": "tests/v5/operator-interface-result.bolt",
+    "stdout": "3\n"
+  },
+  {
+    "name": "v5-interpolation-expressions",
+    "file": "tests/v5/interpolation-expressions.bolt",
+    "stdout": "2-9\n{3}\nab:2\ninner9end\n\n"
+  },
+  {
+    "name": "v5-interpolation-effects",
+    "file": "tests/v5/interpolation-effects.bolt",
+    "stdout": "0:1:2\n2\n"
+  },
+  {
+    "name": "v5-interpolation-escapes",
+    "file": "tests/v5/interpolation-escapes.bolt",
+    "stdout": "a\n\t\"{ok}\"\\b\né:3\nx\u00001\n"
+  },
+  {
+    "name": "v5-interpolation-comments",
+    "file": "tests/v5/interpolation-comments.bolt",
+    "stdout": "begin3end\nline7end\n"
+  },
+  {
+    "name": "v5-cast-primitives",
+    "file": "tests/v5/cast-primitives.bolt",
+    "stdout": "0\n-2\n3\n0\nfalse\n255\n-128\n"
+  },
+  {
+    "name": "v5-interface-explicit-cast",
+    "file": "tests/v5/interface-explicit-cast.bolt",
+    "stdout": "Counter(9)\nCounter(9)\n1\n"
+  },
+  {
+    "name": "v5-reinterpret-all-widths",
+    "file": "tests/v5/reinterpret-all-widths.bolt",
+    "stdout": "65535\n-1\n65535\n-1\n4294967295\n-1\n18446744073709551615\n-1\n1065353216\n1\n4607182418800017408\n1\n"
+  },
+  {
+    "name": "v5-reinterpret-enum",
+    "file": "tests/v5/reinterpret-enum.bolt",
+    "stdout": "-1\n65535\n"
+  },
+  {
+    "name": "v5-cast-range-error",
+    "file": "tests/v5/cast-range-error.bolt",
+    "stdout": "",
+    "error": "integer conversion out of range"
+  },
+  {
+    "name": "v5-missing-interface-member",
+    "file": "tests/v5/missing-interface-member.bolt",
+    "stdout": "",
+    "error": "must implement public",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-interface-return-mismatch",
+    "file": "tests/v5/interface-return-mismatch.bolt",
+    "stdout": "",
+    "error": "return type must match",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-interface-private-member",
+    "file": "tests/v5/interface-private-member.bolt",
+    "stdout": "",
+    "error": "cannot reduce public access",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-interface-static-member",
+    "file": "tests/v5/interface-static-member.bolt",
+    "stdout": "",
+    "error": "cannot override a static",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-interface-fields",
+    "file": "tests/v5/interface-fields.bolt",
+    "stdout": "",
+    "error": "method signatures, not fields",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-interface-constructor",
+    "file": "tests/v5/interface-constructor.bolt",
+    "stdout": "",
+    "error": "cannot declare a constructor",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-interface-default-body",
+    "file": "tests/v5/interface-default-body.bolt",
+    "stdout": "1\n"
+  },
+  {
+    "name": "v5-interface-cycle",
+    "file": "tests/v5/interface-cycle.bolt",
+    "stdout": "",
+    "error": "cyclic",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-class-multiple-bases",
+    "file": "tests/v5/class-multiple-bases.bolt",
+    "stdout": "",
+    "error": "only one class",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-interface-class-parent",
+    "file": "tests/v5/interface-class-parent.bolt",
+    "stdout": "",
+    "error": "only interfaces",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-interface-conflicting-contracts",
+    "file": "tests/v5/interface-conflicting-contracts.bolt",
+    "stdout": "",
+    "error": "disagree on the return type",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-interface-duplicate-base",
+    "file": "tests/v5/interface-duplicate-base.bolt",
+    "stdout": "",
+    "error": "duplicate base",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-interface-static-class",
+    "file": "tests/v5/interface-static-class.bolt",
+    "stdout": "",
+    "error": "static class cannot implement",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-operator-wrong-arity",
+    "file": "tests/v5/operator-wrong-arity.bolt",
+    "stdout": "",
+    "error": "correct number of operands",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-operator-private",
+    "file": "tests/v5/operator-private.bolt",
+    "stdout": "",
+    "error": "public and static",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-operator-wrong-owner",
+    "file": "tests/v5/operator-wrong-owner.bolt",
+    "stdout": "",
+    "error": "operand of its declaring type",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-operator-compare-return",
+    "file": "tests/v5/operator-compare-return.bolt",
+    "stdout": "",
+    "error": "must return bool",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-operator-mutable-ref",
+    "file": "tests/v5/operator-mutable-ref.bolt",
+    "stdout": "",
+    "error": "reference operands must be const",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-operator-logical-and",
+    "file": "tests/v5/operator-logical-and.bolt",
+    "stdout": "",
+    "error": "unsupported overloadable operator",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-operator-direct-assignment",
+    "file": "tests/v5/operator-direct-assignment.bolt",
+    "stdout": "",
+    "error": "unsupported overloadable operator",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-interface-generic-method",
+    "file": "tests/v5/interface-generic-method.bolt",
+    "stdout": "",
+    "error": "use a generic interface instead",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-interface-default-value",
+    "file": "tests/v5/interface-default-value.bolt",
+    "stdout": "",
+    "error": "cannot be constructed",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-interface-new",
+    "file": "tests/v5/interface-new.bolt",
+    "stdout": "",
+    "error": "cannot be constructed",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-interface-array-default",
+    "file": "tests/v5/interface-array-default.bolt",
+    "stdout": "",
+    "error": "cannot be constructed",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-interface-null-value",
+    "file": "tests/v5/interface-null-value.bolt",
+    "stdout": "",
+    "error": "cannot assign",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-interface-primitive-ref",
+    "file": "tests/v5/interface-primitive-ref.bolt",
+    "stdout": "",
+    "error": "cannot assign",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-reinterpret-size",
+    "file": "tests/v5/reinterpret-size.bolt",
+    "stdout": "",
+    "error": "equally sized",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-reinterpret-bool",
+    "file": "tests/v5/reinterpret-bool.bolt",
+    "stdout": "",
+    "error": "equally sized",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-reinterpret-class",
+    "file": "tests/v5/reinterpret-class.bolt",
+    "stdout": "",
+    "error": "equally sized",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-interpolation-empty",
+    "file": "tests/v5/interpolation-empty.bolt",
+    "stdout": "",
+    "error": "requires an expression",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-interpolation-closing-brace",
+    "file": "tests/v5/interpolation-closing-brace.bolt",
+    "stdout": "",
+    "error": "unmatched '}'",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-interpolation-unclosed",
+    "file": "tests/v5/interpolation-unclosed.bolt",
+    "stdout": "",
+    "error": "unterminated interpolation",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-interpolation-nonstringable",
+    "file": "tests/v5/interpolation-nonstringable.bolt",
+    "stdout": "",
+    "error": "requires a primitive, enum, or IStringable",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-operator-const-destination",
+    "file": "tests/v5/operator-const-destination.bolt",
+    "stdout": "",
+    "error": "cannot modify a const",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-no-stringable-opt-in",
+    "file": "tests/v5/no-stringable-opt-in.bolt",
+    "stdout": "",
+    "error": "IStringable",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-operator-update-return",
+    "file": "tests/v5/operator-update-return.bolt",
+    "stdout": "",
+    "error": "must return the left operand type",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-interface-reference-replacement",
+    "file": "tests/v5/interface-reference-replacement.bolt",
+    "stdout": "",
+    "error": "interface reference cannot replace",
+    "phase": "compile"
+  },
+  {
+    "name": "v5-primitive-dot",
+    "file": "tests/v5/primitive-dot.bolt",
+    "stdout": "123\n1.5\ntrue\nabc\n"
+  },
+  {
+    "name": "v5-interface-namespaced",
+    "file": "tests/v5/interface-namespaced.bolt",
+    "stdout": "7\nvalue\n"
+  },
+  {
+    "name": "v5-polymorphic-format",
+    "file": "tests/v5/polymorphic-format.bolt",
+    "stdout": "child\nchild\nhello:child\nconcat:child\nappend:child\nparent\nparent\n"
+  },
+  {
+    "name": "v5-runtime-new-features",
+    "file": "tests/v5/runtime-new-features.bolt",
+    "stdout": "Point(7)\n0\n1065353216\nPoint(7)\n0\n1065353216\n"
+  },
+  {
+    "name": "v5-heap-and-field-views",
+    "file": "tests/v5/heap-and-field-views.bolt",
+    "stdout": "5\nCounter(5)\nCounter(1)\n7\n4\n6\n4\n"
+  },
+  {
+    "name": "v5-numeric-limits",
+    "file": "tests/v5/numeric-limits.bolt",
+    "stdout": "-32768,32767\n-32768,32767\n-2147483648,2147483647\n-9223372036854775808,9223372036854775807\n0,255\n0,65535\n0,4294967295\n0,18446744073709551615\ntrue\ntrue\n4286578687\n2139095039\n18442240474082181119\n9218868437227405311\nshort,short\nshort,short\nint,int\nlong,long\nbyte,byte\nushort,ushort\nuint,uint\nulong,ulong\nfloat,float\ndouble,double\nint,uint\n0,1,255\n-9223372036854775808,9223372036854775807\n0,18446744073709551615\n2147483647\n-32768\n18446744073709551615\n-32768,32767\n4286578687\n9218868437227405311\n"
+  }
+]

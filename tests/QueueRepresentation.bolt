@@ -1,0 +1,56 @@
+import System.Collections.Generic
+
+static class Program {
+public:
+    bool Matches(const Queue<int>& queue, int first, int length) {
+        if (queue.Length != length) return false;
+        int[] contents = queue.ToArray();
+        if (contents.Length != length) return false;
+        ulong expectedHash = 0ul;
+        for (int i = 0; i < length; i++) {
+            int expected = first + i;
+            if (contents[i] != expected || queue.ItemAt(i) != expected) return false;
+            expectedHash = Bolt.Runtime.Bits.Add64(Bolt.Runtime.Bits.Multiply64(expectedHash, 16777619ul),
+                                                  Bolt.Runtime.Values.Hash<int>(expected));
+        }
+        return queue.GetHashCode() == expectedHash;
+    }
+
+    void Main() {
+        Queue<int> fresh, drained, mixed;
+        Print(Matches(fresh, 0, 0));
+        // The two buffers hold the same nine live values split
+        // as 0+9, 9+0, and 4+5 (outgoing + incoming), respectively.
+        drained.Enqueue(19);
+        mixed.Enqueue(19);
+        for (int value = 20; value < 29; value++) {
+            fresh.Enqueue(value);
+            drained.Enqueue(value);
+            if (value < 24) mixed.Enqueue(value);
+        }
+        if (drained.Dequeue() != 19 || mixed.Dequeue() != 19) { Print("setup failed"); return; }
+        for (int value = 24; value < 29; value++) mixed.Enqueue(value);
+
+        Print(Matches(fresh, 20, 9));
+        Print(Matches(drained, 20, 9));
+        Print(Matches(mixed, 20, 9));
+        Print(fresh == drained && drained == mixed);
+
+        int[] snapshot = mixed.ToArray();
+        mixed.Dequeue();
+        mixed.Enqueue(29);
+        Print(snapshot[0] == 20 && snapshot[8] == 28);
+        Print(Matches(mixed, 21, 9));
+        Print(!(fresh == mixed));
+
+        // Drain a complete batch. A numeric queue may retain consumed slots.
+        while (drained.Count != 0) drained.Dequeue();
+        drained.Enqueue(100);
+        drained.Enqueue(101);
+        Print(Matches(drained, 100, 2) && !drained.Contains(28));
+        drained.Dequeue();
+        drained.Clear();
+        drained.Enqueue(7);
+        Print(Matches(drained, 7, 1));
+    }
+}

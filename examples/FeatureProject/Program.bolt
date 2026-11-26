@@ -1,0 +1,72 @@
+import Console
+import Math
+import Random
+import System.Collections.Generic
+import Demo.Geometry
+import Demo.Models
+import Demo.Utilities
+
+namespace Demo;
+
+public static class Program
+{
+public:
+    void Main()
+    {
+        Vector2 position = Vector2(10, 5);
+        Console.WriteLine(position.X + ", " + position.Y);
+
+        int value = 3;
+        Operations.Add(value, 4);
+        int* pointer = &value;
+        *pointer += 1;
+        Console.WriteLine(value);
+
+        int[] values = {1, 2, 3};
+        int[] independentCopy = values;
+        independentCopy[0] = 9;
+        Console.WriteLine(values[0]);
+
+        Container<int> box = Container<int>(Operations.Sum<int>(3, 7));
+        Console.WriteLine(box.Value);
+
+        List<Vector2> positions;
+        positions.Add(position);
+        Console.WriteLine(positions[0].X);
+
+        HashSet<string> tags;
+        tags.Add("Bolt");
+        tags.Add("Bolt");
+        Console.WriteLine(tags.Count);
+
+        Dictionary<string, int> scores;
+        scores["Player"] = 25;
+        Console.WriteLine(scores["Player"]);
+
+        Queue<string> jobs;
+        jobs.Enqueue("Compile");
+        Console.WriteLine(jobs.Dequeue());
+
+        Status state = Status.Running;
+        Console.WriteLine(byte(state));
+
+        AppLogger logger;
+        Logger& loggerReference = logger;
+        Logger* loggerPointer = &logger;
+        loggerReference.Write();
+        loggerPointer->Write();
+
+        Console.WriteLine(Math.Floor<double>(4.8));
+        int randomValue = Random.Next<int>(10, 25);
+        Console.WriteLine(randomValue >= 10 && randomValue < 25);
+
+        Operations.ShowTypes<int, string, double>();
+
+        Vector2* heapPosition = new Vector2(2, 3);
+        Console.WriteLine(heapPosition->X);
+        delete heapPosition;
+        heapPosition = null;
+
+        Runtime.Execute("int[] data = {6, 7}; Console.WriteLine(data[0] * data[1]);");
+    }
+}

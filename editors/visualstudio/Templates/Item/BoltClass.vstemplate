@@ -1,0 +1,5 @@
+<VSTemplate Version="3.0.0" Type="Item" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005">
+  <TemplateData><Name>Bolt Class</Name><Description>A public Bolt class.</Description>
+    <Icon>bolt-file.png</Icon><ProjectType>VC</ProjectType><DefaultName>NewClass.bolt</DefaultName></TemplateData>
+  <TemplateContent><ProjectItem ReplaceParameters="true" TargetFileName="$fileinputname$.bolt">Class.bolt</ProjectItem></TemplateContent>
+</VSTemplate>

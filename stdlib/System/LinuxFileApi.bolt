@@ -1,0 +1,33 @@
+#if Linux && (X64 || ARM64 || RISCV64) && BoltStandaloneCore
+namespace Bolt.Runtime.LinuxFile;
+[Header("sys/stat.h"), Native("fstatat")]
+extern "C" int StatusAt(int directory, byte* path, void* status, int flags);
+[Header("sys/stat.h"), Native("fstat")]
+extern "C" int Status(int descriptor, void* status);
+[Header("sys/stat.h"), Native("fchmod")]
+extern "C" int Permissions(int descriptor, uint mode);
+[Header("sys/stat.h"), Native("mkdir")]
+extern "C" int MakeDirectory(byte* name, uint mode);
+[Header("unistd.h"), Native("rmdir")]
+extern "C" int RemoveDirectory(byte* name);
+[Header("unistd.h"), Native("unlink")]
+extern "C" int Unlink(byte* name);
+[Header("stdio.h"), Native("rename")]
+extern "C" int Rename(byte* source, byte* destination);
+[Header("dirent.h"), Native("opendir")]
+extern "C" void* OpenDirectory(byte* name);
+[Header("dirent.h"), Native("readdir")]
+extern "C" byte* NextEntry(void* directory);
+[Header("dirent.h"), Native("closedir")]
+extern "C" int CloseDirectory(void* directory);
+[Header("fcntl.h"), Native("openat")]
+extern "C" int OpenAt(int directory, byte* name, int flags, uint mode);
+[Header("unistd.h"), Native("close")]
+extern "C" int Close(int descriptor);
+[Header("unistd.h"), Native("ftruncate")]
+extern "C" int Truncate(int descriptor, long length);
+// Linux renameat2(RENAME_NOREPLACE), including libc variants without a wrapper.
+[Header("unistd.h"), Native("syscall")]
+extern "C" long RenameNoReplace(long number, int fromDirectory, byte* source, int toDirectory, byte* destination, uint flags);
+
+#endif

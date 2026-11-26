@@ -1,0 +1,32 @@
+import Console
+import System.Collections.Generic
+
+public class Box<T> {
+public:
+    T Value;
+    T Get() { return Value; }
+}
+
+public static class Program {
+public:
+    void Main() {
+        Console.WriteLine("Hello World");
+        Console.WriteLine($"Cross sum {CrossSum(24)}");
+        Box<int> box;
+        box.Value = 42;
+        Console.WriteLine(box.Get());
+        List<int> values;
+        values.Add(10);
+        Console.WriteLine(values.Count);
+        // To try completion, temporarily replace a call with Console. or box.
+    }
+
+    int CrossSum(int n) {
+        int cSum = 0;
+        while (n > 0) {
+            cSum += n % 10;
+            n /= 10;
+        }
+        return cSum;
+    }
+}

@@ -1,0 +1,24 @@
+
+class N:IStringable {
+public:int Value;N(int v){Value=v;}string ToString(){return (string)Value;}
+static N operator +(N a,N b){return N(a.Value+b.Value);}
+static N operator -(N a,N b){return N(a.Value-b.Value);}
+static N operator *(N a,N b){return N(a.Value*b.Value);}
+static N operator /(N a,N b){return N(a.Value/b.Value);}
+static N operator %(N a,N b){return N(a.Value%b.Value);}
+static N operator +(N a){return N(a.Value);}
+static N operator -(N a){return N(-a.Value);}
+static bool operator !(N a){return a.Value==0;}
+static bool operator ==(N a,N b){return a.Value==b.Value;}
+static bool operator !=(N a,N b){return a.Value!=b.Value;}
+static bool operator <(N a,N b){return a.Value<b.Value;}
+static bool operator >(N a,N b){return a.Value>b.Value;}
+static bool operator <=(N a,N b){return a.Value<=b.Value;}
+static bool operator >=(N a,N b){return a.Value>=b.Value;}
+static N operator ++(N a){return N(a.Value+1);}
+static N operator --(N a){return N(a.Value-1);}
+}
+static class Program {public: void Main(){
+N a=N(7);N b=N(3);Print(a+b);Print(a-b);Print(a*b);Print(a/b);Print(a%b);Print(+a);Print(-a);Print(!N(0));Print(a==b);Print(a!=b);Print(a<b);Print(a>b);Print(a<=b);Print(a>=b);
+a+=b;Print(a);a-=b;Print(a);a*=b;Print(a);a/=b;Print(a);a%=b;Print(a);Print(++a);Print(a++);Print(a);Print(--a);Print(a--);Print(a);
+}}

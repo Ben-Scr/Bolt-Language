@@ -1,0 +1,54 @@
+import System
+namespace System.Security.Cryptography;
+
+// RFC 5869 HKDF using HMAC-SHA-256 or HMAC-SHA-512.
+public static class HKDF
+{
+private:
+    byte[] ExtractCore(const byte[]& salt, const byte[]& inputKeyMaterial, bool sha512)
+    {
+        int hashLength = sha512 ? 64 : 32;
+        byte[] actualSalt = salt.Length == 0 ? new byte[hashLength] : CryptoPrimitives.Copy(salt);
+        return sha512 ? HMAC.SHA512(actualSalt, inputKeyMaterial) : HMAC.SHA256(actualSalt, inputKeyMaterial);
+    }
+
+    byte[] ExpandCore(const byte[]& pseudoRandomKey, const byte[]& info, int length, bool sha512)
+    {
+        int hashLength = sha512 ? 64 : 32;
+        if (length < 0 || length > 255 * hashLength)
+            throw ArgumentOutOfRangeException("HKDF output length exceeds RFC 5869 limits.");
+        if (length == 0) return new byte[0];
+
+        byte[] output = new byte[length];
+        byte[] previous = new byte[0];
+        int outputOffset = 0;
+        int blocks = (length + hashLength - 1) / hashLength;
+        for (int block = 1; block <= blocks; block++)
+        {
+            byte[] input = new byte[previous.Length + info.Length + 1];
+            int p = 0;
+            for (int i = 0; i < previous.Length; i++) input[p++] = previous[i];
+            for (int i = 0; i < info.Length; i++) input[p++] = info[i];
+            input[p] = (byte)block;
+            previous = sha512 ? HMAC.SHA512(pseudoRandomKey, input) : HMAC.SHA256(pseudoRandomKey, input);
+
+            int remaining = length - outputOffset;
+            int take = remaining < hashLength ? remaining : hashLength;
+            for (int i = 0; i < take; i++) output[outputOffset + i] = previous[i];
+            outputOffset += take;
+        }
+        return output;
+    }
+
+public:
+    byte[] ExtractSHA256(const byte[]& salt, const byte[]& inputKeyMaterial) { return ExtractCore(salt, inputKeyMaterial, false); }
+    byte[] ExtractSHA512(const byte[]& salt, const byte[]& inputKeyMaterial) { return ExtractCore(salt, inputKeyMaterial, true); }
+    byte[] ExpandSHA256(const byte[]& pseudoRandomKey, const byte[]& info, int length) { return ExpandCore(pseudoRandomKey, info, length, false); }
+    byte[] ExpandSHA512(const byte[]& pseudoRandomKey, const byte[]& info, int length) { return ExpandCore(pseudoRandomKey, info, length, true); }
+
+    byte[] SHA256(const byte[]& inputKeyMaterial, const byte[]& salt, const byte[]& info, int length)
+    { return ExpandSHA256(ExtractSHA256(salt, inputKeyMaterial), info, length); }
+
+    byte[] SHA512(const byte[]& inputKeyMaterial, const byte[]& salt, const byte[]& info, int length)
+    { return ExpandSHA512(ExtractSHA512(salt, inputKeyMaterial), info, length); }
+}

@@ -1,0 +1,33 @@
+#if BoltStandaloneCore || !BoltCppCompatibility
+namespace Bolt.Runtime;
+
+static class TypedMemory {
+private:
+    // Lowering passes the existing read-only value slot to the copy operation.
+    static byte* Address<T>(const T& value) { return null; }
+public:
+#ifdef BoltStandaloneCore
+    // Borrow contiguous storage for a synchronous read. Array indexing checks the starting offset.
+    byte* ArrayData(const byte[]& bytes, int offset) { return Address<byte>(bytes[offset]); }
+    // Reading immutable text does not detach shared storage or invalidate its
+    // cached hash. The empty string has no backing allocation.
+    byte* TextData(const string& value, ulong& length) {
+        return StandaloneCore.br_string_data(Address<string>(value), &length);
+    }
+#endif
+    void InvalidDelete() { throw System.InvalidOperationException("delete requires a live allocation created with new; an arena allocation is released by Reset or Dispose."); }
+    T* Copy<T>(const T& value) {
+        byte* ctx=ExecutionMemory.Context(), descriptor=ExecutionMemory.Descriptor<T>();
+#ifdef BoltStandaloneCore
+        byte* result=StandaloneCore.br_new(ctx,null,descriptor);
+        try { StandaloneCore.br_copy(ctx,null,descriptor,result,Address<T>(value)); }
+        catch { StandaloneCore.AbandonCopy(ctx,result); throw; }
+#else
+        byte* result=ExecutionMemory.Allocate(ctx,descriptor);
+        try { ExecutionMemory.Copy(ctx,descriptor,result,Address<T>(value)); }
+        catch { ExecutionMemory.Abandon(ctx,descriptor,result); throw; }
+#endif
+        return (T*)result;
+    }
+}
+#endif

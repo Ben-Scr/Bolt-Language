@@ -1,0 +1,5 @@
+import System.Collections.Generic
+class Key {public:int Id; Key(int id){Id=id;} }
+static class Program { public: void Main() {
+HashSet<Key> s; Console.WriteLine(s.Add(Key(1))); Console.WriteLine(s.Add(Key(1))); Console.WriteLine(s.Contains(Key(1))); Console.WriteLine(s.Remove(Key(1))); Console.WriteLine(s.Count);
+} }

@@ -1,0 +1,149 @@
+import System
+namespace Bolt.Runtime;
+
+static class LocalStorage {
+public:
+    ThreadHandle CreateKey() {
+        ThreadHandle result = ThreadHandles.Make(ThreadResourceKind.Word);
+#ifdef Windows
+        uint key = Bolt.Runtime.Tls.Allocate();
+        bool failed = key == uint.MaxValue;
+#else
+#if MacOS || IOS
+        ulong key = 0ul;
+#else
+        uint key = 0u;
+#endif
+        bool failed = Bolt.Runtime.Tls.Allocate(&key, null) != 0;
+#endif
+        if (failed) throw InvalidOperationException("Could not allocate a thread-local key.");
+        result.Pointer->NativeId = (ulong)key;
+        result.Pointer->Kind = ThreadResourceKind.LocalKey;
+        return result;
+    }
+    void* Get(ulong key) {
+#if MacOS || IOS
+        return Bolt.Runtime.Tls.Get(key);
+#else
+        return Bolt.Runtime.Tls.Get((uint)key);
+#endif
+    }
+    bool Set(ulong key, void* value) {
+#ifdef Windows
+        return Bolt.Runtime.Tls.Set((uint)key, value) != 0;
+#elif MacOS || IOS
+        return Bolt.Runtime.Tls.Set(key, value) == 0;
+#else
+        return Bolt.Runtime.Tls.Set((uint)key, value) == 0;
+#endif
+    }
+}
+
+static class ThreadHandles {
+public:
+    ThreadHandle Make(ThreadResourceKind kind) {
+        ThreadHandle h;h.Pointer=ThreadKernel.Create(kind);
+        if(h.Pointer==null)throw OutOfMemoryException("Cannot initialize thread storage.");
+        return h;
+    }
+    void Timeout(int ms) {if(ms < -1)throw ArgumentOutOfRangeException("Timeout must be -1 or non-negative.");}
+    int Remaining(int ms,long deadline) {
+        if(ms<=0)return ms;
+        long ticks=deadline-Clock.MonotonicTicks();
+        return ticks<=0l ? 0 : (int)((ticks+9999l)/10000l);
+    }
+    bool Wait(ThreadResource* p,int ms) {
+        Timeout(ms);
+        long deadline=ms<=0 ? 0l : Clock.MonotonicTicks()+(long)ms*10000l;
+        ThreadKernel.Lock(p);
+        try{
+            while(AtomicOps.Add(p->Published,0ul)==0ul){
+                int remaining=Remaining(ms,deadline);
+                if(remaining==0)return false;
+                if(ThreadKernel.Wait(p,p,remaining)<0)throw InvalidOperationException("Thread wait failed.");
+            }
+            return true;
+        }finally{ThreadKernel.Unlock(p);}
+    }
+    System.Exception* Fault(ThreadResource* p) {
+#if BoltCppCompatibility || Android || IOS || Web
+        return ExecutionMemory.ExceptionBase(p->FaultType,p->Fault);
+#else
+        return (System.Exception*)p->Fault;
+#endif
+    }
+    void SaveException(ThreadResource* p,System.Exception& error,bool canceled) {
+#if BoltCppCompatibility || Android || IOS || Web
+        byte* type=ExecutionMemory.ExceptionDescriptor(error);
+        byte* data=ThreadKernel.CopyValue(ExecutionMemory.Context(),type,ExecutionMemory.ExceptionAddress(error));
+#else
+        byte* type=*((byte**)&error);
+        byte* data=ThreadKernel.CopyValue(ExecutionMemory.Context(),type,(byte*)&error);
+#endif
+        ThreadKernel.DropValue(p->FaultType,p->Fault);p->Fault=data;p->FaultType=type;p->Failed=true;p->Canceled=canceled;
+    }
+}
+public sealed class AtomicWord {
+private:
+    ThreadHandle cell;
+public:
+    AtomicWord(ulong value=0ul){cell=ThreadHandles.Make(ThreadResourceKind.Word);cell.Pointer->Word=value;}
+    [ReadOnly] ulong Load(){return AtomicOps.Add(cell.Pointer->Word,0ul);}
+    void Store(ulong value){Exchange(value);}
+    ulong Exchange(ulong value){
+        ulong expected=Load();
+        while(true){
+            ulong previous=AtomicOps.Cas(cell.Pointer->Word,expected,value);
+            if(previous==expected)return previous;
+            expected=previous;
+        }
+        return 0ul;
+    }
+    bool CompareExchange(ulong& expected,ulong desired){
+        ulong old=AtomicOps.Cas(cell.Pointer->Word,expected,desired);
+        bool exchanged=old==expected;expected=old;return exchanged;
+    }
+    [ReadOnly] bool IsLockFree => true;
+}
+
+[Native("bolt::platform::ThreadCallback")]
+public static class ThreadCallback {
+public:
+    static void* Capture<T>(const T& job);
+    static void* Entry<T>();
+    static void Cancel(void* capture);
+}
+public sealed class Worker {
+private:
+    ThreadHandle lease;
+    [ReadOnly] ThreadResource* State(){
+        if(lease.Pointer==null)throw InvalidOperationException("Thread has not been started.");
+        return lease.Pointer->Target;
+    }
+public:
+    Worker(){}
+    static Worker Start<T>(const T& job){
+        Worker result;result.lease=ThreadHandles.Make(ThreadResourceKind.JoinLease);
+        ThreadResource* capture=(ThreadResource*)ThreadCallback.Capture<T>(job);
+        if(!ThreadKernel.Launch(ExecutionMemory.Context(),capture,ThreadCallback.Entry<T>())){
+            ThreadCallback.Cancel((void*)capture);throw InvalidOperationException("Operating system could not create a thread.");
+        }
+        result.lease.Pointer->Target=capture;
+        ThreadKernel.Lock(capture);
+        while(AtomicOps.Add(capture->Word,0ul)==0ul)ThreadKernel.Wait(capture,capture,-1);
+        ThreadKernel.Unlock(capture);
+        return result;
+    }
+    bool Join(int milliseconds=-1){
+        if(Id==CurrentId() && !IsCompleted)throw InvalidOperationException("A thread cannot join itself.");
+        if(!ThreadHandles.Wait(State(),milliseconds))return false;
+        ThreadKernel.Join(State());
+        if(IsFaulted)throw InvalidOperationException("Worker failed: "+Error);
+        return true;
+    }
+    [ReadOnly] bool IsCompleted => ThreadHandles.Wait(State(),0);
+    [ReadOnly] bool IsFaulted => IsCompleted && State()->Failed;
+    [ReadOnly] ulong Id => AtomicOps.Add(State()->Word,0ul);
+    [ReadOnly] string Error {get{if(!IsFaulted)return "";if(State()->Fault==null)return "Could not retain the worker exception.";return ThreadHandles.Fault(State())->Message;}}
+    static ulong CurrentId(){return ThreadKernel.Identity();}
+}

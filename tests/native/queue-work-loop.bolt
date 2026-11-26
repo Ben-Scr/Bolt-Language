@@ -1,0 +1,66 @@
+import System
+import System.Collections.Generic
+
+static class Program {
+public:
+    void Prime(Queue<int>& q) {
+        for (int i=1; i<=8; i++) q.Enqueue(i);
+        int first=q.Dequeue();
+        q.Reserve(9);
+        q.Enqueue(first);
+    }
+    int Main() {
+        Queue<int> a(9);
+        Prime(a);
+        QueueEnumerator<int> iter=a.GetEnumerator();
+        bool caught=false;
+        try {
+            for (int i=0; i<6; i++) {
+                int item=a.Dequeue();
+                int next=item+10/(3-i);
+                a.Enqueue(next);
+            }
+        } catch (DivideByZeroException& e) { caught=true; }
+        if (!caught || a.Count!=7 || a.Peek()!=6 || a.ItemAt(4)!=5 || a.ItemAt(6)!=14) return 1;
+        caught=false;
+        try { iter.MoveNext(); } catch (InvalidOperationException& e) { caught=true; }
+        if (!caught) return 2;
+
+        Queue<int> b(9);
+        Prime(b);
+        ulong total=ulong.MaxValue-5ul;
+        caught=false;
+        try {
+            for (int i=0; i<7; i++) {
+                int item=b.Dequeue();
+                b.Enqueue(item);
+                total+=(ulong)item;
+            }
+        } catch (OverflowException& e) { caught=true; }
+        if (!caught || total!=ulong.MaxValue || b.Count!=8 || b.Peek()!=5 || b.ItemAt(7)!=4) return 3;
+
+        int limit=4;
+        for (int i=-3; i<limit; i++) {
+            int item=b.Dequeue();
+            b.Enqueue(item+i);
+        }
+        if (b.Peek()!=4 || b.ItemAt(1)!=2 || b.ItemAt(7)!=6) return 4;
+        for (int i=0; i<limit; i++) {
+            int item=b.Dequeue();
+            b.Enqueue(item);
+            limit=0;
+        }
+        if (b.Peek()!=2 || b.ItemAt(7)!=4) return 5;
+
+        limit=6;
+        int& alias=limit;
+        for (int i=0; i<limit; i++) {
+            int item=b.Dequeue();
+            b.Enqueue(item);
+            alias=0;
+        }
+        if (b.Peek()!=4 || b.ItemAt(7)!=2) return 6;
+        Print("queue work loop OK");
+        return 0;
+    }
+}

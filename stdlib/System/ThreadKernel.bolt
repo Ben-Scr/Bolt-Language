@@ -1,0 +1,376 @@
+import System
+namespace Bolt.Runtime;
+
+// Inline storage for the target mutex and condition-variable ABIs.
+struct LockStorage { public: ulong A,B,C,D,E,F,G,H; }
+enum ThreadResourceKind { Word, Mutex, Condition, Guard, Completion, JoinLease, Exception, LocalKey }
+struct ThreadResource {
+public:
+    // Shared layout with the compiler-generated C entry trampoline.
+    byte* Context, Result;
+    byte** Arguments;
+    void* Body;
+    ulong References, Word, Count;
+    ulong Published;
+    ThreadResourceKind Kind;
+    bool Producer, Joining, Joined, Failed, Canceled, HasResult;
+    byte* ResultType, Fault, FaultType;
+    byte** Types;
+    ThreadResource* Target, Next;
+    // Pending captures belong to the completion until publication. Next is
+    // available for the pending list until a capture enters the join registry.
+    ThreadResource* FirstCallback, LastCallback;
+    void* CallbackEntry;
+    void* Thread;
+    ulong NativeId;
+    LockStorage Gate, Changed;
+}
+struct ThreadHandle { public: ThreadResource* Pointer; }
+
+[Native("bolt::platform::ExecutionMemory")]
+static class ExecutionMemory {
+public:
+    byte* Context();
+    byte* Child(byte* parent);
+    byte* Activate(byte* context);
+    void Dispose(byte* context);
+    byte* Registry(byte* context);
+    ulong Size(byte* descriptor);
+    void Copy(byte* context,byte* descriptor,byte* dest,byte* source);
+    void Drop(byte* descriptor,byte* value);
+#if !BoltStandaloneCore && !BoltCppCompatibility
+    byte* Allocate(byte* context,byte* descriptor);
+    void Abandon(byte* context,byte* descriptor,byte* value);
+#endif
+    void OutOfMemory(byte* context);
+    byte* Descriptor<T>();
+    void RunEntry(ThreadResource* state);
+#if BoltCppCompatibility || Android || IOS || Web
+    byte* ExceptionDescriptor(System.Exception& error);
+    byte* ExceptionAddress(System.Exception& error);
+    System.Exception* ExceptionBase(byte* type,byte* value);
+    void Invoke(void* body, ThreadResource* state, byte* capture);
+    void* Entry();
+#endif
+}
+
+// No managed temporaries in these routines. They can run during value cleanup,
+// including when the caller is unwinding an exception.
+static class ThreadKernel {
+public:
+    byte* Allocate(ulong bytes) {
+#ifdef Windows
+        return (byte*)Bolt.Runtime.Windows.HeapAlloc(Bolt.Runtime.Windows.GetProcessHeap(),8u,bytes);
+#else
+        return Bolt.Runtime.Threading.Calloc(1ul,bytes);
+#endif
+    }
+    void Free(byte* data) {
+        if(data==null)return;
+#ifdef Windows
+        Bolt.Runtime.Windows.HeapFree(Bolt.Runtime.Windows.GetProcessHeap(),0u,data);
+#else
+        Bolt.Runtime.Threading.Free(data);
+#endif
+    }
+    ulong Identity() { return (ulong)Bolt.Runtime.Threading.Self(); }
+    bool InitGate(void* gate) {
+#ifdef Windows
+        Bolt.Runtime.Threading.MutexInit(gate); return true;
+#else
+        return Bolt.Runtime.Threading.MutexInit(gate,null)==0;
+#endif
+    }
+    bool InitCondition(void* changed) {
+#ifdef Windows
+        Bolt.Runtime.Threading.ConditionInit(changed); return true;
+#else
+#if MacOS || IOS
+        return Bolt.Runtime.Threading.ConditionInit(changed,null)==0;
+#else
+        ulong attributes=0ul;
+        if(Bolt.Runtime.Threading.ConditionAttributesInit((void*)&attributes)!=0)return false;
+#ifdef FreeBSD
+        int clockId=4;
+#else
+        int clockId=1;
+#endif
+        int status=Bolt.Runtime.Threading.ConditionAttributesClock((void*)&attributes,clockId);
+        if(status==0)status=Bolt.Runtime.Threading.ConditionInit(changed,(void*)&attributes);
+        Bolt.Runtime.Threading.ConditionAttributesDestroy((void*)&attributes);
+        return status==0;
+#endif
+#endif
+    }
+    ThreadResource* Create(ThreadResourceKind kind) {
+        ThreadResource* p=(ThreadResource*)Allocate((ulong)sizeof(ThreadResource));
+        if(p==null)return null;
+        p->References=1ul; p->Kind=kind;
+        if((kind==ThreadResourceKind.Mutex || kind==ThreadResourceKind.Completion) && !InitGate((void*)&p->Gate)){Free((byte*)p);return null;}
+        if((kind==ThreadResourceKind.Condition || kind==ThreadResourceKind.Completion) && !InitCondition((void*)&p->Changed)){
+#ifndef Windows
+            if(kind==ThreadResourceKind.Completion)Bolt.Runtime.Threading.MutexDestroy((void*)&p->Gate);
+#endif
+            Free((byte*)p);return null;
+        }
+        return p;
+    }
+    void Retain(ThreadResource* p) { if(p!=null)AtomicOps.Add(p->References,1ul); }
+    void Lock(ThreadResource* p) { Bolt.Runtime.Threading.MutexLock((void*)&p->Gate); }
+    void Unlock(ThreadResource* p) { Bolt.Runtime.Threading.MutexUnlock((void*)&p->Gate); }
+    void Wake(ThreadResource* p) { Bolt.Runtime.Threading.NotifyAll((void*)&p->Changed); }
+    int Wait(ThreadResource* condition,ThreadResource* mutex,int milliseconds) {
+#ifdef Windows
+        uint duration=milliseconds<0 ? uint.MaxValue : (uint)milliseconds;
+        if(Bolt.Runtime.Threading.ConditionWait((void*)&condition->Changed,(void*)&mutex->Gate,duration,0u)!=0)return 1;
+        return Bolt.Runtime.Threading.LastError()==1460u ? 0 : -1;
+#else
+        if(milliseconds<0)return Bolt.Runtime.Threading.ConditionWait((void*)&condition->Changed,(void*)&mutex->Gate)==0 ? 1 : -1;
+        long seconds=(long)(milliseconds/1000), nanos=(long)(milliseconds%1000)*1000000l;
+        Bolt.Runtime.Threading.TimeSample sample;
+#if MacOS || IOS
+        sample.Seconds=seconds; sample.Nanoseconds=nanos;
+        int rc=Bolt.Runtime.Threading.ConditionRelativeWait((void*)&condition->Changed,(void*)&mutex->Gate,(void*)&sample);
+#else
+#ifdef FreeBSD
+        int clockId=4;
+#else
+        int clockId=1;
+#endif
+        if(Bolt.Runtime.Threading.Clock(clockId,(void*)&sample)!=0)return -1;
+        nanos+=sample.Nanoseconds;
+#if Android && (ARM32 || X86)
+        sample.Seconds+=(int)(seconds+nanos/1000000000l);sample.Nanoseconds=(int)(nanos%1000000000l);
+#else
+        sample.Seconds+=seconds+nanos/1000000000l;sample.Nanoseconds=nanos%1000000000l;
+#endif
+        int rc=Bolt.Runtime.Threading.ConditionTimedWait((void*)&condition->Changed,(void*)&mutex->Gate,(void*)&sample);
+#endif
+#if MacOS || IOS || FreeBSD
+        return rc==0 ? 1 : rc==60 ? 0 : -1;
+#elif Web
+        return rc==0 ? 1 : rc==73 ? 0 : -1;
+#else
+        return rc==0 ? 1 : rc==110 ? 0 : -1;
+#endif
+#endif
+    }
+    void DropValue(byte* type,byte* value) {
+        if(value!=null){ExecutionMemory.Drop(type,value);Free(value);}
+    }
+    void DropArguments(ThreadResource* p) {
+        if(p->Arguments!=null && p->Types!=null)
+            for(ulong i=0ul;i<p->Count;i++)DropValue(p->Types[i],p->Arguments[i]);
+        Free((byte*)p->Arguments); Free((byte*)p->Types);
+        p->Arguments=null;p->Types=null;
+    }
+    // Exactly one caller consumes the OS join token. Concurrent joins wait
+    // for that caller, including the root registry during module finalization.
+    void Join(ThreadResource* p) {
+        Lock(p);
+        while(p->Joining && !p->Joined)Wait(p,p,-1);
+        if(p->Joined){Unlock(p);return;}
+        p->Joining=true;Unlock(p);
+#ifdef Windows
+        if(Bolt.Runtime.Threading.Join(p->Thread,uint.MaxValue)!=0u)Fatal();
+        Bolt.Runtime.Threading.Close(p->Thread);
+#else
+        if(Bolt.Runtime.Threading.Join(p->NativeId,null)!=0)Fatal();
+#endif
+        Lock(p);p->Joined=true;Wake(p);Unlock(p);
+    }
+    void Fatal() {
+#ifdef Windows
+        Bolt.Runtime.Threading.Terminate(255u);
+#else
+        Bolt.Runtime.Threading.Abort();
+#endif
+    }
+    void Release(ThreadResource* p) {
+        if(p==null || AtomicOps.Add(p->References,ulong.MaxValue)!=1ul)return;
+        if(p->Kind==ThreadResourceKind.LocalKey){
+#if MacOS || IOS
+            Bolt.Runtime.Tls.Release(p->NativeId);
+#else
+            Bolt.Runtime.Tls.Release((uint)p->NativeId);
+#endif
+        }
+        while(p->FirstCallback!=null){
+            ThreadResource* callback=p->FirstCallback;
+            p->FirstCallback=callback->Next;
+            Release(callback);
+        }
+        if(p->Kind==ThreadResourceKind.Guard && p->Target!=null && p->Word!=0ul){
+            if(p->Word!=Identity())Fatal();
+            AtomicOps.Cas(p->Target->Word,p->Word,0ul); Unlock(p->Target);
+        }
+        if(p->Kind==ThreadResourceKind.JoinLease && p->Target!=null && (AtomicOps.Add(p->Target->Published,0ul)!=0ul || AtomicOps.Add(p->Target->Word,0ul)!=Identity())){
+            Join(p->Target);
+        }
+        if(p->Target!=null)Release(p->Target);
+        DropArguments(p); DropValue(p->ResultType,p->Result); DropValue(p->FaultType,p->Fault);
+        if(p->Context!=null)ExecutionMemory.Dispose(p->Context);
+#ifndef Windows
+        if(p->Kind==ThreadResourceKind.Mutex || p->Kind==ThreadResourceKind.Completion)Bolt.Runtime.Threading.MutexDestroy((void*)&p->Gate);
+        if(p->Kind==ThreadResourceKind.Condition || p->Kind==ThreadResourceKind.Completion)Bolt.Runtime.Threading.ConditionDestroy((void*)&p->Changed);
+#endif
+        Free((byte*)p);
+    }
+    byte* CopyValue(byte* ctx,byte* type,byte* source) {
+        byte* value=Allocate(ExecutionMemory.Size(type));
+        if(value==null){ExecutionMemory.OutOfMemory(ctx);return null;}
+#if BoltCppCompatibility || Android || IOS || Web
+        try { ExecutionMemory.Copy(ctx,type,value,source); }
+        catch { Free(value);throw; }
+#else
+        ExecutionMemory.Copy(ctx,type,value,source);
+        if(*(int*)ctx!=0){DropValue(type,value);return null;}
+#endif
+        return value;
+    }
+#if !(BoltCppCompatibility || Android || IOS || Web)
+    ThreadResource* Prepare(byte* ctx,byte* resultType,void* body,byte** types,byte** values,ulong count) {
+        ThreadResource* p=Create(ThreadResourceKind.Completion);
+        if(p==null){ExecutionMemory.OutOfMemory(ctx);return null;}
+        p->Context=ExecutionMemory.Child(ctx);p->Count=count;p->Body=body;p->ResultType=resultType;
+        if(resultType!=null)p->Result=Allocate(ExecutionMemory.Size(resultType));
+        if(count!=0ul){p->Arguments=(byte**)Allocate(count*(ulong)sizeof(byte*));p->Types=(byte**)Allocate(count*(ulong)sizeof(byte*));}
+        if(p->Context==null || (resultType!=null && p->Result==null) || (count!=0ul && (p->Arguments==null || p->Types==null))){
+            Release(p);ExecutionMemory.OutOfMemory(ctx);return null;
+        }
+        for(ulong i=0ul;i<count;i++){
+            p->Types[i]=types[i];p->Arguments[i]=CopyValue(ctx,types[i],values[i]);
+            if(*(int*)ctx!=0){Release(p);return null;}
+        }
+        return p;
+    }
+#endif
+    void Dispatch(ThreadResource* completion, ThreadResource* callback) {
+#if BoltCppCompatibility || Android || IOS || Web
+        // A mobile entry can publish a pending task created by an earlier entry.
+        callback->Context=ExecutionMemory.Context();
+#endif
+        // A queued callback borrows its task. Once it can run independently
+        // it owns a reference until the callback finishes.
+        Retain(completion);
+        callback->Target=completion;
+        if(Start(callback->Context,callback,callback->CallbackEntry))Release(callback);
+        else ExecutionMemory.RunEntry(callback);
+    }
+    void Register(ThreadResource* completion, ThreadResource* callback, void* entry) {
+        callback->CallbackEntry=entry;
+        Sweep(callback->Context,false);
+        Lock(completion);
+        if(completion->Published==0ul){
+            if(completion->LastCallback==null)completion->FirstCallback=callback;
+            else completion->LastCallback->Next=callback;
+            completion->LastCallback=callback;
+            Unlock(completion);
+            return;
+        }
+        Unlock(completion);
+        Dispatch(completion,callback);
+    }
+    void Publish(ThreadResource* p) {
+        Lock(p);
+        ThreadResource* callbacks=p->FirstCallback;
+        p->FirstCallback=null;p->LastCallback=null;
+        AtomicOps.Cas(p->Published,0ul,1ul);
+        Wake(p);Unlock(p);
+        while(callbacks!=null){
+            ThreadResource* next=callbacks->Next;
+            callbacks->Next=null;
+            Dispatch(p,callbacks);
+            callbacks=next;
+        }
+    }
+    void Finish(ThreadResource* p) {
+        DropArguments(p);
+        if(p->CallbackEntry!=null){Release(p->Target);p->Target=null;}
+        p->HasResult=p->Result!=null;
+        Publish(p);
+    }
+#if BoltCppCompatibility || Android || IOS || Web
+    ThreadResource* Capture(byte* type,byte* value,void* body) {
+        ThreadResource* p=Create(ThreadResourceKind.Completion);
+        if(p==null)throw OutOfMemoryException("Cannot allocate a worker.");
+        p->Body=body;p->Context=ExecutionMemory.Context();
+        try {
+            p->Types=(byte**)Allocate((ulong)sizeof(byte*));
+            p->Arguments=(byte**)Allocate((ulong)sizeof(byte*));
+            if(p->Types==null || p->Arguments==null)throw OutOfMemoryException("Cannot allocate a worker capture.");
+            p->Count=1ul;p->Types[0]=type;
+            p->Arguments[0]=CopyValue(ExecutionMemory.Context(),type,value);
+        } catch { Release(p);throw; }
+        return p;
+    }
+    void StoreResult(ThreadResource* p,byte* type,byte* value) {
+        p->Result=CopyValue(ExecutionMemory.Context(),type,value);p->ResultType=type;
+    }
+    void RecordFailure(ThreadResource* p,System.Exception& error,bool canceled) {
+        p->Failed=true;p->Canceled=canceled;
+        try { ThreadHandles.SaveException(p,error,canceled); }
+        catch { /* A missing saved exception is reported by Observe. */ }
+    }
+    void Run(ThreadResource* p) {
+        Lock(p);AtomicOps.Add(p->Word,Identity());Wake(p);Unlock(p);
+        try {
+            ExecutionMemory.Invoke(p->Body,p,p->Arguments[0]);
+        } catch(System.OperationCanceledException& error) {
+            RecordFailure(p,error,true);
+        } catch(System.Exception& error) {
+            RecordFailure(p,error,false);
+        } catch {
+            p->Failed=true;
+        } finally { Finish(p);Release(p); }
+    }
+    void Schedule(ThreadResource* p) {
+        if(!Launch(ExecutionMemory.Context(),p,ExecutionMemory.Entry())){
+            Release(p);throw InvalidOperationException("Operating system could not create a thread.");
+        }
+    }
+#endif
+    void RegistryLock(ulong* gate){while(AtomicOps.Cas(*gate,0ul,1ul)!=0ul)Bolt.Runtime.Threading.RegistryYield();}
+    void Sweep(byte* ctx,bool wait) {
+        byte* registry=ExecutionMemory.Registry(ctx);
+        ThreadResource** head=(ThreadResource**)&registry[8];
+        while(true){
+            RegistryLock((ulong*)registry);
+            ThreadResource** link=head;
+            ThreadResource* retired=null;
+            while(*link!=null){
+                ThreadResource* p=*link;
+                if(wait || AtomicOps.Add(p->Published,0ul)!=0ul){
+                    *link=p->Next;p->Next=retired;retired=p;
+                }else link=&p->Next;
+            }
+            AtomicOps.Cas(*(ulong*)registry,1ul,0ul);
+            if(retired==null)return;
+            while(retired!=null){
+                ThreadResource* p=retired;retired=p->Next;Join(p);Release(p);
+            }
+            if(!wait)return;
+        }
+    }
+    bool Launch(byte* ctx,ThreadResource* p,void* entry) {
+        Sweep(ctx,false);
+        return Start(ctx,p,entry);
+    }
+    // Publication runs on the finishing worker, which must never sweep and
+    // join its own registry entry while starting a continuation.
+    bool Start(byte* ctx,ThreadResource* p,void* entry) {
+        Retain(p);
+#ifdef Windows
+        p->Thread=Bolt.Runtime.Threading.Create(null,0ul,entry,(void*)p,0u,null);
+        bool started=p->Thread!=null;
+#else
+        bool started=Bolt.Runtime.Threading.Create((void*)&p->NativeId,null,entry,(void*)p)==0;
+#endif
+        if(!started){Release(p);return false;}
+        byte* registry=ExecutionMemory.Registry(ctx);
+        RegistryLock((ulong*)registry);
+        ThreadResource** head=(ThreadResource**)&registry[8];
+        Retain(p);p->Next=*head;*head=p;
+        AtomicOps.Cas(*(ulong*)registry,1ul,0ul);return true;
+    }
+}

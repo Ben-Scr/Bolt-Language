@@ -1,0 +1,31 @@
+import System.Collections.Generic
+
+int& ChangeInput(string& input, int& result) { input = "invalid"; return result; }
+static class Program {
+public:
+    void Main() {
+        Print(short.Parse("-128"));
+        Print(short.Parse("32767"));
+        Print(int.Parse("-2147483648"));
+        Print(long.Parse("-9223372036854775808"));
+        Print(byte.Parse("255"));
+        Print(ushort.Parse("65535"));
+        Print(uint.Parse("4294967295"));
+        Print(ulong.Parse("18446744073709551615"));
+        Print(float.Parse("+1.25e2"));
+        Print(double.Parse("-.5"));
+        var number = int.Parse("42");
+        Print(number);
+        string input = "41";
+        int result = 7;
+        Print(int.TryParse(input, ChangeInput(input, result)));
+        Print(result);
+        Print(input);
+        Print(int.TryParse("42abc", result));
+        Print(result);
+        List<int> values;
+        values.Add(0);
+        Print(int.TryParse("+23", values[0]));
+        Print(values[0]);
+    }
+}

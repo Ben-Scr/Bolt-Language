@@ -1,0 +1,56 @@
+namespace Bolt.Runtime;
+
+#ifdef Windows
+private sealed class WindowsCounterFrequency
+{
+public:
+    long Value;
+    WindowsCounterFrequency() { Value = Query(); }
+    static long Query()
+    {
+        long frequency = 0l;
+        if (Bolt.Runtime.Windows.PerformanceFrequency((Bolt.Runtime.Windows.LargeInteger*)&frequency) == 0) return 0l;
+        return frequency;
+    }
+}
+#endif
+
+public static class Clock
+{
+#ifdef Windows
+private:
+    // QueryPerformanceFrequency is constant from boot. Module initialization
+    // completes before worker threads can sample this read-only value.
+    WindowsCounterFrequency counterFrequency;
+#endif
+public:
+    long MonotonicTicks()
+    {
+#ifdef Windows
+        long count = 0l, frequency = counterFrequency.Value;
+        if (frequency <= 0l) frequency = WindowsCounterFrequency.Query();
+        if (frequency <= 0l || Bolt.Runtime.Windows.PerformanceCounter((Bolt.Runtime.Windows.LargeInteger*)&count) == 0)
+            Failure.InvalidOperation("Cannot read the Windows performance counter.");
+        if (frequency == 10000000l) return count;
+        // Scale the remainder separately so a long-running system keeps full precision.
+        return (count / frequency) * 10000000l + (count % frequency) * 10000000l / frequency;
+#endif
+#ifdef Linux
+        return LinuxDateTime.MonotonicTicks();
+#endif
+#if MacOS || FreeBSD
+        return MacOSDateTime.MonotonicTicks();
+#endif
+#if Web || Android || IOS
+        Bolt.Runtime.Threading.TimeSample sample;
+#ifdef IOS
+        int monotonic = 6;
+#else
+        int monotonic = 1;
+#endif
+        if (Bolt.Runtime.Threading.Clock(monotonic, &sample) != 0)
+            Failure.InvalidOperation("Cannot read the monotonic clock.");
+        return (long)sample.Seconds * 10000000l + (long)sample.Nanoseconds / 100l;
+#endif
+    }
+}
