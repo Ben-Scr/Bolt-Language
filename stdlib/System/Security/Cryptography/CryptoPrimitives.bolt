@@ -8,7 +8,8 @@ public static class CryptoPrimitives
 public:
     uint Add32(uint a, uint b)
     {
-        while (b != 0u)
+        // A fixed trip count keeps carry propagation independent of operand bits.
+        for (int i = 0; i < 32; i++)
         {
             uint carry = (a & b) << 1;
             a = a ^ b;
@@ -23,7 +24,8 @@ public:
 
     ulong Add64(ulong a, ulong b)
     {
-        while (b != 0ul)
+        // A fixed trip count keeps carry propagation independent of operand bits.
+        for (int i = 0; i < 64; i++)
         {
             ulong carry = (a & b) << 1;
             a = a ^ b;

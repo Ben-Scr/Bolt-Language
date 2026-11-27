@@ -14,6 +14,14 @@ public:
 public static class AESGCM
 {
 private:
+    uint ExpandBitToByteMask(uint bit)
+    {
+        uint mask = bit & 1u;
+        mask = mask | (mask << 1);
+        mask = mask | (mask << 2);
+        return mask | (mask << 4);
+    }
+
     byte[] Xor16(const byte[]& a, const byte[]& b)
     {
         byte[] result = new byte[16];
@@ -40,11 +48,12 @@ private:
         {
             int byteIndex = bit / 8;
             int bitIndex = 7 - (bit % 8);
-            if ((((uint)x[byteIndex] >> bitIndex) & 1u) != 0u)
-                for (int i = 0; i < 16; i++) z[i] = (byte)(z[i] ^ v[i]);
-            bool lsb = (v[15] & (byte)1) != (byte)0;
+            uint inputMask = ExpandBitToByteMask((uint)x[byteIndex] >> bitIndex);
+            for (int i = 0; i < 16; i++)
+                z[i] = (byte)((uint)z[i] ^ ((uint)v[i] & inputMask));
+            uint reductionMask = ExpandBitToByteMask((uint)v[15]);
             ShiftRightOne(v);
-            if (lsb) v[0] = (byte)(v[0] ^ (byte)225);
+            v[0] = (byte)((uint)v[0] ^ (225u & reductionMask));
         }
         return z;
     }

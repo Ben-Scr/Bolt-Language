@@ -9252,10 +9252,16 @@ public sealed class AES
 {
 private:
     byte[] roundKeys;
-    byte[] sbox;
-    byte[] inverseSbox;
     int rounds;
     int keyBytes;
+
+    static uint ExpandBitToByteMask(uint bit)
+    {
+        uint mask = bit & 1u;
+        mask = mask | (mask << 1);
+        mask = mask | (mask << 2);
+        return mask | (mask << 4);
+    }
 
     static byte GfMultiply(byte a, byte b)
     {
@@ -9264,26 +9270,30 @@ private:
         uint result = 0u;
         for (int i = 0; i < 8; i++)
         {
-            if ((y & 1u) != 0u) result = result ^ x;
-            bool high = (x & 128u) != 0u;
-            x = (x << 1) & 255u;
-            if (high) x = x ^ 27u;
+            uint multiplierMask = ExpandBitToByteMask(y);
+            uint highMask = ExpandBitToByteMask(x >> 7);
+            result = result ^ (x & multiplierMask);
+            x = ((x << 1) & 255u) ^ (27u & highMask);
             y = y >> 1;
         }
         return (byte)result;
     }
 
-    static byte GfPower(byte value, int exponent)
+    static byte GfInverse(byte value)
     {
-        byte result = (byte)1;
-        byte factor = value;
-        int power = exponent;
-        while (power > 0)
-        {
-            if ((power & 1) != 0) result = GfMultiply(result, factor);
-            factor = GfMultiply(factor, factor);
-            power = power >> 1;
-        }
+        byte x2 = GfMultiply(value, value);
+        byte x4 = GfMultiply(x2, x2);
+        byte x8 = GfMultiply(x4, x4);
+        byte x16 = GfMultiply(x8, x8);
+        byte x32 = GfMultiply(x16, x16);
+        byte x64 = GfMultiply(x32, x32);
+        byte x128 = GfMultiply(x64, x64);
+        byte result = GfMultiply(x2, x4);
+        result = GfMultiply(result, x8);
+        result = GfMultiply(result, x16);
+        result = GfMultiply(result, x32);
+        result = GfMultiply(result, x64);
+        result = GfMultiply(result, x128);
         return result;
     }
 
@@ -9293,19 +9303,18 @@ private:
         return (byte)(((x << amount) | (x >> (8 - amount))) & 255u);
     }
 
-    void BuildSBoxes()
+    static byte Substitute(byte value)
     {
-        sbox = new byte[256];
-        inverseSbox = new byte[256];
-        for (int i = 0; i < 256; i++)
-        {
-            byte x = (byte)i;
-            byte inverse = x == (byte)0 ? (byte)0 : GfPower(x, 254);
-            byte transformed = (byte)((uint)inverse ^ (uint)RotateByte(inverse, 1) ^ (uint)RotateByte(inverse, 2) ^
-                                      (uint)RotateByte(inverse, 3) ^ (uint)RotateByte(inverse, 4) ^ 99u);
-            sbox[i] = transformed;
-            inverseSbox[(int)transformed] = x;
-        }
+        byte inverse = GfInverse(value);
+        return (byte)((uint)inverse ^ (uint)RotateByte(inverse, 1) ^ (uint)RotateByte(inverse, 2) ^
+                      (uint)RotateByte(inverse, 3) ^ (uint)RotateByte(inverse, 4) ^ 99u);
+    }
+
+    static byte InverseSubstitute(byte value)
+    {
+        byte transformed = (byte)((uint)RotateByte(value, 1) ^ (uint)RotateByte(value, 3) ^
+                                  (uint)RotateByte(value, 6) ^ 5u);
+        return GfInverse(transformed);
     }
 
     void ExpandKey(const byte[]& key)
@@ -9326,13 +9335,13 @@ private:
             {
                 byte first = temp[0];
                 temp[0] = temp[1]; temp[1] = temp[2]; temp[2] = temp[3]; temp[3] = first;
-                for (int i = 0; i < 4; i++) temp[i] = sbox[(int)temp[i]];
+                for (int i = 0; i < 4; i++) temp[i] = Substitute(temp[i]);
                 temp[0] = (byte)(temp[0] ^ rcon);
                 rcon = GfMultiply(rcon, (byte)2);
             }
             elif (keyBytes == 32 && (generated % keyBytes) == 16)
             {
-                for (int i = 0; i < 4; i++) temp[i] = sbox[(int)temp[i]];
+                for (int i = 0; i < 4; i++) temp[i] = Substitute(temp[i]);
             }
 
             for (int i = 0; i < 4 && generated < roundKeys.Length; i++)
@@ -9351,19 +9360,20 @@ private:
 
     void SubBytes(byte[]& state)
     {
-        for (int i = 0; i < 16; i++) state[i] = sbox[(int)state[i]];
+        for (int i = 0; i < 16; i++) state[i] = Substitute(state[i]);
     }
 
     void InverseSubBytes(byte[]& state)
     {
-        for (int i = 0; i < 16; i++) state[i] = inverseSbox[(int)state[i]];
+        for (int i = 0; i < 16; i++) state[i] = InverseSubstitute(state[i]);
     }
 
     void ShiftRows(byte[]& s)
     {
         byte t;
         t = s[1]; s[1] = s[5]; s[5] = s[9]; s[9] = s[13]; s[13] = t;
-        t = s[2]; s[2] = s[10]; s[10] = t; t = s[6]; s[6] = s[14]; s[14] = t;
+        t = s[2]; s[2] = s[10]; s[10] = t; t = s[6]; s[6] =)BOLT_LIB"
+R"BOLT_LIB( s[14]; s[14] = t;
         t = s[15]; s[15] = s[11]; s[11] = s[7]; s[7] = s[3]; s[3] = t;
     }
 
@@ -9377,8 +9387,7 @@ private:
 
     void MixColumns(byte[]& state)
     {
-     )BOLT_LIB"
-R"BOLT_LIB(   for (int c = 0; c < 4; c++)
+        for (int c = 0; c < 4; c++)
         {
             int i = c * 4;
             byte a0 = state[i], a1 = state[i + 1], a2 = state[i + 2], a3 = state[i + 3];
@@ -9407,7 +9416,6 @@ public:
     {
         if (key.Length != 16 && key.Length != 24 && key.Length != 32)
             throw ArgumentException("AES keys must contain exactly 16, 24 or 32 bytes.");
-        BuildSBoxes();
         ExpandKey(key);
     }
 
@@ -9583,6 +9591,14 @@ public:
 public static class AESGCM
 {
 private:
+    uint ExpandBitToByteMask(uint bit)
+    {
+        uint mask = bit & 1u;
+        mask = mask | (mask << 1);
+        mask = mask | (mask << 2);
+        return mask | (mask << 4);
+    }
+
     byte[] Xor16(const byte[]& a, const byte[]& b)
     {
         byte[] result = new byte[16];
@@ -9609,11 +9625,12 @@ private:
         {
             int byteIndex = bit / 8;
             int bitIndex = 7 - (bit % 8);
-            if ((((uint)x[byteIndex] >> bitIndex) & 1u) != 0u)
-                for (int i = 0; i < 16; i++) z[i] = (byte)(z[i] ^ v[i]);
-            bool lsb = (v[15] & (byte)1) != (byte)0;
+            uint inputMask = ExpandBitToByteMask((uint)x[byteIndex] >> bitIndex);
+            for (int i = 0; i < 16; i++)
+                z[i] = (byte)((uint)z[i] ^ ((uint)v[i] & inputMask));
+            uint reductionMask = ExpandBitToByteMask((uint)v[15]);
             ShiftRightOne(v);
-            if (lsb) v[0] = (byte)(v[0] ^ (byte)225);
+            v[0] = (byte)((uint)v[0] ^ (225u & reductionMask));
         }
         return z;
     }
@@ -9683,7 +9700,8 @@ private:
     byte[] Tag(AES aes, const byte[]& h, const byte[]& j0, const byte[]& aad, const byte[]& ciphertext)
     {
         byte[] mask = aes.EncryptBlock(j0);
-        byte[] hash = GHash(h, aad, ciphertext);
+        byte[] hash = )BOLT_LIB"
+R"BOLT_LIB(GHash(h, aad, ciphertext);
         return Xor16(mask, hash);
     }
 
@@ -9691,8 +9709,7 @@ public:
     AESGCMResult Encrypt(const byte[]& plaintext, const byte[]& key, const byte[]& nonce)
     { return Encrypt(plaintext, key, nonce, new byte[0]); }
 
-    AESGCMResult Encrypt(const byte[]& pl)BOLT_LIB"
-R"BOLT_LIB(aintext, const byte[]& key, const byte[]& nonce, const byte[]& associatedData)
+    AESGCMResult Encrypt(const byte[]& plaintext, const byte[]& key, const byte[]& nonce, const byte[]& associatedData)
     {
         if (nonce.Length == 0) throw ArgumentException("AES-GCM nonce cannot be empty.");
         AES aes = AES(key);
@@ -9894,7 +9911,8 @@ public static class CryptoPrimitives
 public:
     uint Add32(uint a, uint b)
     {
-        while (b != 0u)
+        // A fixed trip count keeps carry propagation independent of operand bits.
+        for (int i = 0; i < 32; i++)
         {
             uint carry = (a & b) << 1;
             a = a ^ b;
@@ -9909,7 +9927,8 @@ public:
 
     ulong Add64(ulong a, ulong b)
     {
-        while (b != 0ul)
+        // A fixed trip count keeps carry propagation independent of operand bits.
+        for (int i = 0; i < 64; i++)
         {
             ulong carry = (a & b) << 1;
             a = a ^ b;
@@ -10016,10 +10035,10 @@ public:
 
     byte[] Slice(const byte[]& input, int offset, int count)
     {
-        if (offset < 0 || count < 0 || offset > input.Length || count > input.Length - offset)
+        if)BOLT_LIB"
+R"BOLT_LIB( (offset < 0 || count < 0 || offset > input.Length || count > input.Length - offset)
             throw ArgumentOutOfRangeException("Byte-array slice is outside the source range.");
-        by)BOLT_LIB"
-R"BOLT_LIB(te[] result = new byte[count];
+        byte[] result = new byte[count];
         for (int i = 0; i < count; i++) result[i] = input[offset + i];
         return result;
     }
