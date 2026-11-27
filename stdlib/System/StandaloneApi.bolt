@@ -74,6 +74,16 @@ extern "C" int EndSearch(void* search);
 extern "C" uint FileType(void* handle);
 [Header("windows.h"), Native("GetFileInformationByHandleEx")]
 extern "C" int FileInformation(void* handle, int kind, void* buffer, uint size);
+[Header("windows.h"), Native("SetFileInformationByHandle")]
+extern "C" int SetFileInformation(void* handle, int kind, void* buffer, uint size);
+[Native("OBJECT_ATTRIBUTES")]
+public struct ObjectAttributes {}
+[Native("IO_STATUS_BLOCK")]
+public struct IoStatusBlock {}
+[Header("winternl.h"), Native("NtCreateFile")]
+extern "C" int OpenRelative(void** handle, uint access, ObjectAttributes* attributes, IoStatusBlock* status, Bolt.Runtime.Windows.LargeInteger* allocation, uint fileAttributes, uint sharing, uint disposition, uint options, void* extendedAttributes, uint extendedLength);
+[Header("winternl.h"), Native("RtlNtStatusToDosError")]
+extern "C" uint StatusError(int status);
 [Header("windows.h"), Native("SetFilePointerEx")]
 extern "C" int PositionFile(void* file, long offset, long* position, uint origin);
 [Header("windows.h"), Native("SetEndOfFile")]

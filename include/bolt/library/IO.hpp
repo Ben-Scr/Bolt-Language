@@ -3,7 +3,9 @@
 #include "../Std.hpp"
 #include "../Path.hpp"
 #include <algorithm>
+#include <array>
 #include <bit>
+#include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <filesystem>
@@ -22,7 +24,9 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
+#include <winternl.h>
 #else
+#include <dirent.h>
 #include <unistd.h>
 #endif
 #include <limits>
@@ -45,6 +49,178 @@ namespace bolt::library {
             if(ec==std::errc::no_such_file_or_directory)throw FileNotFoundException(message);
             throw IOException(message);
         }
+#ifdef _WIN32
+        class directory_handle {
+            HANDLE value_=INVALID_HANDLE_VALUE;
+            public:
+            explicit directory_handle(HANDLE value):value_(value){}
+            directory_handle(const directory_handle&)=delete;
+            directory_handle& operator=(const directory_handle&)=delete;
+            ~directory_handle(){if(value_!=INVALID_HANDLE_VALUE)CloseHandle(value_);}
+            HANDLE get()const noexcept{return value_;}
+        };
+        inline DWORD nt_error(LONG status) {
+            using Convert=ULONG (WINAPI*)(LONG);
+            static const auto convert=[] {
+                const auto module=GetModuleHandleW(L"ntdll.dll");
+                return module?reinterpret_cast<Convert>(GetProcAddress(module,"RtlNtStatusToDosError")):nullptr;
+            }();
+            return convert?convert(status):ERROR_GEN_FAILURE;
+        }
+        inline HANDLE open_relative(HANDLE parent,const WCHAR* name,USHORT bytes,const std::filesystem::path& display) {
+            using Open=LONG (NTAPI*)(PHANDLE,ACCESS_MASK,POBJECT_ATTRIBUTES,PIO_STATUS_BLOCK,PLARGE_INTEGER,ULONG,ULONG,ULONG,ULONG,PVOID,ULONG);
+            static const auto open=[] {
+                const auto module=GetModuleHandleW(L"ntdll.dll");
+                return module?reinterpret_cast<Open>(GetProcAddress(module,"NtCreateFile")):nullptr;
+            }();
+            if(!open)throw IOException("NtCreateFile is unavailable for safe recursive deletion.");
+            UNICODE_STRING text{};text.Buffer=const_cast<WCHAR*>(name);text.Length=bytes;text.MaximumLength=bytes;
+            OBJECT_ATTRIBUTES object{};InitializeObjectAttributes(&object,&text,OBJ_CASE_INSENSITIVE,parent,nullptr);
+            IO_STATUS_BLOCK result{};HANDLE child=INVALID_HANDLE_VALUE;
+            const auto status=open(&child,DELETE|FILE_LIST_DIRECTORY|FILE_READ_ATTRIBUTES|SYNCHRONIZE,&object,&result,nullptr,0,
+                FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE,FILE_OPEN,FILE_OPEN_REPARSE_POINT|FILE_SYNCHRONOUS_IO_NONALERT,nullptr,0);
+            if(status<0)error(display,std::error_code(static_cast<int>(nt_error(status)),std::system_category()),"Open directory entry");
+            return child;
+        }
+        struct alignas(8) directory_record {
+            DWORD next,index;LARGE_INTEGER times[6];DWORD attributes,name_length,ea_size;CHAR short_length;WCHAR short_name[12];
+            LARGE_INTEGER id;WCHAR name[1];
+        };
+        static_assert(offsetof(directory_record,name)==104);
+        inline DWORD handle_attributes(HANDLE handle,const std::filesystem::path& path) {
+            struct {DWORD attributes,tag;} info{};
+            if(!GetFileInformationByHandleEx(handle,static_cast<FILE_INFO_BY_HANDLE_CLASS>(9),&info,sizeof(info)))
+                error(path,std::error_code(static_cast<int>(GetLastError()),std::system_category()),"Inspect directory entry");
+            return info.attributes;
+        }
+        inline void delete_handle(HANDLE handle,const std::filesystem::path& path) {
+            BOOL remove=TRUE;
+            if(!SetFileInformationByHandle(handle,static_cast<FILE_INFO_BY_HANDLE_CLASS>(4),&remove,sizeof(remove)))
+                error(path,std::error_code(static_cast<int>(GetLastError()),std::system_category()),"Remove entry");
+        }
+        inline void remove_tree_contents(HANDLE directory,const std::filesystem::path& path) {
+            std::array<std::uint8_t,65536> bytes{};
+            for(;;) {
+                if(!GetFileInformationByHandleEx(directory,static_cast<FILE_INFO_BY_HANDLE_CLASS>(11),bytes.data(),static_cast<DWORD>(bytes.size()))) {
+                    const auto code=GetLastError();
+                    if(code==ERROR_NO_MORE_FILES)return;
+                    error(path,std::error_code(static_cast<int>(code),std::system_category()),"List directory");
+                }
+                bool removed=false;
+                for(DWORD offset=0;;) {
+                    const auto* item=reinterpret_cast<const directory_record*>(bytes.data()+offset);
+                    const auto units=item->name_length/sizeof(WCHAR);
+                    const bool dot=units==1&&item->name[0]==L'.';
+                    const bool dotdot=units==2&&item->name[0]==L'.'&&item->name[1]==L'.';
+                    if(!dot&&!dotdot) {
+                        const auto child_path=path/std::wstring(item->name,item->name+units);
+                        directory_handle child(open_relative(directory,item->name,static_cast<USHORT>(item->name_length),child_path));
+                        const auto attributes=handle_attributes(child.get(),child_path);
+                        if((attributes&FILE_ATTRIBUTE_DIRECTORY)!=0&&(attributes&FILE_ATTRIBUTE_REPARSE_POINT)==0)
+                            remove_tree_contents(child.get(),child_path);
+                        delete_handle(child.get(),child_path);removed=true;break;
+                    }
+                    if(!item->next)break;
+                    offset+=item->next;
+                }
+                if(!removed)return;
+            }
+        }
+        inline void remove_tree(const std::filesystem::path& path) {
+            constexpr DWORD access=DELETE|FILE_LIST_DIRECTORY|FILE_READ_ATTRIBUTES|SYNCHRONIZE;
+            directory_handle root(CreateFileW(path.c_str(),access,FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE,nullptr,OPEN_EXISTING,
+                FILE_FLAG_BACKUP_SEMANTICS|FILE_FLAG_OPEN_REPARSE_POINT,nullptr));
+            if(root.get()==INVALID_HANDLE_VALUE)
+                error(path,std::error_code(static_cast<int>(GetLastError()),std::system_category()),"Open directory");
+            const auto attributes=handle_attributes(root.get(),path);
+            if((attributes&FILE_ATTRIBUTE_DIRECTORY)!=0&&(attributes&FILE_ATTRIBUTE_REPARSE_POINT)==0)
+                remove_tree_contents(root.get(),path);
+            delete_handle(root.get(),path);
+        }
+#else
+        class directory_descriptor {
+            int value_=-1;
+            public:
+            explicit directory_descriptor(int value):value_(value){}
+            directory_descriptor(const directory_descriptor&)=delete;
+            directory_descriptor& operator=(const directory_descriptor&)=delete;
+            ~directory_descriptor(){if(value_>=0)::close(value_);}
+            int get()const noexcept{return value_;}
+        };
+        class directory_stream {
+            DIR* value_=nullptr;
+            public:
+            explicit directory_stream(DIR* value):value_(value){}
+            directory_stream(const directory_stream&)=delete;
+            directory_stream& operator=(const directory_stream&)=delete;
+            ~directory_stream(){if(value_)::closedir(value_);}
+            DIR* get()const noexcept{return value_;}
+        };
+        inline bool same_file(const struct stat& left,const struct stat& right)noexcept {
+            return left.st_dev==right.st_dev&&left.st_ino==right.st_ino;
+        }
+        [[noreturn]] inline void changed(const std::filesystem::path& path) {
+            throw IOException("Directory entry changed during recursive deletion: "+path_to_utf8(path));
+        }
+        inline void remove_tree_contents(int descriptor,const std::filesystem::path& path) {
+            const auto scan=::dup(descriptor);
+            if(scan<0)error(path,std::error_code(errno,std::generic_category()),"Open directory");
+            auto* raw=::fdopendir(scan);
+            if(!raw) {
+                const auto code=errno;::close(scan);
+                error(path,std::error_code(code,std::generic_category()),"Open directory");
+            }
+            directory_stream entries(raw);
+            for(;;) {
+                errno=0;const auto* item=::readdir(entries.get());
+                if(!item) {
+                    if(errno)error(path,std::error_code(errno,std::generic_category()),"List directory");
+                    return;
+                }
+                const std::string name=item->d_name;
+                if(name=="."||name=="..")continue;
+                const auto child_path=path/name;
+                struct stat observed{};
+                if(::fstatat(descriptor,name.c_str(),&observed,AT_SYMLINK_NOFOLLOW)<0)
+                    error(child_path,std::error_code(errno,std::generic_category()),"Inspect directory entry");
+                if(S_ISDIR(observed.st_mode)) {
+                    directory_descriptor child(::openat(descriptor,name.c_str(),O_RDONLY|O_CLOEXEC|O_DIRECTORY|O_NOFOLLOW));
+                    if(child.get()<0)error(child_path,std::error_code(errno,std::generic_category()),"Open directory entry");
+                    struct stat opened{};
+                    if(::fstat(child.get(),&opened)<0)error(child_path,std::error_code(errno,std::generic_category()),"Inspect directory entry");
+                    if(!same_file(observed,opened))changed(child_path);
+                    remove_tree_contents(child.get(),child_path);
+                    struct stat current{};
+                    if(::fstatat(descriptor,name.c_str(),&current,AT_SYMLINK_NOFOLLOW)<0)
+                        error(child_path,std::error_code(errno,std::generic_category()),"Inspect directory entry");
+                    if(!same_file(opened,current))changed(child_path);
+                    if(::unlinkat(descriptor,name.c_str(),AT_REMOVEDIR)<0)
+                        error(child_path,std::error_code(errno,std::generic_category()),"Remove directory");
+                }else if(::unlinkat(descriptor,name.c_str(),0)<0)
+                    error(child_path,std::error_code(errno,std::generic_category()),"Remove entry");
+            }
+        }
+        inline void remove_tree(const std::filesystem::path& path) {
+            directory_descriptor root(::open(path.c_str(),O_RDONLY|O_CLOEXEC|O_DIRECTORY|O_NOFOLLOW));
+            if(root.get()<0) {
+                auto code=errno;
+                if(code==ELOOP||code==ENOTDIR) {
+                    if(::unlink(path.c_str())==0)return;
+                    code=errno;
+                }
+                error(path,std::error_code(code,std::generic_category()),"Open directory");
+            }
+            struct stat opened{};
+            if(::fstat(root.get(),&opened)<0)error(path,std::error_code(errno,std::generic_category()),"Inspect directory");
+            remove_tree_contents(root.get(),path);
+            struct stat current{};
+            if(::fstatat(AT_FDCWD,path.c_str(),&current,AT_SYMLINK_NOFOLLOW)<0)
+                error(path,std::error_code(errno,std::generic_category()),"Inspect directory");
+            if(!same_file(opened,current))changed(path);
+            if(::unlinkat(AT_FDCWD,path.c_str(),AT_REMOVEDIR)<0)
+                error(path,std::error_code(errno,std::generic_category()),"Delete directory");
+        }
+#endif
         inline std::size_t size(std::int64_t value) {
             if(value<0||static_cast<std::uint64_t>(value)>std::numeric_limits<std::size_t>::max())throw ArgumentOutOfRangeException("Size must be non-negative and fit this platform.");
             return static_cast<std::size_t>(value);
@@ -662,7 +838,7 @@ namespace bolt::library {
                 if(ec)io_detail::error(path,ec,"Inspect directory");
                 throw DirectoryNotFoundException("Directory not found: "+name);
             }
-            if(recursive)std::filesystem::remove_all(path,ec);
+            if(recursive)io_detail::remove_tree(path);
             else std::filesystem::remove(path,ec);
             if(ec)io_detail::error(path,ec,"Delete directory");
         }

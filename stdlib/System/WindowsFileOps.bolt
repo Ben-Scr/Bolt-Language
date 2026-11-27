@@ -110,6 +110,68 @@ public:
 
 public static class DirectoryOps
 {
+private:
+    void FailStatus(int status, const string& path)
+    {
+        WindowsPath.Fail(Bolt.Runtime.StandaloneWindows.StatusError(status), "Open directory entry", path);
+    }
+    void* OpenRelative(void* parent, ushort* name, ushort bytes, const string& path)
+    {
+        ulong[] text = new ulong[2], object = new ulong[6], result = new ulong[2];
+        // UNICODE_STRING and OBJECT_ATTRIBUTES are fixed-layout 64-bit NT records.
+        ((ushort*)&text[0])[0] = bytes; ((ushort*)&text[0])[1] = bytes; *((ushort**)&text[1]) = name;
+        *((uint*)&object[0]) = 48u; *((void**)&object[1]) = parent; *((void**)&object[2]) = &text[0]; *((uint*)&object[3]) = 64u;
+        void* handle = null;
+        // DELETE | FILE_LIST_DIRECTORY | FILE_READ_ATTRIBUTES | SYNCHRONIZE;
+        // FILE_OPEN_REPARSE_POINT keeps links as entries instead of targets.
+        int status = Bolt.Runtime.StandaloneWindows.OpenRelative(&handle, 1114241u,
+            (Bolt.Runtime.StandaloneWindows.ObjectAttributes*)&object[0], (Bolt.Runtime.StandaloneWindows.IoStatusBlock*)&result[0],
+            null, 0u, 7u, 1u, 2097184u, null, 0u);
+        if (status < 0) FailStatus(status, path);
+        return handle;
+    }
+    uint Attributes(void* handle, const string& path)
+    {
+        ulong info = 0ul;
+        if (Bolt.Runtime.StandaloneWindows.FileInformation(handle, 9, &info, 8u) == 0)
+            WindowsPath.Fail(Bolt.Runtime.Windows.GetLastError(), "Inspect directory entry", path);
+        return *((uint*)&info);
+    }
+    void DeleteHandle(void* handle, const string& path)
+    {
+        uint remove = 1u;
+        if (Bolt.Runtime.StandaloneWindows.SetFileInformation(handle, 4, &remove, 4u) == 0)
+            WindowsPath.Fail(Bolt.Runtime.Windows.GetLastError(), "Remove entry", path);
+    }
+    void RemoveContents(void* directory, const string& path)
+    {
+        byte[] records = new byte[65536];
+        while (true) {
+            if (Bolt.Runtime.StandaloneWindows.FileInformation(directory, 11, &records[0], 65536u) == 0) {
+                uint code = Bolt.Runtime.Windows.GetLastError();
+                if (code == 18u) return;
+                WindowsPath.Fail(code, "List directory", path);
+            }
+            int offset = 0; bool removed = false;
+            while (true) {
+                byte* record = &records[offset];
+                uint bytes = *((uint*)&record[60]); ushort* name = (ushort*)&record[104]; int units = (int)(bytes / 2u);
+                bool dot = units == 1 && name[0] == 46; bool dotdot = units == 2 && name[0] == 46 && name[1] == 46;
+                if (!dot && !dotdot) {
+                    string childPath = Path.Combine(path, Bolt.Runtime.SystemCalls.FromWide(name, units));
+                    void* child = OpenRelative(directory, name, (ushort)bytes, childPath);
+                    try {
+                        uint attributes = Attributes(child, childPath);
+                        if ((attributes & 16u) != 0u && (attributes & 1024u) == 0u) RemoveContents(child, childPath);
+                        DeleteHandle(child, childPath); removed = true;
+                    } finally { Bolt.Runtime.StandaloneWindows.Close(child); }
+                    break;
+                }
+                uint next = *((uint*)record); if (next == 0u) break; offset += (int)next;
+            }
+            if (!removed) return;
+        }
+    }
 public:
     bool IsDirectory(string path) { return WindowsPath.Exists(path, true); }
     bool IsLink(string path)
@@ -135,6 +197,18 @@ public:
         if (attributes == uint.MaxValue) WindowsPath.Fail(Bolt.Runtime.Windows.GetLastError(), "Inspect entry", path);
         int success = (attributes & 16u) != 0u ? Bolt.Runtime.StandaloneWindows.RemoveDirectory(name) : Bolt.Runtime.StandaloneWindows.DeleteFile(name);
         if (success == 0) WindowsPath.Fail(Bolt.Runtime.Windows.GetLastError(), "Remove entry", path);
+    }
+    void RemoveTree(string path)
+    {
+        byte[] wide = WindowsPath.Wide(path);
+        // FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT.
+        void* root = Bolt.Runtime.StandaloneWindows.OpenFile((ushort*)&wide[0], 1114241u, 7u, null, 3u, 35651584u, null);
+        if (*((long*)&root) == -1l) WindowsPath.Fail(Bolt.Runtime.Windows.GetLastError(), "Open directory", path);
+        try {
+            uint attributes = Attributes(root, path);
+            if ((attributes & 16u) != 0u && (attributes & 1024u) == 0u) RemoveContents(root, path);
+            DeleteHandle(root, path);
+        } finally { Bolt.Runtime.StandaloneWindows.Close(root); }
     }
     void Move(string source, string destination)
     {

@@ -16,12 +16,18 @@ extern "C" int Unlink(byte* name);
 extern "C" int Rename(byte* source, byte* destination);
 [Header("dirent.h"), Native("opendir")]
 extern "C" void* OpenDirectory(byte* name);
+[Header("dirent.h"), Native("fdopendir")]
+extern "C" void* OpenDirectory(int descriptor);
 [Header("dirent.h"), Native("readdir")]
 extern "C" byte* NextEntry(void* directory);
 [Header("dirent.h"), Native("closedir")]
 extern "C" int CloseDirectory(void* directory);
 [Header("fcntl.h"), Native("openat")]
 extern "C" int OpenAt(int directory, byte* name, int flags, uint mode);
+[Header("unistd.h"), Native("dup")]
+extern "C" int Duplicate(int descriptor);
+[Header("unistd.h"), Native("unlinkat")]
+extern "C" int UnlinkAt(int directory, byte* name, int flags);
 [Header("unistd.h"), Native("close")]
 extern "C" int Close(int descriptor);
 [Header("unistd.h"), Native("ftruncate")]

@@ -26,6 +26,7 @@ struct DirectoryOps {
         if(ec)library::io_detail::error(path,ec,"Remove entry");
         if(!removed)throw library::FileNotFoundException("Entry no longer exists: "+name);
     }
+    static void RemoveTree(const native::String& name){library::io_detail::remove_tree(library::io_detail::path(name));}
     static void Move(const native::String& a,const native::String& b){library::Directory::Move(a,b);}
     static native::String Current(){return library::Directory::GetCurrentDirectory();}
     static void Current(const native::String& path){library::Directory::SetCurrentDirectory(path);}

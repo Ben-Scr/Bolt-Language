@@ -82,6 +82,10 @@ struct NativeProgram::Impl {
             if(!kernel){const auto error=GetLastError();throw std::runtime_error("cannot resolve Windows extern C symbols: kernel32.dll is unavailable (Win32 error "+std::to_string(error)+")");}
             auto address=GetProcAddress(kernel,external.name.c_str());
             if(!address) {
+                const auto ntdll=GetModuleHandleW(L"ntdll.dll");
+                if(ntdll)address=GetProcAddress(ntdll,external.name.c_str());
+            }
+            if(!address) {
                 // Secure random uses the Windows CNG API directly. Keep bcrypt.dll
                 // loaded for the process lifetime so JIT code can call its symbol.
                 static const HMODULE bcrypt=LoadLibraryW(L"bcrypt.dll");
@@ -91,7 +95,7 @@ struct NativeProgram::Impl {
                 static const HMODULE winsock=LoadLibraryExW(L"ws2_32.dll",nullptr,LOAD_LIBRARY_SEARCH_SYSTEM32);
                 if(winsock)address=GetProcAddress(winsock,external.name.c_str());
             }
-            if(!address){const auto error=GetLastError();throw std::runtime_error("unresolved Windows extern C symbol '"+external.name+"' in kernel32.dll/bcrypt.dll/ws2_32.dll (Win32 error "+std::to_string(error)+")");}
+            if(!address){const auto error=GetLastError();throw std::runtime_error("unresolved Windows extern C symbol '"+external.name+"' in kernel32.dll/ntdll.dll/bcrypt.dll/ws2_32.dll (Win32 error "+std::to_string(error)+")");}
             foreign_names.push_back(external.name);
             symbols.push_back({foreign_names.back().c_str(),reinterpret_cast<void*>(address)});
 #else

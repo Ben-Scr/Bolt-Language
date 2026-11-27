@@ -668,7 +668,7 @@ Runtime.Execute remains interpreted; Runtime.ExecuteJit compiles native code in 
         catch(const std::runtime_error&) {return {};}
         const auto ucrt=um.parent_path().parent_path()/"ucrt"/"x64";
         if(!fs::is_regular_file(ucrt/"libucrt.lib"))return {};
-        for(auto name:{"shell32.lib","ws2_32.lib","advapi32.lib","bcrypt.lib"})
+        for(auto name:{"shell32.lib","ws2_32.lib","advapi32.lib","bcrypt.lib","ntdll.lib"})
             if(!fs::is_regular_file(um/name))return {};
         return {crt,ucrt,um};
     }
@@ -994,6 +994,9 @@ Runtime.Execute remains interpreted; Runtime.ExecuteJit compiles native code in 
                 return symbol.foreign && (symbol.name=="WSAStartup" || symbol.name=="closesocket" ||
                     symbol.name=="inet_pton" || symbol.name=="inet_ntop");
             }))invocation.push_back(bolt::path_to_utf8(kernel32.parent_path()/"ws2_32.lib"));
+            if(std::any_of(module->externals.begin(),module->externals.end(),[](const auto& symbol){
+                return symbol.foreign && (symbol.name=="NtCreateFile" || symbol.name=="RtlNtStatusToDosError");
+            }))invocation.push_back(bolt::path_to_utf8(kernel32.parent_path()/"ntdll.lib"));
             // BCryptGenRandom is exported by bcrypt.dll. Keep the RNG a direct
             // OS ABI call while linking the matching Windows SDK import library.
             if(std::any_of(module->externals.begin(),module->externals.end(),[](const auto& symbol){return symbol.foreign&&symbol.name=="BCryptGenRandom";})) {
@@ -2026,6 +2029,7 @@ Runtime.Execute remains interpreted; Runtime.ExecuteJit compiles native code in 
                 build.push_back(msvc?"ws2_32.lib":"-lws2_32");
                 build.push_back(msvc?"shell32.lib":"-lshell32");
                 build.push_back(msvc?"bcrypt.lib":"-lbcrypt");
+                build.push_back(msvc?"ntdll.lib":"-lntdll");
 #endif
                 if(msvc){build.push_back("/link");auto import=target;import.replace_extension(".lib");build.push_back("/IMPLIB:"+bolt::path_to_utf8(import));}
                 verbose_command(build,verbose);int status=process(build,"C++ compiler/linker");if(status)return status;
@@ -2101,6 +2105,7 @@ Runtime.Execute remains interpreted; Runtime.ExecuteJit compiles native code in 
         invocation.push_back(msvc?"ws2_32.lib":"-lws2_32");
         invocation.push_back(msvc?"shell32.lib":"-lshell32");
         invocation.push_back(msvc?"bcrypt.lib":"-lbcrypt");
+        invocation.push_back(msvc?"ntdll.lib":"-lntdll");
 #endif
         verbose_command(invocation,verbose);
         const auto begin=std::chrono::steady_clock::now();

@@ -2413,23 +2413,12 @@ public:
     void Delete(string path, bool recursive = true)
     {
         if (!Exists(path)) Bolt.Runtime.Failure.DirectoryMissing("Directory not found: " + path);
-        if (!recursive || DirectoryOps.IsLink(path)) { DirectoryOps.RemoveOne(path); return; }
-        List<string> paths; List<bool> visited;
-        paths.Add(path); visited.Add(false);
-        while (paths.Length > 0)
-        {
-            int index = paths.Length - 1; string current = paths[index]; bool done = visited[index];
-            paths.RemoveAt(index); visited.RemoveAt(index);
-            if (done || DirectoryOps.IsLink(current) || !Exists(current)) { DirectoryOps.RemoveOne(current); continue; }
-            DirectoryEntry[] entries = DirectoryOps.Entries(current);
-            paths.Add(current); visited.Add(true);
-            for (int i = 0; i < entries.Length; i++) { paths.Add(entries[i].Path); visited.Add(false); }
-        }
+        if (recursive) DirectoryOps.RemoveTree(path);
+        else DirectoryOps.RemoveOne(path);
     }
     void Move(string source, string destination) { DirectoryOps.Move(source, destination); }
     string[] GetFiles(string path, bool recursive = false) { return Entries(path, recursive, 1); }
-    string[] GetDirectories(string path, bool recursive = false) { return Ent)BOLT_LIB"
-R"BOLT_LIB(ries(path, recursive, 2); }
+    string[] GetDirectories(string path, bool recursive = false) { return Entries(path, recursive, 2); }
     string[] GetFileSystemEntries(string path, bool recursive = false) { return Entries(path, recursive, 0); }
     string GetCurrentDirectory() { return DirectoryOps.Current(); }
     void SetCurrentDirectory(string path) { DirectoryOps.Current(path); }
@@ -3864,12 +3853,18 @@ extern "C" int Unlink(byte* name);
 extern "C" int Rename(byte* source, byte* destination);
 [Header("dirent.h"), Native("opendir")]
 extern "C" void* OpenDirectory(byte* name);
+[Header("dirent.h"), Native("fdopendir")]
+extern "C" void* OpenDirectory(int descriptor);
 [Header("dirent.h"), Native("readdir")]
 extern "C" byte* NextEntry(void* directory);
 [Header("dirent.h"), Native("closedir")]
 extern "C" int CloseDirectory(void* directory);
 [Header("fcntl.h"), Native("openat")]
 extern "C" int OpenAt(int directory, byte* name, int flags, uint mode);
+[Header("unistd.h"), Native("dup")]
+extern "C" int Duplicate(int descriptor);
+[Header("unistd.h"), Native("unlinkat")]
+extern "C" int UnlinkAt(int directory, byte* name, int flags);
 [Header("unistd.h"), Native("close")]
 extern "C" int Close(int descriptor);
 [Header("unistd.h"), Native("ftruncate")]
@@ -4013,6 +4008,54 @@ R"BOLT_LIB(Error());
 }
 public static class DirectoryOps
 {
+private:
+    bool Same(ulong[]& left, ulong[]& right) { return left[0] == right[0] && left[1] == right[1]; }
+    void Changed(const string& path) { throw IOException("Directory entry changed during recursive deletion: " + path); }
+    void RemoveContents(int descriptor, const string& path)
+    {
+        int scan = Bolt.Runtime.LinuxFile.Duplicate(descriptor);
+        if (scan < 0) LinuxPath.Fail(path, LinuxPath.Error());
+        void* directory = Bolt.Runtime.LinuxFile.OpenDirectory(scan);
+        if (directory == null) {
+            int code = LinuxPath.Error(); Bolt.Runtime.LinuxFile.Close(scan); LinuxPath.Fail(path, code);
+        }
+        int* error = Bolt.Runtime.Linux.ErrnoLocation();
+        try {
+            while (true) {
+                *error = 0;
+                byte* record = Bolt.Runtime.LinuxFile.NextEntry(directory);
+                if (record == null) {
+                    if (*error != 0) LinuxPath.Fail(path, *error);
+                    break;
+                }
+                byte* name = &record[19];
+                string item = Bolt.Runtime.NativeString.FromUtf8(name, Bolt.Runtime.StandaloneCore.CLength(name));
+                if (item == "." || item == "..") continue;
+                string childPath = Path.Combine(path, item);
+                ulong[] observed = new ulong[32];
+                if (Bolt.Runtime.LinuxFile.StatusAt(descriptor, name, &observed[0], 256) != 0)
+                    LinuxPath.Fail(childPath, LinuxPath.Error());
+                if ((LinuxPath.Mode(&observed[0]) & 61440u) == 16384u) {
+                    int child = Bolt.Runtime.LinuxFile.OpenAt(descriptor, name, 720896, 0u);
+                    if (child < 0) LinuxPath.Fail(childPath, LinuxPath.Error());
+                    try {
+                        ulong[] opened = new ulong[32];
+                        if (Bolt.Runtime.LinuxFile.Status(child, &opened[0]) != 0) LinuxPath.Fail(childPath, LinuxPath.Error());
+                        if (!Same(observed, opened)) Changed(childPath);
+                        RemoveContents(child, childPath);
+                        ulong[] current = new ulong[32];
+                        if (Bolt.Runtime.LinuxFile.StatusAt(descriptor, name, &current[0], 256) != 0)
+                      )BOLT_LIB"
+R"BOLT_LIB(      LinuxPath.Fail(childPath, LinuxPath.Error());
+                        if (!Same(opened, current)) Changed(childPath);
+                        if (Bolt.Runtime.LinuxFile.UnlinkAt(descriptor, name, 512) != 0)
+                            LinuxPath.Fail(childPath, LinuxPath.Error());
+                    } finally { Bolt.Runtime.LinuxFile.Close(child); }
+                } else if (Bolt.Runtime.LinuxFile.UnlinkAt(descriptor, name, 0) != 0)
+                    LinuxPath.Fail(childPath, LinuxPath.Error());
+            }
+        } finally { Bolt.Runtime.LinuxFile.CloseDirectory(directory); }
+    }
 public:
     bool IsDirectory(string path) { return LinuxPath.Exists(path, 16384u); }
     bool IsLink(string path)
@@ -4034,6 +4077,25 @@ public:
         int result = LinuxPath.Kind(&name[0], false, true) == 16384u
             ? Bolt.Runtime.LinuxFile.RemoveDirectory(&name[0]) : Bolt.Runtime.LinuxFile.Unlink(&name[0]);
         if (result != 0) LinuxPath.Fail(path, LinuxPath.Error());
+    }
+    void RemoveTree(string path)
+    {
+        byte[] name = LinuxPath.Name(path);
+        int root = Bolt.Runtime.LinuxFile.OpenAt(-100, &name[0], 720896, 0u);
+        if (root < 0) {
+            int code = LinuxPath.Error();
+            if ((code == 40 || code == 20) && Bolt.Runtime.LinuxFile.UnlinkAt(-100, &name[0], 0) == 0) return;
+            LinuxPath.Fail(path, code);
+        }
+        try {
+            ulong[] opened = new ulong[32];
+            if (Bolt.Runtime.LinuxFile.Status(root, &opened[0]) != 0) LinuxPath.Fail(path, LinuxPath.Error());
+            RemoveContents(root, path);
+            ulong[] current = new ulong[32];
+            if (Bolt.Runtime.LinuxFile.StatusAt(-100, &name[0], &current[0], 256) != 0) LinuxPath.Fail(path, LinuxPath.Error());
+            if (!Same(opened, current)) Changed(path);
+            if (Bolt.Runtime.LinuxFile.UnlinkAt(-100, &name[0], 512) != 0) LinuxPath.Fail(path, LinuxPath.Error());
+        } finally { Bolt.Runtime.LinuxFile.Close(root); }
     }
     void Move(string source, string destination)
     {
@@ -4067,11 +4129,11 @@ public:
                     break;
                 }
                 // LP64 Linux dirent: ino64, off64, reclen16, type8, name.
- )BOLT_LIB"
-R"BOLT_LIB(               byte* start = &record[19];
+                byte* start = &record[19];
                 string child = Bolt.Runtime.NativeString.FromUtf8(start, Bolt.Runtime.StandaloneCore.CLength(start));
                 if (child == "." || child == "..") continue;
-                DirectoryEntry entry;
+             )BOLT_LIB"
+R"BOLT_LIB(   DirectoryEntry entry;
                 entry.Path = Path.Combine(path, child);
                 byte[] childName = LinuxPath.Name(entry.Path);
                 uint kind = LinuxPath.Kind(&childName[0], false, true);
@@ -6752,6 +6814,7 @@ public:
     bool IsLink(string path);
     void CreateOne(string path);
     void RemoveOne(string path);
+    void RemoveTree(string path);
     void Move(string source, string destination);
     string Current();
     void Current(string path);
@@ -10865,6 +10928,17 @@ extern "C" int EndSearch(void* search);
 extern "C" uint FileType(void* handle);
 [Header("windows.h"), Native("GetFileInformationByHandleEx")]
 extern "C" int FileInformation(void* handle, int kind, void* buffer, uint size);
+[Header("windows.h"), Native("SetFileInformationByHandle")]
+extern "C" int SetFileInformation(void* handle, int kind, void* buffer, uint size);
+[Native("OBJECT_ATTRIBUTES")]
+public struct ObjectAttributes {}
+[Native("IO_STATUS_BLOCK")]
+public struct IoStatusBlock {}
+[Header("winternl.h"), Native("NtCreateFile")]
+extern "C" int OpenRelative(void** handle, uint access, ObjectAttributes* attributes, IoStatusBlock* status, Bolt.Runtime.Windows.LargeInteger* allocat)BOLT_LIB"
+R"BOLT_LIB(ion, uint fileAttributes, uint sharing, uint disposition, uint options, void* extendedAttributes, uint extendedLength);
+[Header("winternl.h"), Native("RtlNtStatusToDosError")]
+extern "C" uint StatusError(int status);
 [Header("windows.h"), Native("SetFilePointerEx")]
 extern "C" int PositionFile(void* file, long offset, long* position, uint origin);
 [Header("windows.h"), Native("SetEndOfFile")]
@@ -10873,8 +10947,7 @@ extern "C" int TruncateFile(void* file);
 extern "C" int FileSize(void* handle, Bolt.Runtime.Windows.LargeInteger* size);
 [Header("windows.h"), Native("CloseHandle")]
 extern "C" int Close(void* handle);
-[Header("windows.h"), Native("WriteFi)BOLT_LIB"
-R"BOLT_LIB(le")]
+[Header("windows.h"), Native("WriteFile")]
 extern "C" int WriteBytes(void* handle, const byte& first, uint count, uint* written, void* overlapped);
 #endif
 )BOLT_LIB"},
@@ -15412,6 +15485,69 @@ R"BOLT_LIB(ol overwrite)
 
 public static class DirectoryOps
 {
+private:
+    void FailStatus(int status, const string& path)
+    {
+        WindowsPath.Fail(Bolt.Runtime.StandaloneWindows.StatusError(status), "Open directory entry", path);
+    }
+    void* OpenRelative(void* parent, ushort* name, ushort bytes, const string& path)
+    {
+        ulong[] text = new ulong[2], object = new ulong[6], result = new ulong[2];
+        // UNICODE_STRING and OBJECT_ATTRIBUTES are fixed-layout 64-bit NT records.
+        ((ushort*)&text[0])[0] = bytes; ((ushort*)&text[0])[1] = bytes; *((ushort**)&text[1]) = name;
+        *((uint*)&object[0]) = 48u; *((void**)&object[1]) = parent; *((void**)&object[2]) = &text[0]; *((uint*)&object[3]) = 64u;
+        void* handle = null;
+        // DELETE | FILE_LIST_DIRECTORY | FILE_READ_ATTRIBUTES | SYNCHRONIZE;
+        // FILE_OPEN_REPARSE_POINT keeps links as entries instead of targets.
+        int status = Bolt.Runtime.StandaloneWindows.OpenRelative(&handle, 1114241u,
+            (Bolt.Runtime.StandaloneWindows.ObjectAttributes*)&object[0], (Bolt.Runtime.StandaloneWindows.IoStatusBlock*)&result[0],
+            null, 0u, 7u, 1u, 2097184u, null, 0u);
+        if (status < 0) FailStatus(status, path);
+        return handle;
+    }
+    uint Attributes(void* handle, const string& path)
+    {
+        ulong info = 0ul;
+        if (Bolt.Runtime.StandaloneWindows.FileInformation(handle, 9, &info, 8u) == 0)
+            WindowsPath.Fail(Bolt.Runtime.Windows.GetLastError(), "Inspect directory entry", path);
+        return *((uint*)&info);
+    }
+    void DeleteHandle(void* handle, const string& path)
+    {
+        uint remove = 1u;
+        if (Bolt.Runtime.StandaloneWindows.SetFileInformation(handle, 4, &remove, 4u) == 0)
+            WindowsPath.Fail(Bolt.Runtime.Windows.GetLastError(), "Remove entry", path);
+    }
+    void RemoveContents(void* directory, const string& path)
+    {
+        byte[] records = new byte[65536];
+        while (true) {
+            if (Bolt.Runtime.StandaloneWindows.FileInformation(directory, 11, &records[0], 65536u) == 0) {
+                uint code = Bolt.Runtime.Windows.GetLastError();
+                if (code == 18u) return;
+                WindowsPath.Fail(code, "List directory", path);
+            }
+            int offset = 0; bool removed = false;
+            while (true) {
+                byte* record = &records[offset];
+                uint bytes = *((uint*)&record[60]); ushort* name = (ushort*)&record[104]; int units = (int)(bytes / 2u);
+                bool dot = units == 1 && name[0] == 46; bool dotdot = units == 2 && name[0] == 46 && name[1] == 46;
+                if (!dot && !dotdot) {
+                    string childPath = Path.Combine(path, Bolt.Runtime.SystemCalls.FromWide(name, units));
+                    void* child = OpenRelative(directory, name, (ushort)bytes, childPath);
+                    try {
+  )BOLT_LIB"
+R"BOLT_LIB(                      uint attributes = Attributes(child, childPath);
+                        if ((attributes & 16u) != 0u && (attributes & 1024u) == 0u) RemoveContents(child, childPath);
+                        DeleteHandle(child, childPath); removed = true;
+                    } finally { Bolt.Runtime.StandaloneWindows.Close(child); }
+                    break;
+                }
+                uint next = *((uint*)record); if (next == 0u) break; offset += (int)next;
+            }
+            if (!removed) return;
+        }
+    }
 public:
     bool IsDirectory(string path) { return WindowsPath.Exists(path, true); }
     bool IsLink(string path)
@@ -15438,6 +15574,18 @@ public:
         int success = (attributes & 16u) != 0u ? Bolt.Runtime.StandaloneWindows.RemoveDirectory(name) : Bolt.Runtime.StandaloneWindows.DeleteFile(name);
         if (success == 0) WindowsPath.Fail(Bolt.Runtime.Windows.GetLastError(), "Remove entry", path);
     }
+    void RemoveTree(string path)
+    {
+        byte[] wide = WindowsPath.Wide(path);
+        // FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT.
+        void* root = Bolt.Runtime.StandaloneWindows.OpenFile((ushort*)&wide[0], 1114241u, 7u, null, 3u, 35651584u, null);
+        if (*((long*)&root) == -1l) WindowsPath.Fail(Bolt.Runtime.Windows.GetLastError(), "Open directory", path);
+        try {
+            uint attributes = Attributes(root, path);
+            if ((attributes & 16u) != 0u && (attributes & 1024u) == 0u) RemoveContents(root, path);
+            DeleteHandle(root, path);
+        } finally { Bolt.Runtime.StandaloneWindows.Close(root); }
+    }
     void Move(string source, string destination)
     {
         if (!IsDirectory(source)) throw DirectoryNotFoundException("Source directory not found.");
@@ -15463,8 +15611,8 @@ public:
         if (targetError != 0u) WindowsPath.Fail(targetError, "List directory", path);
         if ((attributes & 16u) == 0u) throw DirectoryNotFoundException("Not a directory: " + path);
         byte[] pattern = WindowsPath.Wide(Path.Combine(path, "*"));
-        // WIN3)BOLT_LIB"
-R"BOLT_LIB(2_FIND_DATAW is 592 bytes; cFileName starts at byte 44.
+        // WIN32_FIND_DATAW is 592 bytes; cFileName starts at b)BOLT_LIB"
+R"BOLT_LIB(yte 44.
         uint[] data = new uint[148];
         List<DirectoryEntry> entries;
         void* search = Bolt.Runtime.StandaloneWindows.FindFirst((ushort*)&pattern[0], &data[0]);

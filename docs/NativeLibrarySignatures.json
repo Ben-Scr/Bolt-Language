@@ -1558,5 +1558,9 @@
   {
     "id": 389,
     "signature": "bolt::platform::ValueTree::Unsigned(ulong)->int"
+  },
+  {
+    "id": 390,
+    "signature": "bolt::platform::DirectoryOps::RemoveTree(string)->void"
   }
 ]

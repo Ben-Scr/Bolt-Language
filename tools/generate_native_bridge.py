@@ -80,7 +80,16 @@ strings=[('Length','int',['string']),('ByteLength','int',['string']),('At','char
 # Only add methods actually offered by Strings.hpp; At gets a small adapter.
 for method,result,params in strings:records.append(dict(owner='bolt::library::Strings',operation=method,result=result,params=[(p,True) for p in params],stat=True,ctor=False,gen=None))
 def key(rec):return rec['owner']+'::'+rec['operation']+'('+','.join(canonical(t) for t,_ in rec['params'])+')->'+canonical(rec['result'])
-unique={key(rec):rec for rec in records}; records=[unique[k] for k in sorted(unique,key=lambda k:(unique[k]["owner"] in extra_owners,k))]
+unique={key(rec):rec for rec in records}
+# Existing operation IDs are an ABI. Preserve their checked-in order and append
+# newly introduced signatures so adding a native method cannot renumber callers.
+previous=[]
+metadata=ROOT/'docs/NativeLibrarySignatures.json'
+if metadata.exists():
+ previous=[item['signature'] for item in json.loads(metadata.read_text()) if item['signature'] in unique]
+known=set(previous)
+previous.extend(sorted((k for k in unique if k not in known),key=lambda k:(unique[k]["owner"] in extra_owners,k)))
+records=[unique[k] for k in previous]
 functions=[];manifest=[];meta=[]
 for i,rec in enumerate(records):
  k=key(rec);manifest.append(f'BOLT_LIBRARY_ENTRY({i}, {json.dumps(k)})')

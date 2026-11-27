@@ -2304,6 +2304,11 @@ static void library_op_389(BridgeCall& call) {
     auto result=library_object<bolt::platform::ValueTree>(call.self).Unsigned(a0);
     BridgeCodec<std::int32_t>::put(call.result,call.output,result);
 }
+static void library_op_390(BridgeCall& call) {
+    if(call.count!=1)throw std::runtime_error("native library argument count mismatch");
+    auto a0=BridgeCodec<bolt::native::String>::get(call.types[0],call.args[0]);
+    bolt::platform::DirectoryOps::RemoveTree(a0);
+}
 using BridgeFunction=void(*)(BridgeCall&);
 static const BridgeFunction library_operations[] = {
     &library_op_0,
@@ -2696,4 +2701,5 @@ static const BridgeFunction library_operations[] = {
     &library_op_387,
     &library_op_388,
     &library_op_389,
+    &library_op_390,
 };
