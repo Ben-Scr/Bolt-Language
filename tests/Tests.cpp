@@ -407,6 +407,14 @@ int main() {
     rejects("float-to-ulong-boundary",wrap("double n=18446744073709551616.0;ulong v=n;"),"out of range",true);
     rejects("runtime-context-isolation",wrap("int outer=3;Runtime.Execute(\"Console.WriteLine(outer);\");"),"unknown identifier",true);
     rejects("step-budget",wrap("for(;;){}"),"budget",true,{100,128,16});
+    rejects("array-allocation-step-budget",wrap("int[] values=new int[1000000];"),"budget",true,{100,128,16});
+    rejects("rect-array-allocation-step-budget",wrap("int[,] values=new int[1000,1000];"),"budget",true,{100,128,16});
+    test("array-allocation-within-step-budget", [] {
+        bolt::ExecutionOptions options;
+        options.max_steps=1000;
+        check(run(wrap("int[] values=new int[3];values[2]=7;Print(values[2]);"),{},options)=="7\n",
+              "ordinary array allocation exceeded its sufficient step budget");
+    });
     rejects("call-depth","static class Program{public:void F(){F();}void Main(){F();}}","call-depth",true,{100000,5,16});
     rejects("nested-shared-budget",wrap("for(int i=0;i<100;i++){Runtime.Execute(\"Console.WriteLine(1);\");}"),"budget",true,{100,128,16});
     rejects("runtime-nesting-limit",wrap("Runtime.Execute(\"Runtime.Execute(\\\"Console.WriteLine(1);\\\");\");"),"nesting limit",true,{100000,128,1});

@@ -584,8 +584,14 @@ namespace bolt {
             void reset_budget() {
                 state->steps=state->calls=state->runtime_depth=0;
             }
+            void charge_steps(std::size_t count,const Location& at) {
+                if(options.max_steps==0)return;
+                if(state->steps>options.max_steps||count>options.max_steps-state->steps)
+                    throw Error(at,"runtime instruction budget exceeded", "BLT3000");
+                state->steps+=count;
+            }
             void tick(const Location& at) {
-                if(options.max_steps!=0&&++state->steps>options.max_steps)throw Error(at,"runtime instruction budget exceeded", "BLT3000");
+                charge_steps(1,at);
             }
             Value convert(const std::string& t,const Value& v) {
                 if(is_primitive(t))return convert_value(t,v);
@@ -1007,6 +1013,7 @@ namespace bolt {
                             }
                             const auto size=native::array_count(dimensions);
                             if(size>result.collection().values.max_size())throw std::runtime_error("array size is too large");
+                            charge_steps(size,e.token.at);
                             result.collection().values.reserve(size);
                             for(std::size_t i=0;i<size;++i)result.collection().values.push_back(make(element_type(e.type)));
                             return result;
