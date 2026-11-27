@@ -7,10 +7,16 @@ public sealed class AES
 {
 private:
     byte[] roundKeys;
-    byte[] sbox;
-    byte[] inverseSbox;
     int rounds;
     int keyBytes;
+
+    static uint ExpandBitToByteMask(uint bit)
+    {
+        uint mask = bit & 1u;
+        mask = mask | (mask << 1);
+        mask = mask | (mask << 2);
+        return mask | (mask << 4);
+    }
 
     static byte GfMultiply(byte a, byte b)
     {
@@ -19,26 +25,30 @@ private:
         uint result = 0u;
         for (int i = 0; i < 8; i++)
         {
-            if ((y & 1u) != 0u) result = result ^ x;
-            bool high = (x & 128u) != 0u;
-            x = (x << 1) & 255u;
-            if (high) x = x ^ 27u;
+            uint multiplierMask = ExpandBitToByteMask(y);
+            uint highMask = ExpandBitToByteMask(x >> 7);
+            result = result ^ (x & multiplierMask);
+            x = ((x << 1) & 255u) ^ (27u & highMask);
             y = y >> 1;
         }
         return (byte)result;
     }
 
-    static byte GfPower(byte value, int exponent)
+    static byte GfInverse(byte value)
     {
-        byte result = (byte)1;
-        byte factor = value;
-        int power = exponent;
-        while (power > 0)
-        {
-            if ((power & 1) != 0) result = GfMultiply(result, factor);
-            factor = GfMultiply(factor, factor);
-            power = power >> 1;
-        }
+        byte x2 = GfMultiply(value, value);
+        byte x4 = GfMultiply(x2, x2);
+        byte x8 = GfMultiply(x4, x4);
+        byte x16 = GfMultiply(x8, x8);
+        byte x32 = GfMultiply(x16, x16);
+        byte x64 = GfMultiply(x32, x32);
+        byte x128 = GfMultiply(x64, x64);
+        byte result = GfMultiply(x2, x4);
+        result = GfMultiply(result, x8);
+        result = GfMultiply(result, x16);
+        result = GfMultiply(result, x32);
+        result = GfMultiply(result, x64);
+        result = GfMultiply(result, x128);
         return result;
     }
 
@@ -48,19 +58,18 @@ private:
         return (byte)(((x << amount) | (x >> (8 - amount))) & 255u);
     }
 
-    void BuildSBoxes()
+    static byte Substitute(byte value)
     {
-        sbox = new byte[256];
-        inverseSbox = new byte[256];
-        for (int i = 0; i < 256; i++)
-        {
-            byte x = (byte)i;
-            byte inverse = x == (byte)0 ? (byte)0 : GfPower(x, 254);
-            byte transformed = (byte)((uint)inverse ^ (uint)RotateByte(inverse, 1) ^ (uint)RotateByte(inverse, 2) ^
-                                      (uint)RotateByte(inverse, 3) ^ (uint)RotateByte(inverse, 4) ^ 99u);
-            sbox[i] = transformed;
-            inverseSbox[(int)transformed] = x;
-        }
+        byte inverse = GfInverse(value);
+        return (byte)((uint)inverse ^ (uint)RotateByte(inverse, 1) ^ (uint)RotateByte(inverse, 2) ^
+                      (uint)RotateByte(inverse, 3) ^ (uint)RotateByte(inverse, 4) ^ 99u);
+    }
+
+    static byte InverseSubstitute(byte value)
+    {
+        byte transformed = (byte)((uint)RotateByte(value, 1) ^ (uint)RotateByte(value, 3) ^
+                                  (uint)RotateByte(value, 6) ^ 5u);
+        return GfInverse(transformed);
     }
 
     void ExpandKey(const byte[]& key)
@@ -81,13 +90,13 @@ private:
             {
                 byte first = temp[0];
                 temp[0] = temp[1]; temp[1] = temp[2]; temp[2] = temp[3]; temp[3] = first;
-                for (int i = 0; i < 4; i++) temp[i] = sbox[(int)temp[i]];
+                for (int i = 0; i < 4; i++) temp[i] = Substitute(temp[i]);
                 temp[0] = (byte)(temp[0] ^ rcon);
                 rcon = GfMultiply(rcon, (byte)2);
             }
             elif (keyBytes == 32 && (generated % keyBytes) == 16)
             {
-                for (int i = 0; i < 4; i++) temp[i] = sbox[(int)temp[i]];
+                for (int i = 0; i < 4; i++) temp[i] = Substitute(temp[i]);
             }
 
             for (int i = 0; i < 4 && generated < roundKeys.Length; i++)
@@ -106,12 +115,12 @@ private:
 
     void SubBytes(byte[]& state)
     {
-        for (int i = 0; i < 16; i++) state[i] = sbox[(int)state[i]];
+        for (int i = 0; i < 16; i++) state[i] = Substitute(state[i]);
     }
 
     void InverseSubBytes(byte[]& state)
     {
-        for (int i = 0; i < 16; i++) state[i] = inverseSbox[(int)state[i]];
+        for (int i = 0; i < 16; i++) state[i] = InverseSubstitute(state[i]);
     }
 
     void ShiftRows(byte[]& s)
@@ -161,7 +170,6 @@ public:
     {
         if (key.Length != 16 && key.Length != 24 && key.Length != 32)
             throw ArgumentException("AES keys must contain exactly 16, 24 or 32 bytes.");
-        BuildSBoxes();
         ExpandKey(key);
     }
 
