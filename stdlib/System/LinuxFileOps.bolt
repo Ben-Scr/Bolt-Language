@@ -130,6 +130,53 @@ public:
 }
 public static class DirectoryOps
 {
+private:
+    bool Same(ulong[]& left, ulong[]& right) { return left[0] == right[0] && left[1] == right[1]; }
+    void Changed(const string& path) { throw IOException("Directory entry changed during recursive deletion: " + path); }
+    void RemoveContents(int descriptor, const string& path)
+    {
+        int scan = Bolt.Runtime.LinuxFile.Duplicate(descriptor);
+        if (scan < 0) LinuxPath.Fail(path, LinuxPath.Error());
+        void* directory = Bolt.Runtime.LinuxFile.OpenDirectory(scan);
+        if (directory == null) {
+            int code = LinuxPath.Error(); Bolt.Runtime.LinuxFile.Close(scan); LinuxPath.Fail(path, code);
+        }
+        int* error = Bolt.Runtime.Linux.ErrnoLocation();
+        try {
+            while (true) {
+                *error = 0;
+                byte* record = Bolt.Runtime.LinuxFile.NextEntry(directory);
+                if (record == null) {
+                    if (*error != 0) LinuxPath.Fail(path, *error);
+                    break;
+                }
+                byte* name = &record[19];
+                string item = Bolt.Runtime.NativeString.FromUtf8(name, Bolt.Runtime.StandaloneCore.CLength(name));
+                if (item == "." || item == "..") continue;
+                string childPath = Path.Combine(path, item);
+                ulong[] observed = new ulong[32];
+                if (Bolt.Runtime.LinuxFile.StatusAt(descriptor, name, &observed[0], 256) != 0)
+                    LinuxPath.Fail(childPath, LinuxPath.Error());
+                if ((LinuxPath.Mode(&observed[0]) & 61440u) == 16384u) {
+                    int child = Bolt.Runtime.LinuxFile.OpenAt(descriptor, name, 720896, 0u);
+                    if (child < 0) LinuxPath.Fail(childPath, LinuxPath.Error());
+                    try {
+                        ulong[] opened = new ulong[32];
+                        if (Bolt.Runtime.LinuxFile.Status(child, &opened[0]) != 0) LinuxPath.Fail(childPath, LinuxPath.Error());
+                        if (!Same(observed, opened)) Changed(childPath);
+                        RemoveContents(child, childPath);
+                        ulong[] current = new ulong[32];
+                        if (Bolt.Runtime.LinuxFile.StatusAt(descriptor, name, &current[0], 256) != 0)
+                            LinuxPath.Fail(childPath, LinuxPath.Error());
+                        if (!Same(opened, current)) Changed(childPath);
+                        if (Bolt.Runtime.LinuxFile.UnlinkAt(descriptor, name, 512) != 0)
+                            LinuxPath.Fail(childPath, LinuxPath.Error());
+                    } finally { Bolt.Runtime.LinuxFile.Close(child); }
+                } else if (Bolt.Runtime.LinuxFile.UnlinkAt(descriptor, name, 0) != 0)
+                    LinuxPath.Fail(childPath, LinuxPath.Error());
+            }
+        } finally { Bolt.Runtime.LinuxFile.CloseDirectory(directory); }
+    }
 public:
     bool IsDirectory(string path) { return LinuxPath.Exists(path, 16384u); }
     bool IsLink(string path)
@@ -151,6 +198,25 @@ public:
         int result = LinuxPath.Kind(&name[0], false, true) == 16384u
             ? Bolt.Runtime.LinuxFile.RemoveDirectory(&name[0]) : Bolt.Runtime.LinuxFile.Unlink(&name[0]);
         if (result != 0) LinuxPath.Fail(path, LinuxPath.Error());
+    }
+    void RemoveTree(string path)
+    {
+        byte[] name = LinuxPath.Name(path);
+        int root = Bolt.Runtime.LinuxFile.OpenAt(-100, &name[0], 720896, 0u);
+        if (root < 0) {
+            int code = LinuxPath.Error();
+            if ((code == 40 || code == 20) && Bolt.Runtime.LinuxFile.UnlinkAt(-100, &name[0], 0) == 0) return;
+            LinuxPath.Fail(path, code);
+        }
+        try {
+            ulong[] opened = new ulong[32];
+            if (Bolt.Runtime.LinuxFile.Status(root, &opened[0]) != 0) LinuxPath.Fail(path, LinuxPath.Error());
+            RemoveContents(root, path);
+            ulong[] current = new ulong[32];
+            if (Bolt.Runtime.LinuxFile.StatusAt(-100, &name[0], &current[0], 256) != 0) LinuxPath.Fail(path, LinuxPath.Error());
+            if (!Same(opened, current)) Changed(path);
+            if (Bolt.Runtime.LinuxFile.UnlinkAt(-100, &name[0], 512) != 0) LinuxPath.Fail(path, LinuxPath.Error());
+        } finally { Bolt.Runtime.LinuxFile.Close(root); }
     }
     void Move(string source, string destination)
     {

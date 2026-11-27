@@ -72,18 +72,8 @@ public:
     void Delete(string path, bool recursive = true)
     {
         if (!Exists(path)) Bolt.Runtime.Failure.DirectoryMissing("Directory not found: " + path);
-        if (!recursive || DirectoryOps.IsLink(path)) { DirectoryOps.RemoveOne(path); return; }
-        List<string> paths; List<bool> visited;
-        paths.Add(path); visited.Add(false);
-        while (paths.Length > 0)
-        {
-            int index = paths.Length - 1; string current = paths[index]; bool done = visited[index];
-            paths.RemoveAt(index); visited.RemoveAt(index);
-            if (done || DirectoryOps.IsLink(current) || !Exists(current)) { DirectoryOps.RemoveOne(current); continue; }
-            DirectoryEntry[] entries = DirectoryOps.Entries(current);
-            paths.Add(current); visited.Add(true);
-            for (int i = 0; i < entries.Length; i++) { paths.Add(entries[i].Path); visited.Add(false); }
-        }
+        if (recursive) DirectoryOps.RemoveTree(path);
+        else DirectoryOps.RemoveOne(path);
     }
     void Move(string source, string destination) { DirectoryOps.Move(source, destination); }
     string[] GetFiles(string path, bool recursive = false) { return Entries(path, recursive, 1); }

@@ -287,6 +287,7 @@ public:
     bool IsLink(string path);
     void CreateOne(string path);
     void RemoveOne(string path);
+    void RemoveTree(string path);
     void Move(string source, string destination);
     string Current();
     void Current(string path);
