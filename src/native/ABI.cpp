@@ -1,6 +1,7 @@
 #include <bolt/native/ABI.hpp>
 #include "NativeText.hpp"
 #include "JitCall.hpp"
+#include "../RuntimeInternal.hpp"
 #include "ScalarSearch.hpp"
 #include <bolt/native/Jit.hpp>
 #include <bolt/native/Library.hpp>
@@ -39,6 +40,7 @@
 #include <mutex>
 #include <atomic>
 #include <optional>
+#include <iostream>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -123,8 +125,10 @@ struct Context {
     void (*drain)(BrContext*)=nullptr;
     alignas(8) std::uint64_t thread_registry[2]{};
     SnapshotStorage snapshot_storage;
-    BrContext* execution=nullptr;
     Context* type_owner=nullptr;
+    bolt::ExecutionOptions options;
+    bolt::detail::SharedExecutionBudget budget;
+    bool owns_budget=true;
     std::optional<bolt::Diagnostic> error;
     std::string error_type="System.Exception";
     std::shared_ptr<Box> pending_exception;
@@ -1070,7 +1074,9 @@ BrContext* br_create(std::uint64_t steps,std::uint32_t depth) noexcept {
 #endif
         c->steps=steps;
         c->max_depth=depth;
-        p->execution=c.get();
+        p->options.max_steps=static_cast<std::size_t>(steps);
+        p->options.max_call_depth=depth;
+        p->budget=std::make_shared<bolt::detail::ExecutionBudget>(p->options.max_steps,&c->steps);
         c->implementation=p.release();
         return c.release();
     } catch (...) { return nullptr; }
@@ -1085,6 +1091,7 @@ BrContext* br_context_child(BrContext* parent) noexcept {
     if(child){
         auto& local=impl(child);auto& caller=impl(parent);
         local.type_owner=&allocation_owner(caller);local.input=caller.input;local.output=caller.output;
+        local.options=caller.options;local.budget=caller.budget;local.owns_budget=false;
         parent->flags &= ~BR_PRIVATE_STEPS;
         child->flags=parent->flags;
     }
@@ -1163,10 +1170,8 @@ void br_fail(BrContext* c,const char* site,const char* msg)noexcept{failure(c,si
 void br_frame(BrContext* c,const char* site,const char* method)noexcept{if(!c||!c->failed)return;try{auto& state=impl(c);auto at=location(site);auto name=method?method:"<native>";if(state.error)state.error->frames.push_back({at,name});
     if(auto& payload=state.pending_exception){auto* root=payload->type;while(root->base)root=root->base;if(root->kind==LibraryValue)if(auto* ops=slot_ops(payload->data()))if(auto* error=ops->exception(library_data(payload->data())))error->AddFrame(at,name);}
 }catch(...) {}}
-void br_tick(BrContext* c,const char* site)noexcept{if(!c||c->failed||!(c->flags&1))return;auto* owner=allocation_owner(impl(c)).execution;
-    std::atomic_ref<std::uint64_t> budget(owner->steps);auto remaining=budget.load(std::memory_order_relaxed);
-    while(remaining&&!budget.compare_exchange_weak(remaining,remaining-1,std::memory_order_relaxed)){}
-    if(!remaining)failure(c,site,"runtime instruction budget exceeded");}
+void br_tick(BrContext* c,const char* site)noexcept{if(!c||c->failed||!(c->flags&1))return;
+    if(!impl(c).budget->consume_step())failure(c,site,"runtime instruction budget exceeded");}
 std::int32_t br_enter(BrContext* c,const char* site)noexcept {
     if(!c||c->failed)return 0;
     if(c->max_depth&&c->depth>=c->max_depth){failure(c,site,"runtime call-depth limit exceeded");return 0;}
@@ -1506,15 +1511,31 @@ void br_collection(BrContext* c,const char* site,BrType* t,void* slot,const char
 });}
 #if !defined(BOLT_WINDOWS_AOT_RUNTIME)
 std::int32_t br_runtime(BrContext* c,const char* site,std::int32_t mode,const void* source)noexcept{std::int32_t result=0;checked(c,site,[&]{
+    auto& parent=impl(c);bolt::detail::RuntimeDepthGuard depth(*parent.budget,parent.options.max_runtime_depth);
+    if(!depth)throw bolt::Error(location(site),"runtime execution nesting limit exceeded","BLT3000");
     const std::string s(text(source));
-    if(mode<3){if(mode==0)result=bolt::execute_statements(s);else if(mode==1)result=bolt::execute_program(s);else result=bolt::execute_file(bolt::path_from_utf8(s));}
-    else {bolt::JitOptions options;options.execution.max_steps=1'000'000;options.input=impl(c).input;options.output=impl(c).output;
-        if(mode==3)result=bolt::jit_statements(s,options);else if(mode==4)result=bolt::jit_program(s,options);else result=bolt::jit_file(bolt::path_from_utf8(s),options);}
+    bolt::PreprocessorOptions preprocessing;
+    if(mode<3){
+        if(mode==0)result=bolt::detail::execute_statements_nested(s,parent.options,preprocessing,std::cin,std::cout,parent.budget);
+        else if(mode==1)result=bolt::detail::execute_program_nested(s,parent.options,preprocessing,std::cin,std::cout,parent.budget);
+        else result=bolt::detail::execute_file_nested(bolt::path_from_utf8(s),parent.options,preprocessing,std::cin,std::cout,parent.budget);
+    } else {
+        bolt::JitOptions options;options.execution=parent.options;options.input=parent.input;options.output=parent.output;
+        if(mode==3)result=bolt::detail::jit_statements_nested(s,std::move(options),parent.budget);
+        else if(mode==4)result=bolt::detail::jit_program_nested(s,std::move(options),parent.budget);
+        else result=bolt::detail::jit_file_nested(bolt::path_from_utf8(s),std::move(options),parent.budget);
+    }
 });return result;}
 #endif
 } // extern C
 #if !defined(BOLT_WINDOWS_AOT_RUNTIME)
 namespace bolt::native_abi {
+
+void configure_execution(BrContext* c,const ExecutionOptions& options,detail::SharedExecutionBudget inherited){
+    auto& state=impl(c);state.options=options;
+    if(inherited){state.budget=std::move(inherited);state.owns_budget=false;}
+}
+void reset_execution(BrContext* c) noexcept {if(c&&impl(c).owns_budget)impl(c).budget->reset();}
 
 void rethrow(BrContext* c){if(c&&c->failed){if(impl(c).error)throw bolt::Error(*impl(c).error);throw std::runtime_error("native execution failed without a diagnostic");}}
 void arguments(BrContext* c,const std::vector<std::string>& args){

@@ -1,5 +1,6 @@
 #include <bolt/native/Jit.hpp>
 #include <bolt/API.hpp>
+#include "RuntimeInternal.hpp"
 #include <bolt/Path.hpp>
 #include <bolt/Frontend.hpp>
 #include <bolt/Std.hpp>
@@ -78,7 +79,10 @@ namespace bolt {
 #endif
         }
         struct State {
-            std::size_t steps=0,calls=0,runtime_depth=0;
+            std::size_t calls=0;
+            detail::SharedExecutionBudget budget;
+            explicit State(std::size_t max_steps):budget(std::make_shared<detail::ExecutionBudget>(max_steps)) {}
+            explicit State(detail::SharedExecutionBudget shared):budget(std::move(shared)) {}
         };
         struct CounterGuard {
             std::size_t& count;
@@ -577,15 +581,16 @@ namespace bolt {
             std::shared_ptr<State> state;
             std::unordered_map<std::string,Value> statics;
             Engine(Program p,ExecutionOptions opts,std::istream& in,std::ostream& out,std::shared_ptr<State> shared= {
-            }):program(std::move(p)),options(opts),input(in),output(out),state(shared?std::move(shared):std::make_shared<State>()) {
+            }):program(std::move(p)),options(opts),input(in),output(out),state(shared?std::move(shared):std::make_shared<State>(opts.max_steps)) {
                 if(auto requirement=interpreter_requirement(program);!requirement.empty())throw std::runtime_error("The interpreter does not support "+requirement+"; use bolt run --native or --jit.");
                 for(const auto& c:program.classes)if(emitted_class(c)&&(c.generic_parameters.empty()&&c.pack_parameter.empty())&&!c.is_native)for(const auto& f:c.fields)if(f.is_static)(void)static_value(c.name,f.name);
             }
             void reset_budget() {
-                state->steps=state->calls=state->runtime_depth=0;
+                state->calls=0;
+                state->budget->reset();
             }
             void tick(const Location& at) {
-                if(options.max_steps!=0&&++state->steps>options.max_steps)throw Error(at,"runtime instruction budget exceeded", "BLT3000");
+                if(!state->budget->consume_step())throw Error(at,"runtime instruction budget exceeded", "BLT3000");
             }
             Value convert(const std::string& t,const Value& v) {
                 if(is_primitive(t))return convert_value(t,v);
@@ -1270,17 +1275,16 @@ namespace bolt {
                 return m->type=="void"?0:native::cast<int>(v.as_int());
             }
             int nested(const std::string& kind,const std::string& source,const Location& at) {
-                if(state->runtime_depth>=options.max_runtime_depth)throw Error(at,"runtime execution nesting limit exceeded", "BLT3000");
-                CounterGuard guard(state->runtime_depth);
+                detail::RuntimeDepthGuard guard(*state->budget,options.max_runtime_depth);
+                if(!guard)throw Error(at,"runtime execution nesting limit exceeded", "BLT3000");
                 if(kind.ends_with("Jit")) {
 #if defined(BOLT_INTERPRETER_ONLY) || defined(__EMSCRIPTEN__)
                     throw std::runtime_error("Native JIT is unavailable in this interpreter build; use Runtime.Execute instead.");
 #else
                     JitOptions settings;settings.execution=options;settings.input=&input;settings.output=&output;settings.preprocessing=program.preprocessor;
-                    // A native child owns a separate context and instruction counter.
-                    if(kind=="ExecuteJit")return jit_statements(source,settings);
-                    if(kind=="ExecuteFileJit")return jit_file(path_from_utf8(source),settings);
-                    return jit_program(source,settings);
+                    if(kind=="ExecuteJit")return detail::jit_statements_nested(source,std::move(settings),state->budget);
+                    if(kind=="ExecuteFileJit")return detail::jit_file_nested(path_from_utf8(source),std::move(settings),state->budget);
+                    return detail::jit_program_nested(source,std::move(settings),state->budget);
 #endif
                 }
                 Program p;
@@ -1445,6 +1449,23 @@ namespace bolt {
         if(!c)throw std::runtime_error("unknown class '"+object.type+"'");
         const auto& m=e.exported_method(*c,method,args,false);
         return e.invoke(*c,m,&object,std::move(args));
+    }
+    namespace detail {
+        int execute_program_nested(std::string_view source,ExecutionOptions options,const PreprocessorOptions& preprocessing,
+                                   std::istream& input,std::ostream& output,SharedExecutionBudget budget) {
+            Engine child(compile_source(source,"<runtime program>",true,preprocessing),options,input,output,
+                         std::make_shared<State>(std::move(budget)));
+            return child.run_entry();
+        }
+        int execute_statements_nested(std::string_view source,ExecutionOptions options,const PreprocessorOptions& preprocessing,
+                                      std::istream& input,std::ostream& output,SharedExecutionBudget budget) {
+            return execute_program_nested(statement_program(source),options,preprocessing,input,output,std::move(budget));
+        }
+        int execute_file_nested(const std::filesystem::path& path,ExecutionOptions options,const PreprocessorOptions& preprocessing,
+                                std::istream& input,std::ostream& output,SharedExecutionBudget budget) {
+            Engine child(load(path,true,preprocessing),options,input,output,std::make_shared<State>(std::move(budget)));
+            return child.run_entry();
+        }
     }
     int execute_program(std::string_view source,ExecutionOptions options,const PreprocessorOptions& preprocessing) {
         Runtime runtime(compile_source(source,"<runtime program>",true,preprocessing),options);
