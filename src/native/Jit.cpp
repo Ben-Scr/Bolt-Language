@@ -1,4 +1,5 @@
 #include "JitCall.hpp"
+#include "../RuntimeInternal.hpp"
 #include <bolt/native/Jit.hpp>
 #include <bolt/native/ABI.hpp>
 #include <bolt/Frontend.hpp>
@@ -21,7 +22,14 @@
 
 namespace bolt {
 namespace {
-thread_local std::size_t nesting=0;
+thread_local detail::SharedExecutionBudget inherited_execution;
+
+struct InheritedExecutionGuard {
+    detail::SharedExecutionBudget previous;
+    explicit InheritedExecutionGuard(detail::SharedExecutionBudget budget)
+        :previous(std::exchange(inherited_execution,std::move(budget))) {}
+    ~InheritedExecutionGuard(){inherited_execution=std::move(previous);}
+};
 
 using native_backend::detail::call_generated;
 }
@@ -135,16 +143,15 @@ struct NativeProgram::Impl {
     int run(bool persistent){
 
         std::lock_guard lock(execution);
-        if(nesting>=options.execution.max_runtime_depth)throw Error(runtime_diagnostic({"<jit>",1,1},"runtime nesting limit exceeded"));
-        struct Guard{Guard(){++nesting;}~Guard(){--nesting;}} guard;
         if (!persistent && session) throw std::runtime_error("This module already has a persistent session");
         if (session && session->failed) throw std::runtime_error("Persistent session failed; replace the module to restart");
         const bool first = !session;
         auto* context=session ? session : br_create(options.execution.max_steps,static_cast<std::uint32_t>(options.execution.max_call_depth));
         if(!context)throw std::runtime_error("could not allocate a JIT execution context");
+        if(first)native_abi::configure_execution(context,options.execution,inherited_execution);
         if (persistent && first) context->flags |= BR_PRIVATE_STEPS;
         if (persistent) session = context;
-        std::atomic_ref(context->steps).store(options.execution.max_steps,std::memory_order_relaxed);
+        native_abi::reset_execution(context);
         try {
             if (first) {
                 native_abi::streams(context,options.input,options.output);
@@ -186,4 +193,18 @@ int jit_statements(std::string_view code,JitOptions o){
     return jit_program(source,std::move(o));
 }
 int jit_file(const std::filesystem::path& path,JitOptions o){auto pp=o.preprocessing;if(pp.configuration.empty())pp.configuration=o.release?"Release":"Debug";auto p=load(path,true,pp);NativeProgram executable(p,std::move(o));return executable.run();}
+namespace detail {
+int jit_program_nested(std::string_view source,JitOptions options,SharedExecutionBudget budget){
+    InheritedExecutionGuard guard(std::move(budget));
+    return bolt::jit_program(source,std::move(options));
+}
+int jit_statements_nested(std::string_view source,JitOptions options,SharedExecutionBudget budget){
+    InheritedExecutionGuard guard(std::move(budget));
+    return bolt::jit_statements(source,std::move(options));
+}
+int jit_file_nested(const std::filesystem::path& path,JitOptions options,SharedExecutionBudget budget){
+    InheritedExecutionGuard guard(std::move(budget));
+    return bolt::jit_file(path,std::move(options));
+}
+}
 } // namespace bolt

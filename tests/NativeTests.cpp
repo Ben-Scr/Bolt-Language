@@ -795,8 +795,52 @@ public:
             )")=="1\n0\n","discarded temporary survived its statement or destroyed a retained local");
         });
         output("loop-lifetime-cleanup","for(int i=0;i<500;i++){string s=\"test\"+i; List<string> v;v.Add(s);if(i<499)continue;Print(v[0]);}","test499\n");
+        output("interpreter-statements-call","Print(Runtime.Execute(\"int n=6*7;\"));","0\n");
+        output("interpreter-full-program-call","Print(Runtime.ExecuteProgram(\"static class Program {public:int Main(){return 17;}}\"));","17\n");
+        output("interpreter-file-call","Print(Runtime.ExecuteFile(\"tests/cases/RuntimeBudgetChild.bolt\"));","0\n");
         output("jit-statements-call","Print(Runtime.ExecuteJit(\"Print(21*2);\"));","42\n0\n");
         output("jit-full-program-call","Print(Runtime.ExecuteProgramJit(\"static class Program {public:int Main(){return 17;}}\"));","17\n");
+        output("jit-file-call","Print(Runtime.ExecuteFileJit(\"tests/cases/RuntimeBudgetChild.bolt\"));","0\n");
+        test(prefix+"runtime-children-share-step-budget",[&]{
+            const std::vector<std::string> calls={
+                R"BOLT(Runtime.Execute("int n=0;for(int i=0;i<1000;i++)n+=i;" );)BOLT",
+                R"BOLT(Runtime.ExecuteProgram("static class Program {public:void Main(){int n=0;for(int i=0;i<1000;i++)n+=i;}}" );)BOLT",
+                R"BOLT(Runtime.ExecuteFile("tests/cases/RuntimeBudgetChild.bolt");)BOLT",
+                R"BOLT(Runtime.ExecuteJit("int n=0;for(int i=0;i<1000;i++)n+=i;" );)BOLT",
+                R"BOLT(Runtime.ExecuteProgramJit("static class Program {public:void Main(){int n=0;for(int i=0;i<1000;i++)n+=i;}}" );)BOLT",
+                R"BOLT(Runtime.ExecuteFileJit("tests/cases/RuntimeBudgetChild.bolt");)BOLT"
+            };
+            for(const auto& call:calls){
+                auto options=mode;options.execution.max_steps=128;
+                try {NativeProgram child(compile_source(wrap(call),"runtime-budget.bolt"),options);(void)child.run();}
+                catch(const Error& error){check(std::string(error.what()).find("budget")!=std::string::npos,"wrong nested budget diagnostic");continue;}
+                throw std::runtime_error("Runtime child received a fresh step budget");
+            }
+        });
+        test(prefix+"persistent-runtime-child-shares-step-budget",[&]{
+            auto options=mode;options.execution.max_steps=128;
+            NativeProgram child(compile_source(wrap(R"BOLT(Runtime.Execute("int n=0;for(int i=0;i<1000;i++)n+=i;");)BOLT"),
+                                               "persistent-runtime-budget.bolt"),options);
+            try {(void)child.run_persistent();}
+            catch(const Error& error){check(std::string(error.what()).find("budget")!=std::string::npos,"wrong persistent nested budget diagnostic");return;}
+            throw std::runtime_error("Persistent Runtime child received a fresh step budget");
+        });
+        test(prefix+"runtime-children-share-depth-budget",[&]{
+            const std::vector<std::string> calls={
+                R"BOLT(Runtime.Execute("Runtime.Execute(\"Print(1);\");");)BOLT",
+                R"BOLT(Runtime.ExecuteProgram("static class Program {public:void Main(){Runtime.Execute(\"Print(1);\");}}" );)BOLT",
+                R"BOLT(Runtime.ExecuteFile("tests/cases/RuntimeDepthChild.bolt");)BOLT",
+                R"BOLT(Runtime.ExecuteJit("Runtime.Execute(\"Print(1);\");");)BOLT",
+                R"BOLT(Runtime.ExecuteProgramJit("static class Program {public:void Main(){Runtime.Execute(\"Print(1);\");}}" );)BOLT",
+                R"BOLT(Runtime.ExecuteFileJit("tests/cases/RuntimeDepthChild.bolt");)BOLT"
+            };
+            for(const auto& call:calls){
+                auto options=mode;options.execution.max_steps=10'000;options.execution.max_runtime_depth=1;
+                try {NativeProgram child(compile_source(wrap(call),"runtime-depth.bolt"),options);(void)child.run();}
+                catch(const Error& error){check(std::string(error.what()).find("nesting limit")!=std::string::npos,"wrong nested depth diagnostic");continue;}
+                throw std::runtime_error("Runtime child received a fresh depth budget");
+            }
+        });
         rejects("array-bounds",wrap("int[] a=new int[2];Print(a[2]);"),"index out of range");
         test(prefix+"sequence-header-index-and-length",[&]{
             check(execute(R"BOLT(import System
